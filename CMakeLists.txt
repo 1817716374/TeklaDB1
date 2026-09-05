@@ -8,6 +8,10 @@ include(CMakePackageConfigHelpers)
 option(TEKLADB1_BUILD_TESTS "Build TeklaDB1 test and inspection tools" ON)
 option(TEKLADB1_WITH_OCCT "Build the optional Open CASCADE geometry target" OFF)
 set(TEKLADB1_OCCT_ROOT "" CACHE PATH "Optional Open CASCADE installation prefix")
+set(TEKLADB1_OCCT_INCLUDE_DIR "" CACHE PATH
+    "Existing Open CASCADE include directory; use with TEKLADB1_OCCT_LIBRARIES")
+set(TEKLADB1_OCCT_LIBRARIES "" CACHE STRING
+    "Existing Open CASCADE libraries; bypasses package discovery when supplied")
 
 find_package(ZLIB REQUIRED)
 
@@ -28,11 +32,20 @@ target_include_directories(tekla_db1
 target_link_libraries(tekla_db1 PRIVATE ZLIB::ZLIB)
 
 if(TEKLADB1_WITH_OCCT)
-    if(TEKLADB1_OCCT_ROOT)
-        find_package(OpenCASCADE REQUIRED COMPONENTS FoundationClasses ModelingData ModelingAlgorithms
-            PATHS "${TEKLADB1_OCCT_ROOT}" NO_DEFAULT_PATH)
+    if(TEKLADB1_OCCT_INCLUDE_DIR AND TEKLADB1_OCCT_LIBRARIES)
+        set(_tekladb1_occt_include "${TEKLADB1_OCCT_INCLUDE_DIR}")
+        set(_tekladb1_occt_libraries ${TEKLADB1_OCCT_LIBRARIES})
     else()
-        find_package(OpenCASCADE REQUIRED COMPONENTS FoundationClasses ModelingData ModelingAlgorithms)
+        if(TEKLADB1_OCCT_ROOT)
+            find_package(OpenCASCADE REQUIRED COMPONENTS FoundationClasses ModelingData ModelingAlgorithms
+                PATHS "${TEKLADB1_OCCT_ROOT}" NO_DEFAULT_PATH)
+        else()
+            find_package(OpenCASCADE REQUIRED COMPONENTS FoundationClasses ModelingData ModelingAlgorithms)
+        endif()
+        set(_tekladb1_occt_include "${OpenCASCADE_INCLUDE_DIR}")
+        set(_tekladb1_occt_libraries
+            TKernel TKMath TKG2d TKG3d TKGeomBase TKBRep TKGeomAlgo TKTopAlgo
+            TKPrim TKBO TKShHealing TKBool TKMesh)
     endif()
     add_library(tekla_db1_occt src/OcctGeometry.cpp)
     add_library(TeklaDB1::occt ALIAS tekla_db1_occt)
@@ -42,10 +55,9 @@ if(TEKLADB1_WITH_OCCT)
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-            ${OpenCASCADE_INCLUDE_DIR}
+            ${_tekladb1_occt_include}
     )
-    target_link_libraries(tekla_db1_occt PUBLIC tekla_db1
-        TKernel TKMath TKG2d TKG3d TKGeomBase TKBRep TKGeomAlgo TKTopAlgo TKPrim TKBO TKShHealing TKBool TKMesh)
+    target_link_libraries(tekla_db1_occt PUBLIC tekla_db1 ${_tekladb1_occt_libraries})
     if(MSVC)
         target_compile_options(tekla_db1_occt PRIVATE /W4 /permissive-)
     else()
