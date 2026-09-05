@@ -21,7 +21,9 @@ add_library(tekla_db1
 )
 add_library(TeklaDB1::tekla_db1 ALIAS tekla_db1)
 add_library(TeklaDB1::core ALIAS tekla_db1)
-set_target_properties(tekla_db1 PROPERTIES EXPORT_NAME core)
+set_target_properties(tekla_db1 PROPERTIES
+    EXPORT_NAME core
+    POSITION_INDEPENDENT_CODE ON)
 
 target_compile_features(tekla_db1 PUBLIC cxx_std_17)
 target_include_directories(tekla_db1
@@ -49,7 +51,9 @@ if(TEKLADB1_WITH_OCCT)
     endif()
     add_library(tekla_db1_occt src/OcctGeometry.cpp)
     add_library(TeklaDB1::occt ALIAS tekla_db1_occt)
-    set_target_properties(tekla_db1_occt PROPERTIES EXPORT_NAME occt)
+    set_target_properties(tekla_db1_occt PROPERTIES
+        EXPORT_NAME occt
+        POSITION_INDEPENDENT_CODE ON)
     target_compile_features(tekla_db1_occt PUBLIC cxx_std_17)
     target_include_directories(tekla_db1_occt
         PUBLIC
