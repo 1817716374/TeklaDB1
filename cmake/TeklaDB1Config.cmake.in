@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(ZLIB)
+if(@TEKLADB1_WITH_OCCT@)
+    find_dependency(OpenCASCADE COMPONENTS FoundationClasses ModelingData ModelingAlgorithms)
+endif()
+include("${CMAKE_CURRENT_LIST_DIR}/TeklaDB1Targets.cmake")
