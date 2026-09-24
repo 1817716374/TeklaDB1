@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev ninja-build libocct-modeling-algorithms-dev libocct-modeling-data-dev
+      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev ninja-build libocct-modeling-algorithms-dev libocct-modeling-data-dev libtbb-dev
       - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DTEKLADB1_WITH_OCCT=ON
       - run: cmake --build build --parallel 2
       - run: ctest --test-dir build --output-on-failure
