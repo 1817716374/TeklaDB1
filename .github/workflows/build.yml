@@ -50,3 +50,6 @@ jobs:
       - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DTEKLADB1_WITH_OCCT=ON
       - run: cmake --build build --parallel 2
       - run: ctest --test-dir build --output-on-failure
+      - run: cmake --install build --prefix "$GITHUB_WORKSPACE/installed"
+      - run: cmake -S tests/consumer -B consumer-build -G Ninja -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/installed"
+      - run: cmake --build consumer-build && ctest --test-dir consumer-build --output-on-failure

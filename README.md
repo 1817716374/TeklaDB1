@@ -145,6 +145,15 @@ target_link_libraries(my_target PRIVATE TeklaFormats::core)
 
 使用 `-DTEKLADB1_WITH_OCCT=ON` 和可选 `-DTEKLADB1_OCCT_ROOT=...` 启用 OCCT。
 
+Ubuntu 24.04 的 OCCT 开发包拆分了部分头文件；以下依赖组合已用于 CI：
+
+```sh
+sudo apt-get install libocct-modeling-algorithms-dev libocct-modeling-data-dev libocct-visualization-dev libtbb-dev
+cmake -S . -B build-occt -G Ninja -DCMAKE_BUILD_TYPE=Release -DTEKLADB1_WITH_OCCT=ON
+cmake --build build-occt
+ctest --test-dir build-occt --output-on-failure
+```
+
 支持已有截面构形、部分轮廓、切割、布尔、孔和三角化，但螺栓、焊缝、曲线路径及部分型材存在简化。未知现代轮廓不再默认为板。调用者应检查 `unbuiltPartIds` 与诊断；不可将构形成功数量等同于精确度，更不可直接作为制造验收依据。可选测试用解析解检查简单梁/板体积和网格索引。
 
 长期多格式路线和历史记录见 [逆向路线图](docs/REVERSE_ENGINEERING_PLAN.zh-CN.md)。本项目与 Trimble Inc. 没有隶属或背书关系；不包含 Tekla SDK、软件安装包或第三方专有模型。
