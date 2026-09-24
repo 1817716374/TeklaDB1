@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(TeklaDB1 VERSION 0.2.0 LANGUAGES CXX)
+project(TeklaDB1 VERSION 0.3.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -18,9 +18,11 @@ find_package(ZLIB REQUIRED)
 add_library(tekla_db1
     src/Catalogs.cpp
     src/Parser.cpp
+    src/Project.cpp
 )
 add_library(TeklaDB1::tekla_db1 ALIAS tekla_db1)
 add_library(TeklaDB1::core ALIAS tekla_db1)
+add_library(TeklaFormats::core ALIAS tekla_db1)
 set_target_properties(tekla_db1 PROPERTIES
     EXPORT_NAME core
     POSITION_INDEPENDENT_CODE ON)
@@ -51,6 +53,7 @@ if(TEKLADB1_WITH_OCCT)
     endif()
     add_library(tekla_db1_occt src/OcctGeometry.cpp)
     add_library(TeklaDB1::occt ALIAS tekla_db1_occt)
+    add_library(TeklaFormats::occt ALIAS tekla_db1_occt)
     set_target_properties(tekla_db1_occt PROPERTIES
         EXPORT_NAME occt
         POSITION_INDEPENDENT_CODE ON)
@@ -81,6 +84,27 @@ if(TEKLADB1_BUILD_TESTS)
     target_link_libraries(tekladb1_inspect PRIVATE TeklaDB1::tekla_db1)
     add_executable(tekladb1_catalog_inspect tests/catalog_inspect.cpp)
     target_link_libraries(tekladb1_catalog_inspect PRIVATE TeklaDB1::tekla_db1)
+    add_executable(tekladb1_validate tests/validate.cpp)
+    target_link_libraries(tekladb1_validate PRIVATE TeklaDB1::core)
+    if(MINGW)
+        target_link_options(tekladb1_inspect PRIVATE -municode)
+        target_link_options(tekladb1_catalog_inspect PRIVATE -municode)
+        target_link_options(tekladb1_validate PRIVATE -municode)
+    endif()
+    add_executable(tekladb1_regression tests/regression.cpp)
+    target_link_libraries(tekladb1_regression PRIVATE TeklaDB1::core ZLIB::ZLIB)
+    foreach(case valid_model short_trailer unknown_version wrong_fields broken_reference
+            unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
+            gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path
+            ambiguity raw_retention project strict_companions catalog_error model_limit
+            dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite)
+        add_test(NAME db1.${case} COMMAND tekladb1_regression "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
+    if(TEKLADB1_WITH_OCCT)
+        add_executable(tekladb1_geometry_test tests/geometry.cpp)
+        target_link_libraries(tekladb1_geometry_test PRIVATE TeklaDB1::occt)
+        add_test(NAME db1.geometry_volumes COMMAND tekladb1_geometry_test)
+    endif()
 endif()
 
 install(TARGETS tekla_db1
@@ -119,3 +143,12 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/TeklaDB1ConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TeklaDB1
 )
+
+configure_package_config_file(cmake/TeklaFormatsConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/TeklaFormatsConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TeklaFormats)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/TeklaFormatsConfigVersion.cmake
+    VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/TeklaFormatsConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/TeklaFormatsConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/TeklaFormats)

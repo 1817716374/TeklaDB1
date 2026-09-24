@@ -12,7 +12,8 @@ enum class DatabaseLayout
 {
     Unknown,
     ModernSections,
-    LegacyTables
+    LegacyTables,
+    Opaque
 };
 
 enum class DatabaseKind
@@ -20,7 +21,8 @@ enum class DatabaseKind
     Unknown,
     Model,
     ComponentLibrary,
-    Environment
+    Environment,
+    Numbering
 };
 
 struct RawRecord
@@ -51,6 +53,8 @@ struct RawDatabase
     DatabaseLayout layout = DatabaseLayout::Unknown;
     DatabaseKind kind = DatabaseKind::Unknown;
     std::string storageVersion;
+    // DBV's u32 after its magic is the container-name length, NOT a version.
+    std::string containerName;
     std::string databaseGuid;
     std::vector<std::uint8_t> preamble;
     std::vector<RawTable> tables;
@@ -63,6 +67,8 @@ struct RawDatabaseOptions
     // Retaining the decompressed image permits byte-for-byte research and
     // reserialization, but can roughly double peak memory for a large model.
     bool retainDecompressedFileImage = false;
+    // Applies to plain and GZIP input. A larger research budget can be explicit.
+    std::size_t maxDecodedBytes = 1024ULL * 1024 * 1024;
 };
 
 bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,

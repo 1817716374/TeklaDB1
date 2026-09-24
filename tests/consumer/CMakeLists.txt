@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(TeklaConsumer LANGUAGES CXX)
+find_package(TeklaFormats 0.3 CONFIG REQUIRED)
+find_package(TeklaDB1 0.3 CONFIG REQUIRED)
+add_executable(consumer main.cpp)
+target_link_libraries(consumer PRIVATE TeklaFormats::core TeklaDB1::core)
+enable_testing()
+add_test(NAME installed-consumer COMMAND consumer)

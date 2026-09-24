@@ -1,5 +1,7 @@
 #include <tekla/db1/Parser.hpp>
 #include <tekla/db1/Catalogs.hpp>
+#include "Path.hpp"
+#include "BinaryIO.hpp"
 
 #include <zlib.h>
 
@@ -14,6 +16,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
+#include <utility>
 
 namespace tekla::db1
 {
@@ -51,6 +54,42 @@ struct LegacyTable
     std::size_t rowsOffset = 0;
     std::size_t rowCount = 0;
 };
+
+template<class Map, class Value>
+void insertUnique(Map& target, std::uint32_t id, Value&& value, const char* role)
+{
+    if (!target.emplace(id, std::forward<Value>(value)).second)
+        throw std::runtime_error(std::string("duplicate DB1 ") + role + " ID " + std::to_string(id));
+}
+
+void validateModel(Model& model)
+{
+    const auto finite = [](const Vec3& value) {
+        return std::all_of(value.begin(), value.end(), [](double x) { return std::isfinite(x); });
+    };
+    for (const auto& item : model.points)
+        if (!finite(item.second.value)) throw std::runtime_error("non-finite DB1 point " + std::to_string(item.first));
+    for (const auto& item : model.frames)
+        if (!finite(item.second.axis) || !finite(item.second.secondary) || !finite(item.second.normal))
+            throw std::runtime_error("non-finite DB1 frame " + std::to_string(item.first));
+    for (auto& item : model.parts)
+    {
+        auto& part = item.second;
+        if (!std::isfinite(part.length) || !finite(part.origin))
+            throw std::runtime_error("non-finite DB1 placement " + std::to_string(item.first));
+        for (const auto& point : part.contour)
+            if (!finite(point.value))
+                throw std::runtime_error("non-finite DB1 contour " + std::to_string(item.first));
+            else if (point.chamferType != 0 && point.chamferType != 40 &&
+                     (!std::isfinite(point.chamferX) || !std::isfinite(point.chamferY)))
+            {
+                part.contourKindUnverified = true;
+                model.diagnostics.push_back("non-finite active chamfer retained without geometry for part " + std::to_string(item.first));
+            }
+    }
+    model.identityTypeCounts.clear();
+    for (const auto& identity : model.identities) ++model.identityTypeCounts[identity.second.type];
+}
 
 template <typename T>
 T read(const uint8_t* data, std::size_t offset)
@@ -106,59 +145,11 @@ std::string legacyString(const uint8_t* data, std::size_t offset, std::size_t si
     return result;
 }
 
-std::vector<uint8_t> readFile(const std::filesystem::path& path)
-{
-    std::ifstream stream(path, std::ios::binary);
-    if (!stream)
-        throw std::runtime_error("cannot open " + path.u8string());
-    stream.seekg(0, std::ios::end);
-    const auto size = stream.tellg();
-    if (size < 0)
-        throw std::runtime_error("cannot determine file size: " + path.u8string());
-    stream.seekg(0, std::ios::beg);
-    std::vector<uint8_t> result(static_cast<std::size_t>(size));
-    if (!result.empty() && !stream.read(reinterpret_cast<char*>(result.data()), size))
-        throw std::runtime_error("cannot read " + path.u8string());
-    return result;
-}
+using detail::readFile;
 
 std::vector<uint8_t> inflateGzip(const std::filesystem::path& path)
 {
-    std::ifstream stream(path, std::ios::binary);
-    if (!stream)
-        throw std::runtime_error("cannot open " + path.u8string());
-    std::array<std::uint8_t, 2> signature{};
-    stream.read(reinterpret_cast<char*>(signature.data()), signature.size());
-    if (stream.gcount() != static_cast<std::streamsize>(signature.size()) ||
-        signature[0] != 0x1f || signature[1] != 0x8b)
-        return readFile(path);
-    stream.clear();
-    stream.seekg(0, std::ios::beg);
-    z_stream z{};
-    if (inflateInit2(&z, 16 + MAX_WBITS) != Z_OK)
-        throw std::runtime_error("zlib failed to initialize for " + path.u8string());
-    std::vector<uint8_t> output;
-    std::array<uint8_t, 256 * 1024> input{};
-    std::array<uint8_t, 256 * 1024> chunk{};
-    int status = Z_OK;
-    while (status == Z_OK && stream)
-    {
-        stream.read(reinterpret_cast<char*>(input.data()), input.size());
-        z.next_in = input.data();
-        z.avail_in = static_cast<uInt>(stream.gcount());
-        do
-        {
-            z.next_out = chunk.data();
-            z.avail_out = static_cast<uInt>(chunk.size());
-            status = inflate(&z, Z_NO_FLUSH);
-            output.insert(output.end(), chunk.data(), chunk.data() + chunk.size() - z.avail_out);
-        }
-        while (status == Z_OK && (z.avail_in || z.avail_out == 0));
-    }
-    inflateEnd(&z);
-    if (status != Z_STREAM_END)
-        throw std::runtime_error("invalid gzip stream: " + path.u8string());
-    return output;
+    return detail::readPayload(path);
 }
 
 std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data)
@@ -171,7 +162,27 @@ std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data)
         if (std::equal(kSectionMagic.begin(), kSectionMagic.end(), data.begin() + offset))
         {
             result.push_back(offset);
-            offset += kSectionMagic.size() - 1;
+            // Walk complete allocated records before looking for the next section.
+            // A section signature can legally occur in strings, coordinates or GUIDs.
+            // Old/unknown sections remain available as opaque bytes via the raw API.
+            auto cursor = offset + kSectionMagic.size();
+            if (data.size() - offset >= 12)
+            {
+                const auto payload = read<uint32_t>(data.data(), offset + 4);
+                const auto fields = read<uint32_t>(data.data(), offset + 8);
+                if (fields <= (data.size() - offset - 12) / 4)
+                {
+                    cursor = offset + 12 + static_cast<std::size_t>(fields) * 4;
+                    const auto stride = static_cast<std::size_t>(payload) + 9;
+                    while (cursor < data.size() && (data[cursor] == 4 || data[cursor] == 12))
+                    {
+                        if (stride > data.size() - cursor)
+                            break;
+                        cursor += stride;
+                    }
+                }
+            }
+            offset = cursor - 1;
         }
     }
     return result;
@@ -195,13 +206,28 @@ std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<st
         table.fieldCount = read<uint32_t>(data.data(), table.offset + 8);
         table.headerSize = 12 + static_cast<std::size_t>(table.fieldCount) * 4;
         table.rowStride = static_cast<std::size_t>(table.payloadSize) + 9;
-        table.trailerSize = ordinal + 1 == offsets.size() ? 5 : 9;
-        if (table.offset + table.headerSize + table.trailerSize <= next && table.rowStride > 0)
+        // Some early tables end with only a zero tag; later ones additionally
+        // contain an allocator sentinel. Do not discard those early records.
+        for (const auto trailer : {std::size_t(9), std::size_t(5), std::size_t(1)})
         {
-            const auto body = next - table.offset - table.headerSize - table.trailerSize;
-            table.valid = body % table.rowStride == 0;
-            if (table.valid)
-                table.rowCount = body / table.rowStride;
+            if (ordinal + 1 == offsets.size() && trailer != 5)
+                continue;
+            if (ordinal + 1 != offsets.size() && trailer == 5)
+                continue;
+            if (table.headerSize > next - table.offset || trailer > next - table.offset - table.headerSize)
+                continue;
+            const auto body = next - table.offset - table.headerSize - trailer;
+            if (body % table.rowStride != 0 || data[next - trailer] != 0)
+                continue;
+            bool tagsValid = true;
+            for (std::size_t cursor = table.offset + table.headerSize; cursor < next - trailer; cursor += table.rowStride)
+                if (data[cursor] != 4 && data[cursor] != 12) { tagsValid = false; break; }
+            if (!tagsValid)
+                continue;
+            table.trailerSize = trailer;
+            table.valid = true;
+            table.rowCount = body / table.rowStride;
+            break;
         }
         result.push_back(table);
     }
@@ -220,6 +246,20 @@ void requireTable(const std::vector<Table>& all, std::size_t ordinal, uint32_t p
 {
     if (ordinal >= all.size() || !all[ordinal].valid || all[ordinal].payloadSize != payload)
         throw std::runtime_error("unsupported DB1 table schema at ordinal " + std::to_string(ordinal));
+}
+
+void requireFields(const std::vector<uint8_t>& data, const std::vector<Table>& all,
+                   std::size_t ordinal, std::size_t count, std::initializer_list<std::size_t> references)
+{
+    const auto& table = all.at(ordinal);
+    if (table.fieldCount != count)
+        throw std::runtime_error("unsupported DB1 field count at ordinal " + std::to_string(ordinal));
+    for (std::size_t field = 0; field < count; ++field)
+    {
+        const uint32_t expected = std::find(references.begin(), references.end(), field) != references.end() ? 1 : 0;
+        if (read<uint32_t>(data.data(), table.offset + 12 + field * 4) != expected)
+            throw std::runtime_error("unsupported DB1 field signature at ordinal " + std::to_string(ordinal));
+    }
 }
 
 std::string guid(const uint8_t* bytes)
@@ -244,31 +284,29 @@ Vec3 cross(const Vec3& one, const Vec3& two)
 
 std::filesystem::path findMainDatabase(const std::filesystem::path& directory)
 {
-    std::filesystem::path result;
-    uintmax_t largest = 0;
+    std::vector<std::filesystem::path> candidates;
     std::error_code error;
     for (const auto& entry : std::filesystem::directory_iterator(directory, error))
     {
         if (error || !entry.is_regular_file())
             continue;
-        std::string name = entry.path().filename().u8string();
+        std::string name = detail::pathUtf8(entry.path().filename());
         std::transform(name.begin(), name.end(), name.begin(), [](unsigned char value) {
             return static_cast<char>(std::tolower(value));
         });
-        auto extension = entry.path().extension().u8string();
+        auto extension = detail::pathUtf8(entry.path().extension());
         std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char value) {
             return static_cast<char>(std::tolower(value));
         });
         if (extension != ".db1" || name == "xslib.db1")
             continue;
-        const auto size = entry.file_size(error);
-        if (!error && (!result.empty() ? size > largest : true))
-        {
-            result = entry.path();
-            largest = size;
-        }
+        candidates.push_back(entry.path());
     }
-    return result;
+    if (error)
+        throw std::runtime_error("cannot enumerate model directory: " + error.message());
+    if (candidates.size() > 1)
+        throw std::runtime_error("ambiguous model directory: multiple main .db1 files; use parseModelFile with an explicit path");
+    return candidates.empty() ? std::filesystem::path{} : candidates.front();
 }
 
 void parseProfileDatabase(const std::filesystem::path& path, Model& model)
@@ -480,7 +518,7 @@ void parseLegacyDatabase(const std::vector<uint8_t>& data, Model& model)
         point.type = read<uint32_t>(value, 5);
         for (int axis = 0; axis < 3; ++axis)
             point.value[axis] = read<double>(value, 9 + axis * 8);
-        model.points[point.id] = point;
+        insertUnique(model.points, point.id, point, "point");
     }
     for (std::size_t index = 0; index < frameTable.rowCount; ++index)
     {
@@ -493,7 +531,7 @@ void parseLegacyDatabase(const std::vector<uint8_t>& data, Model& model)
         }
         frame.normal = cross(frame.axis, frame.secondary);
         frame.id = read<uint32_t>(value, 49);
-        model.frames[frame.id] = frame;
+        insertUnique(model.frames, frame.id, frame, "frame");
     }
     for (std::size_t index = 0; index < identityTable.rowCount; ++index)
     {
@@ -719,7 +757,7 @@ void parseLegacyDatabase(const std::vector<uint8_t>& data, Model& model)
             model.actualPartIds.push_back(part.id);
         }
         model.identities[part.id].type = part.internalType;
-        model.parts[part.id] = std::move(part);
+        insertUnique(model.parts, part.id, std::move(part), "part");
     }
 
     for (const auto& association : associations)
@@ -896,16 +934,20 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const auto offsets = sectionOffsets(data);
     if (offsets.empty())
     {
+        if (model.storageVersion != "7.30")
+            throw std::runtime_error("unsupported legacy DB1 version " + model.storageVersion + "; use parseRawDatabase");
         parseLegacyDatabase(data, model);
         return;
     }
     const auto all = tables(data, offsets);
     const bool schema844 = !componentLibrary && model.storageVersion == "8.44" && offsets.size() == 286;
     const bool schema895 = !componentLibrary && model.storageVersion == "8.95" && offsets.size() == 326;
-    const bool schema952OrNewer = !componentLibrary && offsets.size() >= 356;
+    const bool modernVersion = model.storageVersion == "9.52" || model.storageVersion == "9.60" ||
+                               model.storageVersion == "9.65" || model.storageVersion == "9.66";
+    const bool schema952OrNewer = !componentLibrary && modernVersion && offsets.size() >= 356;
     const bool library844 = componentLibrary && model.storageVersion == "8.44" && offsets.size() == 254;
     const bool library895 = componentLibrary && model.storageVersion == "8.95" && offsets.size() == 290;
-    const bool library952OrNewer = componentLibrary && offsets.size() >= 319;
+    const bool library952OrNewer = componentLibrary && modernVersion && offsets.size() >= 319;
     if (!schema844 && !schema895 && !schema952OrNewer &&
         !library844 && !library895 && !library952OrNewer)
         throw std::runtime_error("unsupported DB1 semantic schema " + model.storageVersion + " with " +
@@ -959,6 +1001,45 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
     for (const auto& spec : required)
         requireTable(all, spec.first, spec.second);
+    if (!older844)
+    {
+        // Exact field signatures from the pinned 8.95, 9.52 and 9.60 corpus.
+        // 9.65/9.66 retain these roles; appended tables do not change ordinals.
+        requireFields(data, all, pointOrdinal, 6, {0,1});
+        requireFields(data, all, placementOrdinal, 7, {0,1,2});
+        requireFields(data, all, frameOrdinal, 8, {0,7});
+        requireFields(data, all, profileStringOrdinal, 6, {0,1,2});
+        requireFields(data, all, numericPropertyOrdinal, 6, {0,1,5});
+        requireFields(data, all, componentOrdinal, 22, {0,1,4,5,6,21});
+        for (auto ordinal : {propertyLinkOneOrdinal, propertyLinkTwoOrdinal})
+            requireFields(data, all, ordinal, 7, {0,1,2,3,4});
+        for (auto ordinal : {weldOrdinal, boltGroupOrdinal})
+            requireFields(data, all, ordinal, 7, {0,1,2,3,4,5,6});
+        for (auto ordinal : {associationOneOrdinal, associationTwoOrdinal})
+            requireFields(data, all, ordinal, 7, {0,1,3,4});
+        if (older895) requireFields(data, all, identityOrdinal, 6, {0,1,2,3,4});
+        else requireFields(data, all, identityOrdinal, 13, {0,1,2,3,11,12});
+        requireFields(data, all, partDefinitionOrdinal, 19, {0,1,12});
+        requireFields(data, all, contourBlockOrdinal, 84, {0,1});
+        if (older895) requireFields(data, all, stringPropertyOrdinal, 6, {0,1,5});
+        else requireFields(data, all, stringPropertyOrdinal, 7, {0,1,5,6});
+        requireFields(data, all, partOrdinal, 12, {0,1,2,3,4,5,6,7});
+        requireFields(data, all, contourLinkOrdinal, 7, {0,1,2,5,6});
+        requireFields(data, all, weldDefinitionOrdinal, 18, {0,1,2});
+        requireFields(data, all, assemblyOrdinal, 9, {0,1,4,5});
+        if (older895) requireFields(data, all, boltDefinitionOrdinal, 28, {0,1});
+        else requireFields(data, all, boltDefinitionOrdinal, 30, {0,1,25,26,27,28,29});
+        if (!olderSchema) requireFields(data, all, boltLayerOrdinal, 9, {0,1,3});
+        requireFields(data, all, relationOrdinal, 6, {0,1,2,4,5});
+    }
+    else
+    {
+        for (const auto& spec : required)
+            for (std::size_t field = 0; field < all[spec.first].fieldCount; ++field)
+                if (read<uint32_t>(data.data(), all[spec.first].offset + 12 + field * 4) > 1)
+                    throw std::runtime_error("unsupported DB1 field descriptor at ordinal " + std::to_string(spec.first));
+        model.diagnostics.emplace_back("8.44 semantic tables have structural checks only; complete field signatures need independent corpus validation");
+    }
     if (older844)
         model.diagnostics.emplace_back(
             "Xsteel 8.44 tables without proven semantic roles remain available through parseRawDatabase");
@@ -1006,7 +1087,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         point.type = read<uint32_t>(value, 5);
         for (int axis = 0; axis < 3; ++axis)
             point.value[axis] = read<double>(value, 9 + axis * 8);
-        model.points[point.id] = point;
+        insertUnique(model.points, point.id, point, "point");
     }
     for (std::size_t index = 0; index < all[frameOrdinal].rowCount; ++index)
     {
@@ -1019,7 +1100,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
         frame.normal = cross(frame.axis, frame.secondary);
         frame.id = read<uint32_t>(value, 49);
-        model.frames[frame.id] = frame;
+        insertUnique(model.frames, frame.id, frame, "frame");
     }
     for (std::size_t index = 0; index < all[identityOrdinal].rowCount; ++index)
     {
@@ -1039,10 +1120,12 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             identity.type = read<uint32_t>(value, 29);
             identity.flags = read<uint32_t>(value, 53);
         }
-        model.identities[identity.id] = identity;
+        insertUnique(model.identities, identity.id, identity, "identity");
     }
 
     if (library && all.size() > 68 && all[68].valid && all[68].payloadSize == 76)
+    {
+        if (!older844) requireFields(data, all, 68, 6, {0,1,4});
         for (std::size_t index = 0; index < all[68].rowCount; ++index)
         {
             const auto* value = row(data, all, 68, index);
@@ -1061,6 +1144,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             }
             model.parameterDefinitions[parameter.id] = std::move(parameter);
         }
+    }
 
     std::unordered_map<uint32_t, std::vector<uint32_t>> childrenByOwner;
     childrenByOwner.reserve(model.identities.size() / 4 + 1);
@@ -1118,6 +1202,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         PartDefinition definition;
         definition.id = read<uint32_t>(value, 1);
         definition.classNumber = fixedString(value, 33, 22);
+        definition.subtype = read<uint32_t>(value, 9);
         const auto nameLength = older895 ? std::size_t(22) : std::size_t(62);
         definition.name = fixedString(value, 55, nameLength);
         const auto family = fixedString(value, olderSchema ? 145 : 117, olderSchema ? 22 : 60);
@@ -1125,7 +1210,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         definition.profile = family + strings[dimensionId];
         definition.secondaryName = fixedString(value, olderSchema ? 167 : 207, 62);
         definition.material = fixedString(value, olderSchema ? 229 : 269, older844 ? 85 : 95);
-        model.definitions[definition.id] = definition;
+        insertUnique(model.definitions, definition.id, definition, "definition");
     }
 
     struct ContourBlock { uint32_t sequence = 0; std::vector<ContourPoint> points; };
@@ -1239,11 +1324,23 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             if (contour != contours.end())
                 part.contour = contour->second.points;
         }
+        // Corpus-verified subtype 2 contours are plates. Other modern subtype
+        // meanings require evidence; the legacy subtype-4 mapping is not assumed.
+        part.contourKindUnverified = !part.contour.empty() && definition->second.subtype != 2;
+        if (part.contourKindUnverified)
+            model.diagnostics.push_back("unverified modern contour kind for part " + std::to_string(part.id) +
+                                        " (definition subtype " + std::to_string(definition->second.subtype) + ")");
         if (part.internalType == 2)
             model.actualPartIds.push_back(part.id);
         else if (part.internalType == 11 || part.internalType == 38)
             model.operativePartIds.push_back(part.id);
-        model.parts[part.id] = std::move(part);
+        else
+        {
+            model.unhandledPartIds.push_back(part.id);
+            model.diagnostics.push_back("unhandled part type " + std::to_string(part.internalType) +
+                                        " for object " + std::to_string(part.id));
+        }
+        insertUnique(model.parts, part.id, std::move(part), "part");
     }
 
     std::unordered_map<uint32_t, Property> propertyValues;
@@ -1526,6 +1623,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     }
 
     if (library && all.size() > 226 && all[226].valid && all[226].payloadSize == 36)
+    {
+        if (!older844) requireFields(data, all, 226, 10, {0,1,7,8,9});
         for (std::size_t index = 0; index < all[226].rowCount; ++index)
         {
             const auto* value = row(data, all, 226, index);
@@ -1547,6 +1646,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 definition.childObjectIds = children->second;
             model.customComponentDefinitions.push_back(std::move(definition));
         }
+    }
 
     for (const auto& identity : model.identities)
     {
@@ -1564,20 +1664,30 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         model.controlLines.push_back(std::move(control));
     }
 
+    std::sort(model.actualPartIds.begin(), model.actualPartIds.end());
+    std::sort(model.operativePartIds.begin(), model.operativePartIds.end());
+    std::sort(model.unhandledPartIds.begin(), model.unhandledPartIds.end());
+
 }
 }
 
-bool parseModelDirectory(const std::filesystem::path& directory, Model& model, std::string& error)
+bool parseModelFile(const std::filesystem::path& path, Model& model, std::string& error)
+{
+    return parseModelFile(path, model, error, ModelReadOptions{});
+}
+
+bool parseModelFile(const std::filesystem::path& path, Model& model, std::string& error,
+                    const ModelReadOptions& options)
 {
     try
     {
+        error.clear();
         model = {};
-        if (!std::filesystem::is_directory(directory))
-            throw std::runtime_error("Tekla DB1 input must be a complete model directory");
+        if (!std::filesystem::is_regular_file(path))
+            throw std::runtime_error("Tekla DB1 input must be a regular file");
+        const auto directory = std::filesystem::absolute(path).parent_path();
         model.directory = directory;
-        model.databasePath = findMainDatabase(directory);
-        if (model.databasePath.empty())
-            throw std::runtime_error("the model directory contains no main .db1 file");
+        model.databasePath = std::filesystem::absolute(path);
         const auto metadataPath = directory / "TeklaStructuresModel.xml";
         if (std::filesystem::is_regular_file(metadataPath))
         {
@@ -1606,8 +1716,36 @@ bool parseModelDirectory(const std::filesystem::path& directory, Model& model, s
             for (const auto& diagnostic : catalog.diagnostics)
                 model.diagnostics.push_back("pgdb.bin: " + diagnostic);
         }
-        parseDatabase(inflateGzip(model.databasePath), model, false);
+        parseDatabase(detail::readPayload(model.databasePath, options.maxDecodedBytes), model, false);
+        validateModel(model);
         return true;
+    }
+    catch (const std::exception& exception)
+    {
+        error = exception.what();
+        model = {};
+        return false;
+    }
+}
+
+bool parseModelDirectory(const std::filesystem::path& directory, Model& model, std::string& error)
+{
+    return parseModelDirectory(directory, model, error, ModelReadOptions{});
+}
+
+bool parseModelDirectory(const std::filesystem::path& directory, Model& model, std::string& error,
+                         const ModelReadOptions& options)
+{
+    try
+    {
+        error.clear();
+        model = {};
+        if (!std::filesystem::is_directory(directory))
+            throw std::runtime_error("Tekla DB1 input must be a model directory");
+        const auto path = findMainDatabase(directory);
+        if (path.empty())
+            throw std::runtime_error("the model directory contains no main .db1 file");
+        return parseModelFile(path, model, error, options);
     }
     catch (const std::exception& exception)
     {
@@ -1619,17 +1757,25 @@ bool parseModelDirectory(const std::filesystem::path& directory, Model& model, s
 
 bool parseComponentLibrary(const std::filesystem::path& path, Model& model, std::string& error)
 {
+    return parseComponentLibrary(path, model, error, ModelReadOptions{});
+}
+
+bool parseComponentLibrary(const std::filesystem::path& path, Model& model, std::string& error,
+                           const ModelReadOptions& options)
+{
     try
     {
         model = {};
         if (!std::filesystem::is_regular_file(path))
             throw std::runtime_error("Tekla component library path is not a file");
+        error.clear();
         model.directory = path.parent_path();
         model.databasePath = path;
         const auto profilePath = model.directory / "profdb.bin";
         if (std::filesystem::is_regular_file(profilePath))
             parseProfileDatabase(profilePath, model);
-        parseDatabase(inflateGzip(path), model, true);
+        parseDatabase(detail::readPayload(path, options.maxDecodedBytes), model, true);
+        validateModel(model);
         return true;
     }
     catch (const std::exception& exception)
@@ -1646,24 +1792,41 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
     try
     {
         database = {};
+        error.clear();
         database.sourcePath = path;
-        auto data = inflateGzip(path);
+        auto data = detail::readPayload(path, options.maxDecodedBytes);
         if (data.size() < 8)
             throw std::runtime_error("DB1 file is truncated");
         const bool xsteel = data.size() >= 6 && std::memcmp(data.data(), "Xsteel", 6) == 0;
-        const bool variableDatabase = data.size() >= 4 && std::memcmp(data.data(), "DBV@", 4) == 0;
+        const bool namedVariableDatabase = data.size() >= 8 && std::memcmp(data.data(), "DBV@", 4) == 0;
+        const bool legacyVariableDatabase = data.size() >= 24 && read<uint32_t>(data.data(),0) == 1 &&
+            read<uint32_t>(data.data(),4) == 0 && read<uint32_t>(data.data(),8) == 0 &&
+            read<uint32_t>(data.data(),12) == 0 && read<uint32_t>(data.data(),16) == 1 &&
+            read<uint32_t>(data.data(),20) == 0xdbcec0bc;
+        const bool variableDatabase = namedVariableDatabase || legacyVariableDatabase;
         if (!xsteel && !variableDatabase)
             throw std::runtime_error("file is neither an Xsteel nor a DBV database");
 
-        const auto filename = path.filename().u8string();
+        auto filename = detail::pathUtf8(path.filename());
+        std::transform(filename.begin(), filename.end(), filename.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        const bool numbering = filename.size() >= 4 && filename.substr(filename.size() - 4) == ".db2";
         database.kind = variableDatabase ? DatabaseKind::Environment :
+                            (numbering ? DatabaseKind::Numbering :
                             (startsWithInsensitive(filename, "xslib")
                                  ? DatabaseKind::ComponentLibrary
-                                 : DatabaseKind::Model);
+                                 : DatabaseKind::Model));
         const std::string header(reinterpret_cast<const char*>(data.data()),
                                  (std::min)(data.size(), std::size_t(160)));
-        if (variableDatabase)
-            database.storageVersion = "DBV-" + std::to_string(read<std::uint32_t>(data.data(), 4));
+        if (namedVariableDatabase)
+        {
+            const auto length = read<std::uint32_t>(data.data(),4);
+            if (length == 0 || length > data.size() - 8)
+                throw std::runtime_error("invalid DBV container-name length");
+            database.containerName.assign(reinterpret_cast<const char*>(data.data()+8),length);
+            database.storageVersion = "DBV";
+        }
+        else if (legacyVariableDatabase)
+            database.storageVersion = "DBV-legacy";
         const auto versionAt = xsteel ? header.find_first_of("0123456789", 6) : std::string::npos;
         if (xsteel && versionAt != std::string::npos)
         {
@@ -1732,7 +1895,17 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
             database.layout = DatabaseLayout::LegacyTables;
             const auto all = legacyTables(data);
             if (all.empty())
+            {
+                if (numbering || variableDatabase)
+                {
+                    database.layout = DatabaseLayout::Opaque;
+                    database.preamble = data;
+                    if (options.retainDecompressedFileImage) database.decompressedFileImage = std::move(data);
+                    database.diagnostics.emplace_back("container preserved as opaque bytes; semantic decoding is not implemented");
+                    return true;
+                }
                 throw std::runtime_error("Xsteel file contains neither modern sections nor legacy tables");
+            }
             std::vector<std::uint32_t> ordinals;
             ordinals.reserve(all.size());
             for (const auto& entry : all)

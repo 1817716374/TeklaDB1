@@ -1,0 +1,45 @@
+name: Build and regression
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        standard: [17, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev ninja-build
+      - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_STANDARD=${{ matrix.standard }} -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer'
+      - run: cmake --build build --parallel 2
+      - run: ctest --test-dir build --output-on-failure
+      - uses: actions/setup-python@v5
+        if: matrix.standard == 17
+        with:
+          python-version: '3.12'
+      - name: Pinned public corpus
+        if: matrix.standard == 17
+        run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json
+      - run: cmake --install build --prefix "$GITHUB_WORKSPACE/installed"
+      - run: cmake -S tests/consumer -B consumer-build -G Ninja -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/installed" -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer'
+      - run: cmake --build consumer-build && ctest --test-dir consumer-build --output-on-failure
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: vcpkg install zlib:x64-windows
+      - run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
+      - run: cmake --build build --config Release --parallel 2
+      - run: ctest --test-dir build -C Release --output-on-failure
+      - run: cmake --install build --config Release --prefix "$env:GITHUB_WORKSPACE/installed"
+      - run: cmake -S tests/consumer -B consumer-build -DCMAKE_PREFIX_PATH="$env:GITHUB_WORKSPACE/installed" -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
+      - run: cmake --build consumer-build --config Release; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; ctest --test-dir consumer-build -C Release --output-on-failure
+  linux-occt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev ninja-build libocct-modeling-algorithms-dev libocct-modeling-data-dev
+      - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DTEKLADB1_WITH_OCCT=ON
+      - run: cmake --build build --parallel 2
+      - run: ctest --test-dir build --output-on-failure

@@ -862,6 +862,11 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
 
 TopoDS_Shape partSolid(const Model& model, const Part& part, std::string& mode)
 {
+    if (part.contourKindUnverified)
+    {
+        mode = "unverified contour kind";
+        return {};
+    }
     if (!part.contour.empty())
     {
         if (part.contourIsPath)
@@ -1210,6 +1215,12 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
                 result.weldShapes[weld.id] = BRepPrimAPI_MakePrism(face.Face(), vector(scale(weld.axis, weld.length))).Shape();
             ++completed;
         }
+        if (!model.boltGroups.empty())
+            result.diagnostics.emplace_back("bolt geometry is approximate: cylindrical shanks, without heads, nuts or washers");
+        if (!model.welds.empty())
+            result.diagnostics.emplace_back("weld geometry is approximate: triangular straight prisms, not all weld types");
+        if (std::any_of(model.parts.begin(), model.parts.end(), [](const auto& entry) { return entry.second.contourIsPath; }))
+            result.diagnostics.emplace_back("polybeam geometry may approximate curved path segments with eight chords");
         return true;
     }
     catch (const std::exception& exception)

@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Fetch pinned public samples outside the repository and verify parser regressions.
+
+No third-party model is redistributed. Downloads are explicit, SHA-256 checked,
+and have exact size budgets. The manifest records regression baselines, not a
+claim of independent geometric ground truth.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path, PurePosixPath
+import subprocess
+import sys
+import urllib.request
+import zipfile
+
+
+def safe_path(root, relative):
+    p = PurePosixPath(relative)
+    if p.is_absolute() or ".." in p.parts or not p.parts or ":" in str(p) or "\\" in str(p):
+        raise ValueError(f"unsafe manifest path: {relative}")
+    dest = (root / str(p)).resolve()
+    if not dest.is_relative_to(root.resolve()):
+        raise ValueError(f"path escapes corpus directory: {relative}")
+    return dest
+
+
+def verify(path, spec):
+    if not path.is_file() or path.stat().st_size != spec["size"]:
+        return False
+    with path.open("rb") as f:
+        return hashlib.file_digest(f, "sha256").hexdigest() == spec["sha256"]
+
+
+def fetch(spec, destination):
+    if verify(destination, spec):
+        return
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(destination.name + ".partial")
+    try:
+        with urllib.request.urlopen(spec["url"], timeout=60) as response, temporary.open("wb") as out:
+            total = 0
+            while chunk := response.read(1024 * 1024):
+                total += len(chunk)
+                if total > spec["size"]:
+                    raise ValueError("download exceeded pinned byte count")
+                out.write(chunk)
+        if not verify(temporary, spec):
+            raise ValueError(f"download hash/size mismatch: {spec['url']}")
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--manifest", type=Path, default=Path(__file__).resolve().parents[1] / "tests/corpus.json")
+    parser.add_argument("--data", type=Path, required=True, help="external corpus directory; all downloads stay here")
+    parser.add_argument("--download", action="store_true", help="explicitly fetch pinned sources from the public Internet")
+    parser.add_argument("--exe", type=Path, required=True, help="built tekladb1_validate executable")
+    parser.add_argument("--report", type=Path, help="JSON results path (outside the source tree recommended)")
+    args = parser.parse_args()
+    data = args.data.resolve()
+    manifest = json.loads(args.manifest.read_text(encoding="utf8"))
+    archives = manifest.get("archives", {})
+    for spec in manifest["files"]:
+        path = safe_path(data, spec["path"])
+        if not verify(path, spec):
+            if not args.download:
+                raise ValueError(f"missing or changed corpus file: {path}; use --download")
+            if "archive" in spec:
+                archive = archives[spec["archive"]]
+                archive_path = safe_path(data, "_downloads/" + spec["archive"] + ".zip")
+                fetch(archive, archive_path)
+                with zipfile.ZipFile(archive_path) as z:
+                    info = z.getinfo(spec["member"])
+                    if info.file_size != spec["size"]:
+                        raise ValueError("archive member exceeds pinned byte count")
+                    content = z.read(info)
+                if hashlib.sha256(content).hexdigest() != spec["sha256"]:
+                    raise ValueError("archive member hash mismatch")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(content)
+            else:
+                fetch(spec, path)
+    failures = 0
+    results = []
+    for case in manifest["cases"]:
+        path = safe_path(data, case["path"])
+        result = subprocess.run([str(args.exe.resolve()), case["mode"], str(path)],
+                                capture_output=True, encoding="utf8", errors="replace", timeout=120)
+        ok = result.returncode == case["exit"]
+        if "stdout" in case:
+            ok = ok and result.stdout.strip() == case["stdout"]
+        if "error_contains" in case:
+            ok = ok and case["error_contains"] in result.stderr
+        results.append(dict(name=case["name"],passed=ok,exit=result.returncode,
+                            stdout=result.stdout.strip(),stderr=result.stderr.strip()))
+        failures += not ok
+        print(("PASS " if ok else "FAIL ") + case["name"])
+        if not ok:
+            print(result.stdout, result.stderr)
+    if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf8")
+    print(f"{len(results)-failures}/{len(results)} corpus cases passed")
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except (ValueError, OSError, subprocess.SubprocessError, zipfile.BadZipFile) as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(1)

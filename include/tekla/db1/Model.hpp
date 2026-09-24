@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <map>
@@ -121,6 +122,8 @@ struct Part
     Vec3 normal{};
     double length = 0.0;
     bool contourIsPath = false;
+    // Unknown modern contour subtypes must not silently become plates.
+    bool contourKindUnverified = false;
     std::vector<ContourPoint> contour;
     std::vector<Property> properties;
 };
@@ -308,5 +311,7 @@ struct Model
     std::vector<CustomComponentDefinition> customComponentDefinitions;
     std::unordered_map<uint32_t, std::vector<Property>> properties;
     std::vector<std::string> diagnostics;
+    std::map<std::uint32_t, std::size_t> identityTypeCounts;
+    std::vector<std::uint32_t> unhandledPartIds;
 };
 }

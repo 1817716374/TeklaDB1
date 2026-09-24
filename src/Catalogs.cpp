@@ -1,6 +1,8 @@
 #include <tekla/db1/Catalogs.hpp>
 
 #include <zlib.h>
+#include "Path.hpp"
+#include "BinaryIO.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -40,60 +42,8 @@ std::string trim(std::string value)
     return value;
 }
 
-std::vector<std::uint8_t> readFile(const std::filesystem::path& path)
-{
-    std::ifstream stream(path, std::ios::binary);
-    if (!stream)
-        throw std::runtime_error("cannot open " + path.u8string());
-    stream.seekg(0, std::ios::end);
-    const auto size = stream.tellg();
-    if (size < 0)
-        throw std::runtime_error("cannot determine file size: " + path.u8string());
-    stream.seekg(0, std::ios::beg);
-    std::vector<std::uint8_t> result(static_cast<std::size_t>(size));
-    if (!result.empty() && !stream.read(reinterpret_cast<char*>(result.data()), size))
-        throw std::runtime_error("cannot read " + path.u8string());
-    return result;
-}
-
-std::vector<std::uint8_t> readPayload(const std::filesystem::path& path)
-{
-    std::ifstream inputStream(path, std::ios::binary);
-    if (!inputStream)
-        throw std::runtime_error("cannot open " + path.u8string());
-    std::array<std::uint8_t, 2> signature{};
-    inputStream.read(reinterpret_cast<char*>(signature.data()), signature.size());
-    if (inputStream.gcount() != static_cast<std::streamsize>(signature.size()) ||
-        signature[0] != 0x1f || signature[1] != 0x8b)
-        return readFile(path);
-    inputStream.clear();
-    inputStream.seekg(0, std::ios::beg);
-    z_stream stream{};
-    if (inflateInit2(&stream, 16 + MAX_WBITS) != Z_OK)
-        throw std::runtime_error("zlib failed to initialize for " + path.u8string());
-    std::vector<std::uint8_t> output;
-    std::array<std::uint8_t, 256 * 1024> input{};
-    std::array<std::uint8_t, 256 * 1024> chunk{};
-    int status = Z_OK;
-    while (status == Z_OK && inputStream)
-    {
-        inputStream.read(reinterpret_cast<char*>(input.data()), input.size());
-        stream.next_in = input.data();
-        stream.avail_in = static_cast<uInt>(inputStream.gcount());
-        do
-        {
-            stream.next_out = chunk.data();
-            stream.avail_out = static_cast<uInt>(chunk.size());
-            status = inflate(&stream, Z_NO_FLUSH);
-            output.insert(output.end(), chunk.data(), chunk.data() + chunk.size() - stream.avail_out);
-        }
-        while (status == Z_OK && (stream.avail_in || stream.avail_out == 0));
-    }
-    inflateEnd(&stream);
-    if (status != Z_STREAM_END)
-        throw std::runtime_error("invalid gzip stream: " + path.u8string());
-    return output;
-}
+using detail::readFile;
+using detail::readPayload;
 
 std::string readText(const std::filesystem::path& path)
 {
@@ -305,6 +255,7 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
 {
     try
     {
+        error.clear();
         result = {};
         const auto data = readPayload(path);
         constexpr std::array<std::uint32_t, 5> payloads{100, 36, 52, 24, 44};
@@ -502,6 +453,7 @@ bool parseModelMetadata(const std::filesystem::path& path, ModelMetadata& result
 {
     try
     {
+        error.clear();
         result = {};
         const auto xml = readText(path);
         if (xml.find("<TeklaStructuresModels") == std::string::npos ||
@@ -537,6 +489,7 @@ bool parseMaterialCatalog(const std::filesystem::path& path, MaterialCatalog& re
 {
     try
     {
+        error.clear();
         result = {};
         const auto data = readPayload(path);
         if (data.size() < 4)
@@ -622,6 +575,7 @@ bool parseBoltCatalog(const std::filesystem::path& path, BoltCatalog& result, st
 {
     try
     {
+        error.clear();
         result = {};
         const auto data = readPayload(path);
         if (data.size() < 12)
@@ -660,6 +614,7 @@ bool parseBoltAssemblyCatalog(const std::filesystem::path& path, BoltAssemblyCat
 {
     try
     {
+        error.clear();
         result = {};
         const auto data = readPayload(path);
         if (data.size() < 12)
@@ -696,6 +651,7 @@ bool parseProfitabCatalog(const std::filesystem::path& path, ProfitabCatalog& re
 {
     try
     {
+        error.clear();
         result = {};
         std::istringstream stream(readText(path));
         std::string line;
@@ -740,6 +696,7 @@ bool parseClbDocument(const std::filesystem::path& path, ClbDocument& result, st
 {
     try
     {
+        error.clear();
         result = {};
         std::istringstream stream(readText(path));
         struct SourceLine { std::size_t number = 0; std::string value; };
@@ -814,6 +771,7 @@ bool parseShapeDefinition(const std::filesystem::path& path, ShapeDefinition& re
 {
     try
     {
+        error.clear();
         result = {};
         const auto xml = readText(path);
         if (xml.find("<ImportPart") == std::string::npos)
@@ -848,6 +806,7 @@ bool parseShapeGeometry(const std::filesystem::path& path, ShapeGeometry& result
 {
     try
     {
+        error.clear();
         result = {};
         const auto xml = readText(path);
         if (xml.find("<Polymesh") == std::string::npos)
@@ -890,7 +849,7 @@ bool parseShapeGeometry(const std::filesystem::path& path, ShapeGeometry& result
                 throw std::runtime_error("shape edge references a vertex outside the point array");
             result.edges.push_back(edge);
         }
-        result.storageId = path.stem().u8string();
+        result.storageId = detail::pathUtf8(path.stem());
         result.sourcePath = path;
         return true;
     }
@@ -906,6 +865,7 @@ bool parseShapeCatalog(const std::filesystem::path& directory, ShapeCatalog& res
 {
     try
     {
+        error.clear();
         result = {};
         if (!std::filesystem::is_directory(directory))
             throw std::runtime_error("shape catalog input is not a directory");
@@ -916,7 +876,7 @@ bool parseShapeCatalog(const std::filesystem::path& directory, ShapeCatalog& res
                 throw std::runtime_error("cannot enumerate shape catalog: " + filesystemError.message());
             if (!entry.is_regular_file())
                 continue;
-            auto extension = entry.path().extension().u8string();
+            auto extension = detail::pathUtf8(entry.path().extension());
             std::transform(extension.begin(), extension.end(), extension.begin(),
                            [](unsigned char value) { return static_cast<char>(std::tolower(value)); });
             std::string itemError;
@@ -926,7 +886,7 @@ bool parseShapeCatalog(const std::filesystem::path& directory, ShapeCatalog& res
                 if (parseShapeGeometry(entry.path(), geometry, itemError))
                     result.geometriesByStorageId[geometry.storageId] = std::move(geometry);
                 else
-                    result.diagnostics.push_back(entry.path().u8string() + ": " + itemError);
+                    result.diagnostics.push_back(detail::pathUtf8(entry.path()) + ": " + itemError);
             }
             else if (extension == ".xml")
             {
@@ -937,7 +897,7 @@ bool parseShapeCatalog(const std::filesystem::path& directory, ShapeCatalog& res
                 if (parseShapeDefinition(entry.path(), definition, itemError))
                     result.definitionsByGuid[definition.guid] = std::move(definition);
                 else
-                    result.diagnostics.push_back(entry.path().u8string() + ": " + itemError);
+                    result.diagnostics.push_back(detail::pathUtf8(entry.path()) + ": " + itemError);
             }
         }
         for (const auto& entry : result.definitionsByGuid)
