@@ -55,7 +55,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             ? db1::parseModelDirectory(root, result.model, error, options.modelOptions)
             : db1::parseModelFile(options.mainDatabase.is_absolute() ? options.mainDatabase : root / options.mainDatabase, result.model, error, options.modelOptions);
         if (!ok) { result = {}; return false; }
-        if (result.model.directory.lexically_normal() != root)
+        if (!std::filesystem::equivalent(result.model.directory, root))
             throw std::runtime_error("explicit main database must belong to the supplied project directory");
         result.diagnostics = result.model.diagnostics;
         const auto mark = [&](const std::filesystem::path& path, ReadLevel level, const std::string& diagnostic = std::string{}) {
