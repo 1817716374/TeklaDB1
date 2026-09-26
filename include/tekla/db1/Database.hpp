@@ -13,7 +13,8 @@ enum class DatabaseLayout
     Unknown,
     ModernSections,
     LegacyTables,
-    Opaque
+    Opaque,
+    SequentialTables
 };
 
 enum class DatabaseKind
@@ -22,7 +23,8 @@ enum class DatabaseKind
     Model,
     ComponentLibrary,
     Environment,
-    Numbering
+    Numbering,
+    Drawing
 };
 
 struct RawRecord

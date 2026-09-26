@@ -82,7 +82,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
         if (std::filesystem::is_directory(drawings))
             for (const auto& entry : std::filesystem::directory_iterator(drawings))
                 if (entry.is_regular_file() && roleFor(entry.path()) == FileRole::Drawing)
-                    mark(entry.path(), ReadLevel::Discovered, "DG semantic decoding is not implemented");
+                    mark(entry.path(), ReadLevel::Discovered, "DG reading is optional; full drawing semantics are not implemented");
         mark(result.model.databasePath, ReadLevel::Semantic);
 
         const auto library = findFile(root, "xslib.db1");
@@ -113,14 +113,61 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                     if (file.role == FileRole::Numbering)
                     {
                         const auto stem = lower(db1::detail::pathUtf8(file.path.stem()));
-                        if (stem == lower(db1::detail::pathUtf8(result.model.databasePath.stem())))
-                            result.associations.push_back({result.model.databasePath, file.path, "matching DB1/DB2 basename; numbering fields remain raw"});
+                        if (!raw.databaseGuid.empty() && !result.model.databaseGuid.empty() && lower(raw.databaseGuid)!=lower(result.model.databaseGuid))
+                            result.diagnostics.push_back("numbering database GUID differs from main model: "+db1::detail::pathUtf8(file.path));
+                        else if (stem == lower(db1::detail::pathUtf8(result.model.databasePath.stem())))
+                            result.associations.push_back({result.model.databasePath, file.path, "matching DB1/DB2 basename and no conflicting database GUID"});
                         else if (stem == "xslib" && !library.empty())
                             result.associations.push_back({library, file.path, "component DB1/DB2 pair; numbering fields remain raw"});
                         else result.diagnostics.push_back("unpaired numbering database: " + db1::detail::pathUtf8(file.path));
                     }
                     result.rawCompanions.emplace(file.path, std::move(raw));
                 }
+        }
+
+        const auto companions=result.files;
+        std::map<std::string,std::vector<std::uint32_t>> modelIdsByGuid;
+        for (const auto& entry:result.model.identities)
+            if (!entry.second.guid.empty()) modelIdsByGuid[lower(entry.second.guid)].push_back(entry.first);
+        for (const auto& file:companions)
+        {
+            if (file.role==FileRole::Numbering && options.readNumbering)
+            {
+                NumberingDatabase numbering; std::string diagnostic;
+                if (!parseNumberingDatabase(file.path,numbering,diagnostic,options.rawOptions)) { failure(file.path,diagnostic); continue; }
+                for (const auto& item:numbering.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
+                mark(file.path,ReadLevel::PartialSemantic,"numbering series/counters decoded; object assignments and snapshots remain raw");
+                // Association also works when raw companions were explicitly disabled.
+                if (!options.readRawCompanions)
+                {
+                    const auto stem=lower(db1::detail::pathUtf8(file.path.stem()));
+                    const auto guidMatches=numbering.raw.databaseGuid.empty() || result.model.databaseGuid.empty() || lower(numbering.raw.databaseGuid)==lower(result.model.databaseGuid);
+                    if (stem==lower(db1::detail::pathUtf8(result.model.databasePath.stem())) && guidMatches)
+                        result.associations.push_back({result.model.databasePath,file.path,"matching DB1/DB2 basename and no conflicting database GUID"});
+                    else if (!guidMatches) result.diagnostics.push_back("numbering database GUID differs from main model: "+db1::detail::pathUtf8(file.path));
+                }
+                result.numbering.emplace(file.path,std::move(numbering));
+            }
+            if (file.role==FileRole::Drawing && options.readDrawings)
+            {
+                Drawing drawing; std::string diagnostic;
+                if (!parseDrawing(file.path,drawing,diagnostic,options.rawOptions)) { failure(file.path,diagnostic); continue; }
+                if (!drawing.projectGuid.empty() && !result.model.databaseGuid.empty() && lower(drawing.projectGuid)==lower(result.model.databaseGuid))
+                {
+                    result.associations.push_back({result.model.databasePath,file.path,"DG grProjectGuid matches model database GUID"});
+                    for (const auto& reference:drawing.modelReferences)
+                    {
+                        const auto found=modelIdsByGuid.find(lower(reference.modelGuid));
+                        if (found!=modelIdsByGuid.end() && found->second.size()==1)
+                            result.drawingModelAssociations.push_back({file.path,reference.recordId,found->second.front(),reference.modelGuid});
+                        else result.diagnostics.push_back("drawing model GUID is unresolved or ambiguous: "+reference.modelGuid);
+                    }
+                }
+                else result.diagnostics.push_back("drawing project GUID is missing or differs from main model: "+db1::detail::pathUtf8(file.path));
+                for (const auto& item:drawing.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
+                mark(file.path,ReadLevel::PartialSemantic,"drawing properties, strings and sheet size decoded; graphics remain raw");
+                result.drawings.emplace(file.path,std::move(drawing));
+            }
         }
 
         std::vector<std::filesystem::path> roots{root};
@@ -191,6 +238,9 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
         if (result.profileRules)
             for (const auto& item : result.profileRules->diagnostics) result.diagnostics.push_back("profitab: " + item);
         std::sort(result.files.begin(), result.files.end(), [](const auto& a, const auto& b) { return a.path < b.path; });
+        std::sort(result.drawingModelAssociations.begin(),result.drawingModelAssociations.end(),[](const auto& a,const auto& b) {
+            return std::tie(a.drawing,a.drawingRecordId,a.modelObjectId)<std::tie(b.drawing,b.drawingRecordId,b.modelObjectId);
+        });
         std::sort(result.associations.begin(), result.associations.end(), [](const auto& a, const auto& b) {
             return std::tie(a.source, a.target, a.reason) < std::tie(b.source, b.target, b.reason);
         });

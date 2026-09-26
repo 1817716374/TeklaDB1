@@ -19,6 +19,7 @@ add_library(tekla_db1
     src/Catalogs.cpp
     src/Parser.cpp
     src/Project.cpp
+    src/RelatedFormats.cpp
 )
 add_library(TeklaDB1::tekla_db1 ALIAS tekla_db1)
 add_library(TeklaDB1::core ALIAS tekla_db1)
@@ -93,11 +94,18 @@ if(TEKLADB1_BUILD_TESTS)
     endif()
     add_executable(tekladb1_regression tests/regression.cpp)
     target_link_libraries(tekladb1_regression PRIVATE TeklaDB1::core ZLIB::ZLIB)
+    add_executable(tekla_related_test tests/related.cpp)
+    target_link_libraries(tekla_related_test PRIVATE TeklaFormats::core)
+    foreach(case numbering_valid numbering_truncated numbering_invalid drawing_valid drawing_cycle
+            drawing_missing_chunk drawing_duplicate drawing_missing_property drawing_signature
+            drawing_nonfinite drawing_truncated drawing_limit numbering_unknown drawing_unknown)
+        add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     foreach(case valid_model short_trailer unknown_version wrong_fields broken_reference
             unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
             gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path
             ambiguity raw_retention project strict_companions catalog_error model_limit
-            dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite)
+            dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid)
         add_test(NAME db1.${case} COMMAND tekladb1_regression "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     if(TEKLADB1_WITH_OCCT)

@@ -167,7 +167,8 @@ int main(int argc, char** argv)
         }
         else if (name == "project" || name == "strict_companions")
         {
-            save(path,encode(onePart())); Bytes db2(64); str(db2,0,"Xsteel 9.52"); save(root/"model.db2",db2);
+            save(path,encode(onePart())); const std::string h="Xsteel\x80 9.52 00000000-0000-0000-0000-000000000001";
+            save(root/"model.db2",Bytes(h.begin(),h.end()));
             save(root/"drawings"/"drawing.dg",Bytes{1,2,3});
             if (name=="strict_companions") save(root/"environment.db",Bytes{1,2,3});
             tekla::Project project; tekla::ProjectOptions options; options.strictCompanions=name=="strict_companions";
@@ -212,6 +213,22 @@ int main(int argc, char** argv)
             check(tekla::readProject(root,project,error,options),error.c_str());
             check(project.profileRules && project.profileRules->rules.front().prefix=="LOCAL","external resource overrides local resource");
         }
+        else if (name == "project_guid")
+        {
+            auto b=encode(onePart()); str(b,0,"Xsteel 9.52 01234567-89ab-cdef-0123-456789abcdef"); save(path,b);
+            const std::string header="Xsteel\x80 9.52 01234567-89ab-cdef-0123-456789abcdee";
+            save(root/"model.db2",Bytes(header.begin(),header.end()));
+            for (bool rawCompanions:{true,false})
+            {
+                tekla::Project project; tekla::ProjectOptions options; options.readRawCompanions=rawCompanions;
+                check(tekla::readProject(root,project,error,options),error.c_str());
+                check(project.numbering.size()==1 && project.associations.empty(),"conflicting DB2 GUID associated by basename");
+                bool partial=false,diagnostic=false;
+                for (const auto& f:project.files) partial |= f.level==tekla::ReadLevel::PartialSemantic;
+                for (const auto& d:project.diagnostics) diagnostic |= d.find("GUID differs")!=std::string::npos;
+                check(partial && diagnostic,"partial numbering/mismatched GUID not reported");
+            }
+        }
         else if (name == "partial_project")
         {
             save(path,encode(onePart())); save(root/"environment.db",Bytes{1,2,3}); tekla::Project project;
@@ -224,7 +241,8 @@ int main(int argc, char** argv)
             // Exercise decoder output draining at and beyond the chunk boundary.
             for (std::size_t size : {262144,262145,1048576})
             {
-                Bytes b(size); str(b,0,"Xsteel 9.52"); const auto p=root/"model.db2"; save(p,gzip(b));
+                Bytes b(size); str(b,0,"DBV@"); put<std::uint32_t>(b,4,1); b[8]='X';
+                const auto p=root/"options_model.db"; save(p,gzip(b));
                 check(tekla::db1::parseRawDatabase(p,raw,error),error.c_str()); check(raw.preamble==b,"large gzip output changed");
             }
         }

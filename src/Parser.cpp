@@ -2,6 +2,7 @@
 #include <tekla/db1/Catalogs.hpp>
 #include "Path.hpp"
 #include "BinaryIO.hpp"
+#include "RelatedContainers.hpp"
 
 #include <zlib.h>
 
@@ -1810,6 +1811,14 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
         auto filename = detail::pathUtf8(path.filename());
         std::transform(filename.begin(), filename.end(), filename.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         const bool numbering = filename.size() >= 4 && filename.substr(filename.size() - 4) == ".db2";
+        const bool drawing = filename.size() >= 3 && filename.substr(filename.size() - 3) == ".dg";
+        if (numbering || drawing)
+        {
+            if (drawing) detail::drawingContainer(data,database);
+            else detail::numberingContainer(data,database);
+            if (options.retainDecompressedFileImage) database.decompressedFileImage=std::move(data);
+            return true;
+        }
         database.kind = variableDatabase ? DatabaseKind::Environment :
                             (numbering ? DatabaseKind::Numbering :
                             (startsWithInsensitive(filename, "xslib")

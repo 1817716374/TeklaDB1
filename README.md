@@ -14,12 +14,12 @@
 | matdb / screwdb / assdb | 材料、螺栓与螺栓组件目录 |
 | profitab / CLB | 规则与语句读取；不等于完整执行所有参数化生成器 |
 | Shapes XML / TEZ | Shape 定义和 Polymesh 点、面、内环、边 |
-| DB2 | 原始容器读取、按文件名关联 DB1；**尚无稳定的编号字段语义 API** |
+| DB2 | `parseNumberingDatabase`：完整顺序表、编号系列与零件/装配序列计数；**逐对象编号分配、比较快照及其余字段尚未恢复** |
 | environment.db / options_*.db | DBV 与旧式容器原始读取；选项键值尚未稳定命名 |
-| DG 图纸 | 工程目录发现与状态报告；**尚未实现图纸语义解析** |
+| DG 图纸 | `parseDrawing`：9.54 表容器、链式字符串、属性/属性关联、图幅尺寸、工程 GUID 与 type-322 模型对象引用；**视图、尺寸与完整绘图图元尚未恢复** |
 | history.db | 标准 SQLite，交由 SQLite 工具读取 |
 
-文件扩展名 `.db` 并不代表统一格式，目录文件、DBV 和 SQLite 使用不同入口。`readProject` 会记录每个文件是语义已读取、仅原始读取、未读取还是失败，不能把发现文件当成解析完成。
+文件扩展名 `.db` 并不代表统一格式，目录文件、DBV 和 SQLite 使用不同入口。`readProject` 会区分 `Semantic`、`PartialSemantic`、`Raw`、`Discovered` 和 `Failed`；DG 与 DB2 当前为部分语义，不能把发现文件或读取部分字段当成解析完成。
 
 | DB1 存储版本 | 语义支持证据 |
 |---|---|
@@ -93,13 +93,31 @@ if (!tekla::readProject("/path/to/model", project, error, options)) {
 // project.model、componentLibrary、materials、bolts、boltAssemblies、shapes
 // project.files：逐文件读取层级与错误
 // project.rawCompanions：DB2、DBV 的原始数据
+// project.numbering / drawings：DB2 与 DG 的部分语义
+// project.drawingModelAssociations：用已验证 GUID 连接图纸记录和模型对象
 // project.associations：主库、配套编号库、组件库与资源的关联依据
 // project.diagnostics：部分失败、未支持或缺失信息
 ```
 
 资源优先级为模型目录、随后按顺序指定的外部目录。同名型材优先保留较高优先级来源。XML 中的项目/公司/系统搜索路径仅作为元数据保留，不会静默映射到当前计算机的路径。模型中引用 Shape 的几何实例映射仍未全部完成，读取 Shape 目录不等于所有 Shape 构件已经构形。
 
-配套文件失败默认保留主模型并报告 `ReadLevel::Failed`；设置 `strictCompanions=true` 会使已尝试读取的配套文件失败导致整个工程读取失败。该选项不把尚未实现的 DG 解码转换为已支持。
+配套文件失败默认保留主模型并报告 `ReadLevel::Failed`；设置 `strictCompanions=true` 会使已尝试读取的配套文件失败导致整个工程读取失败。`readNumbering`、`readDrawings` 可分别关闭新增读取入口。未知 DG 版本在语义入口明确失败；需要研究时可使用 raw API。
+
+## DB2 与 DG 的独立入口
+
+```cpp
+#include <tekla/Numbering.hpp>
+#include <tekla/Drawing.hpp>
+tekla::NumberingDatabase numbering;
+tekla::Drawing drawing;
+std::string error;
+tekla::parseNumberingDatabase("models/model.db2", numbering, error);
+tekla::parseDrawing("models/drawings/example.dg", drawing, error);
+```
+
+DB2 语义入口当前覆盖 7.82、8.95、9.52、9.60（包括空组件编号库）。`partCounter` / `assemblyCounter` 是保存的序列计数，不是当前构件数量，也不能单独还原某个对象的编号；其余字段和快照保留在 `raw` 中。7.82 DB2 支持不代表 7.82 DB1 已有语义支持。
+
+DG 9.54 会校验完整表目录签名，恢复根字符串（包括跨记录的标记 XML）、属性、属性链接、图幅宽高及一类模型 GUID 引用。标记 XML 当前作为文本返回。`grProjectGuid` 相符后，工程入口才用引用 GUID 连接 DB1 identity；无法匹配或有歧义的引用给出诊断。不会通过图纸文件名猜测构件，也不把这些字段称为完整图纸解析。研究记录与独立编号日志验证见 [DB2 / DG 格式证据](docs/RELATED_FORMATS.zh-CN.md)。
 
 ## 原始容器与内存预算
 
@@ -117,7 +135,7 @@ tekla::db1::parseRawDatabase("model.db2", raw, error, options);
 
 ## 可重复的公开语料回归
 
-`tests/corpus.json` 记录 282 个外部文件的固定提交 URL、大小、SHA-256 和 298 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
+`tests/corpus.json` 记录 283 个外部文件的固定提交 URL、大小、SHA-256 和 373 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
 
 ```powershell
 python -B tools/corpus.py --download `
@@ -128,7 +146,7 @@ python -B tools/corpus.py --download `
 
 Ninja/MinGW 构建的 exe 通常直接位于构建目录，不含 `Release` 子目录；Linux 使用无 `.exe` 的路径。不带 `--download` 时只验证本地文件。下载约 60 MB，完整文件清单以 manifest 为准。
 
-包含 30 份主库、30 份组件库及配套 DB2/DBV/目录。298 个用例中 4 个是 7.82 语义拒绝测试，不计入语义支持成功数。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源包括 AUTRA、BIM-Modeling、公开钢结构培训模型和研究示例，具体来源均在 manifest 中。
+包含 30 份主库、30 份组件库、60 份 DB2、7 份 DG 及配套 DBV/目录。373 个用例中 4 个是 7.82 DB1 语义拒绝测试，不计入语义支持成功数。新增一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，并核对 28 个 DG→DB1 GUID 引用。默认 CTest 另有 43 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
 
 GitHub Actions 配置 Linux C++17/20、ASan/UBSan、Windows MSVC、安装后独立消费和 Linux OCCT 构建。运行状态以对应提交的 Actions 结果为准。
 
