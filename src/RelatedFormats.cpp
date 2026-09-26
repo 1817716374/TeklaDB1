@@ -97,9 +97,12 @@ bool parseNumberingDatabase(const std::filesystem::path& path,NumberingDatabase&
         auto data=db1::detail::readPayload(path,options.maxDecodedBytes);
         db1::detail::numberingContainer(data,result.raw);
         const auto& version=result.raw.storageVersion;
-        if (version!="7.82" && version!="8.95" && version!="9.52" && version!="9.60")
+        const bool legacy = version=="7.30" || version=="7.82";
+        if (version=="7.30" && (result.raw.preamble.size()!=12 || result.raw.preamble[6]!=' '))
+            throw std::runtime_error("unsupported 7.30 numbering preamble");
+        if (!legacy && version!="8.95" && version!="9.52" && version!="9.60")
             throw std::runtime_error("unsupported numbering semantic version "+version);
-        if (version!="7.82" && result.raw.databaseGuid.empty()) throw std::runtime_error("numbering database GUID missing");
+        if (!legacy && result.raw.databaseGuid.empty()) throw std::runtime_error("numbering database GUID missing");
         std::set<std::string> keys;
         for (const auto& item:result.raw.tables)
         {
@@ -108,7 +111,7 @@ bool parseNumberingDatabase(const std::filesystem::path& path,NumberingDatabase&
                 if (!item.records.empty()) result.diagnostics.push_back("numbering table "+std::to_string(item.ordinal)+" retains raw records; semantic mapping unavailable");
                 continue;
             }
-            if (item.payloadSize!=(version=="7.82" ? 76U : 80U)) throw std::runtime_error("unsupported numbering series record size");
+            if (item.payloadSize!=(legacy ? 76U : 80U)) throw std::runtime_error("unsupported numbering series record size");
             for (const auto& record:item.records)
             {
                 const auto& row=record.payload;

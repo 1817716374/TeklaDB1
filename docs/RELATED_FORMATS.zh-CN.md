@@ -4,20 +4,24 @@
 
 ## 样本与可复验依据
 
-- 已固定的62份公开DB2包括7.82、8.95、9.52、9.60，31份主编号库和31份空组件编号库。实际编号系列出现在7.82、8.95和9.60样本中；新增Construsoft练习的8.95主DB2含12个系列。不能把空库通过视为丰富语义覆盖。
+- 已固定的64份公开DB2包括7.30、7.82、8.95、9.52、9.60，32份主编号库和32份空组件编号库。实际编号系列出现在7.30、7.82、8.95和9.60样本中；7.30教学工程含20个系列，Construsoft练习的8.95主DB2含12个系列。不能把空库通过视为丰富语义覆盖。
 - 7 份 DG 9.54 来自同一培训模型；另有 293 份 DG 7.82 来自 PSDBIM 工程。两种容器与字段布局分别校验，不能推断其他版本兼容性。
 - 培训模型来自 [letstekla 仓库固定提交](https://github.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/tree/efb24b30a722de4afc9052331e2e24b69abba6cf)。模型及 `numberinghistory.txt` 位于同一 ZIP；下载地址、文件大小及 SHA-256 见 `tests/corpus.json`。
 - [Trimble 文件说明](https://support.tekla.com/doc/tekla-structures/2023/sys_files_and_file_extensions)确认 DB2 用于编号、environment.db 用于用户属性定义；这些官方描述不提供下述二进制字段偏移。偏移来自样本分析。
 
 ## DB2 顺序表
 
-头为 `Xsteel`、字节 `0x80`、空格及 ASCII 版本。7.82 样本头后没有数据库 GUID；较新样本继续保存空格及 36 字符 GUID。空 xslib.db2 仅有文件头。
+7.30使用精确的12字节`Xsteel  7.30`头，无GUID；后续仍为带表ID、行数、尺寸、记录标签和表尾的顺序表。主库有9表，表22为76字节系列记录，字段偏移与已验证的7.82一致。组件编号库可以只有12字节头，不应误报截断。未知旧头与7.30错误系列尺寸仍拒绝。
+
+公开来源为[btscm教学工程目录](https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/)，模型元数据Tekla17.0。固定下载7份文件及SHA-256，新增10项回归。`numbering.history`和`numberingresults`中的历史最大分配号与20个系列的21个非零计数逐项一致；全部起始号为1，非1起始号另用合成输入验证读取。历史日志不能证明当前对象仍存在或编号仍有效。系列字符串保留原字节，法国环境中的编码不擅自转成UTF-8。7.30逐对象DB1编号仍待映射，工程仅聚合两份DB2，不产生确定对象/系列配对。
+
+7.82及较新版本的头为 `Xsteel`、字节 `0x80`、空格及 ASCII 版本。7.82 样本头后没有数据库 GUID；较新样本继续保存空格及 36 字符 GUID。空 xslib.db2 仅有文件头。
 
 每表依次为 little-endian `u32 tableId, count, payloadSize`，随后是 `count` 行的 `tag + payload`，最后为 `4f 61 bc 00`。因此 magic 是表尾，不是第一张表的开始。表 ID 可以超过一千万，按 `ordinal <= 1000` 扫描会漏表。新入口严格顺序读取、检查行长度/表尾/重复 ID，并保留所有表。
 
 本轮样本观察到行标签 4 和 5（7.82 的 EXCEL-1246A 编号系列）；标签原样保留，不凭低位推断删除状态。
 
-系列表 ID 为 22，7.82 的 payload 为 76 字节，其余已验证版本为 80 字节：
+系列表 ID 为 22，7.30/7.82 的 payload 为 76 字节，其余已验证版本为 80 字节：
 
 | payload 偏移 | 当前恢复 |
 |---|---|

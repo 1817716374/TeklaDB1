@@ -3663,6 +3663,48 @@
       "member": "oefening W3/xslib.idrm",
       "size": 68,
       "sha256": "b33dc9546363483f0b48cf1e6880996b6883e6ac4b95df41171fa29e54718367"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/TeklaStructuresModel.xml",
+      "size": 761,
+      "sha256": "a4584173cc458000025f4eda4161ed091c1aee16fc38f72dd4582693b80a303f",
+      "path": "btscm-pechelire/TeklaStructuresModel.xml"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelirejulV1.db1",
+      "size": 1090271,
+      "sha256": "6b06855eff3af162ec65add49d0a03576f621870bf903b8a4e9046c27387ad47",
+      "path": "btscm-pechelire/pechelirejulV1.db1"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelirejulV1.db2",
+      "size": 355,
+      "sha256": "64939cc502fe7f925ca370378aa9268437013848027d81c9c7e320849b6d4d2b",
+      "path": "btscm-pechelire/pechelirejulV1.db2"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/xslib.db1",
+      "size": 129079,
+      "sha256": "03d9bccde6a90a2d93b90f341c93f3fb4fd8bf92991b51d4f567b3c185903fb3",
+      "path": "btscm-pechelire/xslib.db1"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/xslib.db2",
+      "size": 32,
+      "sha256": "3bc0af2a5ef4dfba71347beeec16d78b461cb27b35bab8bb3f63c8cc4fb1a1b7",
+      "path": "btscm-pechelire/xslib.db2"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/numberingresults",
+      "size": 10267,
+      "sha256": "d2a9514e30e4cee69239da01b796d4c2ff4a3dd9d43586ac35a87dc7b214f85f",
+      "path": "btscm-pechelire/numberingresults"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/numbering.history",
+      "size": 681588,
+      "sha256": "06bd9ae670080ea16273edd77a2c3262fac59018d30ea420e4a1c7f629ebcea1",
+      "path": "btscm-pechelire/numbering.history"
     }
   ],
   "cases": [
@@ -12940,6 +12982,76 @@
       "path": "construsoft-wapening/oefening W3",
       "exit": 0,
       "stdout": "empty_bolt_groups=2 model_parts=21 unused_reinforcement_definitions=137 numbering_databases=2 options_databases=2"
+    },
+    {
+      "name": "btscm-pechelire/pechelirejulV1.db1:raw",
+      "mode": "raw",
+      "path": "btscm-pechelire/pechelirejulV1.db1",
+      "exit": 0,
+      "stdout": "version=7.30 tables=75 records=94280 opaque=0 bytes=5141436 fingerprint=ec6bfa4f4b6349ec"
+    },
+    {
+      "name": "btscm-pechelire/pechelirejulV1.db1:model",
+      "mode": "model",
+      "path": "btscm-pechelire/pechelirejulV1.db1",
+      "exit": 0,
+      "stdout": "version=7.30 parts=1240 operative=235 profiles=0 bolts=301 welds=52 assemblies=1132 components=35 properties=3094 parameters=0 custom=0 unhandled=0 fingerprint=998aa58616f63e34"
+    },
+    {
+      "name": "btscm-pechelire/xslib.db1:raw",
+      "mode": "raw",
+      "path": "btscm-pechelire/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.30 tables=68 records=10024 opaque=0 bytes=583834 fingerprint=3529c0cd43b887b0"
+    },
+    {
+      "name": "btscm-pechelire/xslib.db1:library",
+      "mode": "library",
+      "path": "btscm-pechelire/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.30 parts=242 operative=37 profiles=0 bolts=41 welds=14 assemblies=217 components=25 properties=568 parameters=0 custom=0 unhandled=0 fingerprint=fbebcb65be151d8c"
+    },
+    {
+      "name": "btscm-pechelire/pechelirejulV1.db2:raw",
+      "mode": "raw",
+      "path": "btscm-pechelire/pechelirejulV1.db2",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 records=20 opaque=0 bytes=1696 fingerprint=d634c9ebc0428795"
+    },
+    {
+      "name": "btscm-pechelire/pechelirejulV1.db2:numbering",
+      "mode": "numbering",
+      "path": "btscm-pechelire/pechelirejulV1.db2",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=20 guid= fingerprint=e2d39dac0e4aef34"
+    },
+    {
+      "name": "btscm-pechelire/xslib.db2:raw",
+      "mode": "raw",
+      "path": "btscm-pechelire/xslib.db2",
+      "exit": 0,
+      "stdout": "version=7.30 tables=0 records=0 opaque=0 bytes=12 fingerprint=216c2c36c656e4ec"
+    },
+    {
+      "name": "btscm-pechelire/xslib.db2:numbering",
+      "mode": "numbering",
+      "path": "btscm-pechelire/xslib.db2",
+      "exit": 0,
+      "stdout": "version=7.30 tables=0 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "btscm-pechelire:project",
+      "mode": "project",
+      "path": "btscm-pechelire",
+      "exit": 0,
+      "stdout": "version=7.30 parts=1240 operative=235 profiles=0 bolts=301 welds=52 assemblies=1132 components=35 properties=3094 parameters=0 custom=0 unhandled=0 fingerprint=998aa58616f63e34\nfiles=4 associations=3 raw=2 failed=0 drawings=0"
+    },
+    {
+      "name": "btscm-pechelire:numbering730_evidence",
+      "mode": "numbering730_evidence",
+      "path": "btscm-pechelire",
+      "exit": 0,
+      "stdout": "numbering_series=20 history_counter_checks=21 empty_libraries=1 automatic_object_series_links=0"
     }
   ]
 }

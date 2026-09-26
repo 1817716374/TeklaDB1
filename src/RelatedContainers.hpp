@@ -27,14 +27,16 @@ inline bool guidText(const std::string& text)
 inline std::size_t relatedHeader(const Bytes& data, RawDatabase& raw, bool drawing)
 {
     const char* prefix = drawing ? "Xsteel  " : "Xsteel\x80 ";
-    if (data.size()<12 || std::memcmp(data.data(),prefix,8)!=0) throw std::runtime_error("unsupported related database header");
-    std::size_t end=8;
-    while (end<data.size() && end<24 && ((data[end]>='0' && data[end]<='9') || data[end]=='.')) ++end;
+    const bool legacyNumbering = !drawing && data.size()>=12 && std::memcmp(data.data(),"Xsteel  7.30",12)==0;
+    if (data.size()<12 || (!legacyNumbering && std::memcmp(data.data(),prefix,8)!=0)) throw std::runtime_error("unsupported related database header");
+    std::size_t end=legacyNumbering ? 12 : 8;
+    while (!legacyNumbering && end<data.size() && end<24 && ((data[end]>='0' && data[end]<='9') || data[end]=='.')) ++end;
     raw.storageVersion.assign(data.begin()+8,data.begin()+static_cast<std::ptrdiff_t>(end));
     const auto dot=raw.storageVersion.find('.');
     if (dot==std::string::npos || dot==0 || dot+1==raw.storageVersion.size() || raw.storageVersion.find('.',dot+1)!=std::string::npos)
         throw std::runtime_error("invalid related database storage version");
-    if (!drawing && end<data.size() && data[end]==' ')
+    if (legacyNumbering && raw.storageVersion!="7.30") throw std::runtime_error("unsupported legacy numbering version");
+    if (!drawing && !legacyNumbering && end<data.size() && data[end]==' ')
     {
         ++end;
         if (data.size()-end<36) throw std::runtime_error("truncated numbering database GUID");

@@ -103,7 +103,9 @@ if(TEKLADB1_BUILD_TESTS)
             environment_invalid options_invalid dbv_unknown_rows dbv_limit)
         add_test(NAME related.${case} COMMAND tekla_environment_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
-    foreach(case numbering_valid numbering_truncated numbering_invalid drawing_valid drawing_cycle
+    foreach(case numbering_valid numbering_truncated numbering_invalid
+            numbering730_valid numbering730_empty numbering730_truncated numbering730_header numbering730_width numbering730_invalid
+            drawing_valid drawing_cycle
             drawing_missing_chunk drawing_duplicate drawing_missing_property drawing_signature
             drawing_nonfinite drawing_truncated drawing_limit numbering_unknown drawing_unknown)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})

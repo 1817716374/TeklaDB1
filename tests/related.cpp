@@ -164,6 +164,67 @@ int main(int argc,char** argv)
                 }
             }
         }
+        else if (mode.rfind("numbering730_",0)==0)
+        {
+            auto b=numbering("prefix/with/slash/100",true); b[6]=' '; b[10]='3'; b[11]='0';
+            const auto valid=b;
+            if (mode=="numbering730_valid")
+            {
+                save(db2,b); check(tekla::parseNumberingDatabase(db2,n,error),error);
+                check(n.raw.storageVersion=="7.30" && n.raw.databaseGuid.empty(),"legacy numbering header");
+                check(n.series.size()==1 && n.series[0].prefix=="prefix/with/slash" && n.series[0].startNumber==100 &&
+                      n.series[0].partCounter==13 && n.series[0].assemblyCounter==2 && n.series[0].additionalFields.size()==4,"legacy numbering values");
+                check(tekla::db1::parseRawDatabase(db2,raw,error,{true}),error);
+                check(raw.decompressedFileImage==b && raw.preamble.size()==12,"legacy numbering roundtrip");
+                for(unsigned tableId:{32U,48U,57U})
+                {
+                    put<unsigned>(b,12,tableId); save(db2,b);
+                    check(tekla::parseNumberingDatabase(db2,n,error),error);
+                    check(n.raw.tables[0].ordinal==tableId && n.raw.storageVersion=="7.30","table ID consumed as version/GUID separator");
+                }
+            }
+            else if (mode=="numbering730_empty")
+            {
+                b.resize(12); save(db2,b); check(tekla::parseNumberingDatabase(db2,n,error),error);
+                check(n.raw.tables.empty() && n.series.empty() && n.raw.storageVersion=="7.30","empty legacy library");
+            }
+            else if (mode=="numbering730_truncated")
+            {
+                for(std::size_t at=0;at<b.size();++at)
+                {
+                    if(at==12 || at==28)continue; // complete table boundaries are valid
+                    save(db2,Bytes(b.begin(),b.begin()+static_cast<std::ptrdiff_t>(at)));
+                    check(!tekla::parseNumberingDatabase(db2,n,error),"truncated 7.30 DB2 accepted at "+std::to_string(at));
+                    check(n.raw.tables.empty() && n.series.empty() && !error.empty(),"failed numbering output not cleared");
+                }
+            }
+            else
+            {
+                std::vector<Bytes> invalid;
+                if(mode=="numbering730_header")
+                {
+                    b[11]='1'; invalid.push_back(b); b=valid; b[6]=0x80; invalid.push_back(b);
+                    b=valid; b.insert(b.begin()+12,'0'); invalid.push_back(b);
+                }
+                else if(mode=="numbering730_width")
+                {
+                    put<unsigned>(b,36,80); b.insert(b.end()-4,4,0); invalid.push_back(b);
+                }
+                else
+                {
+                    b[40]=0; invalid.push_back(b); b=valid; b.back()=1; invalid.push_back(b);
+                    b=valid; put<unsigned>(b,32,0xffffffffU); invalid.push_back(b);
+                    b=valid; const Bytes row(b.begin()+40,b.end()-4); b.insert(b.end()-4,row.begin(),row.end());
+                    put<unsigned>(b,32,2); invalid.push_back(b);
+                    b=valid; b.push_back(1); invalid.push_back(b);
+                }
+                for(const auto& value:invalid)
+                {
+                    save(db2,value); check(!tekla::parseNumberingDatabase(db2,n,error),"invalid 7.30 DB2 accepted");
+                    check(n.raw.tables.empty() && n.series.empty() && !error.empty(),"invalid numbering output not cleared");
+                }
+            }
+        }
         else if (mode=="numbering_valid")
         {
             for (bool old:{false,true})
