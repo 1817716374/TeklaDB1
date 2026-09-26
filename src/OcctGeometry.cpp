@@ -14,6 +14,7 @@
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <Bnd_Box.hxx>
@@ -610,6 +611,60 @@ TopoDS_Shape linearSolid(const Model& model, const Part& part, std::string& mode
     return BRepPrimAPI_MakePrism(TopoDS::Face(face), vector(scale(part.axis, part.length))).Shape();
 }
 
+// PartCambering is a deformation property; the ordinary cambering UDA is
+// annotation only. Do not coerce text, non-finite values or conflicting copies.
+bool partCambering(const Part& part, double& value)
+{
+    bool found = false;
+    value = 0.0;
+    for (const auto& property : part.properties)
+    {
+        if (property.name != "PartCambering") continue;
+        if (property.kind == Property::Kind::String) return false;
+        const auto number = property.kind == Property::Kind::Double
+            ? property.doubleValue : static_cast<double>(property.integerValue);
+        if (!std::isfinite(number) || (found && number != value)) return false;
+        value = number;
+        found = true;
+    }
+    return true;
+}
+
+TopoDS_Shape camberedSolid(const Model& model, const Part& part, double camber, std::string& mode)
+{
+    const auto section = sectionFor(model, part, mode);
+    if (section.outer.size() < 3 || !std::isfinite(part.length) || part.length <= kTolerance) return {};
+    const auto magnitude = std::abs(camber), halfChord = part.length * 0.5;
+    const auto radius = (halfChord / magnitude * halfChord + magnitude) * 0.5;
+    const auto centerOffset = camber - std::copysign(radius, camber);
+    if (!std::isfinite(radius) || !std::isfinite(centerOffset)) return {};
+    // The stored value defines a circle, with its minor arc retained even when
+    // |camber| exceeds half the chord. A semicircle uses the stored sign.
+    const auto direction = centerOffset == 0.0 ? std::copysign(1.0, camber) : -std::copysign(1.0, centerOffset);
+    const auto angle = direction * 2.0 * std::atan2(halfChord, std::abs(centerOffset));
+    if (!std::isfinite(angle) || std::abs(angle) <= kTolerance) return {};
+    double sectionExtent = 0.0;
+    for (const auto& p : section.outer) sectionExtent = (std::max)(sectionExtent, std::abs(p.value[0]));
+    if (radius <= sectionExtent + kTolerance) return {}; // sweep crosses its revolution axis
+    // Tekla local Z in the verified DB1 frame is secondary, not normal.
+    const auto x = normalized(part.axis), y = scale(normalized(part.normal), -1.0), z = normalized(part.secondary);
+    if (length(x) <= kTolerance || length(y) <= kTolerance || length(z) <= kTolerance ||
+        std::abs(dot(x,y)) > 1e-5 || std::abs(dot(x,z)) > 1e-5 ||
+        length(subtract(cross(x,y),z)) > 1e-5) return {};
+    Part start = part;
+    start.axis = add(scale(x, std::cos(angle * 0.5)), scale(z, std::sin(angle * 0.5)));
+    start.normal = scale(y, -1.0);
+    start.secondary = add(scale(z, std::cos(angle * 0.5)), scale(x, -std::sin(angle * 0.5)));
+    BRepBuilderAPI_MakeFace face(wire(section.outer, start, 0.0));
+    for (const auto& hole : section.holes) face.Add(wire(hole, start, 0.0));
+    if (!face.IsDone()) return {};
+    const auto center = add(add(part.origin, scale(x, halfChord)), scale(z, centerOffset));
+    BRepPrimAPI_MakeRevol sweep(face.Face(), gp_Ax1(point(center), gp_Dir(vector(scale(y, direction)))), std::abs(angle));
+    if (!sweep.IsDone()) return {};
+    mode += "; cambered circular sweep";
+    return sweep.Shape();
+}
+
 struct ContourPathPoint
 {
     Vec3 value{};
@@ -907,6 +962,22 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
 
 TopoDS_Shape partSolid(const Model& model, const Part& part, std::string& mode)
 {
+    double camber = 0.0;
+    if (!partCambering(part, camber)) { mode = "invalid or conflicting PartCambering"; return {}; }
+    if (camber != 0.0)
+    {
+        // Applying straight-space cuts to an already curved solid is not the
+        // deformation of the machined part. Keep this missing combination explicit.
+        bool machined = false;
+        for (const auto& operation : model.booleans) machined |= operation.fatherPartId == part.id;
+        for (const auto& operation : model.fittings) machined |= operation.fatherPartId == part.id;
+        for (const auto& operation : model.cutPlanes) machined |= operation.fatherPartId == part.id;
+        for (const auto& group : model.boltGroups)
+            for (const auto& layer : group.layers) machined |= layer.partId == part.id;
+        if (machined || !part.contour.empty() || part.contourKindUnverified)
+        { mode = "unverified cambering with machining or contour"; return {}; }
+        return camberedSolid(model, part, camber, mode);
+    }
     if (part.contourKindUnverified)
     {
         mode = "unverified contour kind";
@@ -1120,7 +1191,7 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
             {
                 result.unbuiltPartIds.push_back(entry.first);
                 result.diagnostics.emplace_back("cannot construct profile " + entry.second.profile +
-                                                " for part " + std::to_string(entry.first));
+                                                " for part " + std::to_string(entry.first) + (mode.empty() ? "" : ": " + mode));
                 continue;
             }
             allPartShapes[entry.first] = std::move(shape);
@@ -1177,11 +1248,14 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
             const auto mode = constructionModes.find(partId);
             const bool nominal = mode != constructionModes.end() &&
                 (mode->second.find("nominal UPE ") != std::string::npos || mode->second.find("nominal IPE ") != std::string::npos);
+            if (mode != constructionModes.end() && mode->second.find("; cambered circular sweep") != std::string::npos && result.partShapes.count(partId))
+                result.camberedPartIds.push_back(partId);
             if (nominal && result.partShapes.count(partId)) result.nominalProfilePartIds.push_back(partId);
             if (mode != constructionModes.end() && (nominal || mode->second.find("envelope") != std::string::npos))
                 approximationModes.insert(mode->second + " for profile " + model.parts.at(partId).profile);
         }
         std::sort(result.nominalProfilePartIds.begin(), result.nominalProfilePartIds.end());
+        std::sort(result.camberedPartIds.begin(), result.camberedPartIds.end());
         for (const auto& mode : approximationModes)
             result.diagnostics.emplace_back("profile geometry approximation used: " + mode);
         for (const auto& operation : model.fittings)

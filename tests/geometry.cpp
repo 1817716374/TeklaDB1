@@ -8,6 +8,7 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
+#include <limits>
 #include "NominalSectionReference.hpp"
 
 int nominalSections()
@@ -81,10 +82,64 @@ int polybeamMiters()
     return 0;
 }
 
+int camberingGeometry()
+{
+    using namespace tekla::db1;
+    const auto pi = std::acos(-1.0);
+    for (double h : {0.0, 10.0, -10.0, 50.0, -50.0, 100.0, -100.0})
+    for (bool tube : {false,true})
+    for (bool rotated : {false,true})
+    {
+        Model m; Part p; p.id=1; p.profile=tube?"TUBE-20*2":"D20"; p.length=100;
+        p.origin={23,41,-7}; p.axis=rotated?Vec3{0,1,0}:Vec3{1,0,0};
+        p.secondary=rotated?Vec3{0,0,1}:Vec3{0,1,0};p.normal=rotated?Vec3{1,0,0}:Vec3{0,0,1};
+        Property q;q.name="PartCambering";q.kind=Property::Kind::Double;q.doubleValue=h;p.properties.push_back(q);
+        m.parts[1]=p;m.actualPartIds={1};OcctGeometryModel g;std::string error;
+        if(!buildOcctGeometry(m,g,error)||g.partShapes.size()!=1||!BRepCheck_Analyzer(g.partShapes.at(1)).IsValid())return 30;
+        if(g.camberedPartIds!=(h==0?std::vector<std::uint32_t>{}:std::vector<std::uint32_t>{1}))return 31;
+        const double a=std::abs(h), radius=h==0?0:1250/a+a/2;
+        const double center=h==0?0:h-std::copysign(radius,h);
+        const double angle=h==0?0:2*std::atan2(50.0,std::abs(center));
+        const double sag=h==0?0:(center==0?h:center-std::copysign(radius,center));
+        GProp_GProps props;BRepGProp::VolumeProperties(g.partShapes.at(1),props);
+        const double expected=pi*(tube?36:100)*(h==0?100:radius*angle);
+        if(std::abs(props.Mass()-expected)>expected*1e-8){std::cerr<<"camber volume "<<h<<" "<<props.Mass()<<" "<<expected;return 32;}
+        // Width points on both end caps and the mid-arc retain their transverse direction.
+        for(double along : {0.0,50.0,100.0})
+        for(double sectionRadius : (tube?std::vector<double>{8,10}:std::vector<double>{10}))
+        for(double sign : {-1.0,1.0})
+        {
+            Vec3 v{};for(int k=0;k<3;++k)v[k]=p.origin[k]+along*p.axis[k]+(along==50?sag:0)*p.secondary[k]+sign*sectionRadius*p.normal[k];
+            BRepExtrema_DistShapeShape d(BRepBuilderAPI_MakeVertex(gp_Pnt(v[0],v[1],v[2])).Vertex(),g.partShapes.at(1));
+            if(!d.IsDone()||d.Value()>1e-6)return 33;
+        }
+    }
+    Model m;Part p;p.id=1;p.profile="D20";p.length=100;p.axis={1,0,0};p.secondary={0,1,0};p.normal={0,0,1};m.actualPartIds={1};
+    Property q;q.name="cambering";q.kind=Property::Kind::Double;q.doubleValue=20;p.properties={q};m.parts[1]=p;
+    OcctGeometryModel g;std::string error;
+    if(!buildOcctGeometry(m,g,error)||g.partShapes.size()!=1||!g.camberedPartIds.empty())return 34;
+    for(int bad=0;bad<7;++bad)
+    {
+        m.booleans.clear();m.cutPlanes.clear();m.boltGroups.clear();p.contour.clear();p.length=100;p.properties.clear();
+        q.name="PartCambering";q.kind=Property::Kind::Double;q.doubleValue=20;p.properties={q};
+        if(bad==0)p.properties[0].doubleValue=std::numeric_limits<double>::quiet_NaN();
+        if(bad==1)p.properties[0].kind=Property::Kind::String;
+        if(bad==2){q.doubleValue=30;p.properties.push_back(q);}
+        if(bad==3){p.length=10;p.properties[0].doubleValue=5;}
+        if(bad==4){ContourPoint c;c.value={0,0,0};p.contour={c,c};p.contourIsPath=true;}
+        if(bad==5){PlaneOperation cut;cut.fatherPartId=1;m.cutPlanes.push_back(cut);}
+        if(bad==6){p.properties[0].doubleValue=std::numeric_limits<double>::infinity();}
+        m.parts[1]=p;
+        if(!buildOcctGeometry(m,g,error)||!g.partShapes.empty()||g.unbuiltPartIds!=std::vector<std::uint32_t>{1}||!g.camberedPartIds.empty())return 35+bad;
+    }
+    return 0;
+}
+
 int main(int argc,char** argv)
 {
     if(argc==2 && std::string(argv[1])=="nominal")return nominalSections();
     if(argc==2 && std::string(argv[1])=="miter")return polybeamMiters();
+    if(argc==2 && std::string(argv[1])=="camber")return camberingGeometry();
     if(argc!=1)return 2;
     tekla::db1::Model model;
     tekla::db1::Part beam;

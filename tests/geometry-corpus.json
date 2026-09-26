@@ -30,6 +30,13 @@
       "mode": "ifc_geometry",
       "exit": 0,
       "stdout": "upe_parts=25 ifc_vertices=1724 nominal_profile_parts=25"
+    },
+    {
+      "name": "btscm-ifc730-occt-cambered-solids",
+      "path": "btscm-ifc730",
+      "mode": "ifc_camber_geometry",
+      "exit": 0,
+      "stdout": "cambered_parts=6 ifc_vertices=336"
     }
   ]
 }

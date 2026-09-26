@@ -32,6 +32,8 @@ struct OcctGeometryModel
     // not verified catalog fillets. This is not a list of all geometric uncertainty
     // (for example, a cutting tool or an envelope can also be approximate).
     std::vector<std::uint32_t> nominalProfilePartIds;
+    // Built actual parts using the PartCambering circular deformation.
+    std::vector<std::uint32_t> camberedPartIds;
 };
 
 struct OcctGeometryOptions

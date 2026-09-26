@@ -182,4 +182,6 @@ ctest --test-dir build-occt --output-on-failure
 
 支持已有截面构形、部分轮廓、切割、布尔、孔和三角化，但螺栓、焊缝、曲线路径及部分型材存在简化。未知现代轮廓不再默认为板。调用者应检查 `unbuiltPartIds` 与诊断；不可将构形成功数量等同于精确度，更不可直接作为制造验收依据。可选测试用解析解检查简单梁/板体积和网格索引。
 
+起拱实体支持已有 `PartCambering` 的圆弧扫掠，并用同工程6个对象的336个独立IFC顶点验证；普通 `cambering` UDA不改变几何。起拱叠加加工/轮廓等未验证组合明确报告未构建，详见[起拱证据与边界](docs/CAMBERING.zh-CN.md)。
+
 长期多格式路线和历史记录见 [逆向路线图](docs/REVERSE_ENGINEERING_PLAN.zh-CN.md)。本项目与 Trimble Inc. 没有隶属或背书关系；不包含 Tekla SDK、软件安装包或第三方专有模型。
