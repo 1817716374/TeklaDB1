@@ -2035,7 +2035,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         const auto firstId = read<uint32_t>(value, 13);
         const auto secondId = read<uint32_t>(value, 17);
         const auto pointArrayId = read<uint32_t>(value, 21);
-        if (!model.points.count(firstId) || !model.points.count(secondId) || !contours.count(pointArrayId) ||
+        group.positionArrayId = pointArrayId;
+        if (!model.points.count(firstId) || !model.points.count(secondId) || (pointArrayId && !contours.count(pointArrayId)) ||
             !model.boltDefinitions.count(group.definitionId))
             throw std::runtime_error("broken DB1 bolt-group join");
         group.first = model.points.at(firstId).value;
@@ -2049,8 +2050,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         group.secondary = frame.secondary;
         group.normal = frame.normal;
         group.placementLength = placement->second.length;
-        for (const auto& point : contours.at(pointArrayId).points)
-            group.positions.push_back(point.value);
+        if (pointArrayId)
+            for (const auto& point : contours.at(pointArrayId).points)
+                group.positions.push_back(point.value);
+        if (group.positions.empty())
+            model.diagnostics.emplace_back("bolt group has no stored positions; geometry remains unavailable: " + std::to_string(group.id));
         group.layers = boltLayers[group.id];
         std::sort(group.layers.begin(), group.layers.end(), [](const auto& one, const auto& two) { return one.sequence < two.sequence; });
         for (const auto associationIndex : bySource[group.id])

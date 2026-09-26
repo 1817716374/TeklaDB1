@@ -304,6 +304,9 @@ struct BoltGroup
     std::vector<BoltLayer> layers;
     std::vector<uint32_t> connectedPartIds;
     std::vector<Property> properties;
+    // Modern stored reference. Zero means no saved position array; nullopt
+    // means this reference was not decoded (e.g. the legacy layout).
+    std::optional<uint32_t> positionArrayId;
 };
 
 struct WeldDefinition

@@ -4,7 +4,7 @@
 
 ## 样本与可复验依据
 
-- 已固定的 60 份公开 DB2 包括 7.82、8.95、9.52、9.60，30 份主编号库和 30 份空组件编号库。实际编号系列出现在 7.82 和 9.60 样本中，不能把空库通过视为丰富语义覆盖。
+- 已固定的62份公开DB2包括7.82、8.95、9.52、9.60，31份主编号库和31份空组件编号库。实际编号系列出现在7.82、8.95和9.60样本中；新增Construsoft练习的8.95主DB2含12个系列。不能把空库通过视为丰富语义覆盖。
 - 7 份 DG 9.54 来自同一培训模型；另有 293 份 DG 7.82 来自 PSDBIM 工程。两种容器与字段布局分别校验，不能推断其他版本兼容性。
 - 培训模型来自 [letstekla 仓库固定提交](https://github.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/tree/efb24b30a722de4afc9052331e2e24b69abba6cf)。模型及 `numberinghistory.txt` 位于同一 ZIP；下载地址、文件大小及 SHA-256 见 `tests/corpus.json`。
 - [Trimble 文件说明](https://support.tekla.com/doc/tekla-structures/2023/sys_files_and_file_extensions)确认 DB2 用于编号、environment.db 用于用户属性定义；这些官方描述不提供下述二进制字段偏移。偏移来自样本分析。
@@ -106,7 +106,7 @@
 
 ## DBV 环境与选项
 
-30 份 environment.db 覆盖 9 表与 15 表签名；60 份 options_model.db/options_drawings.db 共享 9 表签名。具名容器分别为 Environment、EnvModelOptions、EnvDrawingOptions；6 份早期 DBV 无名称。名称长度不是版本。语义入口核对容器头、全部字段描述符和记录尺寸，未知布局仍可尝试原始接口。
+31 份 environment.db 覆盖 9 表与 15 表签名；62 份 options_model.db/options_drawings.db 共享 9 表签名。具名容器分别为 Environment、EnvModelOptions、EnvDrawingOptions；6 份早期 DBV 无名称。名称长度不是版本。语义入口核对容器头、全部字段描述符和记录尺寸，未知布局仍可尝试原始接口。
 
 DBV 表沿用 `66 c0 ce db` 节头，记录为 `tag + payload + 8 字节 allocator`，本轮全部表以单字节零终止，包括最后一表。真实记录标签存在 1、4；兼容原始层已有的 12。此前只接受 4/12 导致部分非空表成为 opaque，本轮修复并更新 90 个 raw 回归基线；完整文件字节指纹保持不变。标签不解释为删除状态。
 

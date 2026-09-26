@@ -247,6 +247,7 @@ std::vector<Table> componentLibrary(bool older895)
 
 #include "ObjectNumberingRegression.hpp"
 #include "ReinforcementRegression.hpp"
+#include "BoltPositionRegression.hpp"
 #include "LegacyNumberingRegression.hpp"
 
 int main(int argc, char** argv)
@@ -262,6 +263,7 @@ int main(int argc, char** argv)
         if (name.rfind("legacy_number_",0)==0) legacyNumberingRegression(path,name);
         else if (name.rfind("object_number_",0)==0) objectNumberingRegression(path,name);
         else if (name.rfind("reinforcement_",0)==0) reinforcementRegression(path,name);
+        else if (name.rfind("bolt_position_",0)==0) boltPositionRegression(path,name);
         else if (name.rfind("inline_position_",0)==0)
         {
             const bool library=name!="inline_position_main";

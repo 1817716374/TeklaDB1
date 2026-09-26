@@ -6,6 +6,17 @@
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
       "size": 2603754,
       "sha256": "be3ffb0b7f64e4c12f3ed3c604b679443497fe2af5cc433275c80b15c33ee6e5"
+    },
+    "construsoft-wapening": {
+      "url": "https://dl.construsoft.com/files/nl/Wapening.zip",
+      "size": 495690,
+      "sha256": "b7ee943ac0026a08794d6732a5f503b3e856f3357b19d18dbfc7630ca8d88185"
+    },
+    "construsoft-w3": {
+      "archive": "construsoft-wapening",
+      "member": "oefening W3.zip",
+      "size": 295967,
+      "sha256": "1252c879bcba4688735f38233b36eb8ace8f21b120175f2c842476958564bf43"
     }
   },
   "files": [
@@ -3554,6 +3565,104 @@
       "url": "https://raw.githubusercontent.com/MohamedHasan94/AUTRA/8b96f8b30a0b132ea22fe4d19c96842c9b317063/TeklaAPI/AUTRATekla.cs",
       "size": 1398,
       "sha256": "cbc51bc1d1253224b8132563298f5e45eeb53a4faac3f0510bb8189b56c974e9"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/ComponentCatalog.xml",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/ComponentCatalog.xml",
+      "size": 501,
+      "sha256": "0e8c1543555aa6d4ab03928d8cecb62397d6dc1485eda1e66621e22621791a77"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/db.idrm",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/db.idrm",
+      "size": 68,
+      "sha256": "570ce9b141fbb6e70a54d985e88453742fa5d59fff0924177b28529ca22e645a"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/environment.db",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/environment.db",
+      "size": 56827,
+      "sha256": "e6801a69dd599173c7781c15936de8155ec5de0d9346dd12350764da2c7fb552"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/history.db",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/history.db",
+      "size": 122880,
+      "sha256": "448bed937f67618446411dcb4e5d5bc7674f3021149df91b3c0d9dd7c08da787"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/oefening W3.db1",
+      "size": 88823,
+      "sha256": "aadf0bbe81a48fbf8af9f0062b068c4d91a3605d26030c3db5d5ec0e94a1824f"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/oefening W3.db2",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/oefening W3.db2",
+      "size": 291,
+      "sha256": "bd36aacad13756b35432290af27dbb466ca7a00ea08f01f0b3b0bb8debe963c7"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/options.ini",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/options.ini",
+      "size": 22,
+      "sha256": "eaa661c017dd1d801201a1c5a31db6ad616443b79a24d803059bc711e468acfa"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/options_drawings.db",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/options_drawings.db",
+      "size": 15536,
+      "sha256": "85a72140d3deb0b8dea4c2b25bc7e6f640f98d72135cf1c816cd2d3367907623"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/options_model.db",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/options_model.db",
+      "size": 29296,
+      "sha256": "f57109ecc73ef2f9891560c35dbd0329cd3004cab9e02e1de86cdecf065b9532"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/TeklaStructuresModel.xml",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/TeklaStructuresModel.xml",
+      "size": 1025,
+      "sha256": "9d4ca06b2e7d10ac5707cc7ff6c06886026f935c3e47b4eb4c538cfa424be85f"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/xsdb.xs",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/xsdb.xs",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/xslib.db1",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/xslib.db1",
+      "size": 62413,
+      "sha256": "a5a95466c918ea9c95851c482f5e81bd736a035e1e2feda048fcdb6788d580af"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/xslib.db2",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/xslib.db2",
+      "size": 67,
+      "sha256": "480d43dfdc2540e29404e09fdfb7e4b71ef7dc802e5ef8b87cd056d93c67d69e"
+    },
+    {
+      "path": "construsoft-wapening/oefening W3/xslib.idrm",
+      "archive": "construsoft-w3",
+      "member": "oefening W3/xslib.idrm",
+      "size": 68,
+      "sha256": "b33dc9546363483f0b48cf1e6880996b6883e6ac4b95df41171fa29e54718367"
     }
   ],
   "cases": [
@@ -12663,6 +12772,174 @@
       "path": "steel-detailing/xslib.db1",
       "exit": 0,
       "stdout": "named_fields=64 bending_radii=16 bar_count_parameters=13 target_spacing_parameters=3"
+    },
+    {
+      "name": "raw:construsoft-wapening/oefening W3/environment.db",
+      "mode": "raw",
+      "path": "construsoft-wapening/oefening W3/environment.db",
+      "exit": 0,
+      "stdout": "version=DBV tables=15 records=5651 opaque=0 bytes=232652 fingerprint=5ab4adc0bd59ff13"
+    },
+    {
+      "name": "environment:construsoft-wapening/oefening W3/environment.db",
+      "mode": "environment",
+      "path": "construsoft-wapening/oefening W3/environment.db",
+      "exit": 0,
+      "stdout": "classes=47 attributes=594 metadata=28 links=4510 choices=472 fingerprint=51cc1957ddfb5b2b"
+    },
+    {
+      "name": "raw:construsoft-wapening/oefening W3/oefening W3.db1",
+      "mode": "raw",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "exit": 0,
+      "stdout": "version=8.95 tables=326 records=4684 opaque=1 bytes=379605 fingerprint=59455c3663837ef8"
+    },
+    {
+      "name": "model:construsoft-wapening/oefening W3/oefening W3.db1",
+      "mode": "model",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "exit": 0,
+      "stdout": "version=8.95 parts=21 operative=8 profiles=0 bolts=2 welds=0 assemblies=19 components=5 properties=73 parameters=0 custom=0 unhandled=0 fingerprint=161bd1bb7c3629a8"
+    },
+    {
+      "name": "ownership_model:construsoft-wapening/oefening W3/oefening W3.db1",
+      "mode": "ownership_model",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=147 classes=51 parts=29 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=2 scopes=0 other_parameters=0 other_formulas=0 fingerprint=bcc7ffcec6867500"
+    },
+    {
+      "name": "position_model:construsoft-wapening/oefening W3/oefening W3.db1",
+      "mode": "position_model",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=8 linked_parts=29 fingerprint=dd218686eca21893"
+    },
+    {
+      "name": "object_number_model:construsoft-wapening/oefening W3/oefening W3.db1",
+      "mode": "object_number_model",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "exit": 0,
+      "stdout": "version=8.95 records=39 derived=30 references=147 linked=48 unverified=0 null=99 fingerprint=de5e90a96b3c0c2"
+    },
+    {
+      "name": "reinforcement_model:construsoft-wapening/oefening W3/oefening W3.db1",
+      "mode": "reinforcement_model",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=137 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=8fe683779955ef22"
+    },
+    {
+      "name": "raw:construsoft-wapening/oefening W3/oefening W3.db2",
+      "mode": "raw",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db2",
+      "exit": 0,
+      "stdout": "version=8.95 tables=10 records=12 opaque=0 bytes=1181 fingerprint=ea7b951962ae3115"
+    },
+    {
+      "name": "numbering:construsoft-wapening/oefening W3/oefening W3.db2",
+      "mode": "numbering",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db2",
+      "exit": 0,
+      "stdout": "version=8.95 tables=10 series=12 guid=4b9a4cca-0000-0d96-3132-363834303533 fingerprint=247599cefb522bc3"
+    },
+    {
+      "name": "raw:construsoft-wapening/oefening W3/options_drawings.db",
+      "mode": "raw",
+      "path": "construsoft-wapening/oefening W3/options_drawings.db",
+      "exit": 0,
+      "stdout": "version=DBV tables=9 records=462 opaque=0 bytes=320104 fingerprint=9b6932d6b9a30854"
+    },
+    {
+      "name": "options:construsoft-wapening/oefening W3/options_drawings.db",
+      "mode": "options",
+      "path": "construsoft-wapening/oefening W3/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=462 bool=188 int=75 real=66 string=133 differing=116 fingerprint=5a3b00e5f0da1118"
+    },
+    {
+      "name": "raw:construsoft-wapening/oefening W3/options_model.db",
+      "mode": "raw",
+      "path": "construsoft-wapening/oefening W3/options_model.db",
+      "exit": 0,
+      "stdout": "version=DBV tables=9 records=1047 opaque=0 bytes=452429 fingerprint=2a7699882d7e3398"
+    },
+    {
+      "name": "options:construsoft-wapening/oefening W3/options_model.db",
+      "mode": "options",
+      "path": "construsoft-wapening/oefening W3/options_model.db",
+      "exit": 0,
+      "stdout": "options=1047 bool=247 int=128 real=508 string=164 differing=234 fingerprint=ddbc34884b749b5f"
+    },
+    {
+      "name": "raw:construsoft-wapening/oefening W3/xslib.db1",
+      "mode": "raw",
+      "path": "construsoft-wapening/oefening W3/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 tables=290 records=4109 opaque=1 bytes=238853 fingerprint=b27757aae68a9324"
+    },
+    {
+      "name": "library:construsoft-wapening/oefening W3/xslib.db1",
+      "mode": "library",
+      "path": "construsoft-wapening/oefening W3/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 parts=22 operative=16 profiles=0 bolts=1 welds=2 assemblies=20 components=6 properties=220 parameters=118 custom=13 unhandled=0 fingerprint=9dbad13e789783b7"
+    },
+    {
+      "name": "ownership_library:construsoft-wapening/oefening W3/xslib.db1",
+      "mode": "ownership_library",
+      "path": "construsoft-wapening/oefening W3/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=564 classes=24 parts=38 children=495 owned_parameters=118 distances=91 formulas=165 bound=182 references=352 custom_references=34 scopes=15 other_parameters=0 other_formulas=0 fingerprint=2bfdf0b6facdf604"
+    },
+    {
+      "name": "position_library:construsoft-wapening/oefening W3/xslib.db1",
+      "mode": "position_library",
+      "path": "construsoft-wapening/oefening W3/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=5 linked_parts=38 fingerprint=8032551fc0a03ae2"
+    },
+    {
+      "name": "object_number_library:construsoft-wapening/oefening W3/xslib.db1",
+      "mode": "object_number_library",
+      "path": "construsoft-wapening/oefening W3/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 records=20 derived=0 references=564 linked=58 unverified=0 null=506 fingerprint=8c798e6568707edc"
+    },
+    {
+      "name": "reinforcement_library:construsoft-wapening/oefening W3/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "construsoft-wapening/oefening W3/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "raw:construsoft-wapening/oefening W3/xslib.db2",
+      "mode": "raw",
+      "path": "construsoft-wapening/oefening W3/xslib.db2",
+      "exit": 0,
+      "stdout": "version=8.95 tables=0 records=0 opaque=0 bytes=49 fingerprint=6c9248c6710f234f"
+    },
+    {
+      "name": "numbering:construsoft-wapening/oefening W3/xslib.db2",
+      "mode": "numbering",
+      "path": "construsoft-wapening/oefening W3/xslib.db2",
+      "exit": 0,
+      "stdout": "version=8.95 tables=0 series=0 guid=4b9a4cca-0000-0d96-3132-363834303533 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "project:construsoft-wapening/oefening W3",
+      "mode": "project",
+      "path": "construsoft-wapening/oefening W3",
+      "exit": 0,
+      "stdout": "version=8.95 parts=21 operative=8 profiles=0 bolts=2 welds=0 assemblies=19 components=5 properties=73 parameters=0 custom=0 unhandled=0 fingerprint=161bd1bb7c3629a8\nfiles=8 associations=6 raw=5 failed=0 drawings=0"
+    },
+    {
+      "name": "empty_bolt_evidence:construsoft-wapening/oefening W3",
+      "mode": "empty_bolt_evidence",
+      "path": "construsoft-wapening/oefening W3",
+      "exit": 0,
+      "stdout": "empty_bolt_groups=2 model_parts=21 unused_reinforcement_definitions=137 numbering_databases=2 options_databases=2"
     }
   ]
 }

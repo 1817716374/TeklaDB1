@@ -147,6 +147,8 @@ if(TEKLADB1_BUILD_TESTS)
             reinforcement_array_duplicate reinforcement_nonfinite reinforcement_coordinate_count reinforcement_string
             reinforcement_fields reinforcement_width reinforcement_array_fields
             reinforcement_shared reinforcement_budget reinforcement_budget_override reinforcement_duplicate_placement
+            bolt_position_null bolt_position_library bolt_position_present bolt_position_missing
+            bolt_position_point bolt_position_definition bolt_position_placement bolt_position_empty_array
             legacy_number_main legacy_number_library legacy_number_fields legacy_number_width legacy_number_link_fields
             legacy_number_link_width legacy_number_duplicate legacy_number_collision legacy_number_duplicate_link
             legacy_number_missing_identity legacy_number_missing_target legacy_number_zero legacy_number_special

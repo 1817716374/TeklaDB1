@@ -25,6 +25,9 @@ jobs:
         if: matrix.standard == 17
         with:
           python-version: '3.12'
+      - name: Pinned archive extraction tests
+        if: matrix.standard == 17
+        run: python -B tools/test_corpus.py "$RUNNER_TEMP/tekla-archive-tests"
       - name: Pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json

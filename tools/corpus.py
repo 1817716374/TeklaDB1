@@ -39,7 +39,9 @@ def fetch(spec, destination):
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_name(destination.name + ".partial")
     try:
-        with urllib.request.urlopen(spec["url"], timeout=60) as response, temporary.open("wb") as out:
+        request = urllib.request.Request(spec["url"], headers={
+            "User-Agent": "TeklaFormats-corpus/1.0 (+https://github.com/1817716374/TeklaDB1)"})
+        with urllib.request.urlopen(request, timeout=60) as response, temporary.open("wb") as out:
             total = 0
             while chunk := response.read(1024 * 1024):
                 total += len(chunk)
@@ -51,6 +53,41 @@ def fetch(spec, destination):
         os.replace(temporary, destination)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def extract_member(spec, archive_path, destination):
+    with zipfile.ZipFile(archive_path) as z:
+        matches = [i for i in z.infolist() if i.filename == spec["member"]]
+        if len(matches) != 1:
+            raise ValueError("missing or ambiguous archive member")
+        info = matches[0]
+        if info.is_dir() or info.file_size != spec["size"]:
+            raise ValueError("archive member exceeds pinned byte count")
+        with z.open(info) as source:
+            content = source.read(spec["size"] + 1)
+    if len(content) != spec["size"] or hashlib.sha256(content).hexdigest() != spec["sha256"]:
+        raise ValueError("archive member hash/size mismatch")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(content)
+
+
+def materialize(spec, destination, archives, data, visiting=None):
+    if verify(destination, spec):
+        return
+    if "archive" not in spec:
+        fetch(spec, destination)
+        return
+    visiting = set() if visiting is None else visiting
+    name = spec["archive"]
+    if name in visiting or name not in archives:
+        raise ValueError("cyclic or missing pinned archive")
+    archive_path = safe_path(data, "_downloads/" + name + ".zip")
+    visiting.add(name)
+    try:
+        materialize(archives[name], archive_path, archives, data, visiting)
+        extract_member(spec, archive_path, destination)
+    finally:
+        visiting.remove(name)
 
 
 def main():
@@ -69,21 +106,7 @@ def main():
         if not verify(path, spec):
             if not args.download:
                 raise ValueError(f"missing or changed corpus file: {path}; use --download")
-            if "archive" in spec:
-                archive = archives[spec["archive"]]
-                archive_path = safe_path(data, "_downloads/" + spec["archive"] + ".zip")
-                fetch(archive, archive_path)
-                with zipfile.ZipFile(archive_path) as z:
-                    info = z.getinfo(spec["member"])
-                    if info.file_size != spec["size"]:
-                        raise ValueError("archive member exceeds pinned byte count")
-                    content = z.read(info)
-                if hashlib.sha256(content).hexdigest() != spec["sha256"]:
-                    raise ValueError("archive member hash mismatch")
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_bytes(content)
-            else:
-                fetch(spec, path)
+            materialize(spec, path, archives, data)
     failures = 0
     results = []
     for case in manifest["cases"]:

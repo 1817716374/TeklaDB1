@@ -88,6 +88,27 @@ int run(const std::string& mode, const std::filesystem::path& path)
     {
         std::string error;
         if (mode=="legacy_number_evidence") validateLegacyNumberEvidence(path);
+        else if (mode=="empty_bolt_evidence")
+        {
+            tekla::Project project;
+            if(!tekla::readProject(path,project,error))throw std::runtime_error(error);
+            const auto& m=project.model;
+            if(m.boltGroups.size()!=2 || m.actualPartIds.size()!=21 || m.reinforcementDefinitions.size()!=137 || !m.reinforcements.empty())
+                throw std::runtime_error("training model coverage changed");
+            std::vector<std::uint32_t> ids;
+            for(const auto& b:m.boltGroups)
+            {
+                if(b.positionArrayId!=0 || !b.positions.empty() || b.definitionId!=453966 || m.boltDefinitions.at(b.definitionId).count!=0)
+                    throw std::runtime_error("empty bolt position/reference evidence changed");
+                if(!m.identities.count(b.id) || b.connectedPartIds.empty())throw std::runtime_error("empty bolt object/connection lost");
+                ids.push_back(b.id);
+            }
+            std::sort(ids.begin(),ids.end());
+            if(ids!=std::vector<std::uint32_t>{436963,442032})throw std::runtime_error("empty bolt identities changed");
+            if(!project.environment || project.optionsDatabases.size()!=2 || project.numbering.size()!=2)
+                throw std::runtime_error("training companion databases missing");
+            std::cout<<"empty_bolt_groups=2 model_parts=21 unused_reinforcement_definitions=137 numbering_databases=2 options_databases=2\n";
+        }
         else if (mode=="object_number_evidence") validateObjectNumberEvidence(path);
         else if (mode=="reinforcement_evidence") validateReinforcementEvidence(path);
         else if (mode=="reinforcement_model" || mode=="reinforcement_library")

@@ -25,6 +25,8 @@ struct OcctGeometryModel
     // They remain visible to callers instead of being silently discarded.
     std::vector<std::uint32_t> unbuiltPartIds;
     std::vector<std::string> diagnostics;
+    // No empty compounds or invented placements are reported as built bolts.
+    std::vector<std::uint32_t> unbuiltBoltGroupIds;
 };
 
 struct OcctGeometryOptions

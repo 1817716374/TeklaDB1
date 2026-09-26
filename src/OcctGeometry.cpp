@@ -1156,8 +1156,13 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
             if (options.progress)
                 options.progress("bolts", group.id, completed, model.boltGroups.size());
             const auto definition = model.boltDefinitions.find(group.definitionId);
-            if (definition == model.boltDefinitions.end())
+            if (definition == model.boltDefinitions.end() || group.positions.empty())
+            {
+                result.unbuiltBoltGroupIds.push_back(group.id);
+                result.diagnostics.emplace_back("cannot construct bolt group with missing definition or stored positions: " + std::to_string(group.id));
+                ++completed;
                 continue;
+            }
             const auto placements = boltPlacements(group);
             std::vector<TopoDS_Shape> bolts;
             const auto radius = (std::max)(1.0, static_cast<double>(definition->second.diameter) * 0.5);
