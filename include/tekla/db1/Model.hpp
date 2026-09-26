@@ -33,6 +33,15 @@ struct Identity
     uint32_t flags = 0;
     uint8_t rowTag = 0;
     std::string guid;
+    // 8.95: reference to IdentityClass, not an owner ID.
+    uint32_t classReferenceId = 0;
+};
+
+struct IdentityClass
+{
+    uint32_t id = 0;
+    uint32_t recordKind = 0;
+    std::array<uint32_t, 5> rawFields{};
 };
 
 struct Point
@@ -126,6 +135,9 @@ struct Part
     bool contourKindUnverified = false;
     std::vector<ContourPoint> contour;
     std::vector<Property> properties;
+    // Non-7.82 modern part payload offset 8. Its 52-byte record is available
+    // through parseRawDatabase; placement/flag semantics remain unverified.
+    uint32_t auxiliaryReferenceId = 0;
 };
 
 struct PlaneOperation
@@ -279,9 +291,11 @@ struct CustomComponentDefinition
     std::string description;
     std::vector<uint32_t> distanceParameterIds;
     std::vector<uint32_t> formulaBindingIds;
+    // Type-4 association targets can be points or other objects, not a line.
+    std::vector<uint32_t> referenceObjectIds;
 };
 
-// 7.82 component distance variables. Values and flags retain their stored form;
+// Component distance variables in 7.82 and verified modern layouts. Values and flags retain their stored form;
 // secondaryStoredValue is not established as a default or an effective value.
 struct DistanceParameter
 {
@@ -315,6 +329,14 @@ struct FormulaBinding
     // Non-target references only. An expression can also read its own target;
     // these IDs do not by themselves establish evaluation order or acyclicity.
     std::vector<uint32_t> inputObjectIds;
+};
+
+// Variables can belong to other identity objects as well as custom components.
+struct VariableOwnership
+{
+    std::vector<uint32_t> parameterIds;
+    std::vector<uint32_t> distanceParameterIds;
+    std::vector<uint32_t> formulaBindingIds;
 };
 
 struct ModelMetadata
@@ -369,5 +391,8 @@ struct Model
     std::unordered_map<uint32_t, DistanceParameter> distanceParameters;
     std::unordered_map<uint32_t, FormulaBinding> formulaBindings;
     std::unordered_map<uint32_t, std::vector<uint32_t>> formulaBindingIdsByTarget;
+    std::unordered_map<uint32_t, IdentityClass> identityClasses;
+    std::unordered_map<uint32_t, VariableOwnership> variablesByOwner;
+    std::unordered_map<uint32_t, std::vector<uint32_t>> customComponentReferences;
 };
 }

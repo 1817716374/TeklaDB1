@@ -972,6 +972,10 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const bool older895 = schema895 || library895;
     const bool olderSchema = older782 || older844 || older895;
     const bool library = componentLibrary;
+    const bool componentVariables = library && !older844;
+    const bool verifiedPartOwnership = !older782 && !older844;
+    const std::size_t identityClassOrdinal = library ? 279 : 315;
+    const std::size_t partAuxiliaryOrdinal = library ? 215 : 245;
     const std::size_t pointOrdinal = library ? 40 : 61;
     const std::size_t placementOrdinal = library ? 43 : 64;
     const std::size_t frameOrdinal = library ? 44 : 65;
@@ -1014,13 +1018,27 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     if (boltLayerOrdinal != noTable) required.emplace_back(boltLayerOrdinal, 48U);
     if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
+    if (older895) required.emplace_back(identityClassOrdinal, 28U);
+    if (verifiedPartOwnership) required.emplace_back(partAuxiliaryOrdinal, 52U);
+    if (componentVariables)
+    {
+        required.emplace_back(68, 76U);
+        required.emplace_back(147, 64U); required.emplace_back(156, 97U);
+        if (!older782) required.emplace_back(226, 36U);
+    }
     if (library782)
     {
-        required.emplace_back(68, 76U); required.emplace_back(125, 32U);
-        required.emplace_back(147, 64U); required.emplace_back(156, 97U);
+        required.emplace_back(125, 32U);
     }
     for (const auto& spec : required)
         requireTable(all, spec.first, spec.second);
+    if (older895) requireFields(data, all, identityClassOrdinal, 8, {0,1,6,7});
+    if (verifiedPartOwnership) requireFields(data, all, partAuxiliaryOrdinal, 14, {0,1});
+    if (componentVariables && !older782)
+    {
+        requireFields(data, all, 147, 14, {0,1,2,3,12,13});
+        requireFields(data, all, 156, 6, {0,1,2,4});
+    }
     if (older782)
     {
         // Both independent 7.82 models and their libraries share exact signatures.
@@ -1094,7 +1112,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         insertUnique(stringChunks, read<uint32_t>(value, 1), StringChunk{read<uint32_t>(value, 5), fixedString(value, 17, 28)}, "string chunk");
     }
     std::unordered_map<uint32_t, std::string> strings;
-    const auto resolveString = [&](uint32_t first) {
+    const auto resolveString = [&](uint32_t first, bool strict = false) {
         std::string result;
         std::unordered_set<uint32_t> visited;
         auto current = first;
@@ -1102,14 +1120,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         {
             if (!visited.insert(current).second)
             {
-                if (older782) throw std::runtime_error("cycle in DB1 chained string at " + std::to_string(current));
+                if (older782 || strict) throw std::runtime_error("cycle in DB1 chained string at " + std::to_string(current));
                 model.diagnostics.push_back("cycle in DB1 chained string at " + std::to_string(current));
                 break;
             }
             const auto found = stringChunks.find(current);
             if (found == stringChunks.end())
             {
-                if (older782) throw std::runtime_error("missing DB1 chained string chunk " + std::to_string(current));
+                if (older782 || strict) throw std::runtime_error("missing DB1 chained string chunk " + std::to_string(current));
                 model.diagnostics.push_back("missing DB1 chained string chunk " + std::to_string(current));
                 break;
             }
@@ -1143,14 +1161,31 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         frame.id = read<uint32_t>(value, 49);
         insertUnique(model.frames, frame.id, frame, "frame");
     }
+    if (older895)
+        for (std::size_t index = 0; index < all[identityClassOrdinal].rowCount; ++index)
+        {
+            const auto* value = row(data, all, identityClassOrdinal, index);
+            IdentityClass identityClass;
+            identityClass.id = read<uint32_t>(value, 1);
+            identityClass.recordKind = read<uint32_t>(value, 5);
+            for (std::size_t i = 0; i < identityClass.rawFields.size(); ++i)
+                identityClass.rawFields[i] = read<uint32_t>(value, 9 + i * 4);
+            insertUnique(model.identityClasses, identityClass.id, identityClass, "identity class");
+        }
     for (std::size_t index = 0; index < all[identityOrdinal].rowCount; ++index)
     {
         const auto* value = row(data, all, identityOrdinal, index);
         Identity identity;
         identity.rowTag = value[0];
         identity.id = read<uint32_t>(value, 1);
-        identity.ownerId = read<uint32_t>(value, older782 ? 17 : 5);
+        identity.ownerId = read<uint32_t>(value, older782 ? 17 : older895 ? 9 : 5);
         identity.contextId = read<uint32_t>(value, 9);
+        if (older895)
+        {
+            identity.classReferenceId = read<uint32_t>(value, 5);
+            if (!model.identityClasses.count(identity.classReferenceId))
+                throw std::runtime_error("missing identity class " + std::to_string(identity.classReferenceId));
+        }
         if (older782) identity.flags = read<uint32_t>(value, 21); // legacy assembly reference
         if (older782 || older844)
             identity.guid = fixedString(value, 25, 39);
@@ -1164,6 +1199,10 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
         insertUnique(model.identities, identity.id, identity, "identity");
     }
+    if (older895)
+        for (const auto& entry : model.identities)
+            if (entry.second.ownerId && !model.identities.count(entry.second.ownerId))
+                throw std::runtime_error("missing identity owner " + std::to_string(entry.second.ownerId));
 
     if (library && all.size() > 68 && all[68].valid && all[68].payloadSize == 76)
     {
@@ -1177,12 +1216,12 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             parameter.name = fixedString(value, 5, 31);
             parameter.label = fixedString(value, 36, 31);
             const auto expressionId = read<uint32_t>(value, 69);
-            if (older782 && expressionId && !stringChunks.count(expressionId))
+            if (componentVariables && expressionId && !stringChunks.count(expressionId))
                 throw std::runtime_error("missing parameter expression string " + std::to_string(expressionId));
-            parameter.expression = strings[expressionId];
+            parameter.expression = componentVariables ? resolveString(expressionId, true) : strings[expressionId];
             parameter.valueType = read<uint32_t>(value, 73);
             const auto identity = model.identities.find(parameter.id);
-            if (older782 && identity == model.identities.end())
+            if (componentVariables && identity == model.identities.end())
                 throw std::runtime_error("missing parameter identity " + std::to_string(parameter.id));
             if (identity != model.identities.end())
             {
@@ -1204,8 +1243,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     std::unordered_map<uint32_t, std::vector<uint32_t>> parametersByOwner;
     parametersByOwner.reserve(model.parameterDefinitions.size() / 4 + 1);
     for (const auto& parameter : model.parameterDefinitions)
-        if (parameter.second.ownerId)
-            parametersByOwner[parameter.second.ownerId].push_back(parameter.first);
+        parametersByOwner[parameter.second.ownerId].push_back(parameter.first);
     for (auto& entry : parametersByOwner)
         std::sort(entry.second.begin(), entry.second.end());
 
@@ -1227,7 +1265,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
 
     std::unordered_map<uint32_t, std::vector<uint32_t>> distancesByOwner, formulasByOwner;
-    if (library782)
+    if (componentVariables)
     {
         const auto variableIdentity = [&](uint32_t id) -> const Identity& {
             const auto found = model.identities.find(id);
@@ -1240,7 +1278,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         const auto variableString = [&](uint32_t id) {
             if (id && !stringChunks.count(id))
                 throw std::runtime_error("missing component variable string " + std::to_string(id));
-            return id ? strings.at(id) : std::string{};
+            return resolveString(id, true);
         };
         for (std::size_t index = 0; index < all[147].rowCount; ++index)
         {
@@ -1325,6 +1363,10 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             if (found != model.formulaBindingIdsByTarget.end()) entry.second.formulaBindingIds = found->second;
         }
     }
+
+    for (const auto& entry : parametersByOwner) model.variablesByOwner[entry.first].parameterIds = entry.second;
+    for (const auto& entry : distancesByOwner) model.variablesByOwner[entry.first].distanceParameterIds = entry.second;
+    for (const auto& entry : formulasByOwner) model.variablesByOwner[entry.first].formulaBindingIds = entry.second;
 
     if (olderSchema)
     {
@@ -1441,6 +1483,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         placements[id] = placement;
     }
 
+    std::unordered_set<uint32_t> partAuxiliaryIds;
+    if (verifiedPartOwnership)
+        for (std::size_t index = 0; index < all[partAuxiliaryOrdinal].rowCount; ++index)
+        {
+            const auto id = read<uint32_t>(row(data, all, partAuxiliaryOrdinal, index), 1);
+            if (!partAuxiliaryIds.insert(id).second)
+                throw std::runtime_error("duplicate part auxiliary record " + std::to_string(id));
+        }
     for (std::size_t index = 0; index < all[partOrdinal].rowCount; ++index)
     {
         const auto* value = row(data, all, partOrdinal, index);
@@ -1448,6 +1498,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         part.id = read<uint32_t>(value, 1);
         part.definitionId = read<uint32_t>(value, 5);
         part.ownerId = older782 ? 0 : read<uint32_t>(value, 9);
+        part.auxiliaryReferenceId = older782 ? 0 : read<uint32_t>(value, 9);
+        if (verifiedPartOwnership && part.auxiliaryReferenceId && !partAuxiliaryIds.count(part.auxiliaryReferenceId))
+            throw std::runtime_error("missing part auxiliary reference " + std::to_string(part.auxiliaryReferenceId));
         part.startPointId = read<uint32_t>(value, older782 ? 9 : 13);
         part.endPointId = read<uint32_t>(value, older782 ? 13 : 17);
         part.geometryReferenceId = read<uint32_t>(value, older782 ? 17 : 21);
@@ -1465,6 +1518,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             identity->second.type = definitionTypes.at(part.definitionId);
             part.ownerId = identity->second.ownerId;
         }
+        if (verifiedPartOwnership) part.ownerId = identity->second.ownerId;
         part.internalType = identity->second.type;
         part.contextId = identity->second.contextId;
         part.guid = identity->second.guid;
@@ -1823,6 +1877,19 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         model.components.push_back(std::move(component));
     }
 
+    if (!older844)
+    {
+        for (const auto& association : associations)
+            if (association.table == associationTwoOrdinal && association.type == 4)
+            {
+                if (!model.identities.count(association.source) || !model.identities.count(association.target))
+                    throw std::runtime_error("missing custom component reference identity");
+                model.customComponentReferences[association.source].push_back(association.target);
+            }
+        for (auto& entry : model.customComponentReferences) std::sort(entry.second.begin(), entry.second.end());
+        if (!model.customComponentReferences.empty())
+            model.diagnostics.emplace_back("type-4 associations are custom component object references, not control lines; control-object decoding remains unverified");
+    }
     const std::size_t customDefinitionOrdinal = library782 ? 125 : 226;
     if (library && all.size() > customDefinitionOrdinal && all[customDefinitionOrdinal].valid &&
         all[customDefinitionOrdinal].payloadSize == (library782 ? 32U : 36U))
@@ -1847,9 +1914,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                         throw std::runtime_error("missing custom definition string " + std::to_string(ref));
                 definition.description = strings[definition.referenceIds[0]];
             }
-            definition.name = strings[definition.referenceIds[1]];
+            definition.name = componentVariables ? resolveString(definition.referenceIds[1], true) : strings[definition.referenceIds[1]];
             const auto identity = model.identities.find(definition.id);
-            if (library782 && identity == model.identities.end())
+            if (componentVariables && identity == model.identities.end())
                 throw std::runtime_error("missing custom definition identity " + std::to_string(definition.id));
             if (identity != model.identities.end())
                 definition.guid = identity->second.guid;
@@ -1863,10 +1930,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             if (distances != distancesByOwner.end()) definition.distanceParameterIds = distances->second;
             const auto formulas = formulasByOwner.find(definition.id);
             if (formulas != formulasByOwner.end()) definition.formulaBindingIds = formulas->second;
+            const auto references = model.customComponentReferences.find(definition.id);
+            if (references != model.customComponentReferences.end()) definition.referenceObjectIds = references->second;
             model.customComponentDefinitions.push_back(std::move(definition));
         }
     }
 
+    // Preserve the historical 8.44 path pending independent layout evidence.
+    if (older844)
     for (const auto& identity : model.identities)
     {
         if (identity.second.type != 4)

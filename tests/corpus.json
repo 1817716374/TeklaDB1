@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed. Ownership corrections separate 8.95 identity class references from owner contexts and modern part auxiliary references from owners. Sixty model/library ownership checks cover raw references, component lists and all variable scopes; three pinned AUTRA dialogs independently check 15 parameter owner/name matches. Modern xslib distance/formula graphs are enabled with exact signatures. Kind-60 variable owners remain distinct, not fabricated components. Type-4 custom-component associations now preserve point and non-point targets in customComponentReferences; these records no longer fabricate ControlLine objects. Legacy geometry baselines remain unchanged.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -3524,6 +3524,24 @@
       "url": "https://raw.githubusercontent.com/PSDBIM/EXCEL-1246A-BLDG-B/5334356d78238c8bc68b95e6b6e4f190232fa4fd/ComponentCatalog.txt",
       "size": 11320,
       "sha256": "cef838bf7c675429659c2cfc7ab3d44a03973ac1b95b46ec9b86f2f524a226a5"
+    },
+    {
+      "path": "modern-component-evidence/GenericFormworkFillerPanel.inp",
+      "url": "https://raw.githubusercontent.com/MohamedHasan94/AUTRA/8b96f8b30a0b132ea22fe4d19c96842c9b317063/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/CustomComponentDialogFiles/GenericFormworkFillerPanel.inp",
+      "size": 208,
+      "sha256": "f2ac28ba7ed598f060030a6ac073cf029175bbd7df709b018311bea2d014f9de"
+    },
+    {
+      "path": "modern-component-evidence/GenericFormworkItem.inp",
+      "url": "https://raw.githubusercontent.com/MohamedHasan94/AUTRA/8b96f8b30a0b132ea22fe4d19c96842c9b317063/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/CustomComponentDialogFiles/GenericFormworkItem.inp",
+      "size": 206,
+      "sha256": "4b4586d87d4d772e9c0aacd94fb36d3abcb99e4ccc065fafc2c8961d37b956bc"
+    },
+    {
+      "path": "modern-component-evidence/GenericFormworkPlatform.inp",
+      "url": "https://raw.githubusercontent.com/MohamedHasan94/AUTRA/8b96f8b30a0b132ea22fe4d19c96842c9b317063/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/CustomComponentDialogFiles/GenericFormworkPlatform.inp",
+      "size": 1005,
+      "sha256": "2e5e69615410d09ff6dd62bec7c68f26816fff299e40b1c93203f22a57072067"
     }
   ],
   "cases": [
@@ -10904,6 +10922,433 @@
       "path": "legacy-component-evidence",
       "exit": 0,
       "stdout": "definitions=40 named=28 anonymous=12 parameters=660 children=2726 dialog_matches=69 unresolved=0 fingerprint=5a7ab2a4be4e2642\ndistances=6838 formulas=10450 bound=13676 references=24442 inputs=13992 cross_owner=360 fingerprint=295a528bfb8581d3"
+    },
+    {
+      "name": "ownership_model:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db1",
+      "mode": "ownership_model",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1311 classes=24 parts=178 children=910 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=8 scopes=0 other_parameters=0 other_formulas=0 fingerprint=ead58aa58d26b795"
+    },
+    {
+      "name": "ownership_library:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "mode": "ownership_library",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=34009 classes=54 parts=1492 children=31059 owned_parameters=6295 distances=6120 formulas=12324 bound=12240 references=25734 custom_references=1322 scopes=507 other_parameters=22 other_formulas=68 fingerprint=4801524eeb694366"
+    },
+    {
+      "name": "ownership_model:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db1",
+      "mode": "ownership_model",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=20 classes=6 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=b51ec074c114077b"
+    },
+    {
+      "name": "ownership_library:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "mode": "ownership_library",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=34009 classes=54 parts=1492 children=31059 owned_parameters=6295 distances=6120 formulas=12324 bound=12240 references=25734 custom_references=1322 scopes=507 other_parameters=22 other_formulas=68 fingerprint=5d76f86fca58a376"
+    },
+    {
+      "name": "ownership_model:PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "mode": "ownership_model",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "exit": 0,
+      "stdout": "version=7.82 identities=14668 classes=0 parts=3866 children=7276 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=40 scopes=0 other_parameters=0 other_formulas=0 fingerprint=b3c1c20d35b5bc57"
+    },
+    {
+      "name": "ownership_library:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "mode": "ownership_library",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 identities=26453 classes=0 parts=843 children=25456 owned_parameters=5345 distances=6838 formulas=10450 bound=13676 references=24442 custom_references=106 scopes=132 other_parameters=0 other_formulas=0 fingerprint=f6b29d0a8b3a55ee"
+    },
+    {
+      "name": "ownership_model:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "mode": "ownership_model",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "exit": 0,
+      "stdout": "version=7.82 identities=2352 classes=0 parts=643 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=3823adbc572c8aec"
+    },
+    {
+      "name": "ownership_library:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "mode": "ownership_library",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=2185 classes=18 parts=396 children=1664 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=ddc9b37f22905898"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=2042 classes=18 parts=376 children=1562 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=85eae6e2feb7d5b5"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1742 classes=18 parts=319 children=1328 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=b527813ccdc14e9d"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1746 classes=18 parts=316 children=1326 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=63c4b2dad5df7873"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=af32af84a54ec65c"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=526 classes=18 parts=98 children=392 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=37bf3032887cdcae"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=15 classes=6 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=179c6a169b136646"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=2334 classes=18 parts=418 children=1772 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=beda7a5a7433d25d"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=709a33aec85d7295"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=239aff1e5567dadc"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=7e820f2eca3b3f43"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=1842a398e223a673"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=a4ce36fceb791437"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=f1b7dfcd70213e24"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1749 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=a6d9a2ace005fbb6"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=c77828618763193e"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=c0ffba33ce35f6f6"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=1e015e1f2846f2de"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=8fbe35cd8147f02b"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=238b581a795dc854"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1746 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=a2f9ff85ca7e3290"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=9f4c896b3b5f28c4"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1747 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=578f3f938e3b9182"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=7bbd83547ad691ad"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1746 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=a2578dfeaccb94ac"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=7f1e6407fc93b133"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=24b59605c80ec77f"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=1bd90c134ae74b56"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1747 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=b796b4c6496cb335"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=162a61baf9e68b19"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=e51185e2d2f6e387"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=1a6340c7fe2e0566"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1749 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=db688e5d256418d0"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=37f73b49fefee422"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=4d40a4da86383573"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=97f6900ff45947a8"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=1752 classes=18 parts=323 children=1340 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=1a97665cb66e0816"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=81e25ff1a0630647"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=15 classes=6 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=ce1e82dd00094b86"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=12853 classes=32 parts=404 children=12421 owned_parameters=2311 distances=2997 formulas=4930 bound=5994 references=10711 custom_references=482 scopes=145 other_parameters=0 other_formulas=0 fingerprint=5fd8920d5dbd235f"
+    },
+    {
+      "name": "ownership_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
+      "mode": "ownership_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=3208 classes=18 parts=585 children=2462 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=53fece482c079181"
+    },
+    {
+      "name": "ownership_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/xslib.db1",
+      "mode": "ownership_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 identities=0 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "ownership_model:steel-detailing/New model 3.db1",
+      "mode": "ownership_model",
+      "path": "steel-detailing/New model 3.db1",
+      "exit": 0,
+      "stdout": "version=9.52 identities=15 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=4de1c8256698b8e4"
+    },
+    {
+      "name": "ownership_library:steel-detailing/xslib.db1",
+      "mode": "ownership_library",
+      "path": "steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 identities=18018 classes=0 parts=558 children=16970 owned_parameters=3627 distances=3621 formulas=6931 bound=7242 references=14871 custom_references=790 scopes=299 other_parameters=0 other_formulas=0 fingerprint=f2e35b2114f929e0"
+    },
+    {
+      "name": "ownership_model:steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
+      "mode": "ownership_model",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
+      "exit": 0,
+      "stdout": "version=9.60 identities=1365 classes=0 parts=226 children=1081 owned_parameters=0 distances=0 formulas=0 bound=0 references=0 custom_references=0 scopes=0 other_parameters=0 other_formulas=0 fingerprint=3415e399ec8ff5d6"
+    },
+    {
+      "name": "ownership_library:steel-fundamentals/Steel Fundamentals Modeling Assignment/xslib.db1",
+      "mode": "ownership_library",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.60 identities=185 classes=0 parts=0 children=0 owned_parameters=0 distances=0 formulas=14 bound=0 references=30 custom_references=0 scopes=2 other_parameters=8 other_formulas=14 fingerprint=ca9192959d590ede"
+    },
+    {
+      "name": "modern_component_dialog_evidence:AUTRA",
+      "mode": "modern_component_dialog_evidence",
+      "path": "modern-component-evidence",
+      "exit": 0,
+      "stdout": "dialogs=3 parameter_owner_matches=15 fingerprint=2f5224a63973df4f"
     }
   ]
 }

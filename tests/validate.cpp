@@ -22,6 +22,8 @@ struct Fingerprint
         std::uint64_t bits; std::memcpy(&bits,&v,sizeof(bits)); number(bits);
     }
 };
+#include "OwnershipValidation.hpp"
+
 void summary(const tekla::db1::Model& model)
 {
     Fingerprint hash;
@@ -79,7 +81,51 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode=="model" || mode=="library")
+        if (mode=="ownership_model" || mode=="ownership_library")
+        {
+            const bool library=mode=="ownership_library";
+            tekla::db1::Model model; tekla::db1::RawDatabase raw;
+            const bool ok=library?tekla::db1::parseComponentLibrary(path,model,error):tekla::db1::parseModelFile(path,model,error);
+            if (!ok || !tekla::db1::parseRawDatabase(path,raw,error)) throw std::runtime_error(error);
+            validateOwnership(model,raw,library);
+        }
+        else if (mode=="modern_component_dialog_evidence")
+        {
+            tekla::db1::Model model;
+            const auto libraryPath=path.parent_path()/"MohamedHasan94__AUTRA"/"AUTRA"/"wwwroot"/"Outputs"/"Tekla"/"ITIFinal02_35"/"xslib.db1";
+            if (!tekla::db1::parseComponentLibrary(libraryPath,model,error)) throw std::runtime_error(error);
+            const std::pair<std::uint32_t,const char*> dialogs[]={{158023,"GenericFormworkPlatform"},{157338,"GenericFormworkItem"},{156768,"GenericFormworkFillerPanel"}};
+            const std::regex pattern(R"rx(parameter\(\s*"[^"]*"\s*,\s*"([^"]+)")rx");
+            std::size_t matched=0; Fingerprint hash;
+            for (const auto& entry : dialogs)
+            {
+                const auto definition=std::find_if(model.customComponentDefinitions.begin(),model.customComponentDefinitions.end(),[&](const auto& c){return c.id==entry.first;});
+                if (definition==model.customComponentDefinitions.end() || definition->name!=entry.second) throw std::runtime_error("modern dialog owner name mismatch");
+                if (model.identityClasses.at(model.identities.at(entry.first).classReferenceId).recordKind!=4) throw std::runtime_error("custom definition class evidence mismatch");
+                std::ifstream f(path/(std::string(entry.second)+".inp"),std::ios::binary);
+                if (!f) throw std::runtime_error("modern dialog evidence file missing");
+                const std::string text((std::istreambuf_iterator<char>(f)),std::istreambuf_iterator<char>());
+                if (text.find(std::string("macro(1, \"")+entry.second+"\")")==std::string::npos) throw std::runtime_error("dialog macro name mismatch");
+                hash.number(entry.first); hash.text(entry.second);
+                for (auto i=std::sregex_iterator(text.begin(),text.end(),pattern);i!=std::sregex_iterator();++i)
+                {
+                    const auto name=(*i)[1].str(); std::size_t count=0;
+                    for (auto id : definition->parameterIds)
+                    {
+                        const auto& p=model.parameterDefinitions.at(id);
+                        if (p.name!=name) continue;
+                        if (p.ownerId!=entry.first || model.identityClasses.at(model.identities.at(id).classReferenceId).recordKind!=64)
+                            throw std::runtime_error("dialog parameter owner/class mismatch");
+                        hash.number(id); hash.text(p.name); hash.text(p.label); hash.text(p.expression); ++count;
+                    }
+                    if (count!=1) throw std::runtime_error("dialog parameter missing or ambiguous: "+name);
+                    ++matched;
+                }
+            }
+            if (matched!=15) throw std::runtime_error("modern dialog evidence count changed");
+            std::cout<<"dialogs=3 parameter_owner_matches=15 fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
+        }
+        else if (mode=="model" || mode=="library")
         {
             tekla::db1::Model model;
             const auto ok=mode=="model" ? tekla::db1::parseModelFile(path,model,error) : tekla::db1::parseComponentLibrary(path,model,error);

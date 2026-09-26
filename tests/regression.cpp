@@ -57,6 +57,7 @@ std::vector<Table> schema()
     define(340,120,7,{0,1,5,6}); define(274,64,12,{0,1,2,3,4,5,6,7}); define(270,24,7,{0,1,2,5,6});
     define(228,104,18,{0,1,2}); define(300,92,9,{0,1,4,5}); define(351,316,30,{0,1,25,26,27,28,29});
     define(332,48,9,{0,1,3}); define(294,20,6,{0,1,2,4,5});
+    define(245,52,14,{0,1});
     return tables;
 }
 Bytes row(const Table& t, std::uint32_t id)
@@ -167,6 +168,70 @@ std::vector<Table> onePart782(bool library = false)
     }
     return tables;
 }
+std::vector<Table> componentLibrary(bool older895)
+{
+    const auto main=onePart();
+    std::vector<Table> tables(older895 ? 290 : 319);
+    for (const auto& pair : std::vector<std::pair<std::size_t,std::size_t>>{
+        {61,40},{64,43},{65,44},{75,53},{122,95},{154,126},{160,132},{161,133},{190,160},{191,161},{192,162},
+        {355,older895?260:318},{341,older895?264:305},{328,older895?94:292},{340,older895?90:304},
+        {274,242},{270,238},{228,198},{300,265},{351,older895?223:314},{310,274},{294,261},{245,215}})
+        tables[pair.second]=main[pair.first];
+    if (!older895) tables[296]=main[332];
+    const auto define=[&](std::size_t n,std::uint32_t width,std::size_t count,std::initializer_list<std::size_t> refs) {
+        auto& t=tables[n]; t.payload=width; t.fields.assign(count,0); t.rows.clear();
+        for (auto ref : refs) t.fields[ref]=1;
+    };
+    if (older895)
+    {
+        define(260,55,6,{0,1,2,3,4}); define(264,332,19,{0,1,12});
+        define(94,332,84,{0,1}); define(90,116,6,{0,1,5}); define(223,308,28,{0,1});
+        define(279,28,8,{0,1,6,7});
+        auto def=row(tables[264],4); str(def,55,"TEST"); str(def,145,"PL10*10"); tables[264].rows={def};
+    }
+    auto legacy=onePart782(true);
+    for (auto n : {53U,68U,147U,156U}) tables[n]=legacy[n];
+    tables[53].fields={1,1,1,0,0,0}; tables[68].fields={1,1,0,0,1,0};
+    tables[147].fields={1,1,1,1,0,0,0,0,0,0,0,0,1,1}; tables[156].fields={1,1,1,0,1,0};
+    // Keep references to two different component owners to exercise cross-owner inputs.
+    define(226,36,10,{0,1,7,8,9});
+    auto custom=row(tables[226],50); put<std::uint32_t>(custom,5,4); put<std::uint32_t>(custom,29,12); tables[226].rows={custom};
+    auto component=row(tables[126],90); put<std::uint32_t>(component,13,12); tables[126].rows={component};
+    const auto identityTable=older895?260U:318U; tables[identityTable].rows.clear();
+    for (const auto& spec : std::vector<std::array<std::uint32_t,3>>{{5,50,2},{50,50,4},{60,90,64},{70,50,58},{80,50,59},{90,90,3}})
+    {
+        auto identity=row(tables[identityTable],spec[0]);
+        if (older895)
+        {
+            const auto classId=100+spec[2];
+            auto cls=row(tables[279],classId); put<std::uint32_t>(cls,5,spec[2]); tables[279].rows.push_back(cls);
+            put<std::uint32_t>(identity,5,classId); put<std::uint32_t>(identity,9,spec[1]);
+            str(identity,17,"01234567-0000-0000-0000-000000000001");
+        }
+        else { put<std::uint32_t>(identity,5,spec[1]); put<std::uint32_t>(identity,29,spec[2]); }
+        tables[identityTable].rows.push_back(identity);
+    }
+    auto aux=row(tables[215],1000); tables[215].rows={aux}; put<std::uint32_t>(tables[242].rows[0],9,1000);
+    tables[162].rows.assign(legacy[162].rows.begin()+1,legacy[162].rows.end());
+    for (const auto& spec : std::vector<std::pair<std::uint32_t,std::uint32_t>>{{91,1},{92,2},{93,5}})
+    {
+        auto ref=row(tables[162],spec.first); put<std::uint32_t>(ref,5,4);
+        put<std::uint32_t>(ref,9,50); put<std::uint32_t>(ref,13,spec.second); tables[162].rows.push_back(ref);
+    }
+    // Reference points also have identity records in real libraries.
+    for (auto id : {1U,2U})
+    {
+        auto identity=row(tables[identityTable],id);
+        if (older895)
+        {
+            if (id==1) { auto cls=row(tables[279],101); put<std::uint32_t>(cls,5,1); tables[279].rows.push_back(cls); }
+            put<std::uint32_t>(identity,5,101); put<std::uint32_t>(identity,9,50);
+        }
+        else { put<std::uint32_t>(identity,5,50); put<std::uint32_t>(identity,29,1); }
+        tables[identityTable].rows.push_back(identity);
+    }
+    return tables;
+}
 }
 
 int main(int argc, char** argv)
@@ -179,7 +244,52 @@ int main(int argc, char** argv)
         const auto path = root / "model.db1";
         tekla::db1::Model model; tekla::db1::RawDatabase raw; std::string error = "stale";
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
-        if (name.rfind("782_",0)==0)
+        if (name.rfind("ownership_",0)==0)
+        {
+            const bool older=name.find("895")!=std::string::npos;
+            auto s=componentLibrary(older); const auto ident=older?260U:318U;
+            if (name=="ownership_other_scope") { s[126].rows.clear(); put<std::uint32_t>(s[ident].rows[5],29,60); }
+            if (name=="ownership_895_class_fields") s[279].fields[7]=0;
+            if (name=="ownership_895_class_width") { s[279].payload=32; s[279].rows.clear(); }
+            if (name=="ownership_895_class_missing") put<std::uint32_t>(s[ident].rows[0],5,999);
+            if (name=="ownership_895_class_duplicate") s[279].rows.push_back(s[279].rows[0]);
+            if (name=="ownership_895_owner_missing") put<std::uint32_t>(s[ident].rows[0],9,999);
+            if (name=="ownership_aux_fields") s[215].fields[2]=1;
+            if (name=="ownership_aux_missing") put<std::uint32_t>(s[242].rows[0],9,999);
+            if (name=="ownership_aux_duplicate") s[215].rows.push_back(s[215].rows[0]);
+            if (name=="ownership_distance_fields") s[147].fields[12]=0;
+            if (name=="ownership_formula_fields") s[156].fields[4]=0;
+            if (name=="ownership_formula_cycle") put<std::uint32_t>(s[53].rows.back(),5,18);
+            if (name=="ownership_formula_missing_chunk") put<std::uint32_t>(s[53].rows.back(),5,999);
+            if (name=="ownership_custom_reference_missing") put<std::uint32_t>(s[162].rows.back(),13,999);
+            save(path,encode(s,older?"8.95":"9.52"));
+            const bool ok=tekla::db1::parseComponentLibrary(path,model,error);
+            if (name=="ownership_895" || name=="ownership_modern" || name=="ownership_other_scope")
+            {
+                check(ok,error.c_str());
+                check(model.identities.at(5).ownerId==50 && model.parts.at(5).ownerId==50 && model.parts.at(5).auxiliaryReferenceId==1000,"owner/auxiliary conflated");
+                check(model.customComponentDefinitions.size()==1,"custom definition missing");
+                const auto& c=model.customComponentDefinitions[0];
+                check(c.parameterIds.empty() && c.childObjectIds==std::vector<std::uint32_t>{1,2,5,70,80},"definition ownership lost");
+                check(model.controlLines.empty() && c.referenceObjectIds==std::vector<std::uint32_t>{1,2,5},"custom references misclassified or non-point target lost");
+                check(model.customComponentReferences.at(50)==c.referenceObjectIds,"custom reference index lost");
+                check(c.distanceParameterIds==std::vector<std::uint32_t>{70} && c.formulaBindingIds==std::vector<std::uint32_t>{80},"definition variable graph lost");
+                if (name=="ownership_other_scope") check(model.components.empty(),"non-component scope fabricated a component");
+                else check(model.components[0].id==90 && model.components[0].parameterIds==std::vector<std::uint32_t>{60},"component parameter ownership lost");
+                check(model.variablesByOwner.at(90).parameterIds==std::vector<std::uint32_t>{60},"generic variable scope lost");
+                check(model.variablesByOwner.at(50).distanceParameterIds==std::vector<std::uint32_t>{70} && model.variablesByOwner.at(50).formulaBindingIds==std::vector<std::uint32_t>{80},"generic formula/distance scope lost");
+                check(model.parameterDefinitions.at(60).ownerId==90 && model.distanceParameters.at(70).ownerId==50,"variable owner offset");
+                check(model.formulaBindings.at(80).inputObjectIds==std::vector<std::uint32_t>{60},"cross-owner input removed");
+                if (older)
+                {
+                    check(model.identities.at(5).classReferenceId==102 && model.identityClasses.at(102).recordKind==2,"identity class join");
+                    check(model.identityClasses.at(104).recordKind==4 && model.controlLines.empty(),"class kind confused with association type");
+                }
+                else check(model.identities.at(5).contextId==0 && model.identityClasses.empty(),"modern identity read with legacy offsets");
+            }
+            else check(!ok && !error.empty() && model.parts.empty() && model.identityClasses.empty() && model.formulaBindings.empty() && model.variablesByOwner.empty(),"malformed ownership accepted or partial output retained");
+        }
+        else if (name.rfind("782_",0)==0)
         {
             const bool library=name.rfind("782_library",0)==0;
             auto s=onePart782(library);
