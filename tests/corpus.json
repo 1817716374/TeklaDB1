@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. Explicit 7.82 failures are coverage boundaries. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -1890,8 +1890,8 @@
       "name": "model:PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
       "mode": "model",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
-      "exit": 1,
-      "error_contains": "unsupported DB1 semantic schema 7.82"
+      "exit": 0,
+      "stdout": "version=7.82 parts=2602 operative=546 profiles=4265 bolts=0 welds=1004 assemblies=1666 components=56 properties=5764 parameters=0 custom=0 unhandled=0 individual_bolts=718 fingerprint=4c48bedefa151906"
     },
     {
       "name": "raw:PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db2",
@@ -1932,8 +1932,8 @@
       "name": "library:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
       "mode": "library",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
-      "exit": 1,
-      "error_contains": "unsupported DB1 semantic schema 7.82"
+      "exit": 0,
+      "stdout": "version=7.82 parts=545 operative=134 profiles=4265 bolts=0 welds=373 assemblies=267 components=124 properties=7275 parameters=5345 custom=0 unhandled=18 individual_bolts=146 fingerprint=839d79fdde1b7de4"
     },
     {
       "name": "raw:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db2",
@@ -1953,8 +1953,8 @@
       "name": "model:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
       "mode": "model",
       "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
-      "exit": 1,
-      "error_contains": "unsupported DB1 semantic schema 7.82"
+      "exit": 0,
+      "stdout": "version=7.82 parts=393 operative=0 profiles=0 bolts=0 welds=268 assemblies=125 components=0 properties=782 parameters=0 custom=0 unhandled=0 individual_bolts=250 fingerprint=6703a5fe89d8e73e"
     },
     {
       "name": "raw:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db2",
@@ -1995,8 +1995,8 @@
       "name": "library:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
       "mode": "library",
       "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
-      "exit": 1,
-      "error_contains": "unsupported DB1 semantic schema 7.82"
+      "exit": 0,
+      "stdout": "version=7.82 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=0 parameters=0 custom=0 unhandled=0 individual_bolts=0 fingerprint=cbf29ce484222325"
     },
     {
       "name": "raw:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db2",
@@ -4979,6 +4979,20 @@
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/options_model.db",
       "exit": 0,
       "stdout": "options=1077 bool=238 int=155 real=520 string=164 differing=215 fingerprint=b966584ca72a48d8"
+    },
+    {
+      "name": "project:PSDBIM__EXCEL-1246A-BLDG-B",
+      "mode": "project",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B",
+      "exit": 0,
+      "stdout": "version=7.82 parts=2602 operative=546 profiles=4265 bolts=0 welds=1004 assemblies=1666 components=56 properties=5764 parameters=0 custom=0 unhandled=0 individual_bolts=718 fingerprint=4c48bedefa151906\nfiles=11 associations=10 raw=5 failed=0 drawings=0"
+    },
+    {
+      "name": "project:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN",
+      "mode": "project",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN",
+      "exit": 0,
+      "stdout": "version=7.82 parts=393 operative=0 profiles=0 bolts=0 welds=268 assemblies=125 components=0 properties=782 parameters=0 custom=0 unhandled=0 individual_bolts=250 fingerprint=6703a5fe89d8e73e\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     }
   ]
 }

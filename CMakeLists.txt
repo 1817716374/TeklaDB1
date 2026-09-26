@@ -116,7 +116,9 @@ if(TEKLADB1_BUILD_TESTS)
             unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
             gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path
             ambiguity raw_retention project strict_companions catalog_error model_limit
-            dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid)
+            dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid
+            782_model 782_library 782_library_fields 782_fields 782_width 782_part_join 782_contour_join
+            782_string_cycle 782_missing_string 782_bolt_join 782_numeric_nan 782_numeric_overflow 782_assembly_missing)
         add_test(NAME db1.${case} COMMAND tekladb1_regression "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     if(TEKLADB1_WITH_OCCT)

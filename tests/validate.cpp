@@ -47,13 +47,32 @@ void summary(const tekla::db1::Model& model)
         if (!model.boltDefinitions.count(group.definitionId)) throw std::runtime_error("bolt definition missing");
         for (const auto& point : group.positions) for (auto coordinate : point) if (!std::isfinite(coordinate)) throw std::runtime_error("non-finite bolt coordinate");
     }
+    if (model.storageVersion == "7.82")
+    {
+        auto bolts = model.individualBolts;
+        std::sort(bolts.begin(), bolts.end(), [](const auto& a, const auto& b) { return a.id < b.id; });
+        for (const auto& bolt : bolts)
+        {
+            hash.number(bolt.id);
+            if (model.parts.at(bolt.id).internalType != 10) throw std::runtime_error("individual bolt type mismatch");
+            for (auto partId : bolt.connectedPartIds) { model.parts.at(partId); hash.number(partId); }
+        }
+        auto assemblies = model.assemblies;
+        std::sort(assemblies.begin(), assemblies.end(), [](const auto& a, const auto& b) { return a.id < b.id; });
+        for (const auto& assembly : assemblies)
+        {
+            hash.number(assembly.id); hash.text(assembly.name);
+            for (auto partId : assembly.memberIds) { model.parts.at(partId); hash.number(partId); }
+        }
+    }
     std::cout << "version=" << model.storageVersion << " parts=" << model.actualPartIds.size()
               << " operative=" << model.operativePartIds.size() << " profiles=" << model.profiles.size()
               << " bolts=" << model.boltGroups.size() << " welds=" << model.welds.size()
               << " assemblies=" << model.assemblies.size() << " components=" << model.components.size()
               << " properties=" << model.properties.size() << " parameters=" << model.parameterDefinitions.size()
-              << " custom=" << model.customComponentDefinitions.size() << " unhandled=" << model.unhandledPartIds.size()
-              << " fingerprint=" << std::hex << hash.value << std::dec << '\n';
+              << " custom=" << model.customComponentDefinitions.size() << " unhandled=" << model.unhandledPartIds.size();
+    if (model.storageVersion == "7.82") std::cout << " individual_bolts=" << model.individualBolts.size();
+    std::cout << " fingerprint=" << std::hex << hash.value << std::dec << '\n';
 }
 int run(const std::string& mode, const std::filesystem::path& path)
 {

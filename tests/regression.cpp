@@ -1,5 +1,6 @@
 #include <tekla/Project.hpp>
 #include <zlib.h>
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -92,6 +93,52 @@ std::vector<Table> onePart(std::uint32_t type = 2, bool broken = false, bool con
     }
     tables[274].rows = {part}; return tables;
 }
+std::vector<Table> onePart782(bool library = false)
+{
+    std::vector<Table> tables(library ? 198 : 228);
+    const std::array<std::array<std::size_t,4>,18> roles{{
+        {{61,40,32,6}}, {{64,43,40,7}}, {{65,44,52,8}}, {{75,53,45,6}},
+        {{122,95,44,6}}, {{154,126,104,22}}, {{160,132,24,7}}, {{161,133,24,7}},
+        {{190,160,24,7}}, {{191,161,60,7}}, {{192,162,60,7}}, {{209,179,63,8}},
+        {{207,177,380,31}}, {{121,94,332,84}}, {{116,90,116,6}}, {{193,163,56,11}},
+        {{226,196,60,16}}, {{181,151,88,8}}}};
+    for (const auto& spec : roles)
+    {
+        auto& t = tables[spec[library ? 1 : 0]];
+        t.payload = static_cast<std::uint32_t>(spec[2]); t.fields.assign(spec[3],0); t.fields[0]=1;
+    }
+    const auto at = [&](std::size_t main) -> Table& {
+        for (const auto& spec : roles) if (spec[0]==main) return tables[spec[library?1:0]];
+        throw std::runtime_error("unknown fixture role");
+    };
+    auto p1=row(at(61),1),p2=row(at(61),2); put<double>(p2,9,100); at(61).rows={p1,p2};
+    auto frame=row(at(65),0); put<double>(frame,1,1); put<double>(frame,33,1); put<std::uint32_t>(frame,49,3); at(65).rows={frame};
+    auto dim=row(at(75),10),more=row(at(75),11);
+    put<std::uint32_t>(dim,5,11); str(dim,17,"10"); str(more,17,"*20"); at(75).rows={dim,more};
+    auto def=row(at(207),4); put<std::uint32_t>(def,5,2); put<std::uint32_t>(def,9,2);
+    str(def,81,"7"); str(def,103,"PLATE"); str(def,125,"PL"); put<std::uint32_t>(def,189,10);
+    str(def,193,"PART_PREFIX"); str(def,215,"SECONDARY"); str(def,277,"S235"); str(def,309,"NOT_MATERIAL");
+    auto boltDef=def; put<std::uint32_t>(boltDef,1,14); put<std::uint32_t>(boltDef,5,10); at(207).rows={def,boltDef};
+    auto ident=row(at(209),5); put<std::uint32_t>(ident,17,50); put<std::uint32_t>(ident,21,20); str(ident,25,"ID01234567-0000-0000-0000-000000000001");
+    auto boltIdent=ident; put<std::uint32_t>(boltIdent,1,15); put<std::uint32_t>(boltIdent,21,0); at(209).rows={ident,boltIdent};
+    auto part=row(at(193),5); put<std::uint32_t>(part,5,4); put<std::uint32_t>(part,9,1); put<std::uint32_t>(part,13,2);
+    put<std::uint32_t>(part,17,7); put<std::uint32_t>(part,21,3); put<double>(part,25,123); put<double>(part,49,100);
+    auto bolt=part; put<std::uint32_t>(bolt,1,15); put<std::uint32_t>(bolt,5,14); at(193).rows={part,bolt};
+    auto contour=row(at(121),7); put<float>(contour,13,2); put<float>(contour,17,8); put<float>(contour,53,3);
+    put<std::uint32_t>(contour,221,0x7fffffff); at(121).rows={contour};
+    auto assembly=row(at(181),20); put<std::uint32_t>(assembly,5,15); put<std::uint32_t>(assembly,13,5);
+    str(assembly,21,"ASSEMBLY"); at(181).rows={assembly};
+    auto association=row(at(192),30); put<std::uint32_t>(association,5,10); put<std::uint32_t>(association,9,15);
+    put<std::uint32_t>(association,13,5); at(192).rows={association};
+    auto property=row(at(122),40); str(property,17,"PHASE"); put<double>(property,9,12); at(122).rows={property};
+    auto link=row(at(160),41); put<std::uint32_t>(link,5,40); put<std::uint32_t>(link,9,5); at(160).rows={link};
+    if (library)
+    {
+        auto& t=tables[68]; t.payload=76; t.fields={1,0,0,0,0,0}; auto param=row(t,60);
+        str(param,5,"WIDTH"); str(param,36,"Width"); put<std::uint32_t>(param,69,10); t.rows={param};
+    }
+    return tables;
+}
 }
 
 int main(int argc, char** argv)
@@ -104,7 +151,61 @@ int main(int argc, char** argv)
         const auto path = root / "model.db1";
         tekla::db1::Model model; tekla::db1::RawDatabase raw; std::string error = "stale";
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
-        if (name == "valid_model" || name == "short_trailer")
+        if (name.rfind("782_",0)==0)
+        {
+            const bool library=name=="782_library" || name=="782_library_fields";
+            auto s=onePart782(library);
+            if (name=="782_library_fields") s[68].fields[1]=1;
+            if (name=="782_fields") s[207].fields[2]=1;
+            if (name=="782_width") { s[207].payload=372; s[207].rows.clear(); }
+            if (name=="782_part_join") put<std::uint32_t>(s[193].rows[0],9,999);
+            if (name=="782_contour_join") put<std::uint32_t>(s[193].rows[0],17,999);
+            if (name=="782_string_cycle") put<std::uint32_t>(s[75].rows[1],5,10);
+            if (name=="782_missing_string") put<std::uint32_t>(s[75].rows[1],5,999);
+            if (name=="782_bolt_join") put<std::uint32_t>(s[192].rows[0],13,999);
+            if (name=="782_numeric_nan") put<double>(s[122].rows[0],9,std::numeric_limits<double>::quiet_NaN());
+            if (name=="782_numeric_overflow") put<double>(s[122].rows[0],9,1e30);
+            if (name=="782_assembly_missing") put<std::uint32_t>(s[209].rows[0],21,999);
+            save(path,encode(s,"7.82",true));
+            const bool ok=library?tekla::db1::parseComponentLibrary(path,model,error):parse();
+            if (name=="782_model" || name=="782_library" || name=="782_assembly_missing")
+            {
+                check(ok,error.c_str()); const auto& p=model.parts.at(5);
+                check(p.profile=="PL10*20" && p.material=="S235" && p.name=="PLATE","7.82 definition offsets");
+                check(p.origin[0]==123 && p.length==100 && p.ownerId==50,"7.82 placement/owner offsets");
+                check(p.contour.size()==2 && p.contour[0].value[0]==2 && p.contour[1].value[0]==8,"7.82 explicit first contour point");
+                check(p.properties.size()==1 && p.properties[0].integerValue==12,"7.82 property join");
+                check(model.actualPartIds==std::vector<std::uint32_t>{5} && model.unhandledPartIds.empty(),"7.82 type classification");
+                check(model.boltGroups.empty() && model.individualBolts.size()==1 && model.individualBolts[0].id==15,"7.82 individual bolt");
+                check(model.individualBolts[0].connectedPartIds==std::vector<std::uint32_t>{5},"7.82 bolt connection");
+                check(model.assemblies.size()==1 && model.assemblies[0].memberIds==std::vector<std::uint32_t>{5},"7.82 assembly membership");
+                if (library) check(model.parameterDefinitions.at(60).expression=="10*20","7.82 parameter expression");
+                if (name=="782_model")
+                {
+                    save(root/"xslib.db1",encode(onePart782(true),"7.82",true));
+                    tekla::Project project;
+                    check(tekla::readProject(root,project,error),error.c_str());
+                    check(project.componentLibrary.has_value(),"7.82 project library missing");
+                    check(project.files.size()==2,"7.82 project inventory");
+                    for (const auto& file : project.files) check(file.level==tekla::ReadLevel::PartialSemantic,"7.82 coverage overstated");
+                }
+                if (name=="782_assembly_missing")
+                {
+                    check(model.identities.at(5).flags==999,"unresolved assembly reference lost");
+                    check(std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& x){return x.find("unresolved stored assembly reference 999")!=std::string::npos;}),"unresolved assembly diagnostic");
+                }
+            }
+            else { check(!ok,"malformed 7.82 accepted"); check(!error.empty() && model.parts.empty(),"7.82 failure contract"); }
+            if (name=="782_part_join")
+            {
+                s=onePart782(); s[209].rows.erase(s[209].rows.begin());
+                auto relation=row(s[191],31); put<std::uint32_t>(relation,5,11);
+                put<std::uint32_t>(relation,9,15); put<std::uint32_t>(relation,13,5); s[191].rows={relation};
+                save(path,encode(s,"7.82",true));
+                check(!parse() && error.find("association identity")!=std::string::npos,"association fabricated missing identity");
+            }
+        }
+        else if (name == "valid_model" || name == "short_trailer")
         {
             save(path,encode(onePart(),"9.52",name=="short_trailer"));
             check(parse(),error.c_str()); check(error.empty(),"stale error");

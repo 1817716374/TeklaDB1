@@ -196,6 +196,15 @@ struct WeldDefinition
     uint32_t type = 0;
 };
 
+// Xsteel 7.82 stores each bolt as a type-10 Part, not a modern BoltGroup.
+// id resolves into Model::parts for its definition, stored profile parameters,
+// placement, contour and properties. Head/nut/hole geometry is not yet decoded.
+struct IndividualBolt
+{
+    uint32_t id = 0;
+    std::vector<uint32_t> connectedPartIds;
+};
+
 struct Weld
 {
     uint32_t id = 0;
@@ -313,5 +322,6 @@ struct Model
     std::vector<std::string> diagnostics;
     std::map<std::uint32_t, std::size_t> identityTypeCounts;
     std::vector<std::uint32_t> unhandledPartIds;
+    std::vector<IndividualBolt> individualBolts;
 };
 }
