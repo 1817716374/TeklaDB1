@@ -197,6 +197,8 @@ struct Part
     Vec3 axis{};
     Vec3 secondary{};
     Vec3 normal{};
+    // Stored placement/extrusion length, not the final length after cuts or
+    // the total length of a multi-segment contour. IFC quantity fields may differ.
     double length = 0.0;
     bool contourIsPath = false;
     // Unknown modern contour subtypes must not silently become plates.

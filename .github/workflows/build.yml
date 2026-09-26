@@ -31,6 +31,9 @@ jobs:
       - name: Pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json
+      - name: Independent IFC evidence mutation checks
+        if: matrix.standard == 17
+        run: python -B tools/test_ifc_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-ifc-tests"
       - run: cmake --install build --prefix "$GITHUB_WORKSPACE/installed"
       - run: cmake -S tests/consumer -B consumer-build -G Ninja -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/installed" -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer'
       - run: cmake --build consumer-build && ctest --test-dir consumer-build --output-on-failure

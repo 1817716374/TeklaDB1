@@ -17,6 +17,11 @@
       "member": "oefening W3.zip",
       "size": 295967,
       "sha256": "1252c879bcba4688735f38233b36eb8ace8f21b120175f2c842476958564bf43"
+    },
+    "btscm-ifc730": {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/out.ifcZIP",
+      "size": 2420513,
+      "sha256": "c582a87234285fe885199183dbe65da93ef1b90b41743416a3ddf8e0323efefa"
     }
   },
   "files": [
@@ -3921,6 +3926,13 @@
       "size": 1090271,
       "sha256": "6b06855eff3af162ec65add49d0a03576f621870bf903b8a4e9046c27387ad47",
       "path": "btscm-dg730/pechelirejulV1.db1"
+    },
+    {
+      "path": "btscm-ifc730/export.ifc",
+      "archive": "btscm-ifc730",
+      "member": "out.ifc",
+      "size": 13124990,
+      "sha256": "d02db80ded529334096fa911f2194978f96b4bc3a0720deee31247992cc295a3"
     }
   ],
   "cases": [
@@ -13772,6 +13784,13 @@
       "path": "btscm-dg730",
       "exit": 0,
       "stdout": "drawings=35 views=91 catalog_files=13 unique_subjects=1 unique_part_axes=2 automatic_subject_links=0"
+    },
+    {
+      "name": "btscm-ifc730-independent-evidence",
+      "mode": "ifc730_evidence",
+      "path": "btscm-ifc730",
+      "exit": 0,
+      "stdout": "products=1215 names=1215 materials=1215 classes=1215 endpoints=2430 origins=1215 boxes=536 corners=4288 unexported=25"
     }
   ]
 }

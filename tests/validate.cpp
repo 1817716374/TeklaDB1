@@ -9,6 +9,7 @@
 #include <regex>
 #include <limits>
 #include <set>
+#include <sstream>
 
 namespace
 {
@@ -31,6 +32,7 @@ struct Fingerprint
 #include "LegacyNumberingValidation.hpp"
 #include "Numbering730Validation.hpp"
 #include "Drawing730Validation.hpp"
+#include "Ifc730Validation.hpp"
 #include "ReinforcementValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
@@ -90,7 +92,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode=="drawing730_evidence") validateDrawing730Evidence(path);
+        if (mode=="ifc730_evidence") ifc730::validate(path);
+        else if (mode=="drawing730_evidence") validateDrawing730Evidence(path);
         else if (mode=="numbering730_evidence") validateNumbering730Evidence(path);
         else if (mode=="legacy_number_evidence") validateLegacyNumberEvidence(path);
         else if (mode=="empty_bolt_evidence")
