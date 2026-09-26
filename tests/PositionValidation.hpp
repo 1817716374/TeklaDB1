@@ -8,31 +8,76 @@ void validatePositions(const tekla::db1::Model& model, const tekla::db1::RawData
     const auto real=[](const std::vector<std::uint8_t>& p,std::size_t offset) {
         float n=0; std::memcpy(&n,p.data()+offset,4); return n;
     };
-    const auto& records=raw.tables.at(library?215:245).records;
-    if (records.size()!=model.partPositions.size()) throw std::runtime_error("part position records dropped");
+    const bool legacy=model.storageVersion=="7.82";
+    const std::size_t shift=legacy?16:0;
+    const auto& positions=legacy?model.partDefinitionPositions:model.partPositions;
+    if (legacy ? !model.partPositions.empty() : !model.partDefinitionPositions.empty())
+        throw std::runtime_error("position ID namespaces mixed");
+    const auto& records=raw.tables.at(legacy?(library?177:207):(library?215:245)).records;
+    if (records.size()!=positions.size()) throw std::runtime_error("part position records dropped");
     for (const auto& record:records)
     {
         const auto& p=record.payload;
-        if (p.size()!=52) throw std::runtime_error("unexpected position evidence width");
-        const auto& position=model.partPositions.at(word(p,0));
-        if (position.id!=word(p,0) || position.startAxialOffset!=real(p,4) || position.endAxialOffset!=real(p,16) ||
-            position.depthCode!=word(p,28) || position.depthOffset!=real(p,32) ||
-            position.planeCode!=word(p,44) || position.planeOffset!=real(p,48))
+        if (p.size()!=(legacy?380:52)) throw std::runtime_error("unexpected position evidence width");
+        const auto& position=positions.at(word(p,0));
+        if (position.id!=word(p,0) || position.startAxialOffset!=real(p,4+shift) || position.endAxialOffset!=real(p,16+shift) ||
+            position.depthCode!=word(p,28+shift) || position.depthOffset!=real(p,32+shift) ||
+            position.planeCode!=word(p,44+shift) || position.planeOffset!=real(p,48+shift))
             throw std::runtime_error("part position field mapping changed");
         hash.number(position.id); hash.real(position.startAxialOffset); hash.real(position.endAxialOffset);
         hash.number(position.depthCode); hash.real(position.depthOffset); hash.number(position.planeCode); hash.real(position.planeOffset);
         const std::size_t offsets[]={8,12,20,24,36,40};
         for (std::size_t i=0;i<6;++i)
         {
-            if (position.rawFields[i]!=word(p,offsets[i])) throw std::runtime_error("opaque position bytes changed");
+            if (position.rawFields[i]!=word(p,offsets[i]+shift)) throw std::runtime_error("opaque position bytes changed");
             hash.number(position.rawFields[i]);
         }
     }
-    std::size_t linked=0;
+    std::size_t linked=0, checked=0, nonzero=0, residuals=0;
+    std::vector<std::uint32_t> axialResidualIds, lengthResidualIds;
     for (const auto& part:model.parts)
-        if (part.second.auxiliaryReferenceId) { model.partPositions.at(part.second.auxiliaryReferenceId); ++linked; }
+    {
+        const auto& p=part.second;
+        if (legacy)
+        {
+            if (p.auxiliaryReferenceId) throw std::runtime_error("fabricated legacy position reference");
+            const auto& position=positions.at(p.definitionId); ++linked;
+            if (!p.geometryReferenceId)
+            {
+                double projected=0, squared=0;
+                for (std::size_t i=0;i<3;++i)
+                {
+                    projected+=(p.origin[i]-p.start[i])*p.axis[i];
+                    squared+=(p.end[i]-p.start[i])*(p.end[i]-p.start[i]);
+                }
+                // Geometry is double, but the setting is float (e.g. -304.8
+                // is stored as -304.79998779296875). Allow one float rounding
+                // interval plus double-coordinate subtraction noise.
+                const double rounding=std::numeric_limits<float>::epsilon()*std::max(1.0,std::abs(double(position.startAxialOffset)))+1e-6;
+                if (std::abs(projected-position.startAxialOffset)>rounding)
+                    axialResidualIds.push_back(p.id);
+                ++checked;
+                if (position.startAxialOffset || position.endAxialOffset) ++nonzero;
+                if (std::abs(p.length-(std::sqrt(squared)+position.endAxialOffset-position.startAxialOffset))>0.005)
+                { ++residuals; lengthResidualIds.push_back(p.id); }
+            }
+        }
+        else if (p.auxiliaryReferenceId) { positions.at(p.auxiliaryReferenceId); ++linked; }
+    }
     std::cout<<"version="<<model.storageVersion<<" positions="<<records.size()<<" linked_parts="<<linked
-             <<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
+             <<" fingerprint="<<std::hex<<hash.value<<std::dec;
+    if (legacy)
+    {
+        const auto ids=[](std::vector<std::uint32_t>& values) {
+            std::sort(values.begin(),values.end());
+            if (values.empty()) std::cout<<'-';
+            for (std::size_t i=0;i<values.size();++i) std::cout<<(i?",":"")<<values[i];
+        };
+        std::cout<<" axial_checked="<<checked<<" nonzero="<<nonzero<<" length_residuals="<<residuals;
+        std::cout<<" axial_residual_ids="; ids(axialResidualIds);
+        std::cout<<" length_residual_ids="; ids(lengthResidualIds);
+    }
+    std::cout<<'\n';
 }
 
 void validatePositionSourceEvidence(const std::filesystem::path& path)

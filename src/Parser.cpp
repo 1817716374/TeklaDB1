@@ -1410,6 +1410,23 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
     }
 
+    const auto readPosition = [&](const uint8_t* value, uint32_t id, std::size_t start) {
+        PartPosition position;
+        position.id = id;
+        position.startAxialOffset = read<float>(value, start);
+        position.endAxialOffset = read<float>(value, start + 12);
+        position.depthCode = read<uint32_t>(value, start + 24);
+        position.depthOffset = read<float>(value, start + 28);
+        position.planeCode = read<uint32_t>(value, start + 40);
+        position.planeOffset = read<float>(value, start + 44);
+        for (auto number : {position.startAxialOffset, position.endAxialOffset, position.depthOffset, position.planeOffset})
+            if (!std::isfinite(number)) throw std::runtime_error("non-finite part position " + std::to_string(id));
+        const std::size_t rawOffsets[] = {4,8,16,20,32,36};
+        for (std::size_t i=0; i<position.rawFields.size(); ++i) position.rawFields[i] = read<uint32_t>(value, start + rawOffsets[i]);
+        if (position.depthCode>2 || position.planeCode>2)
+            model.diagnostics.push_back("unverified part position code for record " + std::to_string(id));
+        return position;
+    };
     std::unordered_map<uint32_t, uint32_t> definitionTypes;
     for (std::size_t index = 0; index < all[partDefinitionOrdinal].rowCount; ++index)
     {
@@ -1429,6 +1446,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         definition.material = fixedString(value, older782 ? 277 : olderSchema ? 229 : 269, older782 ? 32 : older844 ? 85 : 95);
         if (older782) definitionTypes[definition.id] = read<uint32_t>(value, 5);
         insertUnique(model.definitions, definition.id, definition, "definition");
+        if (older782)
+            insertUnique(model.partDefinitionPositions, definition.id, readPosition(value, definition.id, 21), "definition position");
     }
 
     struct ContourBlock { uint32_t sequence = 0; std::vector<ContourPoint> points; };
@@ -1506,20 +1525,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         for (std::size_t index = 0; index < all[partAuxiliaryOrdinal].rowCount; ++index)
         {
             const auto* value = row(data, all, partAuxiliaryOrdinal, index);
-            PartPosition position;
-            position.id = read<uint32_t>(value, 1);
-            position.startAxialOffset = read<float>(value, 5);
-            position.endAxialOffset = read<float>(value, 17);
-            position.depthCode = read<uint32_t>(value, 29);
-            position.depthOffset = read<float>(value, 33);
-            position.planeCode = read<uint32_t>(value, 45);
-            position.planeOffset = read<float>(value, 49);
-            for (auto number : {position.startAxialOffset, position.endAxialOffset, position.depthOffset, position.planeOffset})
-                if (!std::isfinite(number)) throw std::runtime_error("non-finite part position " + std::to_string(position.id));
-            const std::size_t rawOffsets[] = {9,13,21,25,37,41};
-            for (std::size_t i=0; i<position.rawFields.size(); ++i) position.rawFields[i] = read<uint32_t>(value, rawOffsets[i]);
-            if (position.depthCode>2 || position.planeCode>2)
-                model.diagnostics.push_back("unverified part position code for record " + std::to_string(position.id));
+            const auto position = readPosition(value, read<uint32_t>(value, 1), 5);
             insertUnique(model.partPositions, position.id, position, "part position");
         }
     for (std::size_t index = 0; index < all[partOrdinal].rowCount; ++index)

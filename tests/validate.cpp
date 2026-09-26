@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <regex>
+#include <limits>
 
 namespace
 {

@@ -110,6 +110,7 @@ struct PartDefinition
 
 struct PartPosition
 {
+    // Record ID in partPositions; definition ID in partDefinitionPositions.
     uint32_t id = 0;
     float startAxialOffset = 0.0f;
     float endAxialOffset = 0.0f;
@@ -117,7 +118,8 @@ struct PartPosition
     float depthOffset = 0.0f;
     uint32_t planeCode = 0;
     float planeOffset = 0.0f;
-    // Payload offsets 8,12,20,24,36,40. Their meanings are unverified.
+    // Modern payload offsets 8,12,20,24,36,40; 7.82 definition offsets
+    // 24,28,36,40,52,56. Their meanings are unverified.
     std::array<uint32_t, 6> rawFields{};
 };
 
@@ -449,5 +451,8 @@ struct Model
     std::unordered_map<uint32_t, SurfaceTreatmentDefinition> surfaceTreatmentDefinitions;
     std::unordered_map<uint32_t, SurfaceTreatment> surfaceTreatments;
     std::unordered_map<uint32_t, std::vector<uint32_t>> surfaceTreatmentIdsByFather;
+    // 7.82 inline positions, keyed by Part::definitionId, including unused definitions.
+    // Independent namespace from modern partPositions/auxiliaryReferenceId.
+    std::unordered_map<uint32_t, PartPosition> partDefinitionPositions;
 };
 }

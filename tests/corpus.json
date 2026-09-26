@@ -11795,6 +11795,34 @@
       "path": "PSDBIM__EXCEL-1246A-BLDG-B",
       "exit": 0,
       "stdout": "definitions=6 surfaces=7 material_matches=6 points=32 distance_links=132 formula_targets=34 project_material_links=7"
+    },
+    {
+      "name": "position_model:PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "mode": "position_model",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "exit": 0,
+      "stdout": "version=7.82 positions=2249 linked_parts=3866 fingerprint=fafe08654cb1a254 axial_checked=2679 nonzero=90 length_residuals=0 axial_residual_ids=- length_residual_ids=-"
+    },
+    {
+      "name": "position_library:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "mode": "position_library",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 positions=413 linked_parts=843 fingerprint=87afd12d240ac641 axial_checked=486 nonzero=9 length_residuals=7 axial_residual_ids=29686 length_residual_ids=17986,18006,18698,18715,18947,63930,86420"
+    },
+    {
+      "name": "position_model:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "mode": "position_model",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "exit": 0,
+      "stdout": "version=7.82 positions=60 linked_parts=643 fingerprint=3023ae460ce6924f axial_checked=161 nonzero=0 length_residuals=0 axial_residual_ids=- length_residual_ids=-"
+    },
+    {
+      "name": "position_library:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "mode": "position_library",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 positions=0 linked_parts=0 fingerprint=cbf29ce484222325 axial_checked=0 nonzero=0 length_residuals=0 axial_residual_ids=- length_residual_ids=-"
     }
   ]
 }

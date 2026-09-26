@@ -133,6 +133,8 @@ if(TEKLADB1_BUILD_TESTS)
             ownership_distance_fields ownership_formula_fields ownership_formula_cycle ownership_formula_missing_chunk ownership_other_scope
             ownership_custom_reference_missing ownership_position_start_nan ownership_position_end_inf
             ownership_position_depth_nan ownership_position_plane_inf ownership_position_unknown
+            inline_position_main inline_position_library inline_position_start_nan inline_position_end_inf
+            inline_position_depth_nan inline_position_plane_inf inline_position_unused_nan inline_position_unknown
             surface_main surface_library surface_unknown_profile surface_fields surface_definition_fields surface_width
             surface_definition_missing surface_point_missing surface_frame_missing surface_contour_missing surface_identity_missing
             surface_father_missing surface_father_unknown surface_father_duplicate surface_target_missing surface_duplicate

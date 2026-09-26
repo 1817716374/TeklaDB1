@@ -249,7 +249,46 @@ int main(int argc, char** argv)
         const auto path = root / "model.db1";
         tekla::db1::Model model; tekla::db1::RawDatabase raw; std::string error = "stale";
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
-        if (name.rfind("surface_",0)==0)
+        if (name.rfind("inline_position_",0)==0)
+        {
+            const bool library=name!="inline_position_main";
+            auto s=onePart782(library);
+            const auto def=library?177U:207U, part=library?163U:193U;
+            auto& d=s[def].rows[0];
+            put<float>(d,21,-12.5f); put<float>(d,33,25.25f);
+            put<std::uint32_t>(d,45,2); put<float>(d,49,13.5f);
+            put<std::uint32_t>(d,61,1); put<float>(d,65,-7.25f);
+            const std::array<std::size_t,6> offsets{{25,29,37,41,53,57}};
+            for (std::size_t i=0;i<offsets.size();++i) put<std::uint32_t>(d,offsets[i],0x7fc01234U+static_cast<std::uint32_t>(i));
+            // A shared definition and an unused definition must both survive.
+            put<std::uint32_t>(s[part].rows[1],5,4);
+            if (name=="inline_position_start_nan") put<float>(d,21,std::numeric_limits<float>::quiet_NaN());
+            if (name=="inline_position_end_inf") put<float>(d,33,std::numeric_limits<float>::infinity());
+            if (name=="inline_position_depth_nan") put<float>(d,49,std::numeric_limits<float>::quiet_NaN());
+            if (name=="inline_position_plane_inf") put<float>(d,65,std::numeric_limits<float>::infinity());
+            if (name=="inline_position_unused_nan") put<float>(s[def].rows[1],21,std::numeric_limits<float>::quiet_NaN());
+            if (name=="inline_position_unknown") {put<std::uint32_t>(d,45,99);put<std::uint32_t>(d,61,100);}
+            save(path,encode(s,"7.82",library));
+            const auto readModel=[&] {return library?tekla::db1::parseComponentLibrary(path,model,error):parse();};
+            const bool valid=name=="inline_position_main" || name=="inline_position_library" || name=="inline_position_unknown";
+            const bool ok=readModel();
+            if (valid)
+            {
+                check(ok,error.c_str());
+                check(model.partPositions.empty() && model.partDefinitionPositions.size()==2,"inline position records lost or namespaces mixed");
+                const auto& p=model.partDefinitionPositions.at(4);
+                check(p.id==4 && p.startAxialOffset==-12.5f && p.endAxialOffset==25.25f && p.depthOffset==13.5f && p.planeOffset==-7.25f,"inline position values lost");
+                check(p.depthCode==(name=="inline_position_unknown"?99U:2U) && p.planeCode==(name=="inline_position_unknown"?100U:1U),"inline position codes changed");
+                for (std::size_t i=0;i<6;++i) check(p.rawFields[i]==0x7fc01234U+i,"opaque inline position bits lost");
+                check(model.partDefinitionPositions.at(14).id==14,"unused inline definition discarded");
+                for (auto id:{5U,15U}) check(model.parts.at(id).definitionId==4 && model.parts.at(id).auxiliaryReferenceId==0 && model.parts.at(id).origin[0]==123 && model.parts.at(id).length==100,"shared position or stored geometry changed");
+                if (name=="inline_position_unknown") check(std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& x){return x.find("unverified part position code")!=std::string::npos;}),"unknown inline code not diagnosed");
+                // A failed read on a reused model must clear the new position map too.
+                save(path,{1,2,3}); check(!readModel() && model.partDefinitionPositions.empty() && model.parts.empty(),"failed reread kept inline positions");
+            }
+            else check(!ok && error.find("non-finite part position")!=std::string::npos && model.partDefinitionPositions.empty() && model.definitions.empty(),"invalid inline position accepted or partial model retained");
+        }
+        else if (name.rfind("surface_",0)==0)
         {
             const bool library=name!="surface_main" && name!="surface_project_no_catalog";
             auto s=onePart782(library);
