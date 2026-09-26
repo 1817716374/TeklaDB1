@@ -29,6 +29,7 @@
 #include <TopTools_ListOfShape.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Dir.hxx>
+#include <gp_Elips.hxx>
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
@@ -84,6 +85,9 @@ struct Section
     std::vector<Point> outer;
     std::vector<std::vector<Point>> holes;
     bool centerOnCentroid = false;
+    // Analytic constant elliptical section. The polygon remains available for
+    // path orientation/extents, but must not replace the curved boundary.
+    std::array<double, 2> ellipseRadii{};
 };
 
 std::vector<Section::Point> rectangle(double height, double width, double radius = 0.0)
@@ -129,7 +133,7 @@ const Profile* profileByName(const Model& model, const std::string& name)
         return &found->second;
 
     const auto signature = [](const std::string& value) {
-        struct Result { std::string family; std::vector<double> dimensions; } result;
+        struct Result { std::string family; std::vector<double> dimensions; bool valid = true; } result;
         const auto firstNumber = value.find_first_of("0123456789");
         result.family = value.substr(0, firstNumber);
         result.family.erase(std::remove_if(result.family.begin(), result.family.end(),
@@ -142,7 +146,15 @@ const Profile* profileByName(const Model& model, const std::string& name)
         const std::regex number(R"(([0-9]+(?:\.[0-9]+)?))");
         for (auto iterator = std::sregex_iterator(value.begin(), value.end(), number);
              iterator != std::sregex_iterator(); ++iterator)
-            result.dimensions.push_back(std::stod((*iterator)[1]));
+        {
+            try
+            {
+                const auto dimension = std::stod((*iterator)[1]);
+                if (!std::isfinite(dimension)) { result.valid = false; return result; }
+                result.dimensions.push_back(dimension);
+            }
+            catch (const std::exception&) { result.valid = false; return result; }
+        }
         const std::pair<const char*, const char*> aliases[] = {
             {"CBLA", "CBL"}, {"LBEAM", "BL"}, {"LSPAN", "LS"},
             {"COLUMN", "CN"}, {"CX", "CN"}, {"ITBEAM", "BT"},
@@ -153,12 +165,13 @@ const Profile* profileByName(const Model& model, const std::string& name)
         return result;
     };
     const auto requested = signature(name);
+    if (!requested.valid) return nullptr;
     for (const auto& entry : model.profiles)
     {
         if (entry.second.source != ProfileSource::SketchSolver)
             continue;
         const auto candidate = signature(entry.first);
-        if (candidate.family != requested.family ||
+        if (!candidate.valid || candidate.family != requested.family ||
             candidate.dimensions.size() != requested.dimensions.size())
             continue;
         bool equal = true;
@@ -318,7 +331,7 @@ Section sectionFor(const Model& model, const Part& part, std::string& mode)
     const std::regex ipe(R"(^IPE([0-9]+(?:\.[0-9]+)?)$)", std::regex::icase);
     const std::regex channel(R"(^C([0-9.]+)\*([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
     const std::regex sadef(R"(^SADEF-C([0-9.]+)/([0-9.]+)/([0-9.]+)X([0-9.]+)$)", std::regex::icase);
-    const std::regex eld(R"(^ELD([0-9.]+)\*([0-9.]+)\*([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
+    const std::regex eld(R"(^ELD([0-9]+(?:\.[0-9]+)?)\*([0-9]+(?:\.[0-9]+)?)\*([0-9]+(?:\.[0-9]+)?)\*([0-9]+(?:\.[0-9]+)?)$)", std::regex::icase);
     if (std::regex_match(part.profile, match, plate))
     {
         result.centerOnCentroid = true;
@@ -455,10 +468,25 @@ Section sectionFor(const Model& model, const Part& part, std::string& mode)
     }
     else if (std::regex_match(part.profile, match, eld))
     {
-        const auto height = std::stod(match[1]) + std::stod(match[3]);
-        const auto width = (std::max)(std::stod(match[2]), std::stod(match[4]));
+        if (catalog) return result;
+        std::array<double,4> dimensions{};
+        try { for (unsigned i=0;i<4;++i) dimensions[i]=std::stod(match[i+1]); }
+        catch (const std::exception&) { mode = "invalid ELD dimensions"; return result; }
+        const auto height = dimensions[0], width = dimensions[1];
+        const auto endHeight = dimensions[2], endWidth = dimensions[3];
+        if (!std::isfinite(height) || !std::isfinite(width) || height <= kTolerance || width <= kTolerance ||
+            !std::isfinite(endHeight) || !std::isfinite(endWidth) || endHeight <= kTolerance || endWidth <= kTolerance)
+        { mode = "invalid ELD dimensions"; return result; }
+        if (height != endHeight || width != endWidth)
+        { mode = "unverified tapered ELD section"; return result; }
         result.centerOnCentroid = true;
-        result.outer = rectangle(height, width); mode = "ELD envelope";
+        result.ellipseRadii = {height * 0.5, width * 0.5};
+        for (unsigned i = 0; i < 16; ++i)
+        {
+            const auto theta = 2 * kPi * i / 16;
+            result.outer.emplace_back(result.ellipseRadii[0] * std::cos(theta), result.ellipseRadii[1] * std::sin(theta));
+        }
+        mode = "parametric constant ELD ellipse";
     }
     else if (part.profile.find("ARVAL_") == 0)
     {
@@ -597,12 +625,27 @@ TopoDS_Wire wire(const std::vector<Section::Point>& source, const Part& part, do
     return builder.IsDone() ? builder.Wire() : TopoDS_Wire{};
 }
 
+TopoDS_Wire sectionWire(const Section& section, const Part& part, double along)
+{
+    const auto a = section.ellipseRadii[0], b = section.ellipseRadii[1];
+    if (a <= 0 || b <= 0) return wire(section.outer, part, along);
+    const auto x = normalized(part.secondary);
+    const auto z = normalized(cross(part.secondary, part.normal));
+    const auto y = normalized(cross(z, x));
+    if (length(x) <= kTolerance || length(z) <= kTolerance || length(y) <= kTolerance) return {};
+    const auto major = a >= b ? x : y;
+    const gp_Ax2 frame(point(add(part.origin, scale(part.axis, along))), gp_Dir(vector(z)), gp_Dir(vector(major)));
+    BRepBuilderAPI_MakeEdge edge(gp_Elips(frame, (std::max)(a,b), (std::min)(a,b)));
+    if (!edge.IsDone()) return {};
+    return BRepBuilderAPI_MakeWire(edge.Edge()).Wire();
+}
+
 TopoDS_Shape linearSolid(const Model& model, const Part& part, std::string& mode)
 {
     const auto section = sectionFor(model, part, mode);
     if (section.outer.size() < 3 || part.length <= kTolerance)
         return {};
-    BRepBuilderAPI_MakeFace faceBuilder(wire(section.outer, part, 0.0));
+    BRepBuilderAPI_MakeFace faceBuilder(sectionWire(section, part, 0.0));
     for (const auto& hole : section.holes)
         faceBuilder.Add(wire(hole, part, 0.0));
     if (!faceBuilder.IsDone())
@@ -655,7 +698,7 @@ TopoDS_Shape camberedSolid(const Model& model, const Part& part, double camber, 
     start.axis = add(scale(x, std::cos(angle * 0.5)), scale(z, std::sin(angle * 0.5)));
     start.normal = scale(y, -1.0);
     start.secondary = add(scale(z, std::cos(angle * 0.5)), scale(x, -std::sin(angle * 0.5)));
-    BRepBuilderAPI_MakeFace face(wire(section.outer, start, 0.0));
+    BRepBuilderAPI_MakeFace face(sectionWire(section, start, 0.0));
     for (const auto& hole : section.holes) face.Add(wire(hole, start, 0.0));
     if (!face.IsDone()) return {};
     const auto center = add(add(part.origin, scale(x, halfChord)), scale(z, centerOffset));
@@ -862,7 +905,7 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
     builder.MakeCompound(result);
     std::string sectionMode;
     const auto section = sectionFor(model, part, sectionMode);
-    if (section.outer.size() < 3) return {};
+    if (section.outer.size() < 3) { mode = sectionMode; return {}; }
     double minimumSecondary = (std::numeric_limits<double>::max)();
     double maximumSecondary = (std::numeric_limits<double>::lowest)();
     double minimumNormal = (std::numeric_limits<double>::max)();
@@ -874,21 +917,9 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
         minimumNormal = (std::min)(minimumNormal, point.value[1]);
         maximumNormal = (std::max)(maximumNormal, point.value[1]);
     }
-    Vec3 pathPlaneNormal{};
-    for (std::size_t index = 2; index < path.size(); ++index)
-    {
-        const auto previous = subtract(path[index - 1], path[index - 2]);
-        const auto following = subtract(path[index], path[index - 1]);
-        const auto candidate = cross(previous, following);
-        if (length(candidate) > kTolerance)
-        {
-            pathPlaneNormal = normalized(candidate);
-            break;
-        }
-    }
-    const auto preserveSecondary = length(pathPlaneNormal) > kTolerance
-                                       ? std::abs(dot(part.secondary, pathPlaneNormal)) >= std::abs(dot(part.normal, pathPlaneNormal))
-                                       : maximumSecondary - minimumSecondary >= maximumNormal - minimumNormal;
+    auto previousAxis = normalized(part.axis);
+    auto previousSecondary = normalized(subtract(part.secondary, scale(previousAxis, dot(part.secondary, previousAxis))));
+    if (length(previousAxis) <= kTolerance || length(previousSecondary) <= kTolerance) return {};
     const auto profileOffset = subtract(part.origin, part.start);
     const auto secondaryOffset = dot(profileOffset, part.secondary);
     const auto normalOffset = dot(profileOffset, part.normal);
@@ -902,23 +933,18 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
         Part segment = part;
         segment.contour.clear();
         segment.axis = scale(delta, 1.0 / segmentLength);
-        if (preserveSecondary)
-        {
-            auto secondary = subtract(part.secondary, scale(segment.axis, dot(part.secondary, segment.axis)));
-            if (length(secondary) <= kTolerance)
-                secondary = subtract(part.normal, scale(segment.axis, dot(part.normal, segment.axis)));
-            segment.secondary = normalized(secondary);
-            segment.normal = normalized(cross(segment.axis, segment.secondary));
-        }
-        else
-        {
-            auto normal = subtract(part.normal, scale(segment.axis, dot(part.normal, segment.axis)));
-            if (length(normal) <= kTolerance)
-                normal = subtract(part.secondary, scale(segment.axis, dot(part.secondary, segment.axis)));
-            segment.normal = normalized(normal);
-            segment.secondary = normalized(cross(segment.normal, segment.axis));
-            segment.normal = normalized(cross(segment.axis, segment.secondary));
-        }
+        // Transport the section by the smallest rotation between tangents.
+        // Projecting a fixed initial axis onto every segment introduces twist
+        // when the section is oblique to the path's plane (notably ELD).
+        const auto cosine = (std::max)(-1.0, (std::min)(1.0, dot(previousAxis, segment.axis)));
+        if (cosine <= -1.0 + 1e-10) return {};
+        const auto turn = cross(previousAxis, segment.axis);
+        const auto rotated = add(add(previousSecondary, cross(turn, previousSecondary)),
+                                 scale(cross(turn, cross(turn, previousSecondary)), 1.0 / (1.0 + cosine)));
+        segment.secondary = normalized(subtract(rotated, scale(segment.axis, dot(rotated, segment.axis))));
+        segment.normal = normalized(cross(segment.axis, segment.secondary));
+        previousAxis = segment.axis;
+        previousSecondary = segment.secondary;
         segment.origin = add(add(path[index - 1], scale(segment.secondary, secondaryOffset)),
                              scale(segment.normal, normalOffset));
         segment.length = segmentLength;

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Optional OCCT evidence, reusing exactly the two pinned files in corpus.json. All 25 UPE parts including eight polybeams retain nominal-source provenance; final volumes and 1724 IFC vertex distances are checked after model operations. This does not claim all complex model geometry is complete.",
+  "note": "Optional OCCT evidence, reusing exactly the two pinned files in corpus.json. Checks UPE, circular cambering and constant ELD ellipses, including eight ELD polybeams. Ellipse volumes use independently fitted IFC end rings to account for polygonal sampling, plus all 7872 world-space vertices. This does not claim all complex model geometry is complete.",
   "archives": {
     "btscm-ifc730": {
       "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/out.ifcZIP",
@@ -37,6 +37,13 @@
       "mode": "ifc_camber_geometry",
       "exit": 0,
       "stdout": "cambered_parts=6 ifc_vertices=336"
+    },
+    {
+      "name": "btscm-ifc730-occt-ellipse-solids",
+      "path": "btscm-ifc730",
+      "mode": "ifc_ellipse_geometry",
+      "exit": 0,
+      "stdout": "ellipse_parts=12 ifc_vertices=7872 transport_controls=1"
     }
   ]
 }

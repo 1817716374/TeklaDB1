@@ -184,4 +184,6 @@ ctest --test-dir build-occt --output-on-failure
 
 起拱实体支持已有 `PartCambering` 的圆弧扫掠，并用同工程6个对象的336个独立IFC顶点验证；普通 `cambering` UDA不改变几何。起拱叠加加工/轮廓等未验证组合明确报告未构建，详见[起拱证据与边界](docs/CAMBERING.zh-CN.md)。
 
+等截面ELD支持解析椭圆，并修正斜置截面在折线路径上的额外扭转。真实检查覆盖12个构件、7,872个IFC顶点及独立体积；变截面ELD仍明确报告未构建，详见[椭圆截面证据](docs/ELLIPSE_GEOMETRY.zh-CN.md)。
+
 长期多格式路线和历史记录见 [逆向路线图](docs/REVERSE_ENGINEERING_PLAN.zh-CN.md)。本项目与 Trimble Inc. 没有隶属或背书关系；不包含 Tekla SDK、软件安装包或第三方专有模型。

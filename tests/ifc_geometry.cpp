@@ -16,6 +16,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "Ifc730Validation.hpp"
+#include "EllipseIfcValidation.hpp" // Independent rings/volume/vertices and non-ellipse transport control.
 
 // Independent analytic volume inferred only from the fixed IFC BREP rings.
 // Do not use its undeformed quantity field or the DB1 camber formula here.
@@ -111,8 +112,8 @@ int check(const std::filesystem::path& directory, bool camberCheck)
 }
 #ifdef _WIN32
 int wmain(int argc,wchar_t** argv)
-{return argc==3 && (std::wstring(argv[1])==L"ifc_geometry" || std::wstring(argv[1])==L"ifc_camber_geometry")?check(std::filesystem::path(argv[2]),std::wstring(argv[1])==L"ifc_camber_geometry"):2;}
+{if(argc==3 && std::wstring(argv[1])==L"ifc_ellipse_geometry")return checkEllipseIfc(std::filesystem::path(argv[2]));return argc==3 && (std::wstring(argv[1])==L"ifc_geometry" || std::wstring(argv[1])==L"ifc_camber_geometry")?check(std::filesystem::path(argv[2]),std::wstring(argv[1])==L"ifc_camber_geometry"):2;}
 #else
 int main(int argc,char** argv)
-{return argc==3 && (std::string(argv[1])=="ifc_geometry" || std::string(argv[1])=="ifc_camber_geometry")?check(std::filesystem::u8path(argv[2]),std::string(argv[1])=="ifc_camber_geometry"):2;}
+{if(argc==3 && std::string(argv[1])=="ifc_ellipse_geometry")return checkEllipseIfc(std::filesystem::u8path(argv[2]));return argc==3 && (std::string(argv[1])=="ifc_geometry" || std::string(argv[1])=="ifc_camber_geometry")?check(std::filesystem::u8path(argv[2]),std::string(argv[1])=="ifc_camber_geometry"):2;}
 #endif

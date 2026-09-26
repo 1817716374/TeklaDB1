@@ -10,6 +10,7 @@
 #include <set>
 #include <limits>
 #include "NominalSectionReference.hpp"
+#include "EllipseGeometryRegression.hpp" // Includes oblique section transport across a bend.
 
 int nominalSections()
 {
@@ -140,6 +141,7 @@ int main(int argc,char** argv)
     if(argc==2 && std::string(argv[1])=="nominal")return nominalSections();
     if(argc==2 && std::string(argv[1])=="miter")return polybeamMiters();
     if(argc==2 && std::string(argv[1])=="camber")return camberingGeometry();
+    if(argc==2 && std::string(argv[1])=="ellipse")return ellipseSections();
     if(argc!=1)return 2;
     tekla::db1::Model model;
     tekla::db1::Part beam;
