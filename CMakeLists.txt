@@ -108,6 +108,10 @@ if(TEKLADB1_BUILD_TESTS)
             drawing_nonfinite drawing_truncated drawing_limit numbering_unknown drawing_unknown)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
+    foreach(case drawing_view_valid drawing_view_duplicate drawing_view_basis drawing_view_nonfinite
+            drawing_view_volume drawing_view_depth drawing_view_subject drawing_view_unknown)
+        add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     foreach(case valid_model short_trailer unknown_version wrong_fields broken_reference
             unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
             gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path

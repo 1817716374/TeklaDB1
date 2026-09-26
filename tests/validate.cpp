@@ -133,6 +133,47 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 if (compared!=10 || project.drawings.size()!=7 || references!=28 || project.drawingModelAssociations.size()!=references)
                     throw std::runtime_error("public related-format evidence count mismatch");
                 std::cout<<"independent_numbering_counters="<<compared<<" drawing_model_guid_links="<<references<<'\n';
+                std::ifstream vi(path/"attributes"/"new_FAB-PLATE_Without_Dimensions.vi",std::ios::binary);
+                if (!vi) throw std::runtime_error("independent view settings missing");
+                const std::string settings((std::istreambuf_iterator<char>(vi)),{});
+                std::size_t views=0,volumeFields=0,plateAxes=0;
+                for (const auto& file:project.drawings)
+                {
+                    const auto& drawing=file.second; views+=drawing.viewsByContext.size();
+                    for (const auto& ref:drawing.modelReferences)
+                        if (!drawing.viewsByContext.count(ref.drawingContextId)) throw std::runtime_error("drawing reference context has no view");
+                    for (const auto& entry:drawing.viewsByContext)
+                    {
+                        const auto& view=entry.second;
+                        if (!drawing.subject || view.modelGuid!=drawing.subject->modelGuid) throw std::runtime_error("view/subject GUID mismatch");
+                        if (view.propertySetName!="new_FAB-PLATE_Without_Dimensions") continue;
+                        const auto& v=view.storedAttributeVolume;
+                        for (const auto& field:std::map<std::string,double>{{"xmin",v.minX},{"xmax",v.maxX},{"ymin",v.minY},{"ymax",v.maxY},{"depth_neg",v.depthNegative},{"depth_pos",v.depthPositive}})
+                        {
+                            std::smatch match;
+                            if (!std::regex_search(settings,match,std::regex("(?:^|\\n)"+field.first+" ([^\\r\\n]+)")) ||
+                                std::abs(std::stod(match[1].str())-field.second)>1e-6)
+                                throw std::runtime_error("view volume differs from saved Tekla VI settings: "+field.first);
+                            ++volumeFields;
+                        }
+                        for (const auto& link:project.drawingSubjectAssociations)
+                            if (link.drawing==file.first)
+                            {
+                                const auto& part=project.model.parts.at(link.modelObjectId);
+                                for (std::size_t i=0;i<3;++i)
+                                    if (std::abs(part.axis[i]-view.viewCoordinates.axisX[i])>1e-6)
+                                        throw std::runtime_error("plate drawing view X axis differs from model part axis");
+                                ++plateAxes;
+                            }
+                    }
+                }
+                if (views!=19 || volumeFields!=6 || plateAxes!=1 || project.drawingSubjectAssociations.size()!=4)
+                    throw std::runtime_error("view/subject public evidence count mismatch");
+                for (const auto& link:project.drawingModelAssociations)
+                    if (!project.drawings.at(link.drawing).viewsByContext.count(link.drawingContextId))
+                        throw std::runtime_error("project drawing model link lost its view context");
+                std::cout<<"drawing_views="<<views<<" subject_links="<<project.drawingSubjectAssociations.size()
+                         <<" independent_vi_volume_fields="<<volumeFields<<" model_plate_axis_checks="<<plateAxes<<'\n';
             }
         }
         else if (mode=="raw")
@@ -225,10 +266,21 @@ int run(const std::string& mode, const std::filesystem::path& path)
             for (const auto& link:drawing.propertyLinks) { hash.number(link.id); hash.number(link.propertyId); hash.number(link.ownerId); }
             for (const auto& sheet:drawing.sheets) { hash.number(sheet.id); hash.real(sheet.width); hash.real(sheet.height); }
             for (const auto& ref:drawing.modelReferences) { hash.number(ref.recordId); hash.number(ref.drawingContextId); hash.text(ref.modelGuid); }
+            if (drawing.subject) { hash.number(drawing.subject->recordId); hash.number(drawing.subject->typeCode); hash.text(drawing.subject->modelGuid); }
+            for (const auto& entry:drawing.viewsByContext)
+            {
+                const auto& view=entry.second;
+                hash.number(view.recordId); hash.number(view.contextId); hash.text(view.modelGuid); hash.text(view.propertySetName);
+                for (const auto* cs:{&view.viewCoordinates,&view.displayCoordinates})
+                    for (const auto* p:{&cs->origin,&cs->axisX,&cs->axisY,&cs->axisZ}) for (auto x:*p) hash.real(x);
+                for (const auto* v:{&view.restriction,&view.storedAttributeVolume})
+                    for (auto x:{v->minX,v->maxX,v->minY,v->maxY,v->depthNegative,v->depthPositive}) hash.real(x);
+            }
             std::cout<<"version="<<drawing.raw.storageVersion<<" tables="<<drawing.raw.tables.size()
                      <<" strings="<<drawing.strings.size()<<" properties="<<drawing.properties.size()
                      <<" links="<<drawing.propertyLinks.size()<<" sheets="<<drawing.sheets.size()
                      <<" model_refs="<<drawing.modelReferences.size()
+                     <<" views="<<drawing.viewsByContext.size()<<" subject="<<bool(drawing.subject)
                      <<" guid="<<drawing.projectGuid<<" stored="<<drawing.storedFileName
                      <<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
         }

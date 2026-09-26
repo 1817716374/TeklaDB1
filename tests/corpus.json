@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. Explicit 7.82 failures are coverage boundaries. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. Explicit 7.82 failures are coverage boundaries. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -1729,6 +1729,13 @@
       "member": "Steel Fundamentals Modeling Assignment/numberinghistory.txt",
       "size": 23333,
       "sha256": "29786b6c0d72c569b2b18241278883eee4ead059652cc312ee71540d19798861"
+    },
+    {
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/attributes/new_FAB-PLATE_Without_Dimensions.vi",
+      "archive": "steel-fundamentals",
+      "member": "Steel Fundamentals Modeling Assignment/attributes/new_FAB-PLATE_Without_Dimensions.vi",
+      "size": 67920,
+      "sha256": "ddb5cc292ef1f918014e4bbe393f42d0414cfbe86559cf9ee09ff7fb33d89b95"
     }
   ],
   "cases": [
@@ -4236,7 +4243,7 @@
       "mode": "drawing",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D0af4f427-b208-4018-b750-6bb0549b6dda.dg",
       "exit": 0,
-      "stdout": "version=9.54 tables=48 strings=90 properties=7 links=14 sheets=1 model_refs=14 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=D0af4f427-b208-4018-b750-6bb0549b6dda.dg fingerprint=69726af5e40e3046"
+      "stdout": "version=9.54 tables=48 strings=90 properties=7 links=14 sheets=1 model_refs=14 views=9 subject=1 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=D0af4f427-b208-4018-b750-6bb0549b6dda.dg fingerprint=f3a92ddf5b35609c"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D0af4f427-b208-4018-b750-6bb0549b6dda.dg",
@@ -4250,7 +4257,7 @@
       "mode": "drawing",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg",
       "exit": 0,
-      "stdout": "version=9.54 tables=48 strings=39 properties=6 links=7 sheets=1 model_refs=2 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg fingerprint=5c45ba2b00e68221"
+      "stdout": "version=9.54 tables=48 strings=39 properties=6 links=7 sheets=1 model_refs=2 views=2 subject=1 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg fingerprint=b18cb229baa3ace3"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg",
@@ -4264,7 +4271,7 @@
       "mode": "drawing",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg",
       "exit": 0,
-      "stdout": "version=9.54 tables=48 strings=49 properties=5 links=8 sheets=1 model_refs=6 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg fingerprint=2402c6e01c41e237"
+      "stdout": "version=9.54 tables=48 strings=49 properties=5 links=8 sheets=1 model_refs=6 views=4 subject=1 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg fingerprint=e7ef3a8cc40e74b4"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg",
@@ -4278,7 +4285,7 @@
       "mode": "drawing",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Db2ae07cb-3c9e-4c0b-af76-7b96284a737b.dg",
       "exit": 0,
-      "stdout": "version=9.54 tables=48 strings=14 properties=4 links=4 sheets=0 model_refs=0 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=Db2ae07cb-3c9e-4c0b-af76-7b96284a737b.dg fingerprint=12e1c9705b4f023a"
+      "stdout": "version=9.54 tables=48 strings=14 properties=4 links=4 sheets=0 model_refs=0 views=0 subject=0 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=Db2ae07cb-3c9e-4c0b-af76-7b96284a737b.dg fingerprint=12e1c9705b4f023a"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Db2ae07cb-3c9e-4c0b-af76-7b96284a737b.dg",
@@ -4292,7 +4299,7 @@
       "mode": "drawing",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Dd51e7c0b-f390-4f85-9e82-40ea1ef5d642.dg",
       "exit": 0,
-      "stdout": "version=9.54 tables=48 strings=14 properties=4 links=4 sheets=0 model_refs=0 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=Dd51e7c0b-f390-4f85-9e82-40ea1ef5d642.dg fingerprint=4d70b3aa9dd49ac"
+      "stdout": "version=9.54 tables=48 strings=14 properties=4 links=4 sheets=0 model_refs=0 views=0 subject=0 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=Dd51e7c0b-f390-4f85-9e82-40ea1ef5d642.dg fingerprint=4d70b3aa9dd49ac"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Dd51e7c0b-f390-4f85-9e82-40ea1ef5d642.dg",
@@ -4306,7 +4313,7 @@
       "mode": "drawing",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/De22c5500-3c8c-445e-8d3c-84d72a7dd4be.dg",
       "exit": 0,
-      "stdout": "version=9.54 tables=48 strings=14 properties=4 links=4 sheets=0 model_refs=0 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=De22c5500-3c8c-445e-8d3c-84d72a7dd4be.dg fingerprint=8aa789d63f846d08"
+      "stdout": "version=9.54 tables=48 strings=14 properties=4 links=4 sheets=0 model_refs=0 views=0 subject=0 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=De22c5500-3c8c-445e-8d3c-84d72a7dd4be.dg fingerprint=8aa789d63f846d08"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/De22c5500-3c8c-445e-8d3c-84d72a7dd4be.dg",
@@ -4320,7 +4327,7 @@
       "mode": "drawing",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg",
       "exit": 0,
-      "stdout": "version=9.54 tables=48 strings=49 properties=5 links=8 sheets=1 model_refs=6 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg fingerprint=669e1c9bceb7443e"
+      "stdout": "version=9.54 tables=48 strings=49 properties=5 links=8 sheets=1 model_refs=6 views=4 subject=1 guid=014917ef-f600-4312-b450-a70c95f7efe4 stored=Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg fingerprint=793b16c63358a5de"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg",
@@ -4341,7 +4348,7 @@
       "mode": "related_evidence",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
       "exit": 0,
-      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=15 associations=13 raw=5 failed=0 drawings=7\ndocumented_attribute_choices=3 model_attribute_definition_links=118\nindependent_numbering_counters=10 drawing_model_guid_links=28"
+      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=15 associations=13 raw=5 failed=0 drawings=7\ndocumented_attribute_choices=3 model_attribute_definition_links=118\nindependent_numbering_counters=10 drawing_model_guid_links=28\ndrawing_views=19 subject_links=4 independent_vi_volume_fields=6 model_plate_axis_checks=1"
     },
     {
       "name": "dbv-semantic-1",

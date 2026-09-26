@@ -48,6 +48,27 @@ struct DgFixture
         }
         return b;
     }
+    void addView()
+    {
+        Bytes view(4788); put<unsigned>(view,0,260); put<unsigned>(view,4,44); put<unsigned>(view,8,45);
+        std::fill(view.begin()+24,view.begin()+40,0x11);
+        for (auto offset:{48U,168U})
+        {
+            for (auto p:{0U,24U,48U}) { put<double>(view,offset+p,100); put<double>(view,offset+p+8,200); put<double>(view,offset+p+16,300); }
+            if (offset==48) { put<double>(view,offset+24,101); put<double>(view,offset+56,201); }
+            else { put<double>(view,offset+32,201); put<double>(view,offset+48,99); }
+        }
+        for (auto offset:{120U,240U})
+        {
+            put<double>(view,offset,-10); put<double>(view,offset+8,20); put<double>(view,offset+16,-30);
+            put<double>(view,offset+24,40); put<double>(view,offset+32,5); put<double>(view,offset+40,7);
+        }
+        rows[5]={view};
+        Bytes subject(6196); put<unsigned>(subject,0,269); put<unsigned>(subject,4,43); put<unsigned>(subject,12,1);
+        std::fill(subject.begin()+16,subject.begin()+32,0x11); rows[10]={subject};
+        Bytes property(110); put<unsigned>(property,0,6); put<unsigned>(property,4,2); text(property,8,"gr_cl_view_prop"); text(property,29,"saved-view"); rows[22].push_back(property);
+        Bytes link(12); put<unsigned>(link,0,7); put<unsigned>(link,4,6); put<unsigned>(link,8,45); rows[21].push_back(link);
+    }
 };
 }
 int main(int argc,char** argv)
@@ -101,6 +122,15 @@ int main(int argc,char** argv)
         else
         {
             DgFixture fixture;
+            const auto viewCase=mode.find("drawing_view_")==0;
+            if (viewCase) fixture.addView();
+            if (mode=="drawing_view_duplicate") { fixture.rows[5].push_back(fixture.rows[5][0]); put<unsigned>(fixture.rows[5][1],4,46); }
+            if (mode=="drawing_view_basis") put<double>(fixture.rows[5][0],72,100);
+            if (mode=="drawing_view_nonfinite") put<double>(fixture.rows[5][0],168,std::numeric_limits<double>::infinity());
+            if (mode=="drawing_view_volume") put<double>(fixture.rows[5][0],120,50);
+            if (mode=="drawing_view_depth") put<double>(fixture.rows[5][0],272,std::numeric_limits<double>::quiet_NaN());
+            if (mode=="drawing_view_subject") fixture.rows[10].push_back(fixture.rows[10][0]);
+            if (mode=="drawing_view_unknown") put<unsigned>(fixture.rows[10][0],12,777);
             if (mode=="drawing_cycle") put<unsigned>(fixture.rows[18][1],4,1);
             if (mode=="drawing_missing_chunk") put<unsigned>(fixture.rows[18][0],4,999);
             if (mode=="drawing_duplicate") fixture.rows[18].push_back(fixture.rows[18][0]);
@@ -108,7 +138,19 @@ int main(int argc,char** argv)
             if (mode=="drawing_signature") fixture.widths[0]=129;
             if (mode=="drawing_nonfinite") put<double>(fixture.rows[8][0],16,std::numeric_limits<double>::quiet_NaN());
             auto b=fixture.encode(); if (mode=="drawing_unknown") b[11]='5'; save(dg,b);
-            if (mode=="drawing_valid")
+            if (mode=="drawing_view_valid" || mode=="drawing_view_unknown")
+            {
+                check(tekla::parseDrawing(dg,d,error,{true}),error);
+                const auto& view=d.viewsByContext.at(45);
+                check(view.recordId==44 && view.propertySetName=="saved-view","view property context join");
+                check(view.viewCoordinates.origin==tekla::DrawingPoint3{100,200,300} && view.viewCoordinates.axisX==tekla::DrawingPoint3{1,0,0},"axis endpoint conversion");
+                check(view.displayCoordinates.axisX==tekla::DrawingPoint3{0,1,0} && view.displayCoordinates.axisZ==tekla::DrawingPoint3{0,0,1},"display coordinate basis");
+                check(view.restriction.minX==-10 && view.storedAttributeVolume.depthPositive==7,"view volume");
+                check(d.subject && d.subject->modelGuid=="11111111-1111-1111-1111-111111111111","subject GUID");
+                check(d.subject->kind==(mode=="drawing_view_unknown" ? tekla::DrawingSubjectKind::Unknown : tekla::DrawingSubjectKind::SinglePart),"subject classification");
+                check(d.raw.decompressedFileImage==b,"view raw retention");
+            }
+            else if (mode=="drawing_valid")
             {
                 check(tekla::parseDrawing(dg,d,error,{true}),error); check(error.empty(),"stale drawing error");
                 check(d.strings.size()==1 && d.strings.at(1).text=="<Mark><UserText>HELLO WORLD</UserText></Mark>","drawing XML chain incorrect");
@@ -138,7 +180,8 @@ int main(int argc,char** argv)
                 check(!tekla::parseDrawing(dg,d,error),"unknown drawing semantic version accepted");
             }
             else check(!tekla::parseDrawing(dg,d,error),"invalid drawing accepted: "+mode);
-            if (mode!="drawing_valid") check(d.raw.tables.empty() && d.strings.empty() && !error.empty(),"DG failed output not cleared");
+            if (mode!="drawing_valid" && mode!="drawing_view_valid" && mode!="drawing_view_unknown")
+                check(d.raw.tables.empty() && d.strings.empty() && d.viewsByContext.empty() && !d.subject && !error.empty(),"DG failed output not cleared");
         }
         std::cout<<"PASS "<<mode<<'\n'; return 0;
     }

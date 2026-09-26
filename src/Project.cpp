@@ -174,17 +174,33 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 if (!drawing.projectGuid.empty() && !result.model.databaseGuid.empty() && lower(drawing.projectGuid)==lower(result.model.databaseGuid))
                 {
                     result.associations.push_back({result.model.databasePath,file.path,"DG grProjectGuid matches model database GUID"});
+                    if (drawing.subject)
+                    {
+                        const auto& subject=*drawing.subject;
+                        const auto found=modelIdsByGuid.find(lower(subject.modelGuid));
+                        if (found!=modelIdsByGuid.end() && found->second.size()==1)
+                        {
+                            const auto id=found->second.front();
+                            const auto matches=subject.kind==DrawingSubjectKind::Unknown ||
+                                (subject.kind==DrawingSubjectKind::SinglePart && result.model.parts.count(id)) ||
+                                (subject.kind==DrawingSubjectKind::Assembly && std::any_of(result.model.assemblies.begin(),result.model.assemblies.end(),
+                                    [&](const auto& assembly) { return assembly.id==id; }));
+                            if (matches) result.drawingSubjectAssociations.push_back({file.path,subject.recordId,id,subject.modelGuid});
+                            else result.diagnostics.push_back("drawing subject type differs from matching model object: "+subject.modelGuid);
+                        }
+                        else result.diagnostics.push_back("drawing subject GUID is unresolved or ambiguous: "+subject.modelGuid);
+                    }
                     for (const auto& reference:drawing.modelReferences)
                     {
                         const auto found=modelIdsByGuid.find(lower(reference.modelGuid));
                         if (found!=modelIdsByGuid.end() && found->second.size()==1)
-                            result.drawingModelAssociations.push_back({file.path,reference.recordId,found->second.front(),reference.modelGuid});
+                            result.drawingModelAssociations.push_back({file.path,reference.recordId,found->second.front(),reference.modelGuid,reference.drawingContextId});
                         else result.diagnostics.push_back("drawing model GUID is unresolved or ambiguous: "+reference.modelGuid);
                     }
                 }
                 else result.diagnostics.push_back("drawing project GUID is missing or differs from main model: "+db1::detail::pathUtf8(file.path));
                 for (const auto& item:drawing.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
-                mark(file.path,ReadLevel::PartialSemantic,"drawing properties, strings and sheet size decoded; graphics remain raw");
+                mark(file.path,ReadLevel::PartialSemantic,"drawing subject, view bases/volumes, properties, strings and sheet size decoded; graphics remain raw");
                 result.drawings.emplace(file.path,std::move(drawing));
             }
         }
@@ -278,6 +294,9 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
         std::sort(result.files.begin(), result.files.end(), [](const auto& a, const auto& b) { return a.path < b.path; });
         std::sort(result.drawingModelAssociations.begin(),result.drawingModelAssociations.end(),[](const auto& a,const auto& b) {
             return std::tie(a.drawing,a.drawingRecordId,a.modelObjectId)<std::tie(b.drawing,b.drawingRecordId,b.modelObjectId);
+        });
+        std::sort(result.drawingSubjectAssociations.begin(),result.drawingSubjectAssociations.end(),[](const auto& a,const auto& b) {
+            return std::tie(a.drawing,a.drawingRecordId)<std::tie(b.drawing,b.drawingRecordId);
         });
         std::sort(result.associations.begin(), result.associations.end(), [](const auto& a, const auto& b) {
             return std::tie(a.source, a.target, a.reason) < std::tie(b.source, b.target, b.reason);

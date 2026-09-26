@@ -46,6 +46,7 @@ struct DrawingModelAssociation
     std::uint32_t drawingRecordId = 0;
     std::uint32_t modelObjectId = 0;
     std::string modelGuid;
+    std::uint32_t drawingContextId = 0;
 };
 struct AttributeDefinitionAssociation
 {
@@ -74,6 +75,7 @@ struct Project
     std::optional<EnvironmentDatabase> environment;
     std::map<std::filesystem::path, OptionsDatabase> optionsDatabases;
     std::vector<AttributeDefinitionAssociation> attributeDefinitionAssociations;
+    std::vector<DrawingModelAssociation> drawingSubjectAssociations;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

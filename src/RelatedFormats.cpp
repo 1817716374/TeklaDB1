@@ -29,6 +29,43 @@ double real(const Bytes& data,std::size_t offset)
     if (!std::isfinite(value)) throw std::runtime_error("non-finite drawing numeric value");
     return value;
 }
+std::string binaryGuid(const Bytes& data,std::size_t offset)
+{
+    if (offset>data.size() || data.size()-offset<16) throw std::runtime_error("truncated drawing GUID");
+    std::ostringstream out; out<<std::hex<<std::setfill('0');
+    for (std::size_t i=0;i<16;++i)
+    {
+        if (i==4 || i==6 || i==8 || i==10) out<<'-';
+        out<<std::setw(2)<<static_cast<unsigned>(data[offset+i]);
+    }
+    return out.str();
+}
+DrawingCoordinateSystem coordinates(const Bytes& row,std::size_t offset)
+{
+    DrawingCoordinateSystem value;
+    for (std::size_t i=0;i<3;++i)
+    {
+        value.origin[i]=real(row,offset+i*8);
+        value.axisX[i]=real(row,offset+24+i*8)-value.origin[i];
+        value.axisY[i]=real(row,offset+48+i*8)-value.origin[i];
+    }
+    const auto dot=[](const auto& a,const auto& b) { return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; };
+    const double xx=dot(value.axisX,value.axisX),yy=dot(value.axisY,value.axisY),xy=dot(value.axisX,value.axisY);
+    if (!std::isfinite(xx) || !std::isfinite(yy) || !std::isfinite(xy) ||
+        std::abs(xx-1)>1e-6 || std::abs(yy-1)>1e-6 || std::abs(xy)>1e-6)
+        throw std::runtime_error("unsupported or degenerate drawing coordinate basis");
+    for (std::size_t i=0;i<3;++i)
+        value.axisZ[i]=value.axisX[(i+1)%3]*value.axisY[(i+2)%3]-value.axisX[(i+2)%3]*value.axisY[(i+1)%3];
+    return value;
+}
+DrawingViewVolume volume(const Bytes& row,std::size_t offset)
+{
+    DrawingViewVolume value{real(row,offset),real(row,offset+8),real(row,offset+16),
+        real(row,offset+24),real(row,offset+32),real(row,offset+40)};
+    if (value.minX>value.maxX || value.minY>value.maxY)
+        throw std::runtime_error("invalid drawing view volume");
+    return value;
+}
 const db1::RawTable& table(const db1::RawDatabase& raw,std::uint32_t type)
 {
     for (const auto& item:raw.tables) if (item.ordinal==type) return item;
@@ -180,20 +217,54 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             if (sheet.width<=0 || sheet.height<=0) throw std::runtime_error("invalid drawing sheet dimensions");
             result.sheets.push_back(sheet);
         }
+        for (const auto& row:table(result.raw,269).records)
+        {
+            if (u32(row.payload,0)==0)
+            {
+                result.diagnostics.emplace_back("drawing header placeholder retained raw; no active subject decoded");
+                continue;
+            }
+            if (u32(row.payload,0)!=269 || result.subject) throw std::runtime_error("invalid or duplicate drawing subject header");
+            DrawingSubject subject; subject.recordId=u32(row.payload,4); subject.typeCode=u32(row.payload,12);
+            if (!subject.recordId) throw std::runtime_error("zero drawing subject ID");
+            subject.modelGuid=binaryGuid(row.payload,16);
+            if (subject.typeCode==1) subject.kind=DrawingSubjectKind::SinglePart;
+            else if (subject.typeCode==2) subject.kind=DrawingSubjectKind::Assembly;
+            else result.diagnostics.emplace_back("unknown drawing subject type code retained without classification");
+            result.subject=std::move(subject);
+        }
+        std::set<std::uint32_t> viewIds;
+        for (const auto& record:table(result.raw,260).records)
+        {
+            const auto& row=record.payload;
+            if (u32(row,0)!=260) throw std::runtime_error("invalid drawing view type");
+            DrawingView view; view.recordId=u32(row,4); view.contextId=u32(row,8); view.modelGuid=binaryGuid(row,24);
+            if (!view.recordId || !view.contextId || !viewIds.insert(view.recordId).second)
+                throw std::runtime_error("zero or duplicate drawing view ID");
+            view.viewCoordinates=coordinates(row,48); view.displayCoordinates=coordinates(row,168);
+            view.restriction=volume(row,120); view.storedAttributeVolume=volume(row,240);
+            const auto context=view.contextId;
+            if (!result.viewsByContext.emplace(context,std::move(view)).second) throw std::runtime_error("duplicate drawing view context");
+        }
+        for (const auto& link:result.propertyLinks)
+        {
+            auto view=result.viewsByContext.find(link.ownerId); const auto& property=result.properties.at(link.propertyId);
+            if (view==result.viewsByContext.end() || property.name!="gr_cl_view_prop" || !property.isString) continue;
+            if (!view->second.propertySetName.empty() && view->second.propertySetName!=property.stringValue)
+                throw std::runtime_error("conflicting drawing view property sets");
+            view->second.propertySetName=property.stringValue;
+        }
         std::set<std::uint32_t> referenceIds;
         for (const auto& row:table(result.raw,322).records)
         {
             DrawingModelReference reference; reference.recordId=u32(row.payload,0); reference.drawingContextId=u32(row.payload,4);
             if (!reference.recordId || !referenceIds.insert(reference.recordId).second) throw std::runtime_error("zero or duplicate drawing model reference ID");
-            std::ostringstream guid; guid<<std::hex<<std::setfill('0');
-            for (std::size_t i=0;i<16;++i)
-            {
-                if (i==4 || i==6 || i==8 || i==10) guid<<'-';
-                guid<<std::setw(2)<<static_cast<unsigned>(row.payload[8+i]);
-            }
-            reference.modelGuid=guid.str(); result.modelReferences.push_back(std::move(reference));
+            reference.modelGuid=binaryGuid(row.payload,8);
+            if (!result.viewsByContext.count(reference.drawingContextId))
+                result.diagnostics.emplace_back("drawing model reference has no decoded view context: "+std::to_string(reference.drawingContextId));
+            result.modelReferences.push_back(std::move(reference));
         }
-        result.diagnostics.emplace_back("partial drawing semantics: views, dimensions, other reference types and rendered primitives remain raw; mark XML is stored text");
+        result.diagnostics.emplace_back("partial drawing semantics: paper placement, scale/shortening, dimensions, other reference types and rendered primitives remain raw; mark XML is stored text");
         if (options.retainDecompressedFileImage) result.raw.decompressedFileImage=std::move(data);
         return true;
     }
