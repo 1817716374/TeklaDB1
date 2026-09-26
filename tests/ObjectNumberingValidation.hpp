@@ -10,7 +10,7 @@ void validateObjectNumbers(const tekla::db1::Model& model, const tekla::db1::Raw
         for (const auto& source:raw.tables.at(first+kind).records)
         {
             const auto& p=source.payload; const auto& r=model.objectNumberingRecords.at(word(p,0));
-            if (r.rawPayload!=p || r.id!=word(p,0)) throw std::runtime_error("numbering raw payload lost");
+            if (r.rawPayload!=p || r.id!=word(p,0) || r.inlineObjectId || r.storedNumber) throw std::runtime_error("numbering raw payload lost");
             const auto expectedKind=kind==0?ObjectNumberingKind::Part:kind==1?ObjectNumberingKind::Assembly:ObjectNumberingKind::Unverified;
             if (r.kind!=expectedKind) throw std::runtime_error("numbering kind changed");
             if (kind<2)

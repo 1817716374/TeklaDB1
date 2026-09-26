@@ -39,7 +39,7 @@ struct ProjectOptions
     bool readDrawings = true;
     bool readEnvironment = true;
     bool readOptions = true;
-    // Caller explicitly trusts same-directory, same-basename 7.82 DB1/DB2 files
+    // Caller explicitly trusts same-directory, same-basename 7.30/7.82 DB1/DB2 files
     // when both lack GUIDs. Never bypasses a GUID or storage-version conflict.
     bool trustLegacyNumberingBasenames = false;
 };

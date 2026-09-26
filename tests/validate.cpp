@@ -31,6 +31,7 @@ struct Fingerprint
 #include "ObjectNumberingValidation.hpp"
 #include "LegacyNumberingValidation.hpp"
 #include "Numbering730Validation.hpp"
+#include "InlineNumbering730Validation.hpp"
 #include "Drawing730Validation.hpp"
 #include "Ifc730Validation.hpp"
 #include "ReinforcementValidation.hpp"
@@ -94,6 +95,14 @@ int run(const std::string& mode, const std::filesystem::path& path)
         std::string error;
         if (mode=="ifc730_evidence") ifc730::validate(path);
         else if (mode=="drawing730_evidence") validateDrawing730Evidence(path);
+        else if (mode=="inline730_history") validateInline730History(path);
+        else if (mode=="inline730_backups") validateInline730Backups(path);
+        else if (mode=="inline730_model" || mode=="inline730_library")
+        {
+            tekla::db1::Model model;tekla::db1::RawDatabase raw;
+            if(!(mode=="inline730_library"?tekla::db1::parseComponentLibrary(path,model,error):tekla::db1::parseModelFile(path,model,error)) || !tekla::db1::parseRawDatabase(path,raw,error))throw std::runtime_error(error);
+            validateInlineNumbers730(model,raw);
+        }
         else if (mode=="numbering730_evidence") validateNumbering730Evidence(path);
         else if (mode=="legacy_number_evidence") validateLegacyNumberEvidence(path);
         else if (mode=="empty_bolt_evidence")

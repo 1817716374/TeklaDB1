@@ -156,6 +156,11 @@ if(TEKLADB1_BUILD_TESTS)
             reinforcement_shared reinforcement_budget reinforcement_budget_override reinforcement_duplicate_placement
             bolt_position_null bolt_position_library bolt_position_present bolt_position_missing
             bolt_position_point bolt_position_definition bolt_position_placement bolt_position_empty_array
+            inline_number_730_main inline_number_730_library inline_number_730_zero inline_number_730_non1 inline_number_730_zero_start
+            inline_number_730_special inline_number_730_tag inline_number_730_tag12 inline_number_730_duplicate inline_number_730_missing_record
+            inline_number_730_identity inline_number_730_wrong_kind inline_number_730_zero_id inline_number_730_width inline_number_730_empty
+            inline_number_730_project_default inline_number_730_project_trusted inline_number_730_project_missing_series
+            inline_number_730_project_ambiguous inline_number_730_project_absent inline_number_730_project_version inline_number_730_project_library_scope
             legacy_number_main legacy_number_library legacy_number_fields legacy_number_width legacy_number_link_fields
             legacy_number_link_width legacy_number_duplicate legacy_number_collision legacy_number_duplicate_link
             legacy_number_missing_identity legacy_number_missing_target legacy_number_zero legacy_number_special

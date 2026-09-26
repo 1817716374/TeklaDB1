@@ -2,6 +2,8 @@
 
 DB2 的系列计数不能回答“某个构件的编号是多少”。已核对的现代 DB1 将对象、编号记录、系列信息分开保存。读取接口现在保留这条关联链，并在工程入口与同工程 DB2 的系列匹配。
 
+7.30采用对象内联布局，新增 `inlineObjectId` 和 `storedNumber`，不生成后续版本的共享引用，详见[7.30内联编号证据](INLINE_NUMBERING_730.zh-CN.md)。下文的sequence公式只适用于已验证的现代/7.82布局。
+
 ## 存储证据与 API
 
 56份8.95/9.52/9.60主库和组件库保持以下现代布局。9.65/9.66沿用已有现代入口，但没有新增其独立真实样本；7.82采用下文独立布局，8.44尚未验证。
@@ -38,7 +40,7 @@ if (ref.numberingRecordId != 0) {
 
 每条工程关联包含源DB1路径、目标DB2路径、objectId、numberingRecordId及seriesIndex，后者索引`Project::numbering.at(numberingDatabase).series`。配对要求相同存储版本、同工程目录、同文件基名、双方非空且相同的数据库GUID（忽略GUID字母大小写）；主库和组件库各用自己的GUID。系列按精确前缀与数值起始号唯一匹配，大小写不折叠。若`P/100`与`P/0100`同时存在，数值系列有歧义，不任选一条。缺库、未读取DB2、GUID缺失/冲突或系列缺失/歧义都不生成关联。显式关闭readNumbering时不执行这一步。
 
-现代配对的`pairingEvidence`为`NumberingPairEvidence::DatabaseGuid`。没有GUID的7.82文件默认不生成上述确定关联；调用者可按下节显式确认其配对。
+现代配对的`pairingEvidence`为`NumberingPairEvidence::DatabaseGuid`。没有GUID的7.30/7.82文件默认不生成上述确定关联；调用者可按下节显式确认其配对。
 
 系列关联可以表示尚未分配序号的记录所引用的系列，不能以关联存在代表编号已生效。DB2计数不用于重算或限制对象编号；真实对象数、历史分配次数与当前最大编号未必相同。
 

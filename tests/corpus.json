@@ -3933,6 +3933,414 @@
       "member": "out.ifc",
       "size": 13124990,
       "sha256": "d02db80ded529334096fa911f2194978f96b4bc3a0720deee31247992cc295a3"
+    },
+    {
+      "path": "btscm-730-backups/V53.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/V53.db1.bak",
+      "size": 301299,
+      "sha256": "15f413dde6e67030118f60482f2b73c1d22c7d26f8dbbfdf899f6bd9b6a5017a"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV1.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV1.db1.bak",
+      "size": 67109,
+      "sha256": "3bb81737610064529dff802ddb858e4c117b3b72e6e3d0806386f4bdcee7b685"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV2.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV2.db1.bak",
+      "size": 108690,
+      "sha256": "34a5336f5d1ef87ddcd1069a5d34f5f7f5520f808a7b663ef4e8eea930ef2377"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV3.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV3.db1.bak",
+      "size": 109166,
+      "sha256": "9695fa3f225896afd8d984396ba0f7240cadabac96ff3b25f478961a3765e883"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV4.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV4.db1.bak",
+      "size": 132525,
+      "sha256": "a9ba9f22b70411f46f253d4a8f0b01ceef3e98b7fcc281ab38e65129c4784a95"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV31.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV31.db1.bak",
+      "size": 116377,
+      "sha256": "264edc0eed6a4eadcfbe9c8333a4cf9a3335e1ae970ead8efe121c4908b341f2"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV41.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV41.db1.bak",
+      "size": 180876,
+      "sha256": "ca4d9e14f6bc5fd989e880a84715cc0381cfa63b8e43e50eaa1b50a9bf742b5b"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV42.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV42.db1.bak",
+      "size": 188514,
+      "sha256": "6ae74c77205e51c5f89662688591f0c00913f14cf6d5e041112f86cf8eb9609f"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV43.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV43.db1.bak",
+      "size": 203690,
+      "sha256": "dc2af18dfc8ca8687a20f07d626663d012b6df8694d1281ec8bb6d75de114515"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV44.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV44.db1.bak",
+      "size": 203592,
+      "sha256": "fc5669622bdc36e637fd78b56b2c21f7d9351327e3256aceaf039d2df8af7d9a"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV50.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV50.db1.bak",
+      "size": 251384,
+      "sha256": "0e37ee3b771ecdf189faaf7403c201cdfad4a7c4ad6bab7a99b43d7504e2b24d"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV51.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV51.db1.bak",
+      "size": 276596,
+      "sha256": "e6f274f6a01c4bce31e092e2908cd1c10f11e90a2d57b6f84310ef14f4dfa225"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV52.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV52.db1.bak",
+      "size": 298943,
+      "sha256": "2dd524347945e889d635759c5ae42266507b0df401ca2099b2b4e0459701b78e"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV53.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV53.db1.bak",
+      "size": 307917,
+      "sha256": "b0c2a6599bc670077822f9ad2e63ebb2601dee7dde4cd17f9d143f224407ddb9"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV54.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV54.db1.bak",
+      "size": 335068,
+      "sha256": "f2c6c62cf848cdff459f1182fa23b23c1b404bbd503423ef2f75f0f74129a6bd"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV60.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV60.db1.bak",
+      "size": 354202,
+      "sha256": "51906e78ebeb9689ff02f7a36201fd358f1ecc1e6f16d552620b1bb7415dbfed"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV61.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV61.db1.bak",
+      "size": 368365,
+      "sha256": "d8c246b24e9fed72034e69a0643ad2078da2d95507a10ae6fb63ae72039d9e62"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV62.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV62.db1.bak",
+      "size": 369056,
+      "sha256": "76d839ba66051055d61f91084a3d67c4a0feacbe324a600f7db72835c49bc022"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV70.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV70.db1.bak",
+      "size": 413782,
+      "sha256": "687365f9292dd71bdb04ca46bfb4d13bccd6b3241171596fa391ac1ffe6a1f5c"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV71.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV71.db1.bak",
+      "size": 428555,
+      "sha256": "3ca33b8deaafd0dc784cc5d068ab7d71ac0b88cb755ce6e57c8a94f9b9f93d55"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV80.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV80.db1.bak",
+      "size": 567158,
+      "sha256": "eccb09433949505ca5c99efcde97da6d5a51e6d0cad33236b7a6e601e3724c73"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV81.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV81.db1.bak",
+      "size": 573630,
+      "sha256": "85f05acb0e2fa6d6071dea1ed59d8190fb3b4e7877421c4f42f45764544418b4"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV90.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV90.db1.bak",
+      "size": 634055,
+      "sha256": "32cfbddcfc43a8bb88c102db70da9ca6563862e17115ab2c74f0d88e8d3e8ddf"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV100.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV100.db1.bak",
+      "size": 635883,
+      "sha256": "49632bb3928164953adcb175fa6fc33ff1915399e3aef927fb2e3308ed4a8355"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV101.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV101.db1.bak",
+      "size": 763119,
+      "sha256": "f65d67409955c6d0646713ac3af041f8d61bd7bec24af2935155a4bf9b9f1e2b"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV110.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV110.db1.bak",
+      "size": 822863,
+      "sha256": "d6f91459389abb0808e47a9fed5616523af5ec57faafc56d6629f60388aae04a"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV111.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV111.db1.bak",
+      "size": 678274,
+      "sha256": "29a493c579772a62c4903919b92bed805e7a94bb8d182d66c06437c8436a8ac4"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV200.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV200.db1.bak",
+      "size": 730296,
+      "sha256": "588d0e7e72ceda0cb0706e1bb82bf6840e2874de27e455ebf9e4223bf8b7a4c5"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV201.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV201.db1.bak",
+      "size": 996061,
+      "sha256": "d50cb4a433f9f9c67b220c339b741787e70f835c80b3994342460b753cf34696"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV711.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV711.db1.bak",
+      "size": 550532,
+      "sha256": "51237c72a2bf591ad7379c1dcb00768c611b8d271e936adb480616b7355ec9ec"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV811.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV811.db1.bak",
+      "size": 592538,
+      "sha256": "ca0f71a03393635e0251cfc8c2440efc78c0f98068d6e7404d35fd7c04e7e701"
+    },
+    {
+      "path": "btscm-730-backups/pechelirejulV1.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelirejulV1.db1.bak",
+      "size": 1090239,
+      "sha256": "652d0913ea2141fdcb1f638d094dbd7c5036fb8b03a72babeddfa9e4cab0ef60"
+    },
+    {
+      "path": "btscm-730-backups/pecherie.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pecherie.db1.bak",
+      "size": 41512,
+      "sha256": "4e8111483353e134b1d352c40e0fa4909235eed28524c2fcab2a907d1cd07e62"
+    },
+    {
+      "path": "btscm-730-backups/xslib.db1.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/xslib.db1.bak",
+      "size": 129079,
+      "sha256": "fa602284f9a4e75ad514507243d1037e56785fcf620101a50599b8d97dd51044"
+    },
+    {
+      "path": "btscm-730-backups/V53.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/V53.db2.bak",
+      "size": 285,
+      "sha256": "8dae1b566e7ccaeca966f6a6219f8261c46bdf8c47f152f2be617b4f9d614861"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV1.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV1.db2.bak",
+      "size": 97,
+      "sha256": "4ed1fb318089cbe42742416dc25973be7da6cfa16cc01a666cd7f561ea874c03"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV2.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV2.db2.bak",
+      "size": 97,
+      "sha256": "4ed1fb318089cbe42742416dc25973be7da6cfa16cc01a666cd7f561ea874c03"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV3.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV3.db2.bak",
+      "size": 97,
+      "sha256": "4ed1fb318089cbe42742416dc25973be7da6cfa16cc01a666cd7f561ea874c03"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV4.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV4.db2.bak",
+      "size": 118,
+      "sha256": "42b55fc10e7fcfbd218b10a2ae4dc9ac1c093cc8c71b60ae2184ebc4508e1203"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV31.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV31.db2.bak",
+      "size": 118,
+      "sha256": "42b55fc10e7fcfbd218b10a2ae4dc9ac1c093cc8c71b60ae2184ebc4508e1203"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV41.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV41.db2.bak",
+      "size": 118,
+      "sha256": "42b55fc10e7fcfbd218b10a2ae4dc9ac1c093cc8c71b60ae2184ebc4508e1203"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV42.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV42.db2.bak",
+      "size": 225,
+      "sha256": "a6c45f931b088d5bc2bc1c9114550c5eccab0040c5a29cd3931516fcb19da759"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV43.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV43.db2.bak",
+      "size": 220,
+      "sha256": "d42d4be350e3aa4eebdcdfe6c994d7346bf97c27130aebc73c85239dd40ce45b"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV44.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV44.db2.bak",
+      "size": 261,
+      "sha256": "0ffd16cbdcf3dbe091e3e50690c270b0ea1d10e946c2929054d691e4214056dd"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV50.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV50.db2.bak",
+      "size": 281,
+      "sha256": "c09e7f25b3efca6107e24b2ff466613e45f1c7d20c6b1eed6e525f42c44d033a"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV51.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV51.db2.bak",
+      "size": 281,
+      "sha256": "8f8b6384549287a5a8abf333f7942a1846c9d7d580400213f4c3ca2f5735d6f6"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV52.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV52.db2.bak",
+      "size": 281,
+      "sha256": "8f8b6384549287a5a8abf333f7942a1846c9d7d580400213f4c3ca2f5735d6f6"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV53.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV53.db2.bak",
+      "size": 281,
+      "sha256": "38d7b753facf5fbd57644eab2980603dfef23d9654bfe23fd207e90f4a30b8db"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV54.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV54.db2.bak",
+      "size": 297,
+      "sha256": "857c33453a6f3556f2083b5f6c96e27ac57665e8b51d055332c326394e6444b6"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV60.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV60.db2.bak",
+      "size": 297,
+      "sha256": "857c33453a6f3556f2083b5f6c96e27ac57665e8b51d055332c326394e6444b6"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV61.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV61.db2.bak",
+      "size": 300,
+      "sha256": "8e94879099a3f0c5e08aa1e74755df4ba82ea1cea3cf34d5e3be7515a15b8d66"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV62.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV62.db2.bak",
+      "size": 300,
+      "sha256": "8e94879099a3f0c5e08aa1e74755df4ba82ea1cea3cf34d5e3be7515a15b8d66"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV70.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV70.db2.bak",
+      "size": 297,
+      "sha256": "857c33453a6f3556f2083b5f6c96e27ac57665e8b51d055332c326394e6444b6"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV71.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV71.db2.bak",
+      "size": 297,
+      "sha256": "d4a850ccbf9d8822a5364c6a386320d3c146f2b2237cd39559d7280ecb5aa299"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV80.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV80.db2.bak",
+      "size": 305,
+      "sha256": "d518cc442299a5cd2f2f46514cbdb8d34ce980d0716d90514f262e9b514d204f"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV81.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV81.db2.bak",
+      "size": 307,
+      "sha256": "22caff1bc9cf8c643f11d740ba7a6b8c3aa661f7f3719f4b2462f27bad1ae021"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV90.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV90.db2.bak",
+      "size": 307,
+      "sha256": "22caff1bc9cf8c643f11d740ba7a6b8c3aa661f7f3719f4b2462f27bad1ae021"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV100.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV100.db2.bak",
+      "size": 307,
+      "sha256": "22caff1bc9cf8c643f11d740ba7a6b8c3aa661f7f3719f4b2462f27bad1ae021"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV101.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV101.db2.bak",
+      "size": 344,
+      "sha256": "9801031009dee8cb39bb9bcedb96fd1e7b7e54d97b265bc9df1f86981b08a39a"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV110.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV110.db2.bak",
+      "size": 355,
+      "sha256": "221b60262c2c4126ddb1a043797f64e4dd0efd841708147151a49f78fbd7a7b8"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV111.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV111.db2.bak",
+      "size": 356,
+      "sha256": "5a48e911401d89cc4b14df1823d36dd7c6e2ecfffed864a199fb564a2fe1deb1"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV200.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV200.db2.bak",
+      "size": 355,
+      "sha256": "4b100c4a8642687fdc1e7afeda4cbb2ad0ddc0c3c525e6e13815c1969324bd21"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV201.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV201.db2.bak",
+      "size": 355,
+      "sha256": "4b100c4a8642687fdc1e7afeda4cbb2ad0ddc0c3c525e6e13815c1969324bd21"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV711.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV711.db2.bak",
+      "size": 305,
+      "sha256": "d518cc442299a5cd2f2f46514cbdb8d34ce980d0716d90514f262e9b514d204f"
+    },
+    {
+      "path": "btscm-730-backups/pechelireV811.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelireV811.db2.bak",
+      "size": 307,
+      "sha256": "22caff1bc9cf8c643f11d740ba7a6b8c3aa661f7f3719f4b2462f27bad1ae021"
+    },
+    {
+      "path": "btscm-730-backups/pechelirejulV1.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelirejulV1.db2.bak",
+      "size": 355,
+      "sha256": "64939cc502fe7f925ca370378aa9268437013848027d81c9c7e320849b6d4d2b"
+    },
+    {
+      "path": "btscm-730-backups/pecherie.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pecherie.db2.bak",
+      "size": 97,
+      "sha256": "4ed1fb318089cbe42742416dc25973be7da6cfa16cc01a666cd7f561ea874c03"
+    },
+    {
+      "path": "btscm-730-backups/xslib.db2.bak",
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/xslib.db2.bak",
+      "size": 32,
+      "sha256": "3bc0af2a5ef4dfba71347beeec16d78b461cb27b35bab8bb3f63c8cc4fb1a1b7"
     }
   ],
   "cases": [
@@ -13791,6 +14199,517 @@
       "path": "btscm-ifc730",
       "exit": 0,
       "stdout": "products=1215 names=1215 materials=1215 classes=1215 endpoints=2430 origins=1215 boxes=536 corners=4288 unexported=25"
+    },
+    {
+      "name": "inline730-backup:V53.db1.bak",
+      "path": "btscm-730-backups/V53.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=887 verified_positions=587 stored_references=0 fingerprint=21f1504bf11b1caf"
+    },
+    {
+      "name": "inline730-backup:pechelireV1.db1.bak",
+      "path": "btscm-730-backups/pechelireV1.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=219 verified_positions=0 stored_references=0 fingerprint=e4b96324561c8cba"
+    },
+    {
+      "name": "inline730-backup:pechelireV2.db1.bak",
+      "path": "btscm-730-backups/pechelireV2.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=294 verified_positions=0 stored_references=0 fingerprint=d8021356894cf7c3"
+    },
+    {
+      "name": "inline730-backup:pechelireV3.db1.bak",
+      "path": "btscm-730-backups/pechelireV3.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=294 verified_positions=0 stored_references=0 fingerprint=d8021356894cf7c3"
+    },
+    {
+      "name": "inline730-backup:pechelireV4.db1.bak",
+      "path": "btscm-730-backups/pechelireV4.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=347 verified_positions=64 stored_references=0 fingerprint=cd56861cb3b84649"
+    },
+    {
+      "name": "inline730-backup:pechelireV31.db1.bak",
+      "path": "btscm-730-backups/pechelireV31.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=195 verified_positions=64 stored_references=0 fingerprint=c641be5e8b7d496c"
+    },
+    {
+      "name": "inline730-backup:pechelireV41.db1.bak",
+      "path": "btscm-730-backups/pechelireV41.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=790 verified_positions=70 stored_references=0 fingerprint=e625fc58f825c5a9"
+    },
+    {
+      "name": "inline730-backup:pechelireV42.db1.bak",
+      "path": "btscm-730-backups/pechelireV42.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=805 verified_positions=633 stored_references=0 fingerprint=f79eead6e1bd98"
+    },
+    {
+      "name": "inline730-backup:pechelireV43.db1.bak",
+      "path": "btscm-730-backups/pechelireV43.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=756 verified_positions=516 stored_references=0 fingerprint=c24d05a3047bcdcb"
+    },
+    {
+      "name": "inline730-backup:pechelireV44.db1.bak",
+      "path": "btscm-730-backups/pechelireV44.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=791 verified_positions=564 stored_references=0 fingerprint=b0091a13b68631ce"
+    },
+    {
+      "name": "inline730-backup:pechelireV50.db1.bak",
+      "path": "btscm-730-backups/pechelireV50.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=776 verified_positions=564 stored_references=0 fingerprint=5b5f5b034b5a82ca"
+    },
+    {
+      "name": "inline730-backup:pechelireV51.db1.bak",
+      "path": "btscm-730-backups/pechelireV51.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=828 verified_positions=511 stored_references=0 fingerprint=3569d4a0ae300dbb"
+    },
+    {
+      "name": "inline730-backup:pechelireV52.db1.bak",
+      "path": "btscm-730-backups/pechelireV52.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=867 verified_positions=509 stored_references=0 fingerprint=4de07be8c2556d02"
+    },
+    {
+      "name": "inline730-backup:pechelireV53.db1.bak",
+      "path": "btscm-730-backups/pechelireV53.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=895 verified_positions=599 stored_references=0 fingerprint=339b5086255e9519"
+    },
+    {
+      "name": "inline730-backup:pechelireV54.db1.bak",
+      "path": "btscm-730-backups/pechelireV54.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=968 verified_positions=702 stored_references=0 fingerprint=f2e7357585a04863"
+    },
+    {
+      "name": "inline730-backup:pechelireV60.db1.bak",
+      "path": "btscm-730-backups/pechelireV60.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=857 verified_positions=627 stored_references=0 fingerprint=22fb7e9c2c3849f7"
+    },
+    {
+      "name": "inline730-backup:pechelireV61.db1.bak",
+      "path": "btscm-730-backups/pechelireV61.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=887 verified_positions=647 stored_references=0 fingerprint=77618319d6ed701"
+    },
+    {
+      "name": "inline730-backup:pechelireV62.db1.bak",
+      "path": "btscm-730-backups/pechelireV62.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=887 verified_positions=647 stored_references=0 fingerprint=77618319d6ed701"
+    },
+    {
+      "name": "inline730-backup:pechelireV70.db1.bak",
+      "path": "btscm-730-backups/pechelireV70.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=981 verified_positions=652 stored_references=0 fingerprint=d11c2e8191d06840"
+    },
+    {
+      "name": "inline730-backup:pechelireV71.db1.bak",
+      "path": "btscm-730-backups/pechelireV71.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=981 verified_positions=700 stored_references=0 fingerprint=aeda20a234310d4f"
+    },
+    {
+      "name": "inline730-backup:pechelireV80.db1.bak",
+      "path": "btscm-730-backups/pechelireV80.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1260 verified_positions=832 stored_references=0 fingerprint=c88a8715ff2e5263"
+    },
+    {
+      "name": "inline730-backup:pechelireV81.db1.bak",
+      "path": "btscm-730-backups/pechelireV81.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1244 verified_positions=868 stored_references=0 fingerprint=b2c18c9183099229"
+    },
+    {
+      "name": "inline730-backup:pechelireV90.db1.bak",
+      "path": "btscm-730-backups/pechelireV90.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1472 verified_positions=729 stored_references=0 fingerprint=e4f79fca40b5e790"
+    },
+    {
+      "name": "inline730-backup:pechelireV100.db1.bak",
+      "path": "btscm-730-backups/pechelireV100.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1472 verified_positions=729 stored_references=0 fingerprint=e4f79fca40b5e790"
+    },
+    {
+      "name": "inline730-backup:pechelireV101.db1.bak",
+      "path": "btscm-730-backups/pechelireV101.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1604 verified_positions=954 stored_references=0 fingerprint=eb492bd64dcd61e4"
+    },
+    {
+      "name": "inline730-backup:pechelireV110.db1.bak",
+      "path": "btscm-730-backups/pechelireV110.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=2387 verified_positions=1898 stored_references=0 fingerprint=74c3fab13a1132bd"
+    },
+    {
+      "name": "inline730-backup:pechelireV111.db1.bak",
+      "path": "btscm-730-backups/pechelireV111.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1841 verified_positions=1530 stored_references=0 fingerprint=157f2569df9c4f29"
+    },
+    {
+      "name": "inline730-backup:pechelireV200.db1.bak",
+      "path": "btscm-730-backups/pechelireV200.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=2048 verified_positions=1677 stored_references=0 fingerprint=96252adbf50bb52a"
+    },
+    {
+      "name": "inline730-backup:pechelireV201.db1.bak",
+      "path": "btscm-730-backups/pechelireV201.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=2522 verified_positions=1579 stored_references=0 fingerprint=b549023983dbae3c"
+    },
+    {
+      "name": "inline730-backup:pechelireV711.db1.bak",
+      "path": "btscm-730-backups/pechelireV711.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1238 verified_positions=835 stored_references=0 fingerprint=e21274a91812b2ea"
+    },
+    {
+      "name": "inline730-backup:pechelireV811.db1.bak",
+      "path": "btscm-730-backups/pechelireV811.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=1276 verified_positions=721 stored_references=0 fingerprint=95e32b5509634aba"
+    },
+    {
+      "name": "inline730-backup:pechelirejulV1.db1.bak",
+      "path": "btscm-730-backups/pechelirejulV1.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=2908 verified_positions=1573 stored_references=0 fingerprint=e82160bd238a64d5"
+    },
+    {
+      "name": "inline730-backup:pecherie.db1.bak",
+      "path": "btscm-730-backups/pecherie.db1.bak",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=171 verified_positions=0 stored_references=0 fingerprint=4840a23953c7266"
+    },
+    {
+      "name": "inline730-backup:xslib.db1.bak",
+      "path": "btscm-730-backups/xslib.db1.bak",
+      "mode": "inline730_library",
+      "exit": 0,
+      "stdout": "inline_records=537 verified_positions=59 stored_references=0 fingerprint=6f3486a7d129c428"
+    },
+    {
+      "name": "inline730-backup:V53.db2.bak",
+      "path": "btscm-730-backups/V53.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=13 guid= fingerprint=aefe320cdc840d5"
+    },
+    {
+      "name": "inline730-backup:pechelireV1.db2.bak",
+      "path": "btscm-730-backups/pechelireV1.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "inline730-backup:pechelireV2.db2.bak",
+      "path": "btscm-730-backups/pechelireV2.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "inline730-backup:pechelireV3.db2.bak",
+      "path": "btscm-730-backups/pechelireV3.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "inline730-backup:pechelireV4.db2.bak",
+      "path": "btscm-730-backups/pechelireV4.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=2 guid= fingerprint=67ba07c559fb8689"
+    },
+    {
+      "name": "inline730-backup:pechelireV31.db2.bak",
+      "path": "btscm-730-backups/pechelireV31.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=2 guid= fingerprint=67ba07c559fb8689"
+    },
+    {
+      "name": "inline730-backup:pechelireV41.db2.bak",
+      "path": "btscm-730-backups/pechelireV41.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=2 guid= fingerprint=67ba07c559fb8689"
+    },
+    {
+      "name": "inline730-backup:pechelireV42.db2.bak",
+      "path": "btscm-730-backups/pechelireV42.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=9 guid= fingerprint=d9fbaa2dca93a0bc"
+    },
+    {
+      "name": "inline730-backup:pechelireV43.db2.bak",
+      "path": "btscm-730-backups/pechelireV43.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=9 guid= fingerprint=2fb330b7ad099534"
+    },
+    {
+      "name": "inline730-backup:pechelireV44.db2.bak",
+      "path": "btscm-730-backups/pechelireV44.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=12 guid= fingerprint=53e516e489d62a49"
+    },
+    {
+      "name": "inline730-backup:pechelireV50.db2.bak",
+      "path": "btscm-730-backups/pechelireV50.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=13 guid= fingerprint=d0a73fbe0541364e"
+    },
+    {
+      "name": "inline730-backup:pechelireV51.db2.bak",
+      "path": "btscm-730-backups/pechelireV51.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=13 guid= fingerprint=80d3cd6c00b18125"
+    },
+    {
+      "name": "inline730-backup:pechelireV52.db2.bak",
+      "path": "btscm-730-backups/pechelireV52.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=13 guid= fingerprint=80d3cd6c00b18125"
+    },
+    {
+      "name": "inline730-backup:pechelireV53.db2.bak",
+      "path": "btscm-730-backups/pechelireV53.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=13 guid= fingerprint=17911707f0f57667"
+    },
+    {
+      "name": "inline730-backup:pechelireV54.db2.bak",
+      "path": "btscm-730-backups/pechelireV54.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=14 guid= fingerprint=63162fff995906e0"
+    },
+    {
+      "name": "inline730-backup:pechelireV60.db2.bak",
+      "path": "btscm-730-backups/pechelireV60.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=14 guid= fingerprint=63162fff995906e0"
+    },
+    {
+      "name": "inline730-backup:pechelireV61.db2.bak",
+      "path": "btscm-730-backups/pechelireV61.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=14 guid= fingerprint=a99bd67cc44537e8"
+    },
+    {
+      "name": "inline730-backup:pechelireV62.db2.bak",
+      "path": "btscm-730-backups/pechelireV62.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=14 guid= fingerprint=a99bd67cc44537e8"
+    },
+    {
+      "name": "inline730-backup:pechelireV70.db2.bak",
+      "path": "btscm-730-backups/pechelireV70.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=14 guid= fingerprint=63162fff995906e0"
+    },
+    {
+      "name": "inline730-backup:pechelireV71.db2.bak",
+      "path": "btscm-730-backups/pechelireV71.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=14 guid= fingerprint=3ef8717a988634cb"
+    },
+    {
+      "name": "inline730-backup:pechelireV80.db2.bak",
+      "path": "btscm-730-backups/pechelireV80.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=15 guid= fingerprint=d8301901727e9548"
+    },
+    {
+      "name": "inline730-backup:pechelireV81.db2.bak",
+      "path": "btscm-730-backups/pechelireV81.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=15 guid= fingerprint=d2a6b1a3352e3673"
+    },
+    {
+      "name": "inline730-backup:pechelireV90.db2.bak",
+      "path": "btscm-730-backups/pechelireV90.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=15 guid= fingerprint=d2a6b1a3352e3673"
+    },
+    {
+      "name": "inline730-backup:pechelireV100.db2.bak",
+      "path": "btscm-730-backups/pechelireV100.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=15 guid= fingerprint=d2a6b1a3352e3673"
+    },
+    {
+      "name": "inline730-backup:pechelireV101.db2.bak",
+      "path": "btscm-730-backups/pechelireV101.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=18 guid= fingerprint=be763c582c5748a2"
+    },
+    {
+      "name": "inline730-backup:pechelireV110.db2.bak",
+      "path": "btscm-730-backups/pechelireV110.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=20 guid= fingerprint=2097230d35d1ba31"
+    },
+    {
+      "name": "inline730-backup:pechelireV111.db2.bak",
+      "path": "btscm-730-backups/pechelireV111.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=20 guid= fingerprint=f64b8d020f75299c"
+    },
+    {
+      "name": "inline730-backup:pechelireV200.db2.bak",
+      "path": "btscm-730-backups/pechelireV200.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=20 guid= fingerprint=11b0418b5a0d8740"
+    },
+    {
+      "name": "inline730-backup:pechelireV201.db2.bak",
+      "path": "btscm-730-backups/pechelireV201.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=20 guid= fingerprint=11b0418b5a0d8740"
+    },
+    {
+      "name": "inline730-backup:pechelireV711.db2.bak",
+      "path": "btscm-730-backups/pechelireV711.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=15 guid= fingerprint=d8301901727e9548"
+    },
+    {
+      "name": "inline730-backup:pechelireV811.db2.bak",
+      "path": "btscm-730-backups/pechelireV811.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=15 guid= fingerprint=d2a6b1a3352e3673"
+    },
+    {
+      "name": "inline730-backup:pechelirejulV1.db2.bak",
+      "path": "btscm-730-backups/pechelirejulV1.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=20 guid= fingerprint=e2d39dac0e4aef34"
+    },
+    {
+      "name": "inline730-backup:pecherie.db2.bak",
+      "path": "btscm-730-backups/pecherie.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "inline730-backup:xslib.db2.bak",
+      "path": "btscm-730-backups/xslib.db2.bak",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=7.30 tables=0 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "inline730:btscm-pechelire/pechelirejulV1.db1",
+      "path": "btscm-pechelire/pechelirejulV1.db1",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=2908 verified_positions=1573 stored_references=0 fingerprint=e82160bd238a64d5"
+    },
+    {
+      "name": "inline730:btscm-pechelire/xslib.db1",
+      "path": "btscm-pechelire/xslib.db1",
+      "mode": "inline730_library",
+      "exit": 0,
+      "stdout": "inline_records=537 verified_positions=59 stored_references=0 fingerprint=6f3486a7d129c428"
+    },
+    {
+      "name": "inline730:btscm-dg730/pechelirejulV1.db1",
+      "path": "btscm-dg730/pechelirejulV1.db1",
+      "mode": "inline730_model",
+      "exit": 0,
+      "stdout": "inline_records=2908 verified_positions=1573 stored_references=0 fingerprint=e82160bd238a64d5"
+    },
+    {
+      "name": "inline730-independent-history",
+      "path": "btscm-pechelire",
+      "mode": "inline730_history",
+      "exit": 0,
+      "stdout": "history_parts=759 history_assemblies=708 preserved_zero_differences=2 explicit_series_links=2236 component_records=537"
+    },
+    {
+      "name": "inline730-backup-pairs",
+      "path": "btscm-730-backups",
+      "mode": "inline730_backups",
+      "exit": 0,
+      "stdout": "backup_pairs=34 inline_records=36285 nonzero=22640 linked=22581 missing_component_series=59 counters_above_current_max=58"
     }
   ]
 }

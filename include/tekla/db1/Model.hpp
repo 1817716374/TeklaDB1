@@ -114,12 +114,17 @@ struct ObjectNumberingRecord
     uint32_t id = 0;
     ObjectNumberingKind kind = ObjectNumberingKind::Unverified;
     uint32_t startNumber = 0;
-    uint32_t sequence = 0;
+    uint32_t sequence = 0; // Linked-record sequence; zero for 7.30 inline storage.
     std::string prefix;
     // Derived only for ordinary positive ranges. Not a lifecycle/currentness claim.
     std::optional<uint32_t> positionNumber;
     // Complete stored payload, including unknown flags and unverified record kinds.
     std::vector<uint8_t> rawPayload;
+    // 7.30 records directly name the object; no reference-table row is fabricated.
+    std::optional<uint32_t> inlineObjectId;
+    // Raw 7.30 number slot. Absolute-vs-relative semantics for start != 1
+    // remain unverified; sequence stays zero and positionNumber is then absent.
+    std::optional<uint32_t> storedNumber;
 };
 struct ObjectNumberingReference
 {

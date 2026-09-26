@@ -303,7 +303,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 result.diagnostics.push_back("object numbering DB1/DB2 storage version differs: " + db1::detail::pathUtf8(model.databasePath));
                 return;
             }
-            const bool legacyPair = options.trustLegacyNumberingBasenames && model.storageVersion=="7.82" && database.raw.storageVersion=="7.82" && model.databaseGuid.empty() && database.raw.databaseGuid.empty();
+            const bool legacyPair = options.trustLegacyNumberingBasenames && (model.storageVersion=="7.30" || model.storageVersion=="7.82") && model.databaseGuid.empty() && database.raw.databaseGuid.empty();
             if (!legacyPair && (model.databaseGuid.empty() || database.raw.databaseGuid.empty() || lower(model.databaseGuid)!=lower(database.raw.databaseGuid)))
             {
                 result.diagnostics.push_back("object numbering DB1/DB2 GUID scope is unverified: " + db1::detail::pathUtf8(model.databasePath));
@@ -313,14 +313,19 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             for (std::size_t i=0; i<database.series.size(); ++i)
                 indices[{database.series[i].prefix,database.series[i].startNumber}].push_back(i);
             std::size_t unresolved = 0;
+            const auto linkRecord = [&](std::uint32_t objectId,const db1::ObjectNumberingRecord& record) {
+                if (record.kind==db1::ObjectNumberingKind::Unverified) return;
+                const auto series = indices.find({record.prefix,record.startNumber});
+                if (series==indices.end() || series->second.size()!=1) { ++unresolved; return; }
+                result.objectNumberingSeriesAssociations.push_back({model.databasePath,pair,objectId,record.id,series->second.front(),legacyPair?NumberingPairEvidence::ExplicitLegacyBasename:NumberingPairEvidence::DatabaseGuid});
+            };
             for (const auto& entry : model.objectNumberingReferences)
             {
                 const auto record = model.objectNumberingRecords.find(entry.second.numberingRecordId);
-                if (record==model.objectNumberingRecords.end() || record->second.kind==db1::ObjectNumberingKind::Unverified) continue;
-                const auto series = indices.find({record->second.prefix,record->second.startNumber});
-                if (series==indices.end() || series->second.size()!=1) { ++unresolved; continue; }
-                result.objectNumberingSeriesAssociations.push_back({model.databasePath,pair,entry.first,record->first,series->second.front(),legacyPair?NumberingPairEvidence::ExplicitLegacyBasename:NumberingPairEvidence::DatabaseGuid});
+                if (record!=model.objectNumberingRecords.end()) linkRecord(entry.first,record->second);
             }
+            for (const auto& entry : model.objectNumberingRecords)
+                if (entry.second.inlineObjectId) linkRecord(*entry.second.inlineObjectId,entry.second);
             if (unresolved) result.diagnostics.push_back(std::to_string(unresolved) + " object numbering references have missing or ambiguous DB2 series: " + db1::detail::pathUtf8(model.databasePath));
         };
         linkNumberingSeries(result.model);

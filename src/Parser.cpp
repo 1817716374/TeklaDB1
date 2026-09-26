@@ -517,6 +517,7 @@ void parseLegacyDatabase(const std::vector<uint8_t>& data, Model& model)
     const auto& componentTable = requireLegacyTable(all, 6, 104);
     const auto& assemblyTable = requireLegacyTable(all, 2, 88);
     const auto& partGroupTable = requireLegacyTable(all, 94, 60);
+    const auto& assemblyNumberTable = requireLegacyTable(all, 95, 68);
     const auto& weldDefinitionTable = requireLegacyTable(all, 98, 108);
 
     struct Placement { uint32_t frameId = 0; Vec3 origin{}; double length = 0.0; };
@@ -613,6 +614,42 @@ void parseLegacyDatabase(const std::vector<uint8_t>& data, Model& model)
         if (property != propertyValues.end())
             model.properties[read<uint32_t>(value, 9)].push_back(property->second);
     }
+    std::size_t unverifiedNumberRanges = 0;
+    const auto inlineNumbers = [&](const LegacyTable& numbers, const LegacyTable& objects, ObjectNumberingKind kind) {
+        std::unordered_set<uint32_t> expected, assigned;
+        for (std::size_t index = 0; index < objects.rowCount; ++index)
+        {
+            const auto* value = legacyRow(data, objects, index);
+            const auto id = read<uint32_t>(value,1);
+            if (!id || !expected.insert(id).second || (kind==ObjectNumberingKind::Assembly && read<uint32_t>(value,5)!=15))
+                throw std::runtime_error("invalid legacy inline numbering object scope");
+        }
+        for (std::size_t index = 0; index < numbers.rowCount; ++index)
+        {
+            const auto* value = legacyRow(data,numbers,index);
+            if (value[0]!=4 && value[0]!=12) throw std::runtime_error("invalid legacy inline numbering row tag");
+            ObjectNumberingRecord record;
+            record.id = read<uint32_t>(value,1);
+            if (!expected.count(record.id) || !model.identities.count(record.id) || !assigned.insert(record.id).second)
+                throw std::runtime_error("broken or duplicate legacy inline numbering object");
+            record.kind = kind;
+            record.inlineObjectId = record.id;
+            record.startNumber = read<uint32_t>(value,5);
+            record.storedNumber = read<uint32_t>(value,9);
+            record.prefix = fixedString(value,kind==ObjectNumberingKind::Part?17:25,44);
+            record.rawPayload.assign(value+1,value+1+numbers.payloadSize);
+            if (record.startNumber==1 && *record.storedNumber>0 && *record.storedNumber<0x80000000U)
+                record.positionNumber = *record.storedNumber;
+            else if (record.startNumber>1 || *record.storedNumber!=0) ++unverifiedNumberRanges;
+            insertUnique(model.objectNumberingRecords,record.id,std::move(record),"inline numbering record");
+        }
+        if (assigned!=expected) throw std::runtime_error("missing legacy inline numbering record");
+    };
+    inlineNumbers(partGroupTable,partTable,ObjectNumberingKind::Part);
+    inlineNumbers(assemblyNumberTable,assemblyTable,ObjectNumberingKind::Assembly);
+    if (unverifiedNumberRanges) model.diagnostics.push_back(std::to_string(unverifiedNumberRanges)+
+        " legacy inline numbering records retain unverified start/number ranges");
+    // Compatibility alias: historical ModelGroup was actually the numbering prefix.
     for (std::size_t index = 0; index < partGroupTable.rowCount; ++index)
     {
         const auto* value = legacyRow(data, partGroupTable, index);
