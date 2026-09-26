@@ -1,25 +1,4 @@
 #pragma once
-double ellipseIfcMeshVolume(const ifc730::Entities& all,unsigned id)
-{
-    const auto& e=all.at(id);
-    if(e.type=="IFCPOLYLOOP")
-    {
-        const auto ids=ifc730::refs(e.args.at(0));ifc730::require(ids.size()>=3,"ellipse face loop");
-        const auto o=ifc730::vector(all,ids[0],"IFCCARTESIANPOINT");double volume=0;
-        for(std::size_t i=1;i+1<ids.size();++i)
-        {
-            const auto a=ifc730::vector(all,ids[i],"IFCCARTESIANPOINT"),b=ifc730::vector(all,ids[i+1],"IFCCARTESIANPOINT");
-            volume+=(o[0]*(a[1]*b[2]-a[2]*b[1])+o[1]*(a[2]*b[0]-a[0]*b[2])+o[2]*(a[0]*b[1]-a[1]*b[0]))/6;
-        }
-        return volume;
-    }
-    if(e.type=="IFCFACEOUTERBOUND"||e.type=="IFCFACEBOUND")
-    {ifc730::require(e.args.at(1)==".T."||e.args[1]==".F.","ellipse bound orientation");return ellipseIfcMeshVolume(all,ifc730::entityRef(e.args[0]))*(e.args[1]==".T."?1:-1);}
-    ifc730::require(e.type=="IFCPRODUCTDEFINITIONSHAPE"||e.type=="IFCSHAPEREPRESENTATION"||e.type=="IFCFACETEDBREP"||e.type=="IFCCLOSEDSHELL"||e.type=="IFCFACE","ellipse mesh entity");
-    const unsigned slot=e.type=="IFCPRODUCTDEFINITIONSHAPE"?2:e.type=="IFCSHAPEREPRESENTATION"?3:0;
-    double sum=0;for(auto child:ifc730::refs(e.args.at(slot)))sum+=ellipseIfcMeshVolume(all,child);return sum;
-}
-
 // Infer the analytic/polygon area ratio from an independently exported end
 // ring. No DB1 dimensions or production section construction are used here.
 double ellipseIfcAreaCorrection(const ifc730::Entities& all,unsigned shape)
@@ -90,7 +69,7 @@ int checkEllipseIfc(const std::filesystem::path& directory)
                 ifc730::require(distance.IsDone(),"ellipse vertex distance failed");maximum=(std::max)(maximum,distance.Value());++(control?controlVertices:count);
             }
             GProp_GProps props;BRepGProp::VolumeProperties(shape,props,1e-10);
-            const auto expected=std::abs(ellipseIfcMeshVolume(all,ifc730::entityRef(e.args[6])))*(control?1:correction);
+            const auto expected=std::abs(ifc730::facetedVolume(all,ifc730::entityRef(e.args[6])))*(control?1:correction);
             ifc730::require(expected>0,"positive ellipse IFC volume");
             const auto residual=std::abs(props.Mass()-expected)/expected;volumeWorst=(std::max)(volumeWorst,residual);
             ifc730::require(residual<=1e-5,"ellipse IFC analytic volume mismatch: "+std::to_string(id));

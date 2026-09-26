@@ -2,7 +2,7 @@
 
 离线读取 Tekla Structures / Xsteel 文件的 C++17 互操作库。方向是 **单文件解析 + 完整模型目录关联**。现有仓库名称和 `tekla::db1` API 保留兼容；新的工程入口为 `tekla::readProject`，CMake 同时支持 `TeklaFormats::core` 与 `TeklaDB1::core`。
 
-不需要启动 Tekla，也不依赖其 SDK。核心依赖 zlib；Open CASCADE 几何后端可选。 缺少目录时的UPE/IPE使用明确标注的公称尺寸尖角回退；已修复折线段转角斜接，并用25个真实IFC实体核验，见[截面与斜接证据](docs/NOMINAL_SECTIONS.zh-CN.md)。
+不需要启动 Tekla，也不依赖其 SDK。核心依赖 zlib；Open CASCADE 几何后端可选。 缺少目录时的UPE/IPE使用明确标注的公称尺寸尖角回退；已修复折线段转角斜接，并对25个真实IFC实体做单向顶点距离与体积检查，见[截面与斜接证据](docs/NOMINAL_SECTIONS.zh-CN.md)。后续双向边界审计仍发现4个UPE及2个矩形加工件有残片，尚未解决，见[加工证据与限制](docs/CUT_GEOMETRY_EVIDENCE.zh-CN.md)。
 
 ## 当前支持范围
 
