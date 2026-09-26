@@ -298,7 +298,13 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 return;
             }
             const auto& database = found->second;
-            if (model.databaseGuid.empty() || database.raw.databaseGuid.empty() || lower(model.databaseGuid)!=lower(database.raw.databaseGuid))
+            if (model.storageVersion!=database.raw.storageVersion)
+            {
+                result.diagnostics.push_back("object numbering DB1/DB2 storage version differs: " + db1::detail::pathUtf8(model.databasePath));
+                return;
+            }
+            const bool legacyPair = options.trustLegacyNumberingBasenames && model.storageVersion=="7.82" && database.raw.storageVersion=="7.82" && model.databaseGuid.empty() && database.raw.databaseGuid.empty();
+            if (!legacyPair && (model.databaseGuid.empty() || database.raw.databaseGuid.empty() || lower(model.databaseGuid)!=lower(database.raw.databaseGuid)))
             {
                 result.diagnostics.push_back("object numbering DB1/DB2 GUID scope is unverified: " + db1::detail::pathUtf8(model.databasePath));
                 return;
@@ -313,7 +319,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 if (record==model.objectNumberingRecords.end() || record->second.kind==db1::ObjectNumberingKind::Unverified) continue;
                 const auto series = indices.find({record->second.prefix,record->second.startNumber});
                 if (series==indices.end() || series->second.size()!=1) { ++unresolved; continue; }
-                result.objectNumberingSeriesAssociations.push_back({model.databasePath,pair,entry.first,record->first,series->second.front()});
+                result.objectNumberingSeriesAssociations.push_back({model.databasePath,pair,entry.first,record->first,series->second.front(),legacyPair?NumberingPairEvidence::ExplicitLegacyBasename:NumberingPairEvidence::DatabaseGuid});
             }
             if (unresolved) result.diagnostics.push_back(std::to_string(unresolved) + " object numbering references have missing or ambiguous DB2 series: " + db1::detail::pathUtf8(model.databasePath));
         };

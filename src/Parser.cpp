@@ -1410,16 +1410,18 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
     }
 
-    if (verifiedPartOwnership)
+    if (verifiedPartOwnership || older782)
     {
-        const std::size_t first = library ? 286 : 322;
+        const std::size_t first = older782 ? (library ? 185 : 215) : (library ? 286 : 322);
         const std::size_t links = library ? 181 : 211;
-        const std::size_t widths[] = {68,76,44}, fields[] = {9,11,7};
+        const std::size_t widths[] = {older782?64U:68U,older782?72U:76U,44};
+        const std::size_t fields[] = {older782?8U:9U,older782?10U:11U,7};
         std::size_t unverified = 0;
-        for (std::size_t kind=0; kind<3; ++kind)
+        for (std::size_t kind=0; kind<(older782?2U:3U); ++kind)
         {
             requireTable(all, first+kind, static_cast<uint32_t>(widths[kind]));
-            requireFields(data, all, first+kind, fields[kind], {0,1,2});
+            if (older782) requireFields(data, all, first+kind, fields[kind], {0});
+            else requireFields(data, all, first+kind, fields[kind], {0,1,2});
             for (std::size_t i=0; i<all[first+kind].rowCount; ++i)
             {
                 const auto* value = row(data, all, first+kind, i);
@@ -1429,9 +1431,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 if (kind<2)
                 {
                     record.kind = kind==0 ? ObjectNumberingKind::Part : ObjectNumberingKind::Assembly;
-                    record.startNumber = read<uint32_t>(value, 9);
-                    record.sequence = read<uint32_t>(value, 13);
-                    record.prefix = fixedString(value, kind==0 ? 21 : 29, 48);
+                    record.startNumber = read<uint32_t>(value, older782 ? 5 : 9);
+                    record.sequence = read<uint32_t>(value, older782 ? 9 : 13);
+                    record.prefix = fixedString(value, (kind==0 ? 21 : 29) - (older782 ? 4 : 0), 48);
                     const auto number = uint64_t(record.startNumber) + record.sequence;
                     if (record.startNumber>0 && record.startNumber<0x80000000U && record.sequence>0 && number<=0x80000000ULL)
                         record.positionNumber = static_cast<uint32_t>(number-1);
@@ -1441,7 +1443,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             }
         }
         requireTable(all, links, 12);
-        requireFields(data, all, links, 4, {0,1,2,3});
+        if (older782) requireFields(data, all, links, 4, {0});
+        else requireFields(data, all, links, 4, {0,1,2,3});
         for (std::size_t i=0; i<all[links].rowCount; ++i)
         {
             const auto* value = row(data, all, links, i);

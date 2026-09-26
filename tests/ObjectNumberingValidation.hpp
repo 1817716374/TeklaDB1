@@ -4,8 +4,9 @@ void validateObjectNumbers(const tekla::db1::Model& model, const tekla::db1::Raw
     using namespace tekla::db1;
     Fingerprint hash; std::size_t records=0, derived=0, linked=0, unknown=0, nulls=0;
     const auto word=[](const std::vector<std::uint8_t>& p,std::size_t at) { std::uint32_t n=0; std::memcpy(&n,p.data()+at,4); return n; };
-    const auto first=library?286U:322U;
-    for (std::size_t kind=0;kind<3;++kind)
+    const bool legacy=model.storageVersion=="7.82";
+    const auto first=legacy?(library?185U:215U):(library?286U:322U);
+    for (std::size_t kind=0;kind<(legacy?2U:3U);++kind)
         for (const auto& source:raw.tables.at(first+kind).records)
         {
             const auto& p=source.payload; const auto& r=model.objectNumberingRecords.at(word(p,0));
@@ -14,9 +15,9 @@ void validateObjectNumbers(const tekla::db1::Model& model, const tekla::db1::Raw
             if (r.kind!=expectedKind) throw std::runtime_error("numbering kind changed");
             if (kind<2)
             {
-                const auto start=kind==0?20:28;
+                const auto start=(kind==0?20:28)-(legacy?4:0);
                 const auto end=std::find(p.begin()+start,p.end(),0);
-                if (r.startNumber!=word(p,8) || r.sequence!=word(p,12) || r.prefix!=std::string(p.begin()+start,end))
+                if (r.startNumber!=word(p,legacy?4:8) || r.sequence!=word(p,legacy?8:12) || r.prefix!=std::string(p.begin()+start,end))
                     throw std::runtime_error("numbering field mapping changed");
                 const auto number=std::uint64_t(r.startNumber)+r.sequence;
                 const bool expected=r.startNumber>0 && r.startNumber<0x80000000U && r.sequence>0 && number<=0x80000000ULL;
@@ -81,6 +82,7 @@ void validateObjectNumberEvidence(const std::filesystem::path& path)
     for (const auto& link:project.objectNumberingSeriesAssociations)
     {
         if (link.database!=project.model.databasePath) throw std::runtime_error("numbering database namespace lost");
+        if (link.pairingEvidence!=tekla::NumberingPairEvidence::DatabaseGuid) throw std::runtime_error("modern numbering evidence changed");
         const auto& record=project.model.objectNumberingRecords.at(link.numberingRecordId);
         const auto& series=project.numbering.at(link.numberingDatabase).series.at(link.seriesIndex);
         if (project.model.objectNumberingReferences.at(link.objectId).numberingRecordId!=record.id ||

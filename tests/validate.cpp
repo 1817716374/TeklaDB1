@@ -27,6 +27,7 @@ struct Fingerprint
 #include "PositionValidation.hpp"
 #include "SurfaceValidation.hpp"
 #include "ObjectNumberingValidation.hpp"
+#include "LegacyNumberingValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
 {
@@ -85,7 +86,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode=="object_number_evidence") validateObjectNumberEvidence(path);
+        if (mode=="legacy_number_evidence") validateLegacyNumberEvidence(path);
+        else if (mode=="object_number_evidence") validateObjectNumberEvidence(path);
         else if (mode=="object_number_model" || mode=="object_number_library")
         {
             const bool library=mode=="object_number_library";

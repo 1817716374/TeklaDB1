@@ -140,6 +140,10 @@ if(TEKLADB1_BUILD_TESTS)
             object_number_collision object_number_duplicate_link object_number_fields object_number_link_fields object_number_width object_number_link_width
             object_number_project object_number_project_guid object_number_project_no_guid object_number_project_absent
             object_number_project_series object_number_project_ambiguous object_number_project_library_scope
+            legacy_number_main legacy_number_library legacy_number_fields legacy_number_width legacy_number_link_fields
+            legacy_number_link_width legacy_number_duplicate legacy_number_collision legacy_number_duplicate_link
+            legacy_number_missing_identity legacy_number_missing_target legacy_number_zero legacy_number_special
+            legacy_number_project_default legacy_number_project_trusted legacy_number_project_conflict legacy_number_project_modern_pair
             surface_main surface_library surface_unknown_profile surface_fields surface_definition_fields surface_width
             surface_definition_missing surface_point_missing surface_frame_missing surface_contour_missing surface_identity_missing
             surface_father_missing surface_father_unknown surface_father_duplicate surface_target_missing surface_duplicate

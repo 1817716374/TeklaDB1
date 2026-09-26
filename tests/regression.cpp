@@ -99,12 +99,13 @@ std::vector<Table> onePart(std::uint32_t type = 2, bool broken = false, bool con
 std::vector<Table> onePart782(bool library = false)
 {
     std::vector<Table> tables(library ? 198 : 228);
-    const std::array<std::array<std::size_t,4>,20> roles{{
+    const std::array<std::array<std::size_t,4>,23> roles{{
         {{61,40,32,6}}, {{64,43,40,7}}, {{65,44,52,8}}, {{75,53,45,6}},
         {{122,95,44,6}}, {{154,126,104,22}}, {{160,132,24,7}}, {{161,133,24,7}},
         {{190,160,24,7}}, {{191,161,60,7}}, {{192,162,60,7}}, {{209,179,63,8}},
         {{207,177,380,31}}, {{121,94,332,84}}, {{116,90,116,6}}, {{193,163,56,11}},
-        {{226,196,60,16}}, {{181,151,88,8}}, {{145,117,78,12}}, {{146,118,292,29}}}};
+        {{226,196,60,16}}, {{181,151,88,8}}, {{145,117,78,12}}, {{146,118,292,29}},
+        {{211,181,12,4}}, {{215,185,64,8}}, {{216,186,72,10}}}};
     for (const auto& spec : roles)
     {
         auto& t = tables[spec[library ? 1 : 0]];
@@ -243,6 +244,7 @@ std::vector<Table> componentLibrary(bool older895)
 }
 
 #include "ObjectNumberingRegression.hpp"
+#include "LegacyNumberingRegression.hpp"
 
 int main(int argc, char** argv)
 {
@@ -254,7 +256,8 @@ int main(int argc, char** argv)
         const auto path = root / "model.db1";
         tekla::db1::Model model; tekla::db1::RawDatabase raw; std::string error = "stale";
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
-        if (name.rfind("object_number_",0)==0) objectNumberingRegression(path,name);
+        if (name.rfind("legacy_number_",0)==0) legacyNumberingRegression(path,name);
+        else if (name.rfind("object_number_",0)==0) objectNumberingRegression(path,name);
         else if (name.rfind("inline_position_",0)==0)
         {
             const bool library=name!="inline_position_main";

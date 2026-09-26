@@ -12222,6 +12222,41 @@
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
       "exit": 0,
       "stdout": "log_parts=187 log_assemblies=43 project_series_links=249"
+    },
+    {
+      "name": "object_number_model:PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "mode": "object_number_model",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "exit": 0,
+      "stdout": "version=7.82 records=621 derived=508 references=14668 linked=5532 unverified=0 null=9136 fingerprint=f74b66978bb56a64"
+    },
+    {
+      "name": "object_number_library:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "mode": "object_number_library",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 records=53 derived=2 references=26453 linked=1110 unverified=0 null=25343 fingerprint=b1b14aa51a3d2752"
+    },
+    {
+      "name": "object_number_model:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "mode": "object_number_model",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "exit": 0,
+      "stdout": "version=7.82 records=11 derived=0 references=2352 linked=768 unverified=0 null=1584 fingerprint=249c1c08c17c15d9"
+    },
+    {
+      "name": "object_number_library:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "mode": "object_number_library",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 records=0 derived=0 references=0 linked=0 unverified=0 null=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "legacy_number_evidence:PSDBIM",
+      "mode": "legacy_number_evidence",
+      "path": "legacy-dg782",
+      "exit": 0,
+      "stdout": "drawing_objects=4 parts=2 assemblies=2 explicit_series_links=5192"
     }
   ]
 }

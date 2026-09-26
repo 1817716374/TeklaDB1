@@ -63,6 +63,8 @@ void objectNumberingRegression(const std::filesystem::path& path, const std::str
             save(path.parent_path()/"xslib.db2",db2("11234567-89ab-cdef-0123-456789abcdef",keys));
         }
         tekla::Project project; tekla::ProjectOptions options; options.mainDatabase=path.filename(); options.readRawCompanions=false;
+        // The legacy opt-in cannot weaken a modern GUID conflict.
+        if (name=="object_number_project_guid") options.trustLegacyNumberingBasenames=true;
         check(tekla::readProject(path.parent_path(),project,error,options),error.c_str());
         const auto expected=name=="object_number_project"?1U:name=="object_number_project_library_scope"?2U:0U;
         check(project.objectNumberingSeriesAssociations.size()==expected,"project numbering scope/missing/ambiguous series mishandled");
@@ -70,6 +72,7 @@ void objectNumberingRegression(const std::filesystem::path& path, const std::str
         {
             check(association.objectId==5 && association.numberingRecordId==100 && association.seriesIndex==0,"project number association wrong");
             check(association.database.stem()==association.numberingDatabase.stem(),"number association crossed database namespaces");
+            check(association.pairingEvidence==tekla::NumberingPairEvidence::DatabaseGuid,"modern pair evidence mislabeled");
         }
         if (!expected) check(std::any_of(project.diagnostics.begin(),project.diagnostics.end(),[](const auto& d){return d.find("object numbering")!=std::string::npos && (d.find("DB2")!=std::string::npos);}),"missing project numbering diagnostic");
     }

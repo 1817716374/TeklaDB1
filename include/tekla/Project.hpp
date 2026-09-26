@@ -39,6 +39,9 @@ struct ProjectOptions
     bool readDrawings = true;
     bool readEnvironment = true;
     bool readOptions = true;
+    // Caller explicitly trusts same-directory, same-basename 7.82 DB1/DB2 files
+    // when both lack GUIDs. Never bypasses a GUID or storage-version conflict.
+    bool trustLegacyNumberingBasenames = false;
 };
 struct DrawingModelAssociation
 {
@@ -62,6 +65,7 @@ struct SurfaceMaterialAssociation
     std::uint32_t surfaceTreatmentId = 0;
     std::size_t materialIndex = 0;
 };
+enum class NumberingPairEvidence { DatabaseGuid, ExplicitLegacyBasename };
 struct ObjectNumberingSeriesAssociation
 {
     std::filesystem::path database;
@@ -69,6 +73,7 @@ struct ObjectNumberingSeriesAssociation
     std::uint32_t objectId = 0;
     std::uint32_t numberingRecordId = 0;
     std::size_t seriesIndex = 0; // index into Project::numbering.at(numberingDatabase).series
+    NumberingPairEvidence pairingEvidence = NumberingPairEvidence::DatabaseGuid;
 };
 struct Project
 {
