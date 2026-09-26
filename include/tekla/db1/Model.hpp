@@ -108,15 +108,18 @@ struct PartDefinition
     std::string classNumber;
 };
 
-enum class ObjectNumberingKind { Unverified, Part, Assembly };
+enum class ObjectNumberingKind { Unverified, Part, Assembly, Reinforcement };
 struct ObjectNumberingRecord
 {
     uint32_t id = 0;
     ObjectNumberingKind kind = ObjectNumberingKind::Unverified;
     uint32_t startNumber = 0;
-    uint32_t sequence = 0; // Linked-record sequence; zero for 7.30 inline storage.
+    // Linked part/assembly sequence; zero for 7.30 inline storage and for
+    // reinforcement, whose assignment slot is not yet interpreted.
+    uint32_t sequence = 0;
     std::string prefix;
-    // Derived only for ordinary positive ranges. Not a lifecycle/currentness claim.
+    // Derived only for verified ordinary positive ranges; absent for reinforcement.
+    // Not a lifecycle/currentness claim.
     std::optional<uint32_t> positionNumber;
     // Complete stored payload, including unknown flags and unverified record kinds.
     std::vector<uint8_t> rawPayload;

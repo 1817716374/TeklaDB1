@@ -314,7 +314,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 indices[{database.series[i].prefix,database.series[i].startNumber}].push_back(i);
             std::size_t unresolved = 0;
             const auto linkRecord = [&](std::uint32_t objectId,const db1::ObjectNumberingRecord& record) {
-                if (record.kind==db1::ObjectNumberingKind::Unverified) return;
+                if (record.kind!=db1::ObjectNumberingKind::Part && record.kind!=db1::ObjectNumberingKind::Assembly) return;
                 const auto series = indices.find({record.prefix,record.startNumber});
                 if (series==indices.end() || series->second.size()!=1) { ++unresolved; return; }
                 result.objectNumberingSeriesAssociations.push_back({model.databasePath,pair,objectId,record.id,series->second.front(),legacyPair?NumberingPairEvidence::ExplicitLegacyBasename:NumberingPairEvidence::DatabaseGuid});

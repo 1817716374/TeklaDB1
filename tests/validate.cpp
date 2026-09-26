@@ -29,6 +29,7 @@ struct Fingerprint
 #include "PositionValidation.hpp"
 #include "SurfaceValidation.hpp"
 #include "ObjectNumberingValidation.hpp"
+#include "ReinforcementNumberingValidation.hpp"
 #include "LegacyNumberingValidation.hpp"
 #include "Numbering730Validation.hpp"
 #include "InlineNumbering730Validation.hpp"
@@ -126,6 +127,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 throw std::runtime_error("training companion databases missing");
             std::cout<<"empty_bolt_groups=2 model_parts=21 unused_reinforcement_definitions=137 numbering_databases=2 options_databases=2\n";
         }
+        else if (mode=="rebar_number_evidence") validateReinforcementNumberingEvidence(path);
         else if (mode=="object_number_evidence") validateObjectNumberEvidence(path);
         else if (mode=="reinforcement_evidence") validateReinforcementEvidence(path);
         else if (mode=="reinforcement_model" || mode=="reinforcement_library")

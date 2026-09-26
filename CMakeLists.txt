@@ -156,6 +156,10 @@ if(TEKLADB1_BUILD_TESTS)
             reinforcement_shared reinforcement_budget reinforcement_budget_override reinforcement_duplicate_placement
             bolt_position_null bolt_position_library bolt_position_present bolt_position_missing
             bolt_position_point bolt_position_definition bolt_position_placement bolt_position_empty_array
+            rebar_number_main rebar_number_library rebar_number_895 rebar_number_952
+            rebar_number_zero rebar_number_special rebar_number_raw_zero rebar_number_raw_high rebar_number_full_prefix
+            rebar_number_unreferenced rebar_number_null rebar_number_shared rebar_number_wrong_kind rebar_number_wrong_kind895
+            rebar_number_missing rebar_number_fields rebar_number_width rebar_number_duplicate rebar_number_zero_id rebar_number_project
             inline_number_730_main inline_number_730_library inline_number_730_zero inline_number_730_non1 inline_number_730_zero_start
             inline_number_730_special inline_number_730_tag inline_number_730_tag12 inline_number_730_duplicate inline_number_730_missing_record
             inline_number_730_identity inline_number_730_wrong_kind inline_number_730_zero_id inline_number_730_width inline_number_730_empty

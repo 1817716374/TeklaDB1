@@ -30,7 +30,7 @@ void objectNumberingRegression(const std::filesystem::path& path, const std::str
     bytes[11]=' '; str(bytes,12,databaseGuid); save(path,bytes);
     Model model; std::string error;
     const bool ok=library?parseComponentLibrary(path,model,error):parseModelFile(path,model,error);
-    const bool invalid=name=="object_number_missing" || name=="object_number_identity" || name=="object_number_duplicate" || name=="object_number_collision" || name=="object_number_duplicate_link" || name=="object_number_fields" || name=="object_number_link_fields" || name=="object_number_width" || name=="object_number_link_width";
+    const bool invalid=name=="object_number_unknown" || name=="object_number_missing" || name=="object_number_identity" || name=="object_number_duplicate" || name=="object_number_collision" || name=="object_number_duplicate_link" || name=="object_number_fields" || name=="object_number_link_fields" || name=="object_number_width" || name=="object_number_link_width";
     if (invalid)
     {
         check(!ok && !error.empty() && model.objectNumberingRecords.empty() && model.objectNumberingReferences.empty() && model.identities.empty(),"bad object numbering accepted or partial model retained");
@@ -42,7 +42,7 @@ void objectNumberingRegression(const std::filesystem::path& path, const std::str
     if (name=="object_number_zero" || name=="object_number_special" || name=="object_number_overflow") check(!record.positionNumber,"special/zero/overflow range fabricated an assigned number");
     else check(record.positionNumber && *record.positionNumber==107,"start+sequence-1 derivation wrong");
     const auto& a=model.objectNumberingRecords.at(200); check(a.kind==ObjectNumberingKind::Assembly && a.prefix=="A" && a.positionNumber==2,"assembly numbering mapping wrong");
-    const auto& raw=model.objectNumberingRecords.at(300); check(raw.kind==ObjectNumberingKind::Unverified && raw.rawPayload.size()==44 && raw.rawPayload.back()==0xab && !raw.positionNumber && raw.prefix.empty(),"unverified numbering record guessed or lost");
+    const auto& raw=model.objectNumberingRecords.at(300); check(raw.kind==ObjectNumberingKind::Reinforcement && raw.startNumber==123 && raw.sequence==0 && raw.rawPayload.size()==44 && raw.rawPayload.back()==0xab && !raw.positionNumber && raw.prefix.empty(),"reinforcement prefix/start or unknown assignment payload lost");
     check(model.objectNumberingReferences.at(5).rawContext==585288,"numbering context lost");
     if (name.rfind("object_number_project",0)==0)
     {

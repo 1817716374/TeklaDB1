@@ -13,13 +13,13 @@ DB2 的系列计数不能回答“某个构件的编号是多少”。已核对�
 | 211 / 181 | 12 | 4项，全1 | objectId@0、rawContext@4、numberingRecordId@8 |
 | 322 / 286 | 68 | 9项，前三项1，其余0 | 零件编号记录 |
 | 323 / 287 | 76 | 11项，前三项1，其余0 | 装配编号记录 |
-| 324 / 288 | 44 | 7项，前三项1，其余0 | 未解释的第三种记录，保留原始payload |
+| 324 / 288 | 44 | 7项，前三项1，其余0 | 钢筋编号系列，startNumber@12、prefix@16..43；分配号未知 |
 
-零件/装配记录共1,982条，均有id@0、startNumber@8、sequence@12。零件prefix在@20..67，装配prefix在@28..75。@4及编号与前缀之间的槽位含义未验证，连同其他字节保存为`rawPayload`。第三种记录不根据看起来相似的整数或文本生成前缀、起始号或编号。
+零件/装配记录共1,982条，均有id@0、startNumber@8、sequence@12。零件prefix在@20..67，装配prefix在@28..75。@4及编号与前缀之间的槽位含义未验证，连同其他字节保存为`rawPayload`。钢筋记录的前缀与起始号已按独立参数证据恢复，其分配槽不套用上述公式，详见[钢筋编号](REINFORCEMENT_NUMBERING.zh-CN.md)。
 
-`Model::objectNumberingRecords`按记录ID索引，包含共享及未引用记录；`objectNumberingReferences`按对象身份ID索引，保留零引用和原始上下文。上下文值出现0、585288、588603，含义尚未确定，不据此推断编号批次或生命周期。27,303条引用指向零件/装配编号记录；另外1,447条非零引用指向未解释的44字节记录，仍完整保留。
+`Model::objectNumberingRecords`按记录ID索引，包含共享及未引用记录；`objectNumberingReferences`按对象身份ID索引，保留零引用和原始上下文。上下文值出现0、585288、588603，含义尚未确定，不据此推断编号批次或生命周期。27,303条引用指向零件/装配编号记录；另外1,447条非零引用指向44字节钢筋记录，全部验证kind47身份并完整保留。
 
-`ObjectNumberingRecord::kind`区分`Part`、`Assembly`和`Unverified`。`positionNumber`是可选派生值：只有起始号、序号均大于零，起始号及`startNumber+sequence-1`落在普通正有符号32位范围时才提供。计算使用64位避免溢出。序号零、特殊高位起始值或越界结果保留存储值，optional为空，不能把它们自动当成编号0、默认号或已删除对象。
+`ObjectNumberingRecord::kind`区分`Part`、`Assembly`、`Reinforcement`和`Unverified`。`positionNumber`是可选派生值：对已验证的零件/装配记录，只有起始号、序号均大于零，起始号及`startNumber+sequence-1`落在普通正有符号32位范围时才提供。计算使用64位避免溢出。序号零、特殊高位起始值或越界结果保留存储值，optional为空，不能把它们自动当成编号0、默认号或已删除对象。
 
 ```cpp
 const auto& ref = model.objectNumberingReferences.at(objectId);
@@ -30,7 +30,7 @@ if (ref.numberingRecordId != 0) {
 }
 ```
 
-严格检查表宽/签名、重复记录ID（包含跨种类冲突）、重复对象引用、缺失对象身份及非零目标断链。失败清空结果。原始44字节记录产生未解释语义诊断，不因它们存在而丢掉整个模型。
+严格检查表宽/签名、重复记录ID（包含跨种类冲突）、重复对象引用、缺失对象身份及非零目标断链。失败清空结果。44字节钢筋记录仅恢复系列字段，分配号继续保持未解释诊断；新增类型限定不影响合法共享与未引用记录。
 
 ## 独立编号日志与工程关联
 

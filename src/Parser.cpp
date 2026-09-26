@@ -1483,6 +1483,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 const auto* value = row(data, all, first+kind, i);
                 ObjectNumberingRecord record;
                 record.id = read<uint32_t>(value, 1);
+                if (!record.id) throw std::runtime_error("zero object numbering record ID");
                 record.rawPayload.assign(value+1, value+1+widths[kind]);
                 if (kind<2)
                 {
@@ -1494,7 +1495,15 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                     if (record.startNumber>0 && record.startNumber<0x80000000U && record.sequence>0 && number<=0x80000000ULL)
                         record.positionNumber = static_cast<uint32_t>(number-1);
                 }
-                else ++unverified;
+                else
+                {
+                    record.kind = ObjectNumberingKind::Reinforcement;
+                    record.startNumber = read<uint32_t>(value, 13);
+                    record.prefix = fixedString(value, 17, 28);
+                    // The slot at payload offset 8 has no independently verified
+                    // assignment semantics. Preserve it without deriving a mark.
+                    ++unverified;
+                }
                 insertUnique(model.objectNumberingRecords, record.id, record, "object numbering record");
             }
         }
@@ -1508,9 +1517,15 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             if (!model.identities.count(reference.objectId)) throw std::runtime_error("missing object numbering identity");
             if (reference.numberingRecordId && !model.objectNumberingRecords.count(reference.numberingRecordId))
                 throw std::runtime_error("missing object numbering record " + std::to_string(reference.numberingRecordId));
+            if (reference.numberingRecordId && model.objectNumberingRecords.at(reference.numberingRecordId).kind==ObjectNumberingKind::Reinforcement)
+            {
+                const auto& identity = model.identities.at(reference.objectId);
+                const auto sourceKind = older895 ? model.identityClasses.at(identity.classReferenceId).recordKind : identity.type;
+                if (sourceKind!=47) throw std::runtime_error("reinforcement numbering reference has non-reinforcement identity");
+            }
             insertUnique(model.objectNumberingReferences, reference.objectId, reference, "object numbering reference");
         }
-        if (unverified) model.diagnostics.push_back(std::to_string(unverified) + " object numbering records retain unverified 44-byte semantics");
+        if (unverified) model.diagnostics.push_back(std::to_string(unverified) + " reinforcement numbering records retain unverified assignment semantics; only prefix/start are decoded");
     }
 
     const auto readPosition = [&](const uint8_t* value, uint32_t id, std::size_t start) {

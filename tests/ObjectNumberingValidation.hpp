@@ -11,7 +11,7 @@ void validateObjectNumbers(const tekla::db1::Model& model, const tekla::db1::Raw
         {
             const auto& p=source.payload; const auto& r=model.objectNumberingRecords.at(word(p,0));
             if (r.rawPayload!=p || r.id!=word(p,0) || r.inlineObjectId || r.storedNumber) throw std::runtime_error("numbering raw payload lost");
-            const auto expectedKind=kind==0?ObjectNumberingKind::Part:kind==1?ObjectNumberingKind::Assembly:ObjectNumberingKind::Unverified;
+            const auto expectedKind=kind==0?ObjectNumberingKind::Part:kind==1?ObjectNumberingKind::Assembly:ObjectNumberingKind::Reinforcement;
             if (r.kind!=expectedKind) throw std::runtime_error("numbering kind changed");
             if (kind<2)
             {
@@ -23,7 +23,12 @@ void validateObjectNumbers(const tekla::db1::Model& model, const tekla::db1::Raw
                 const bool expected=r.startNumber>0 && r.startNumber<0x80000000U && r.sequence>0 && number<=0x80000000ULL;
                 if (bool(r.positionNumber)!=expected || (expected && *r.positionNumber!=number-1)) throw std::runtime_error("numbering derived position changed");
             }
-            else if (r.positionNumber || r.startNumber || r.sequence || !r.prefix.empty()) throw std::runtime_error("unverified numbering semantics fabricated");
+            else
+            {
+                const auto end=std::find(p.begin()+16,p.end(),0);
+                if (r.positionNumber || r.sequence || r.startNumber!=word(p,12) || r.prefix!=std::string(p.begin()+16,end))
+                    throw std::runtime_error("reinforcement numbering series changed or assignment fabricated");
+            }
             ++records; derived+=bool(r.positionNumber);
             hash.number(r.id); hash.number(static_cast<unsigned>(r.kind)); hash.number(r.startNumber); hash.number(r.sequence); hash.text(r.prefix);
             hash.number(bool(r.positionNumber)); if (r.positionNumber) hash.number(*r.positionNumber);
@@ -37,7 +42,16 @@ void validateObjectNumbers(const tekla::db1::Model& model, const tekla::db1::Raw
             throw std::runtime_error("numbering reference changed");
         if (!r.numberingRecordId) ++nulls;
         else if (model.objectNumberingRecords.at(r.numberingRecordId).kind==ObjectNumberingKind::Unverified) ++unknown;
-        else ++linked;
+        else
+        {
+            if (model.objectNumberingRecords.at(r.numberingRecordId).kind==ObjectNumberingKind::Reinforcement)
+            {
+                const auto& identity=model.identities.at(r.objectId);
+                const auto kind=model.storageVersion=="8.95"?model.identityClasses.at(identity.classReferenceId).recordKind:identity.type;
+                if (kind!=47 || !model.reinforcements.count(r.objectId)) throw std::runtime_error("reinforcement numbering object scope changed");
+            }
+            ++linked;
+        }
         hash.number(r.objectId); hash.number(r.rawContext); hash.number(r.numberingRecordId);
     }
     if (model.objectNumberingRecords.size()!=records || model.objectNumberingReferences.size()!=references.size())

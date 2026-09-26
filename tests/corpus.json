@@ -12665,7 +12665,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db1",
@@ -12721,7 +12721,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
@@ -12735,7 +12735,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
@@ -12749,7 +12749,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
@@ -12763,7 +12763,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
@@ -12777,7 +12777,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
@@ -12791,7 +12791,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
@@ -12805,7 +12805,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
@@ -12819,7 +12819,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
@@ -12833,7 +12833,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
@@ -12847,7 +12847,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
@@ -12861,7 +12861,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
@@ -12875,7 +12875,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
@@ -12889,7 +12889,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
@@ -12903,7 +12903,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
@@ -12917,7 +12917,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
@@ -12931,7 +12931,7 @@
       "mode": "object_number_library",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=626 unverified=16 null=12211 fingerprint=e5809b1cd8430acc"
+      "stdout": "version=8.95 records=57 derived=0 references=12853 linked=642 unverified=0 null=12211 fingerprint=8221df99470e1556"
     },
     {
       "name": "object_number_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
@@ -12952,14 +12952,14 @@
       "mode": "object_number_model",
       "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=11 derived=0 references=1311 linked=261 unverified=67 null=983 fingerprint=c98e98cbc13a3893"
+      "stdout": "version=8.95 records=11 derived=0 references=1311 linked=328 unverified=0 null=983 fingerprint=ae3e588ff046cd4e"
     },
     {
       "name": "object_number_library:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
       "mode": "object_number_library",
       "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=423 derived=0 references=34009 linked=2629 unverified=469 null=30911 fingerprint=40227512706925e5"
+      "stdout": "version=8.95 records=423 derived=0 references=34009 linked=3098 unverified=0 null=30911 fingerprint=ed630bf96c15d6b8"
     },
     {
       "name": "object_number_model:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db1",
@@ -12973,7 +12973,7 @@
       "mode": "object_number_library",
       "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=423 derived=0 references=34009 linked=2629 unverified=469 null=30911 fingerprint=105d6b98346951db"
+      "stdout": "version=8.95 records=423 derived=0 references=34009 linked=3098 unverified=0 null=30911 fingerprint=d522106f9c759b72"
     },
     {
       "name": "object_number_model:steel-detailing/New model 3.db1",
@@ -12987,7 +12987,7 @@
       "mode": "object_number_library",
       "path": "steel-detailing/xslib.db1",
       "exit": 0,
-      "stdout": "version=9.52 records=104 derived=0 references=18018 linked=934 unverified=170 null=16914 fingerprint=2c3e460dfc7f033b"
+      "stdout": "version=9.52 records=104 derived=0 references=18018 linked=1104 unverified=0 null=16914 fingerprint=a8028b04319feb35"
     },
     {
       "name": "object_number_model:steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
@@ -13498,7 +13498,7 @@
       "mode": "object_number_model",
       "path": "construsoft-wapening/oefening W3/oefening W3.db1",
       "exit": 0,
-      "stdout": "version=8.95 records=39 derived=30 references=147 linked=48 unverified=0 null=99 fingerprint=de5e90a96b3c0c2"
+      "stdout": "version=8.95 records=39 derived=30 references=147 linked=48 unverified=0 null=99 fingerprint=e8c4f769ba2faa34"
     },
     {
       "name": "reinforcement_model:construsoft-wapening/oefening W3/oefening W3.db1",
@@ -14710,6 +14710,20 @@
       "mode": "inline730_backups",
       "exit": 0,
       "stdout": "backup_pairs=34 inline_records=36285 nonzero=22640 linked=22581 missing_component_series=59 counters_above_current_max=58"
+    },
+    {
+      "name": "rebar-number-evidence:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "mode": "rebar_number_evidence",
+      "exit": 0,
+      "stdout": "reinforcement_objects=3 prefix_parameters=3 start_parameters=3 assigned_positions=unverified"
+    },
+    {
+      "name": "rebar-number-evidence:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "mode": "rebar_number_evidence",
+      "exit": 0,
+      "stdout": "reinforcement_objects=3 prefix_parameters=3 start_parameters=3 assigned_positions=unverified"
     }
   ]
 }

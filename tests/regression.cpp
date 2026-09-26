@@ -246,6 +246,7 @@ std::vector<Table> componentLibrary(bool older895)
 }
 
 #include "ObjectNumberingRegression.hpp"
+#include "ReinforcementNumberingRegression.hpp"
 #include "ReinforcementRegression.hpp"
 #include "BoltPositionRegression.hpp"
 #include "LegacyNumberingRegression.hpp"
@@ -263,6 +264,7 @@ int main(int argc, char** argv)
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
         if (name.rfind("inline_number_730_",0)==0) inlineNumbering730Regression(path,name);
         else if (name.rfind("legacy_number_",0)==0) legacyNumberingRegression(path,name);
+        else if (name.rfind("rebar_number_",0)==0) reinforcementNumberingRegression(path,name);
         else if (name.rfind("object_number_",0)==0) objectNumberingRegression(path,name);
         else if (name.rfind("reinforcement_",0)==0) reinforcementRegression(path,name);
         else if (name.rfind("bolt_position_",0)==0) boltPositionRegression(path,name);
