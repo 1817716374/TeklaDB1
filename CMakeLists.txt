@@ -132,7 +132,11 @@ if(TEKLADB1_BUILD_TESTS)
             ownership_895_class_duplicate ownership_895_owner_missing ownership_aux_fields ownership_aux_missing ownership_aux_duplicate
             ownership_distance_fields ownership_formula_fields ownership_formula_cycle ownership_formula_missing_chunk ownership_other_scope
             ownership_custom_reference_missing ownership_position_start_nan ownership_position_end_inf
-            ownership_position_depth_nan ownership_position_plane_inf ownership_position_unknown)
+            ownership_position_depth_nan ownership_position_plane_inf ownership_position_unknown
+            surface_main surface_library surface_unknown_profile surface_fields surface_definition_fields surface_width
+            surface_definition_missing surface_point_missing surface_frame_missing surface_contour_missing surface_identity_missing
+            surface_father_missing surface_father_unknown surface_father_duplicate surface_target_missing surface_duplicate
+            surface_definition_duplicate surface_origin_nan surface_length_inf surface_contour_nan surface_chamfer_nan surface_project_no_catalog)
         add_test(NAME db1.${case} COMMAND tekladb1_regression "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     if(TEKLADB1_WITH_OCCT)

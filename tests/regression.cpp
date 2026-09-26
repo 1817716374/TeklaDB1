@@ -97,12 +97,12 @@ std::vector<Table> onePart(std::uint32_t type = 2, bool broken = false, bool con
 std::vector<Table> onePart782(bool library = false)
 {
     std::vector<Table> tables(library ? 198 : 228);
-    const std::array<std::array<std::size_t,4>,18> roles{{
+    const std::array<std::array<std::size_t,4>,20> roles{{
         {{61,40,32,6}}, {{64,43,40,7}}, {{65,44,52,8}}, {{75,53,45,6}},
         {{122,95,44,6}}, {{154,126,104,22}}, {{160,132,24,7}}, {{161,133,24,7}},
         {{190,160,24,7}}, {{191,161,60,7}}, {{192,162,60,7}}, {{209,179,63,8}},
         {{207,177,380,31}}, {{121,94,332,84}}, {{116,90,116,6}}, {{193,163,56,11}},
-        {{226,196,60,16}}, {{181,151,88,8}}}};
+        {{226,196,60,16}}, {{181,151,88,8}}, {{145,117,78,12}}, {{146,118,292,29}}}};
     for (const auto& spec : roles)
     {
         auto& t = tables[spec[library ? 1 : 0]];
@@ -249,7 +249,78 @@ int main(int argc, char** argv)
         const auto path = root / "model.db1";
         tekla::db1::Model model; tekla::db1::RawDatabase raw; std::string error = "stale";
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
-        if (name.rfind("ownership_",0)==0)
+        if (name.rfind("surface_",0)==0)
+        {
+            const bool library=name!="surface_main" && name!="surface_project_no_catalog";
+            auto s=onePart782(library);
+            const auto surface=library?117U:145U, definition=library?118U:146U, identity=library?179U:209U;
+            const auto association=library?161U:191U, contour=library?94U:121U, propertyLink=library?132U:160U;
+            auto def=row(s[definition],101); str(def,69,"7"); str(def,91,"TEST SURFACE"); str(def,113,"PL1.587");
+            str(def,175,"Zero_Density"); str(def,207,"TS1 - Tile surface 1"); put<std::uint32_t>(def,269,3);
+            put<std::uint32_t>(def,5,196); put<std::uint32_t>(def,61,6); put<std::uint32_t>(def,273,99); s[definition].rows={def};
+            auto object=row(s[surface],100); put<std::uint32_t>(object,5,101); put<std::uint32_t>(object,9,1);
+            put<std::uint32_t>(object,13,2); put<std::uint32_t>(object,17,8); put<std::uint32_t>(object,21,3);
+            put<double>(object,25,20); put<double>(object,49,30); object[57]=0xab; object[78]=0xcd; s[surface].rows={object};
+            auto ident=s[identity].rows[0]; put<std::uint32_t>(ident,1,100); s[identity].rows.push_back(ident);
+            auto polygon=s[contour].rows[0]; put<std::uint32_t>(polygon,1,8); put<std::uint32_t>(polygon,221,0);
+            put<std::uint32_t>(polygon,225,0x7fffffff); put<float>(polygon,21,9); put<float>(polygon,61,9); s[contour].rows.push_back(polygon);
+            auto father=row(s[association],102); put<std::uint32_t>(father,5,73); put<std::uint32_t>(father,9,5);
+            put<std::uint32_t>(father,13,100); s[association].rows.push_back(father);
+            auto property=s[propertyLink].rows[0]; put<std::uint32_t>(property,1,103); put<std::uint32_t>(property,9,100); s[propertyLink].rows.push_back(property);
+            if (library)
+            {
+                put<std::uint32_t>(s[156].rows[0],5,100);
+                for (auto& r:s[162].rows)
+                {
+                    std::uint32_t id=0; std::memcpy(&id,r.data()+1,4);
+                    if (id==71 || id==81) put<std::uint32_t>(r,13,100);
+                }
+            }
+            if (name=="surface_fields") s[surface].fields[1]=1;
+            if (name=="surface_definition_fields") s[definition].fields[1]=1;
+            if (name=="surface_width") {s[surface].payload=80;s[surface].rows.clear();}
+            if (name=="surface_definition_missing") s[definition].rows.clear();
+            if (name=="surface_point_missing") put<std::uint32_t>(s[surface].rows[0],9,999);
+            if (name=="surface_frame_missing") put<std::uint32_t>(s[surface].rows[0],21,999);
+            if (name=="surface_contour_missing") put<std::uint32_t>(s[surface].rows[0],17,999);
+            if (name=="surface_identity_missing") s[identity].rows.pop_back();
+            if (name=="surface_father_missing") s[association].rows.pop_back();
+            if (name=="surface_father_unknown") put<std::uint32_t>(s[association].rows.back(),9,999);
+            if (name=="surface_father_duplicate") s[association].rows.push_back(s[association].rows.back());
+            if (name=="surface_target_missing") {auto extra=father;put<std::uint32_t>(extra,13,999);s[association].rows.push_back(extra);}
+            if (name=="surface_duplicate") s[surface].rows.push_back(s[surface].rows[0]);
+            if (name=="surface_definition_duplicate") s[definition].rows.push_back(s[definition].rows[0]);
+            if (name=="surface_origin_nan") put<double>(s[surface].rows[0],25,std::numeric_limits<double>::quiet_NaN());
+            if (name=="surface_length_inf") put<double>(s[surface].rows[0],49,std::numeric_limits<double>::infinity());
+            if (name=="surface_contour_nan") put<float>(s[contour].rows.back(),13,std::numeric_limits<float>::quiet_NaN());
+            if (name=="surface_chamfer_nan") {put<std::uint32_t>(s[contour].rows.back(),213,20);put<float>(s[contour].rows.back(),133,std::numeric_limits<float>::quiet_NaN());}
+            if (name=="surface_unknown_profile") s[definition].rows[0][113]='X';
+            save(path,encode(s,"7.82"));
+            const bool ok=library?tekla::db1::parseComponentLibrary(path,model,error):parse();
+            if (name=="surface_main" || name=="surface_library" || name=="surface_unknown_profile" || name=="surface_project_no_catalog")
+            {
+                check(ok,error.c_str()); const auto& treatment=model.surfaceTreatments.at(100);
+                const auto& definitionValue=model.surfaceTreatmentDefinitions.at(101);
+                check(model.parts.size()==2 && !model.parts.count(100),"surface fabricated a structural part");
+                check(treatment.fatherPartId==5 && treatment.ownerId==50 && treatment.definitionId==101 && treatment.contour.size()==3,"surface object joins lost");
+                check(treatment.startPointId==1 && treatment.endPointId==2 && treatment.orientationId==3 && treatment.origin[0]==20 && treatment.storedLength==30,"surface geometry overwritten");
+                check(model.surfaceTreatmentIdsByFather.at(5)==std::vector<std::uint32_t>{100},"surface reverse father join lost");
+                check(treatment.rawTail.front()==0xab && treatment.rawTail.back()==0xcd && definitionValue.rawHeader[0]==196 && definitionValue.rawHeader[14]==6 && definitionValue.rawTail[0]==99,"surface opaque bytes lost");
+                check(definitionValue.name=="TEST SURFACE" && definitionValue.classNumber=="7" && definitionValue.material=="Zero_Density" && definitionValue.typeCode==3 && definitionValue.typeName=="TS1 - Tile surface 1","surface definition fields lost");
+                check(name=="surface_unknown_profile"?!definitionValue.thicknessFromProfile:(definitionValue.thicknessFromProfile && *definitionValue.thicknessFromProfile==1.587),"surface profile thickness guessed");
+                check(treatment.properties.size()==1 && treatment.properties[0].name=="PHASE","surface properties lost");
+                if (library) check(treatment.distanceParameterIds==std::vector<std::uint32_t>{70} && treatment.formulaBindingIds==std::vector<std::uint32_t>{80},"surface variable graph lost");
+                if (name=="surface_project_no_catalog")
+                {
+                    tekla::Project project; tekla::ProjectOptions options; options.mainDatabase=path.filename(); options.readComponentLibrary=false;
+                    check(tekla::readProject(path.parent_path(),project,error,options),error.c_str());
+                    check(project.model.surfaceTreatments.size()==1 && project.surfaceMaterialAssociations.empty(),"surface lost or material association fabricated without catalog");
+                    check(std::any_of(project.diagnostics.begin(),project.diagnostics.end(),[](const auto& x){return x.find("no material catalog")!=std::string::npos;}),"missing surface catalog diagnostic lost");
+                }
+            }
+            else check(!ok && !error.empty() && model.surfaceTreatments.empty() && model.surfaceTreatmentDefinitions.empty() && model.surfaceTreatmentIdsByFather.empty() && model.parts.empty(),"malformed surface accepted or partial result retained");
+        }
+        else if (name.rfind("ownership_",0)==0)
         {
             const bool older=name.find("895")!=std::string::npos;
             auto s=componentLibrary(older); const auto ident=older?260U:318U;

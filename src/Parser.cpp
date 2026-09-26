@@ -96,6 +96,16 @@ void validateModel(Model& model)
             if (!model.parts.count(partId) || model.parts.at(partId).internalType != 2)
                 throw std::runtime_error("broken DB1 individual bolt connection " + std::to_string(bolt.id));
     }
+    for (const auto& entry : model.surfaceTreatments)
+    {
+        const auto& surface = entry.second;
+        if (!finite(surface.origin) || !std::isfinite(surface.storedLength))
+            throw std::runtime_error("non-finite surface treatment placement " + std::to_string(surface.id));
+        for (const auto& point : surface.contour)
+            if (!finite(point.value) || (point.chamferType != 0 && point.chamferType != 40 &&
+                (!std::isfinite(point.chamferX) || !std::isfinite(point.chamferY))))
+                throw std::runtime_error("non-finite surface treatment contour " + std::to_string(surface.id));
+    }
     model.identityTypeCounts.clear();
     for (const auto& identity : model.identities) ++model.identityTypeCounts[identity.second.type];
 }
@@ -976,6 +986,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const bool verifiedPartOwnership = !older782 && !older844;
     const std::size_t identityClassOrdinal = library ? 279 : 315;
     const std::size_t partAuxiliaryOrdinal = library ? 215 : 245;
+    const std::size_t surfaceOrdinal = library ? 117 : 145;
+    const std::size_t surfaceDefinitionOrdinal = library ? 118 : 146;
     const std::size_t pointOrdinal = library ? 40 : 61;
     const std::size_t placementOrdinal = library ? 43 : 64;
     const std::size_t frameOrdinal = library ? 44 : 65;
@@ -1019,6 +1031,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
     if (older895) required.emplace_back(identityClassOrdinal, 28U);
+    if (older782)
+    {
+        required.emplace_back(surfaceOrdinal, 78U);
+        required.emplace_back(surfaceDefinitionOrdinal, 292U);
+    }
     if (verifiedPartOwnership) required.emplace_back(partAuxiliaryOrdinal, 52U);
     if (componentVariables)
     {
@@ -1041,6 +1058,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     }
     if (older782)
     {
+        requireFields(data, all, surfaceOrdinal, 12, {0});
+        requireFields(data, all, surfaceDefinitionOrdinal, 29, {0});
         // Both independent 7.82 models and their libraries share exact signatures.
         const std::pair<std::size_t, std::size_t> fields[] = {
             {pointOrdinal,6}, {placementOrdinal,7}, {frameOrdinal,8}, {profileStringOrdinal,6},
@@ -1649,6 +1668,90 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         model.diagnostics.emplace_back(std::to_string(rootOnlyUnresolved) + " unresolved database-root bookkeeping links ignored");
     for (auto& entry : model.parts)
         entry.second.properties = model.properties[entry.first];
+
+    if (older782)
+    {
+        const std::regex thicknessPattern(R"(^PL([+]?[0-9]+(?:\.[0-9]+)?)$)");
+        for (std::size_t index = 0; index < all[surfaceDefinitionOrdinal].rowCount; ++index)
+        {
+            const auto* value = row(data, all, surfaceDefinitionOrdinal, index);
+            SurfaceTreatmentDefinition definition;
+            definition.id = read<uint32_t>(value, 1);
+            definition.classNumber = fixedString(value, 69, 22);
+            definition.name = fixedString(value, 91, 22);
+            definition.profile = fixedString(value, 113, 62);
+            definition.material = fixedString(value, 175, 32);
+            definition.typeName = fixedString(value, 207, 62);
+            definition.typeCode = read<uint32_t>(value, 269);
+            for (std::size_t i=0; i<definition.rawHeader.size(); ++i) definition.rawHeader[i] = read<uint32_t>(value, 5+i*4);
+            for (std::size_t i=0; i<definition.rawTail.size(); ++i) definition.rawTail[i] = read<uint32_t>(value, 273+i*4);
+            std::smatch match;
+            if (std::regex_match(definition.profile, match, thicknessPattern))
+            {
+                std::istringstream input(match[1].str()); input.imbue(std::locale::classic());
+                double thickness = 0.0; input >> thickness;
+                if (!input || !std::isfinite(thickness)) throw std::runtime_error("invalid surface profile thickness");
+                definition.thicknessFromProfile = thickness;
+            }
+            insertUnique(model.surfaceTreatmentDefinitions, definition.id, std::move(definition), "surface treatment definition");
+        }
+        std::unordered_map<uint32_t, uint32_t> fathers;
+        for (const auto& association : associations)
+            if (association.table == associationOneOrdinal && association.type == 73)
+            {
+                if (!model.parts.count(association.source)) throw std::runtime_error("missing surface treatment father part");
+                if (!fathers.emplace(association.target, association.source).second)
+                    throw std::runtime_error("multiple surface treatment father associations");
+            }
+        for (std::size_t index = 0; index < all[surfaceOrdinal].rowCount; ++index)
+        {
+            const auto* value = row(data, all, surfaceOrdinal, index);
+            SurfaceTreatment surface;
+            surface.id = read<uint32_t>(value, 1);
+            surface.definitionId = read<uint32_t>(value, 5);
+            surface.startPointId = read<uint32_t>(value, 9);
+            surface.endPointId = read<uint32_t>(value, 13);
+            surface.contourId = read<uint32_t>(value, 17);
+            surface.orientationId = read<uint32_t>(value, 21);
+            const auto identity = model.identities.find(surface.id);
+            const auto father = fathers.find(surface.id);
+            const auto start = model.points.find(surface.startPointId), end = model.points.find(surface.endPointId);
+            const auto frame = model.frames.find(surface.orientationId);
+            const auto contour = contours.find(surface.contourId);
+            if (identity == model.identities.end() || father == fathers.end() ||
+                !model.surfaceTreatmentDefinitions.count(surface.definitionId) ||
+                start == model.points.end() || end == model.points.end() || frame == model.frames.end() || contour == contours.end())
+                throw std::runtime_error("broken surface treatment join for object " + std::to_string(surface.id));
+            surface.fatherPartId = father->second;
+            surface.ownerId = identity->second.ownerId; surface.guid = identity->second.guid;
+            surface.start = start->second.value; surface.end = end->second.value;
+            surface.axis = frame->second.axis; surface.secondary = frame->second.secondary; surface.normal = frame->second.normal;
+            for (std::size_t axis=0; axis<3; ++axis) surface.origin[axis] = read<double>(value, 25+axis*8);
+            surface.storedLength = read<double>(value, 49);
+            surface.contour = contour->second.points;
+            std::copy(value+57, value+79, surface.rawTail.begin());
+            const auto properties = model.properties.find(surface.id);
+            if (properties != model.properties.end()) surface.properties = properties->second;
+            const auto formulas = model.formulaBindingIdsByTarget.find(surface.id);
+            if (formulas != model.formulaBindingIdsByTarget.end()) surface.formulaBindingIds = formulas->second;
+            model.surfaceTreatmentIdsByFather[surface.fatherPartId].push_back(surface.id);
+            insertUnique(model.surfaceTreatments, surface.id, std::move(surface), "surface treatment");
+        }
+        for (const auto& father : fathers)
+            if (!model.surfaceTreatments.count(father.first)) throw std::runtime_error("surface father association has missing target");
+        for (const auto& entry : model.distanceParameters)
+            for (auto id : entry.second.boundObjectIds)
+            {
+                const auto surface = model.surfaceTreatments.find(id);
+                if (surface != model.surfaceTreatments.end()) surface->second.distanceParameterIds.push_back(entry.first);
+            }
+        for (auto& entry : model.surfaceTreatments)
+        {
+            auto& ids = entry.second.distanceParameterIds;
+            std::sort(ids.begin(), ids.end()); ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
+        }
+        for (auto& entry : model.surfaceTreatmentIdsByFather) std::sort(entry.second.begin(), entry.second.end());
+    }
 
     for (const auto& id : model.operativePartIds)
     {

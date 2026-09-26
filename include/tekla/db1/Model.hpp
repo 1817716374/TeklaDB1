@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <map>
 #include <string>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -165,6 +166,43 @@ struct PlaneOperation
     Vec3 normal{};
     double length = 0.0;
     std::vector<Property> properties;
+};
+
+struct SurfaceTreatmentDefinition
+{
+    uint32_t id = 0;
+    std::string classNumber;
+    std::string name;
+    std::string profile;
+    std::string material;
+    std::string typeName;
+    uint32_t typeCode = 0;
+    // Derived only from an exact PL<number> profile, not an independent field.
+    std::optional<double> thicknessFromProfile;
+    // Uninterpreted payload words at 4..64 and 272..288 (7.82 layout).
+    std::array<uint32_t, 16> rawHeader{};
+    std::array<uint32_t, 5> rawTail{};
+};
+
+struct SurfaceTreatment
+{
+    uint32_t id = 0;
+    uint32_t definitionId = 0;
+    uint32_t fatherPartId = 0;
+    uint32_t ownerId = 0;
+    uint32_t startPointId = 0;
+    uint32_t endPointId = 0;
+    uint32_t contourId = 0;
+    uint32_t orientationId = 0;
+    std::string guid;
+    Vec3 start{}, end{}, origin{}, axis{}, secondary{}, normal{};
+    double storedLength = 0.0;
+    // Stored local contour; origin and basis are kept separately. No clipping.
+    std::vector<ContourPoint> contour;
+    std::array<uint8_t, 22> rawTail{};
+    std::vector<Property> properties;
+    std::vector<uint32_t> distanceParameterIds;
+    std::vector<uint32_t> formulaBindingIds;
 };
 
 struct BooleanOperation
@@ -408,5 +446,8 @@ struct Model
     std::unordered_map<uint32_t, VariableOwnership> variablesByOwner;
     std::unordered_map<uint32_t, std::vector<uint32_t>> customComponentReferences;
     std::unordered_map<uint32_t, PartPosition> partPositions;
+    std::unordered_map<uint32_t, SurfaceTreatmentDefinition> surfaceTreatmentDefinitions;
+    std::unordered_map<uint32_t, SurfaceTreatment> surfaceTreatments;
+    std::unordered_map<uint32_t, std::vector<uint32_t>> surfaceTreatmentIdsByFather;
 };
 }

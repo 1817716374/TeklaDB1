@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed. Ownership corrections separate 8.95 identity class references from owner contexts and modern part auxiliary references from owners. Sixty model/library ownership checks cover raw references, component lists and all variable scopes; three pinned AUTRA dialogs independently check 15 parameter owner/name matches. Modern xslib distance/formula graphs are enabled with exact signatures. Kind-60 variable owners remain distinct, not fabricated components. Type-4 custom-component associations now preserve point and non-point targets in customComponentReferences; these records no longer fabricate ControlLine objects. Legacy geometry baselines remain unchanged. Modern partPositions expose verified axial offsets and depth/plane settings, keeping six uninterpreted words. Position records are not applied again to stored geometry. Two pinned AUTRA C# files corroborate 30 beam and 36 centered column/footing settings; two additional stored-geometry checks are consistency evidence, not independent geometry truth.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed. Ownership corrections separate 8.95 identity class references from owner contexts and modern part auxiliary references from owners. Sixty model/library ownership checks cover raw references, component lists and all variable scopes; three pinned AUTRA dialogs independently check 15 parameter owner/name matches. Modern xslib distance/formula graphs are enabled with exact signatures. Kind-60 variable owners remain distinct, not fabricated components. Type-4 custom-component associations now preserve point and non-point targets in customComponentReferences; these records no longer fabricate ControlLine objects. Legacy geometry baselines remain unchanged. Modern partPositions expose verified axial offsets and depth/plane settings, keeping six uninterpreted words. Position records are not applied again to stored geometry. Two pinned AUTRA C# files corroborate 30 beam and 36 centered column/footing settings; two additional stored-geometry checks are consistency evidence, not independent geometry truth. 7.82 surface treatments: seven objects/six definitions, 32 local contour points, seven father links, 132 distance-variable links and 34 formula targets. Six definition material names match the paired catalog; seven project material links use exact unique names and DB1 path scope. TS1/type3 corroborated by official surface-treatment documentation; PL thickness is derived from profile text. Unknown flags, clipping, tiling, final geometry and lifecycle remain unresolved. Modern corresponding tables are empty in public corpus and nonempty semantics are not enabled.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -11760,6 +11760,41 @@
       "path": "auxiliary-evidence",
       "exit": 0,
       "stdout": "source_beams=30 source_centered=36 stored_geometry_checks=2"
+    },
+    {
+      "name": "surface_model:PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "mode": "surface_model",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/EXCEL-1246A-BLDG-B.db1",
+      "exit": 0,
+      "stdout": "version=7.82 definitions=0 surfaces=0 fathers=0 points=0 distances=0 formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "surface_library:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "mode": "surface_library",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 definitions=6 surfaces=7 fathers=7 points=32 distances=132 formulas=34 fingerprint=aa66f4f8df8a60b7"
+    },
+    {
+      "name": "surface_model:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "mode": "surface_model",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/MOHSEN.db1",
+      "exit": 0,
+      "stdout": "version=7.82 definitions=0 surfaces=0 fathers=0 points=0 distances=0 formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "surface_library:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "mode": "surface_library",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.82 definitions=0 surfaces=0 fathers=0 points=0 distances=0 formulas=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "surface_evidence:PSDBIM",
+      "mode": "surface_evidence",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B",
+      "exit": 0,
+      "stdout": "definitions=6 surfaces=7 material_matches=6 points=32 distance_links=132 formula_targets=34 project_material_links=7"
     }
   ]
 }

@@ -288,6 +288,28 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 mark(path, ReadLevel::Semantic);
             }
         }
+        const auto linkSurfaceMaterials = [&](const db1::Model& model) {
+            if (!result.materials)
+            {
+                if (!model.surfaceTreatments.empty()) result.diagnostics.push_back("surface treatments have no material catalog: " + db1::detail::pathUtf8(model.databasePath));
+                return;
+            }
+            for (const auto& entry : model.surfaceTreatments)
+            {
+                const auto& definition = model.surfaceTreatmentDefinitions.at(entry.second.definitionId);
+                std::size_t count = 0, matched = 0;
+                for (std::size_t i=0; i<result.materials->materials.size(); ++i)
+                    if (result.materials->materials[i].name == definition.material) { ++count; matched = i; }
+                if (count == 1) result.surfaceMaterialAssociations.push_back({model.databasePath, entry.first, matched});
+                else result.diagnostics.push_back("missing or ambiguous surface material '" + definition.material + "' for " +
+                    db1::detail::pathUtf8(model.databasePath) + ":" + std::to_string(entry.first));
+            }
+        };
+        linkSurfaceMaterials(result.model);
+        if (result.componentLibrary) linkSurfaceMaterials(*result.componentLibrary);
+        std::sort(result.surfaceMaterialAssociations.begin(),result.surfaceMaterialAssociations.end(),[](const auto& a,const auto& b) {
+            return std::tie(a.database,a.surfaceTreatmentId)<std::tie(b.database,b.surfaceTreatmentId);
+        });
         for (const auto& entry : result.shapes.definitionsByGuid)
             if (!result.shapes.geometriesByStorageId.count(entry.second.brepStorageId))
                 result.diagnostics.push_back("shape " + entry.second.name + " references missing geometry " + entry.second.brepStorageId);

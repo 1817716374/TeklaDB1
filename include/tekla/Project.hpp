@@ -56,6 +56,12 @@ struct AttributeDefinitionAssociation
     // Exact case-sensitive name and storage-type match only. This does not
     // establish class applicability or supply an object's missing/default value.
 };
+struct SurfaceMaterialAssociation
+{
+    std::filesystem::path database;
+    std::uint32_t surfaceTreatmentId = 0;
+    std::size_t materialIndex = 0;
+};
 struct Project
 {
     db1::Model model;
@@ -76,6 +82,8 @@ struct Project
     std::map<std::filesystem::path, OptionsDatabase> optionsDatabases;
     std::vector<AttributeDefinitionAssociation> attributeDefinitionAssociations;
     std::vector<DrawingModelAssociation> drawingSubjectAssociations;
+    // Exact unique name matches into materials->materials, scoped by DB1 path.
+    std::vector<SurfaceMaterialAssociation> surfaceMaterialAssociations;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.
