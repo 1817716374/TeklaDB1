@@ -86,6 +86,74 @@ int run(const std::string& mode, const std::filesystem::path& path)
             if (!ok) { std::cerr << error << '\n'; return 1; }
             summary(model);
         }
+        else if (mode=="legacy_component_evidence")
+        {
+            tekla::db1::Model model;
+            if (!tekla::db1::parseComponentLibrary(path.parent_path()/"PSDBIM__EXCEL-1246A-BLDG-B"/"xslib.db1",model,error))
+                throw std::runtime_error(error);
+            const auto readText=[](const std::filesystem::path& p) {
+                std::ifstream f(p,std::ios::binary);
+                if (!f) throw std::runtime_error("missing component evidence file");
+                return std::string(std::istreambuf_iterator<char>(f),std::istreambuf_iterator<char>());
+            };
+            const auto catalog=readText(path/"ComponentCatalog.txt");
+            auto definitions=model.customComponentDefinitions;
+            std::sort(definitions.begin(),definitions.end(),[](const auto& a,const auto& b){return a.id<b.id;});
+            Fingerprint hash; std::size_t named=0,anonymous=0,parameters=0,children=0;
+            for (const auto& d : definitions)
+            {
+                if (d.name.empty()) ++anonymous;
+                else
+                {
+                    if (catalog.find("-10\t"+d.name+"\t")==std::string::npos)
+                        throw std::runtime_error("custom part name disagrees with ComponentCatalog.txt");
+                    ++named;
+                }
+                hash.number(d.id); hash.number(d.kind); hash.number(d.classificationCode);
+                hash.text(d.name); hash.text(d.description); hash.text(d.guid);
+                if (d.referenceIds[2]) throw std::runtime_error("invented third legacy custom reference");
+                for (auto id : d.parameterIds)
+                {
+                    const auto& p=model.parameterDefinitions.at(id);
+                    if (p.ownerId!=d.id) throw std::runtime_error("custom parameter ownership mismatch");
+                    hash.number(id); hash.text(p.name); hash.text(p.label); hash.text(p.expression); hash.number(p.valueType);
+                    ++parameters;
+                }
+                for (auto id : d.childObjectIds)
+                {
+                    if (id==d.id || model.identities.at(id).ownerId!=d.id) throw std::runtime_error("custom child ownership mismatch");
+                    hash.number(id); ++children;
+                }
+            }
+            const std::pair<std::uint32_t,const char*> dialogs[]={{103393,"Anchor-Bent Rod"},{112580,"Anchor-Epoxy"},
+                {31989,"2-Angle+Plate lintel"},{50,"1 Sided Beam to Column Flg MC"}};
+            const std::regex parameter(R"rx(parameter\(\s*"[^"]*"\s*,\s*"([^"]+)")rx");
+            std::size_t matched=0,unresolved=0;
+            for (const auto& dialog : dialogs)
+            {
+                const auto definition=std::find_if(definitions.begin(),definitions.end(),[&](const auto& d){return d.id==dialog.first && d.name==dialog.second;});
+                const auto component=std::find_if(model.components.begin(),model.components.end(),[&](const auto& c){return c.id==dialog.first && c.name==dialog.second;});
+                if (definition==definitions.end() && component==model.components.end())
+                    throw std::runtime_error("dialog owner/name mismatch");
+                const auto text=readText(path/(std::string(dialog.second)+".inp"));
+                if (text.find(std::string("\"")+dialog.second+"\"")==std::string::npos)
+                    throw std::runtime_error("dialog component name missing");
+                for (auto i=std::sregex_iterator(text.begin(),text.end(),parameter); i!=std::sregex_iterator(); ++i)
+                {
+                    const auto name=(*i)[1].str();
+                    const auto found=std::any_of(model.parameterDefinitions.begin(),model.parameterDefinitions.end(),[&](const auto& p){
+                        return p.second.ownerId==dialog.first && p.second.name==name;
+                    });
+                    if (found) ++matched;
+                    else if ((dialog.first==112580 && name=="D5") || (dialog.first==31989 && name=="D1")) ++unresolved;
+                    else throw std::runtime_error("unexpected missing dialog parameter "+name);
+                }
+            }
+            if (definitions.size()!=40 || named!=28 || anonymous!=12 || parameters!=660 || children!=2726 || matched!=67 || unresolved!=2)
+                throw std::runtime_error("legacy custom component evidence changed");
+            std::cout << "definitions=40 named=28 anonymous=12 parameters=660 children=2726 dialog_matches=67 unresolved=2 fingerprint="
+                      << std::hex << hash.value << std::dec << '\n';
+        }
         else if (mode=="project" || mode=="related_evidence")
         {
             tekla::Project project;

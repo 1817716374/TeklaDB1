@@ -136,6 +136,12 @@ std::vector<Table> onePart782(bool library = false)
     {
         auto& t=tables[68]; t.payload=76; t.fields={1,0,0,0,0,0}; auto param=row(t,60);
         str(param,5,"WIDTH"); str(param,36,"Width"); put<std::uint32_t>(param,69,10); t.rows={param};
+        auto parameterIdentity=ident; put<std::uint32_t>(parameterIdentity,1,60); at(209).rows.push_back(parameterIdentity);
+        auto definitionIdentity=ident; put<std::uint32_t>(definitionIdentity,1,50); at(209).rows.push_back(definitionIdentity);
+        auto& c=tables[125]; c.payload=32; c.fields={1,0,0,0,0,0,0,0,0};
+        auto custom=row(c,50); put<std::uint32_t>(custom,5,4); put<std::uint32_t>(custom,21,912);
+        put<std::uint32_t>(custom,25,10); put<std::uint32_t>(custom,29,12); c.rows={custom};
+        auto name=row(at(75),12); str(name,17,"Anchor"); at(75).rows.push_back(name);
     }
     return tables;
 }
@@ -153,9 +159,22 @@ int main(int argc, char** argv)
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
         if (name.rfind("782_",0)==0)
         {
-            const bool library=name=="782_library" || name=="782_library_fields";
+            const bool library=name.rfind("782_library",0)==0;
             auto s=onePart782(library);
             if (name=="782_library_fields") s[68].fields[1]=1;
+            if (name=="782_library_definition_fields") s[125].fields[1]=1;
+            if (name=="782_library_definition_width") { s[125].payload=36; s[125].rows.clear(); }
+            if (name=="782_library_definition_string")
+            {
+                put<std::uint32_t>(s[125].rows[0],29,999);
+                // A prior permissive lookup must not fabricate a valid string chunk.
+                auto component=row(s[126],90); put<std::uint32_t>(component,13,999); s[126].rows={component};
+            }
+            if (name=="782_library_definition_identity") s[179].rows.pop_back();
+            if (name=="782_library_definition_duplicate") s[125].rows.push_back(s[125].rows[0]);
+            if (name=="782_library_parameter_string") put<std::uint32_t>(s[68].rows[0],69,999);
+            if (name=="782_library_parameter_identity") s[179].rows.erase(s[179].rows.begin()+2);
+            if (name=="782_library_parameter_duplicate") s[68].rows.push_back(s[68].rows[0]);
             if (name=="782_fields") s[207].fields[2]=1;
             if (name=="782_width") { s[207].payload=372; s[207].rows.clear(); }
             if (name=="782_part_join") put<std::uint32_t>(s[193].rows[0],9,999);
@@ -179,7 +198,16 @@ int main(int argc, char** argv)
                 check(model.boltGroups.empty() && model.individualBolts.size()==1 && model.individualBolts[0].id==15,"7.82 individual bolt");
                 check(model.individualBolts[0].connectedPartIds==std::vector<std::uint32_t>{5},"7.82 bolt connection");
                 check(model.assemblies.size()==1 && model.assemblies[0].memberIds==std::vector<std::uint32_t>{5},"7.82 assembly membership");
-                if (library) check(model.parameterDefinitions.at(60).expression=="10*20","7.82 parameter expression");
+                if (library)
+                {
+                    check(model.parameterDefinitions.at(60).expression=="10*20","7.82 parameter expression");
+                    check(model.customComponentDefinitions.size()==1,"7.82 definition missing");
+                    const auto& c=model.customComponentDefinitions[0];
+                    check(c.id==50 && c.name=="Anchor" && c.description=="10*20" && c.kind==4 && c.classificationCode==912,"7.82 definition fields");
+                    check(c.referenceIds==std::array<std::uint32_t,3>{10,12,0},"7.82 nonexistent third reference read");
+                    check(c.guid==model.identities.at(50).guid && !c.guid.empty(),"7.82 definition identity join");
+                    check(c.parameterIds==std::vector<std::uint32_t>{60} && c.childObjectIds==std::vector<std::uint32_t>{5,15,60},"7.82 definition owner joins");
+                }
                 if (name=="782_model")
                 {
                     save(root/"xslib.db1",encode(onePart782(true),"7.82",true));

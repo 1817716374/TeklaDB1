@@ -272,6 +272,8 @@ struct CustomComponentDefinition
     std::string name;
     std::vector<uint32_t> parameterIds;
     std::vector<uint32_t> childObjectIds;
+    // Decoded description for 7.82; other layouts currently retain raw references.
+    std::string description;
 };
 
 struct ModelMetadata

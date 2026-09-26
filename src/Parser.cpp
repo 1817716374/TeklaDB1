@@ -1014,7 +1014,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     if (boltLayerOrdinal != noTable) required.emplace_back(boltLayerOrdinal, 48U);
     if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
-    if (library782) required.emplace_back(68, 76U);
+    if (library782) { required.emplace_back(68, 76U); required.emplace_back(125, 32U); }
     for (const auto& spec : required)
         requireTable(all, spec.first, spec.second);
     if (older782)
@@ -1028,9 +1028,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             {contourBlockOrdinal,84}, {stringPropertyOrdinal,6}, {partOrdinal,11},
             {weldDefinitionOrdinal,16}, {assemblyOrdinal,8}};
         for (const auto& field : fields) requireFields(data, all, field.first, field.second, {0});
-        if (library782) requireFields(data, all, 68, 6, {0});
+        if (library782) { requireFields(data, all, 68, 6, {0}); requireFields(data, all, 125, 9, {0}); }
         model.diagnostics.emplace_back("Xsteel 7.82 partial semantics: individual bolts retain stored placement/profile parameters; non-plate contours and unnamed tables need further validation");
-        if (library782) model.diagnostics.emplace_back("Xsteel 7.82 custom component definition tables remain unnamed; parameters and stored ownership are preserved");
+        if (library782) model.diagnostics.emplace_back("Xsteel 7.82 custom definitions preserve anonymous and repeated names; classification, lifecycle and formula evaluation remain unverified");
     }
     else if (!older844)
     {
@@ -1169,15 +1169,19 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             parameter.name = fixedString(value, 5, 31);
             parameter.label = fixedString(value, 36, 31);
             const auto expressionId = read<uint32_t>(value, 69);
+            if (older782 && expressionId && !stringChunks.count(expressionId))
+                throw std::runtime_error("missing parameter expression string " + std::to_string(expressionId));
             parameter.expression = strings[expressionId];
             parameter.valueType = read<uint32_t>(value, 73);
             const auto identity = model.identities.find(parameter.id);
+            if (older782 && identity == model.identities.end())
+                throw std::runtime_error("missing parameter identity " + std::to_string(parameter.id));
             if (identity != model.identities.end())
             {
                 parameter.ownerId = identity->second.ownerId;
                 parameter.guid = identity->second.guid;
             }
-            model.parameterDefinitions[parameter.id] = std::move(parameter);
+            insertUnique(model.parameterDefinitions, parameter.id, parameter, "parameter definition");
         }
     }
 
@@ -1249,7 +1253,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         definition.name = fixedString(value, older782 ? 103 : 55, nameLength);
         const auto family = fixedString(value, older782 ? 125 : olderSchema ? 145 : 117, older782 ? 64 : olderSchema ? 22 : 60);
         const auto dimensionId = read<uint32_t>(value, older782 ? 189 : olderSchema ? 141 : 181);
-        if (older782 && dimensionId && !strings.count(dimensionId))
+        if (older782 && dimensionId && !stringChunks.count(dimensionId))
             throw std::runtime_error("broken DB1 profile string reference for definition " + std::to_string(definition.id));
         definition.profile = family + strings[dimensionId];
         definition.secondaryName = fixedString(value, older782 ? 215 : olderSchema ? 167 : 207, 62);
@@ -1705,20 +1709,34 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         model.components.push_back(std::move(component));
     }
 
-    if (library && all.size() > 226 && all[226].valid && all[226].payloadSize == 36)
+    const std::size_t customDefinitionOrdinal = library782 ? 125 : 226;
+    if (library && all.size() > customDefinitionOrdinal && all[customDefinitionOrdinal].valid &&
+        all[customDefinitionOrdinal].payloadSize == (library782 ? 32U : 36U))
     {
-        if (!older844) requireFields(data, all, 226, 10, {0,1,7,8,9});
-        for (std::size_t index = 0; index < all[226].rowCount; ++index)
+        if (!older782 && !older844) requireFields(data, all, customDefinitionOrdinal, 10, {0,1,7,8,9});
+        std::unordered_set<uint32_t> definitionIds;
+        for (std::size_t index = 0; index < all[customDefinitionOrdinal].rowCount; ++index)
         {
-            const auto* value = row(data, all, 226, index);
+            const auto* value = row(data, all, customDefinitionOrdinal, index);
             CustomComponentDefinition definition;
             definition.id = read<uint32_t>(value, 1);
+            if (!definitionIds.insert(definition.id).second)
+                throw std::runtime_error("duplicate custom component definition " + std::to_string(definition.id));
             definition.kind = read<uint32_t>(value, 5);
             definition.classificationCode = read<uint32_t>(value, 21);
-            for (std::size_t item = 0; item < definition.referenceIds.size(); ++item)
+            for (std::size_t item = 0; item < (library782 ? 2U : definition.referenceIds.size()); ++item)
                 definition.referenceIds[item] = read<uint32_t>(value, 25 + item * 4);
+            if (library782)
+            {
+                for (auto ref : definition.referenceIds)
+                    if (ref && !stringChunks.count(ref))
+                        throw std::runtime_error("missing custom definition string " + std::to_string(ref));
+                definition.description = strings[definition.referenceIds[0]];
+            }
             definition.name = strings[definition.referenceIds[1]];
             const auto identity = model.identities.find(definition.id);
+            if (library782 && identity == model.identities.end())
+                throw std::runtime_error("missing custom definition identity " + std::to_string(definition.id));
             if (identity != model.identities.end())
                 definition.guid = identity->second.guid;
             const auto parameters = parametersByOwner.find(definition.id);

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -3494,6 +3494,36 @@
       "url": "https://raw.githubusercontent.com/PSDBIM/EXCEL-1246A-BLDG-B/5334356d78238c8bc68b95e6b6e4f190232fa4fd/drawings/DID66BA1F91-0000-0002-3137-323334373439.dg",
       "size": 150002,
       "sha256": "8c94d6785ed07c5c68bfa38634e6f7770f63ca6be6d71c1ec5fc0954f534d908"
+    },
+    {
+      "path": "legacy-component-evidence/1 Sided Beam to Column Flg MC.inp",
+      "url": "https://raw.githubusercontent.com/PSDBIM/EXCEL-1246A-BLDG-B/5334356d78238c8bc68b95e6b6e4f190232fa4fd/CustomComponentDialogFiles/1%20Sided%20Beam%20to%20Column%20Flg%20MC.inp",
+      "size": 5793,
+      "sha256": "1dceee1605b74344e0b127bb3a87490ad140b6f51be82a9ef1ffb5250061ca37"
+    },
+    {
+      "path": "legacy-component-evidence/2-Angle+Plate lintel.inp",
+      "url": "https://raw.githubusercontent.com/PSDBIM/EXCEL-1246A-BLDG-B/5334356d78238c8bc68b95e6b6e4f190232fa4fd/CustomComponentDialogFiles/2-Angle%2BPlate%20lintel.inp",
+      "size": 1228,
+      "sha256": "102667bb8663ea62da2cec67044fbe04da8f127ea5504b5ce87e9932472edd53"
+    },
+    {
+      "path": "legacy-component-evidence/Anchor-Bent Rod.inp",
+      "url": "https://raw.githubusercontent.com/PSDBIM/EXCEL-1246A-BLDG-B/5334356d78238c8bc68b95e6b6e4f190232fa4fd/CustomComponentDialogFiles/Anchor-Bent%20Rod.inp",
+      "size": 1123,
+      "sha256": "1d082420372e5530b127f4769fa6ce212532bc3fe49126f415945ad4f4406711"
+    },
+    {
+      "path": "legacy-component-evidence/Anchor-Epoxy.inp",
+      "url": "https://raw.githubusercontent.com/PSDBIM/EXCEL-1246A-BLDG-B/5334356d78238c8bc68b95e6b6e4f190232fa4fd/CustomComponentDialogFiles/Anchor-Epoxy.inp",
+      "size": 2446,
+      "sha256": "94643fea3ead594cca4213394359f672b657ae04cd4e62e2e913cb97fbf9f5f1"
+    },
+    {
+      "path": "legacy-component-evidence/ComponentCatalog.txt",
+      "url": "https://raw.githubusercontent.com/PSDBIM/EXCEL-1246A-BLDG-B/5334356d78238c8bc68b95e6b6e4f190232fa4fd/ComponentCatalog.txt",
+      "size": 11320,
+      "sha256": "cef838bf7c675429659c2cfc7ab3d44a03973ac1b95b46ec9b86f2f524a226a5"
     }
   ],
   "cases": [
@@ -3691,7 +3721,7 @@
       "mode": "library",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
       "exit": 0,
-      "stdout": "version=7.82 parts=545 operative=134 profiles=4265 bolts=0 welds=373 assemblies=267 components=124 properties=7275 parameters=5345 custom=0 unhandled=18 individual_bolts=146 fingerprint=839d79fdde1b7de4"
+      "stdout": "version=7.82 parts=545 operative=134 profiles=4265 bolts=0 welds=373 assemblies=267 components=124 properties=7275 parameters=5345 custom=40 unhandled=18 individual_bolts=146 fingerprint=839d79fdde1b7de4"
     },
     {
       "name": "raw:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db2",
@@ -10860,6 +10890,13 @@
       "path": "legacy-dg782",
       "exit": 0,
       "stdout": "files=293 subject_id_type_matches=59 numeric_reference_matches=1361 unresolved_numeric_references=35"
+    },
+    {
+      "name": "legacy_component_evidence:PSDBIM",
+      "mode": "legacy_component_evidence",
+      "path": "legacy-component-evidence",
+      "exit": 0,
+      "stdout": "definitions=40 named=28 anonymous=12 parameters=660 children=2726 dialog_matches=67 unresolved=2 fingerprint=5a7ab2a4be4e2642"
     }
   ]
 }
