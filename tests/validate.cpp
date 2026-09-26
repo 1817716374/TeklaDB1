@@ -86,7 +86,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
             if (!ok) { std::cerr << error << '\n'; return 1; }
             summary(model);
         }
-        else if (mode=="legacy_component_evidence")
+        else if (mode=="legacy_component_evidence" || mode=="legacy_component_graph_evidence")
         {
             tekla::db1::Model model;
             if (!tekla::db1::parseComponentLibrary(path.parent_path()/"PSDBIM__EXCEL-1246A-BLDG-B"/"xslib.db1",model,error))
@@ -144,15 +144,83 @@ int run(const std::string& mode, const std::filesystem::path& path)
                     const auto found=std::any_of(model.parameterDefinitions.begin(),model.parameterDefinitions.end(),[&](const auto& p){
                         return p.second.ownerId==dialog.first && p.second.name==name;
                     });
-                    if (found) ++matched;
-                    else if ((dialog.first==112580 && name=="D5") || (dialog.first==31989 && name=="D1")) ++unresolved;
+                    const auto distanceFound=std::any_of(model.distanceParameters.begin(),model.distanceParameters.end(),[&](const auto& p){
+                        return p.second.ownerId==dialog.first && p.second.name==name;
+                    });
+                    if (found || distanceFound) ++matched;
                     else throw std::runtime_error("unexpected missing dialog parameter "+name);
                 }
             }
-            if (definitions.size()!=40 || named!=28 || anonymous!=12 || parameters!=660 || children!=2726 || matched!=67 || unresolved!=2)
+            if (definitions.size()!=40 || named!=28 || anonymous!=12 || parameters!=660 || children!=2726 || matched!=69 || unresolved!=0)
                 throw std::runtime_error("legacy custom component evidence changed");
-            std::cout << "definitions=40 named=28 anonymous=12 parameters=660 children=2726 dialog_matches=67 unresolved=2 fingerprint="
+            std::cout << "definitions=40 named=28 anonymous=12 parameters=660 children=2726 dialog_matches=69 unresolved=0 fingerprint="
                       << std::hex << hash.value << std::dec << '\n';
+            if (mode=="legacy_component_graph_evidence")
+            {
+                Fingerprint graph; std::vector<std::uint32_t> distanceIds,formulaIds;
+                for (const auto& d : model.distanceParameters) distanceIds.push_back(d.first);
+                for (const auto& f : model.formulaBindings) formulaIds.push_back(f.first);
+                std::sort(distanceIds.begin(),distanceIds.end()); std::sort(formulaIds.begin(),formulaIds.end());
+                std::size_t bound=0,references=0,inputs=0,crossOwner=0;
+                for (auto id : distanceIds)
+                {
+                    const auto& d=model.distanceParameters.at(id);
+                    graph.number(id); graph.number(d.ownerId); graph.text(d.guid); graph.text(d.name); graph.text(d.label);
+                    graph.real(d.storedDistance); graph.real(d.secondaryStoredValue); graph.text(d.propertyToken); graph.text(d.planeToken);
+                    for (auto v : d.rawFields) graph.number(v);
+                    if (d.boundObjectIds.size()!=2 || model.identities.at(id).ownerId!=d.ownerId) throw std::runtime_error("distance bindings/owner changed");
+                    for (auto v : d.boundObjectIds) { model.identities.at(v); graph.number(v); ++bound; }
+                    for (auto v : d.formulaBindingIds)
+                    {
+                        if (model.formulaBindings.at(v).targetObjectId!=id) throw std::runtime_error("distance formula target mismatch");
+                        graph.number(v);
+                    }
+                }
+                for (auto id : formulaIds)
+                {
+                    const auto& f=model.formulaBindings.at(id);
+                    graph.number(id); graph.number(f.ownerId); graph.number(f.targetObjectId); graph.number(f.storedIndex);
+                    graph.text(f.guid); graph.text(f.propertyName); graph.text(f.expression);
+                    if (model.identities.at(id).ownerId!=f.ownerId) throw std::runtime_error("formula owner mismatch");
+                    const auto& indexed=model.formulaBindingIdsByTarget.at(f.targetObjectId);
+                    if (std::count(indexed.begin(),indexed.end(),id)!=1) throw std::runtime_error("formula target index mismatch");
+                    for (auto v : f.referencedObjectIds)
+                    {
+                        const auto owner=model.identities.at(v).ownerId;
+                        crossOwner+=owner!=f.ownerId && v!=f.ownerId;
+                        graph.number(v); ++references;
+                    }
+                    for (auto v : f.inputObjectIds)
+                    {
+                        if (v==f.targetObjectId) throw std::runtime_error("formula output included in inputs");
+                        graph.number(v); ++inputs;
+                    }
+                    if (f.inputObjectIds.size()+1!=f.referencedObjectIds.size()) throw std::runtime_error("formula input/output count mismatch");
+                }
+                const auto verifyOwner=[&](const auto& owner) {
+                    for (auto id : owner.distanceParameterIds)
+                        if (model.distanceParameters.at(id).ownerId!=owner.id) throw std::runtime_error("owner distance list mismatch");
+                    for (auto id : owner.formulaBindingIds)
+                        if (model.formulaBindings.at(id).ownerId!=owner.id) throw std::runtime_error("owner formula list mismatch");
+                };
+                std::size_t ownedDistances=0,ownedFormulas=0;
+                for (const auto& d : definitions) { verifyOwner(d); ownedDistances+=d.distanceParameterIds.size(); ownedFormulas+=d.formulaBindingIds.size(); }
+                for (const auto& c : model.components) { verifyOwner(c); ownedDistances+=c.distanceParameterIds.size(); ownedFormulas+=c.formulaBindingIds.size(); }
+                if (ownedDistances!=distanceIds.size() || ownedFormulas!=formulaIds.size()) throw std::runtime_error("owner lists omit variables");
+                const auto& epoxy=model.distanceParameters.at(112715); const auto& lintel=model.distanceParameters.at(32158);
+                if (epoxy.ownerId!=112580 || epoxy.name!="D5" || epoxy.label!="Plate Thickness" || epoxy.storedDistance!=12.7 ||
+                    lintel.ownerId!=31989 || lintel.name!="D1" || lintel.label!="Lintel length")
+                    throw std::runtime_error("dialog distance evidence disagrees");
+                const auto& f=model.formulaBindings.at(112771);
+                if (f.targetObjectId!=112718 || f.propertyName!="proVALUE" || f.expression!="P6+D5" ||
+                    f.inputObjectIds!=std::vector<std::uint32_t>{112624,112715} ||
+                    model.parameterDefinitions.at(112624).name!="P6" || model.distanceParameters.at(112718).name!="D6")
+                    throw std::runtime_error("formula P6+D5 binding/input evidence disagrees");
+                if (distanceIds.size()!=6838 || formulaIds.size()!=10450 || bound!=13676 || references!=24442 || inputs!=13992 || crossOwner!=360)
+                    throw std::runtime_error("component variable graph changed");
+                std::cout << "distances=6838 formulas=10450 bound=13676 references=24442 inputs=13992 cross_owner=360 fingerprint="
+                          << std::hex << graph.value << std::dec << '\n';
+            }
         }
         else if (mode=="project" || mode=="related_evidence")
         {

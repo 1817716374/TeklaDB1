@@ -142,6 +142,28 @@ std::vector<Table> onePart782(bool library = false)
         auto custom=row(c,50); put<std::uint32_t>(custom,5,4); put<std::uint32_t>(custom,21,912);
         put<std::uint32_t>(custom,25,10); put<std::uint32_t>(custom,29,12); c.rows={custom};
         auto name=row(at(75),12); str(name,17,"Anchor"); at(75).rows.push_back(name);
+        for (const auto& text : std::vector<std::pair<std::uint32_t,std::string>>{
+            {13,"D1"},{14,"Length"},{16,"proPOSITION1"},{17,"PlaneXY"},{18,"WIDTH+2"}})
+        {
+            auto chunk=row(at(75),text.first); str(chunk,17,text.second); at(75).rows.push_back(chunk);
+        }
+        auto& d=tables[147]; d.payload=64; d.fields.assign(14,0); d.fields[0]=1;
+        auto distance=row(d,70); put<std::uint32_t>(distance,5,13); put<std::uint32_t>(distance,9,14);
+        put<double>(distance,17,12.5); put<double>(distance,25,30); put<std::uint32_t>(distance,41,0xffffffff);
+        put<std::uint32_t>(distance,57,16); put<std::uint32_t>(distance,61,17); d.rows={distance};
+        auto& f=tables[156]; f.payload=97; f.fields={1,0,0,0,0,0};
+        auto formula=row(f,80); put<std::uint32_t>(formula,5,70); put<std::uint32_t>(formula,9,2);
+        put<std::uint32_t>(formula,13,18); str(formula,17,"proVALUE"); f.rows={formula};
+        for (auto id : {70U,80U})
+        {
+            auto identity=ident; put<std::uint32_t>(identity,1,id); at(209).rows.insert(at(209).rows.end()-1,identity);
+        }
+        for (const auto& spec : std::vector<std::array<std::uint32_t,4>>{
+            {71,58,70,5},{72,58,70,50},{81,59,80,70},{82,59,80,60}})
+        {
+            auto a=row(at(192),spec[0]); put<std::uint32_t>(a,5,spec[1]);
+            put<std::uint32_t>(a,9,spec[2]); put<std::uint32_t>(a,13,spec[3]); at(192).rows.push_back(a);
+        }
     }
     return tables;
 }
@@ -175,6 +197,22 @@ int main(int argc, char** argv)
             if (name=="782_library_parameter_string") put<std::uint32_t>(s[68].rows[0],69,999);
             if (name=="782_library_parameter_identity") s[179].rows.erase(s[179].rows.begin()+2);
             if (name=="782_library_parameter_duplicate") s[68].rows.push_back(s[68].rows[0]);
+            if (name=="782_library_distance_fields") s[147].fields[2]=1;
+            if (name=="782_library_distance_width") { s[147].payload=68; s[147].rows.clear(); }
+            if (name=="782_library_distance_string") put<std::uint32_t>(s[147].rows[0],61,999);
+            if (name=="782_library_distance_identity") put<std::uint32_t>(s[147].rows[0],1,999);
+            if (name=="782_library_distance_nan") put<double>(s[147].rows[0],17,std::numeric_limits<double>::quiet_NaN());
+            if (name=="782_library_distance_secondary_nan") put<double>(s[147].rows[0],25,std::numeric_limits<double>::infinity());
+            if (name=="782_library_distance_bindings") s[162].rows.erase(s[162].rows.begin()+1);
+            if (name=="782_library_distance_duplicate") s[147].rows.push_back(s[147].rows[0]);
+            if (name=="782_library_formula_fields") s[156].fields[2]=1;
+            if (name=="782_library_formula_width") { s[156].payload=101; s[156].rows.clear(); }
+            if (name=="782_library_formula_string") put<std::uint32_t>(s[156].rows[0],13,999);
+            if (name=="782_library_formula_target") put<std::uint32_t>(s[156].rows[0],5,999);
+            if (name=="782_library_formula_identity") put<std::uint32_t>(s[156].rows[0],1,999);
+            if (name=="782_library_formula_duplicate") s[156].rows.push_back(s[156].rows[0]);
+            if (name=="782_library_formula_refs") put<std::uint32_t>(s[162].rows.back(),13,999);
+            if (name=="782_library_formula_output") s[162].rows.erase(s[162].rows.begin()+3);
             if (name=="782_fields") s[207].fields[2]=1;
             if (name=="782_width") { s[207].payload=372; s[207].rows.clear(); }
             if (name=="782_part_join") put<std::uint32_t>(s[193].rows[0],9,999);
@@ -206,7 +244,17 @@ int main(int argc, char** argv)
                     check(c.id==50 && c.name=="Anchor" && c.description=="10*20" && c.kind==4 && c.classificationCode==912,"7.82 definition fields");
                     check(c.referenceIds==std::array<std::uint32_t,3>{10,12,0},"7.82 nonexistent third reference read");
                     check(c.guid==model.identities.at(50).guid && !c.guid.empty(),"7.82 definition identity join");
-                    check(c.parameterIds==std::vector<std::uint32_t>{60} && c.childObjectIds==std::vector<std::uint32_t>{5,15,60},"7.82 definition owner joins");
+                    check(c.parameterIds==std::vector<std::uint32_t>{60} && c.childObjectIds==std::vector<std::uint32_t>{5,15,60,70,80},"7.82 definition owner joins");
+                    check(c.distanceParameterIds==std::vector<std::uint32_t>{70} && c.formulaBindingIds==std::vector<std::uint32_t>{80},"7.82 variable owner joins");
+                    const auto& d=model.distanceParameters.at(70);
+                    check(d.name=="D1" && d.label=="Length" && d.ownerId==50 && d.guid==model.identities.at(70).guid,"distance names/identity");
+                    check(d.storedDistance==12.5 && d.secondaryStoredValue==30 && d.rawFields[3]==0xffffffff,"distance values/opaque fields");
+                    check(d.propertyToken=="proPOSITION1" && d.planeToken=="PlaneXY" && d.boundObjectIds==std::vector<std::uint32_t>{5,50},"distance bindings");
+                    check(d.formulaBindingIds==std::vector<std::uint32_t>{80},"distance formula join");
+                    const auto& f=model.formulaBindings.at(80);
+                    check(f.ownerId==50 && f.targetObjectId==70 && f.storedIndex==2 && f.expression=="WIDTH+2" && f.propertyName=="proVALUE","formula fields");
+                    check(f.referencedObjectIds==std::vector<std::uint32_t>{60,70} && f.inputObjectIds==std::vector<std::uint32_t>{60},"formula input/output references");
+                    check(model.formulaBindingIdsByTarget.at(70)==std::vector<std::uint32_t>{80},"formula target index");
                 }
                 if (name=="782_model")
                 {
@@ -223,7 +271,12 @@ int main(int argc, char** argv)
                     check(std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& x){return x.find("unresolved stored assembly reference 999")!=std::string::npos;}),"unresolved assembly diagnostic");
                 }
             }
-            else { check(!ok,"malformed 7.82 accepted"); check(!error.empty() && model.parts.empty(),"7.82 failure contract"); }
+            else
+            {
+                check(!ok,"malformed 7.82 accepted");
+                check(!error.empty() && model.parts.empty() && model.distanceParameters.empty() && model.formulaBindings.empty() &&
+                      model.formulaBindingIdsByTarget.empty(),"7.82 failure contract");
+            }
             if (name=="782_part_join")
             {
                 s=onePart782(); s[209].rows.erase(s[209].rows.begin());

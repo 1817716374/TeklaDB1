@@ -1014,7 +1014,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     if (boltLayerOrdinal != noTable) required.emplace_back(boltLayerOrdinal, 48U);
     if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
-    if (library782) { required.emplace_back(68, 76U); required.emplace_back(125, 32U); }
+    if (library782)
+    {
+        required.emplace_back(68, 76U); required.emplace_back(125, 32U);
+        required.emplace_back(147, 64U); required.emplace_back(156, 97U);
+    }
     for (const auto& spec : required)
         requireTable(all, spec.first, spec.second);
     if (older782)
@@ -1028,7 +1032,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             {contourBlockOrdinal,84}, {stringPropertyOrdinal,6}, {partOrdinal,11},
             {weldDefinitionOrdinal,16}, {assemblyOrdinal,8}};
         for (const auto& field : fields) requireFields(data, all, field.first, field.second, {0});
-        if (library782) { requireFields(data, all, 68, 6, {0}); requireFields(data, all, 125, 9, {0}); }
+        if (library782)
+        {
+            requireFields(data, all, 68, 6, {0}); requireFields(data, all, 125, 9, {0});
+            requireFields(data, all, 147, 14, {0}); requireFields(data, all, 156, 6, {0});
+        }
         model.diagnostics.emplace_back("Xsteel 7.82 partial semantics: individual bolts retain stored placement/profile parameters; non-plate contours and unnamed tables need further validation");
         if (library782) model.diagnostics.emplace_back("Xsteel 7.82 custom definitions preserve anonymous and repeated names; classification, lifecycle and formula evaluation remain unverified");
     }
@@ -1217,6 +1225,106 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             bySource[associations.back().source].push_back(associationIndex);
             byTarget[associations.back().target].push_back(associationIndex);
         }
+
+    std::unordered_map<uint32_t, std::vector<uint32_t>> distancesByOwner, formulasByOwner;
+    if (library782)
+    {
+        const auto variableIdentity = [&](uint32_t id) -> const Identity& {
+            const auto found = model.identities.find(id);
+            if (found == model.identities.end())
+                throw std::runtime_error("missing component variable identity " + std::to_string(id));
+            if (found->second.ownerId && !model.identities.count(found->second.ownerId))
+                throw std::runtime_error("missing component variable owner " + std::to_string(found->second.ownerId));
+            return found->second;
+        };
+        const auto variableString = [&](uint32_t id) {
+            if (id && !stringChunks.count(id))
+                throw std::runtime_error("missing component variable string " + std::to_string(id));
+            return id ? strings.at(id) : std::string{};
+        };
+        for (std::size_t index = 0; index < all[147].rowCount; ++index)
+        {
+            const auto* value = row(data, all, 147, index);
+            DistanceParameter distance;
+            distance.id = read<uint32_t>(value, 1);
+            const auto& identity = variableIdentity(distance.id);
+            distance.ownerId = identity.ownerId; distance.guid = identity.guid;
+            distance.name = variableString(read<uint32_t>(value, 5));
+            distance.label = variableString(read<uint32_t>(value, 9));
+            distance.storedDistance = read<double>(value, 17);
+            distance.secondaryStoredValue = read<double>(value, 25);
+            if (!std::isfinite(distance.storedDistance) || !std::isfinite(distance.secondaryStoredValue))
+                throw std::runtime_error("non-finite component distance " + std::to_string(distance.id));
+            distance.propertyToken = variableString(read<uint32_t>(value, 57));
+            distance.planeToken = variableString(read<uint32_t>(value, 61));
+            const std::size_t offsets[] = {13,33,37,41,45,49,53};
+            for (std::size_t i = 0; i < distance.rawFields.size(); ++i)
+                distance.rawFields[i] = read<uint32_t>(value, offsets[i]);
+            insertUnique(model.distanceParameters, distance.id, distance, "distance parameter");
+            distancesByOwner[distance.ownerId].push_back(distance.id);
+        }
+        for (std::size_t index = 0; index < all[156].rowCount; ++index)
+        {
+            const auto* value = row(data, all, 156, index);
+            FormulaBinding formula;
+            formula.id = read<uint32_t>(value, 1);
+            const auto& identity = variableIdentity(formula.id);
+            formula.ownerId = identity.ownerId; formula.guid = identity.guid;
+            formula.targetObjectId = read<uint32_t>(value, 5);
+            if (!model.identities.count(formula.targetObjectId))
+                throw std::runtime_error("missing formula target identity " + std::to_string(formula.targetObjectId));
+            formula.storedIndex = read<uint32_t>(value, 9);
+            formula.expression = variableString(read<uint32_t>(value, 13));
+            formula.propertyName = fixedString(value, 17, 81);
+            insertUnique(model.formulaBindings, formula.id, formula, "formula binding");
+            formulasByOwner[formula.ownerId].push_back(formula.id);
+            model.formulaBindingIdsByTarget[formula.targetObjectId].push_back(formula.id);
+        }
+        for (const auto& association : associations)
+        {
+            if (association.table != associationTwoOrdinal || (association.type != 58 && association.type != 59)) continue;
+            if (!model.identities.count(association.target))
+                throw std::runtime_error("missing component variable reference " + std::to_string(association.target));
+            if (association.type == 58)
+            {
+                const auto found = model.distanceParameters.find(association.source);
+                if (found == model.distanceParameters.end())
+                    throw std::runtime_error("missing distance association source " + std::to_string(association.source));
+                found->second.boundObjectIds.push_back(association.target);
+            }
+            else
+            {
+                const auto found = model.formulaBindings.find(association.source);
+                if (found == model.formulaBindings.end())
+                    throw std::runtime_error("missing formula association source " + std::to_string(association.source));
+                found->second.referencedObjectIds.push_back(association.target);
+                if (association.target != found->second.targetObjectId)
+                    found->second.inputObjectIds.push_back(association.target);
+            }
+        }
+        for (auto& entry : model.distanceParameters)
+        {
+            auto& distance = entry.second;
+            if (distance.boundObjectIds.size() != 2)
+                throw std::runtime_error("component distance requires two object bindings " + std::to_string(distance.id));
+            std::sort(distance.boundObjectIds.begin(), distance.boundObjectIds.end());
+        }
+        for (auto& entry : model.formulaBindings)
+        {
+            auto& formula = entry.second;
+            if (std::count(formula.referencedObjectIds.begin(), formula.referencedObjectIds.end(), formula.targetObjectId) != 1)
+                throw std::runtime_error("formula association must contain its target once " + std::to_string(formula.id));
+            std::sort(formula.referencedObjectIds.begin(), formula.referencedObjectIds.end());
+            std::sort(formula.inputObjectIds.begin(), formula.inputObjectIds.end());
+        }
+        for (auto* map : {&distancesByOwner, &formulasByOwner, &model.formulaBindingIdsByTarget})
+            for (auto& entry : *map) std::sort(entry.second.begin(), entry.second.end());
+        for (auto& entry : model.distanceParameters)
+        {
+            const auto found = model.formulaBindingIdsByTarget.find(entry.first);
+            if (found != model.formulaBindingIdsByTarget.end()) entry.second.formulaBindingIds = found->second;
+        }
+    }
 
     if (olderSchema)
     {
@@ -1706,6 +1814,12 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         const auto children = childrenByOwner.find(component.id);
         if (children != childrenByOwner.end())
             component.childIds = children->second;
+        const auto parameters = parametersByOwner.find(component.id);
+        if (parameters != parametersByOwner.end()) component.parameterIds = parameters->second;
+        const auto distances = distancesByOwner.find(component.id);
+        if (distances != distancesByOwner.end()) component.distanceParameterIds = distances->second;
+        const auto formulas = formulasByOwner.find(component.id);
+        if (formulas != formulasByOwner.end()) component.formulaBindingIds = formulas->second;
         model.components.push_back(std::move(component));
     }
 
@@ -1745,6 +1859,10 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             const auto children = childrenByOwner.find(definition.id);
             if (children != childrenByOwner.end())
                 definition.childObjectIds = children->second;
+            const auto distances = distancesByOwner.find(definition.id);
+            if (distances != distancesByOwner.end()) definition.distanceParameterIds = distances->second;
+            const auto formulas = formulasByOwner.find(definition.id);
+            if (formulas != formulasByOwner.end()) definition.formulaBindingIds = formulas->second;
             model.customComponentDefinitions.push_back(std::move(definition));
         }
     }

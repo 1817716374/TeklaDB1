@@ -123,7 +123,11 @@ if(TEKLADB1_BUILD_TESTS)
             782_string_cycle 782_missing_string 782_bolt_join 782_numeric_nan 782_numeric_overflow 782_assembly_missing
             782_library_definition_fields 782_library_definition_width 782_library_definition_string
             782_library_definition_identity 782_library_definition_duplicate 782_library_parameter_string
-            782_library_parameter_identity 782_library_parameter_duplicate)
+            782_library_parameter_identity 782_library_parameter_duplicate
+            782_library_distance_fields 782_library_distance_width 782_library_distance_string 782_library_distance_identity
+            782_library_distance_nan 782_library_distance_secondary_nan 782_library_distance_bindings 782_library_distance_duplicate
+            782_library_formula_fields 782_library_formula_width 782_library_formula_string 782_library_formula_target
+            782_library_formula_identity 782_library_formula_duplicate 782_library_formula_refs 782_library_formula_output)
         add_test(NAME db1.${case} COMMAND tekladb1_regression "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     if(TEKLADB1_WITH_OCCT)

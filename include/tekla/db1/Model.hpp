@@ -239,6 +239,9 @@ struct Component
     std::string name;
     std::vector<uint32_t> childIds;
     std::vector<Property> properties;
+    std::vector<uint32_t> parameterIds;
+    std::vector<uint32_t> distanceParameterIds;
+    std::vector<uint32_t> formulaBindingIds;
 };
 
 struct ControlLine
@@ -274,6 +277,44 @@ struct CustomComponentDefinition
     std::vector<uint32_t> childObjectIds;
     // Decoded description for 7.82; other layouts currently retain raw references.
     std::string description;
+    std::vector<uint32_t> distanceParameterIds;
+    std::vector<uint32_t> formulaBindingIds;
+};
+
+// 7.82 component distance variables. Values and flags retain their stored form;
+// secondaryStoredValue is not established as a default or an effective value.
+struct DistanceParameter
+{
+    uint32_t id = 0;
+    uint32_t ownerId = 0;
+    std::string guid;
+    std::string name;
+    std::string label;
+    double storedDistance = 0.0;
+    double secondaryStoredValue = 0.0;
+    std::string propertyToken;
+    std::string planeToken;
+    std::array<uint32_t, 7> rawFields{}; // payload offsets 12,32,36,40,44,48,52
+    std::vector<uint32_t> boundObjectIds; // type-58 targets; no endpoint order inferred
+    std::vector<uint32_t> formulaBindingIds;
+};
+
+// Stored formula-to-property bindings; formulas are never executed by parsing.
+struct FormulaBinding
+{
+    uint32_t id = 0;
+    uint32_t ownerId = 0;
+    uint32_t targetObjectId = 0;
+    uint32_t storedIndex = 0;
+    std::string guid;
+    std::string propertyName;
+    std::string expression;
+    // Type-59 targets include the output target exactly once in the known schema.
+    // Other references may cross owner boundaries; they are not lexical tokens.
+    std::vector<uint32_t> referencedObjectIds;
+    // Non-target references only. An expression can also read its own target;
+    // these IDs do not by themselves establish evaluation order or acyclicity.
+    std::vector<uint32_t> inputObjectIds;
 };
 
 struct ModelMetadata
@@ -325,5 +366,8 @@ struct Model
     std::map<std::uint32_t, std::size_t> identityTypeCounts;
     std::vector<std::uint32_t> unhandledPartIds;
     std::vector<IndividualBolt> individualBolts;
+    std::unordered_map<uint32_t, DistanceParameter> distanceParameters;
+    std::unordered_map<uint32_t, FormulaBinding> formulaBindings;
+    std::unordered_map<uint32_t, std::vector<uint32_t>> formulaBindingIdsByTarget;
 };
 }
