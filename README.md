@@ -17,7 +17,7 @@
 | DB2 | `parseNumberingDatabase`：完整顺序表、编号系列与零件/装配序列计数；**逐对象编号分配、比较快照及其余字段尚未恢复** |
 | environment.db | `parseEnvironmentDatabase`：属性名称/标签/存储类型、对象类别关联、整数选项列表；**元数据标志和部分定义值尚未解释** |
 | options_*.db | `parseOptionsDatabase`：布尔/整数/浮点/字符串键与成对值槽位；**当前值/默认值的优先级尚未验证** |
-| DG 图纸 | `parseDrawing`：9.54 表容器、字符串/属性、图幅、主体与工程 GUID、视图坐标基/范围/属性集、模型对象引用；**纸面定位、比例/缩短、尺寸与完整绘图图元尚未恢复** |
+| DG 图纸 | `parseDrawing`：7.82/9.54 容器、文本/属性、图幅、主体、视图坐标基/范围与模型引用；旧版使用无工程范围的数字 ID，新版使用 GUID；**纸面定位、比例/缩短、尺寸与完整绘图图元尚未恢复** |
 | history.db | 标准 SQLite，交由 SQLite 工具读取 |
 
 文件扩展名 `.db` 并不代表统一格式，目录文件、DBV 和 SQLite 使用不同入口。`readProject` 会区分 `Semantic`、`PartialSemantic`、`Raw`、`Discovered` 和 `Failed`；DG、DB2 与 DBV 当前为部分语义，不能把发现文件或读取部分字段当成解析完成。
@@ -141,7 +141,7 @@ tekla::db1::parseRawDatabase("model.db2", raw, error, options);
 
 ## 可重复的公开语料回归
 
-`tests/corpus.json` 记录 284 个外部文件的固定提交 URL、大小、SHA-256 和 463 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
+`tests/corpus.json` 记录 577 个外部文件的固定提交 URL、大小、SHA-256 和 1,052 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
 
 ```powershell
 python -B tools/corpus.py --download `
@@ -152,7 +152,7 @@ python -B tools/corpus.py --download `
 
 Ninja/MinGW 构建的 exe 通常直接位于构建目录，不含 `Release` 子目录；Linux 使用无 `.exe` 的路径。不带 `--download` 时只验证本地文件。下载约 60 MB，完整文件清单以 manifest 为准。
 
-包含 30 份主库、30 份组件库、60 份 DB2、7 份 DG、90 份 DBV 及配套目录。465 个用例包含 7.82 的两份主库、两份组件库与两个工程聚合检查；7.82 仍为部分语义，独立螺栓和未命名实体的限制见支持矩阵。一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，同时核对 28 个 DG→DB1 GUID 引用、118 条 DB1→环境定义名称/类型匹配，并检查官方 OBJECT_LOCKED 示例中的标签次序。另核对 19 个视图、4 个图纸主体、同包 VI 设置中的 6 个范围/深度字段，以及钢板模型轴与视图 X 轴。默认 CTest 另有 72 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
+包含 30 份主库、30 份组件库、60 份 DB2、300 份 DG、90 份 DBV 及配套目录。1,052 个用例包含 7.82 的两份主库、两份组件库与两个工程聚合检查；7.82 仍为部分语义，独立螺栓和未命名实体的限制见支持矩阵。一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，同时核对 28 个 DG→DB1 GUID 引用、118 条 DB1→环境定义名称/类型匹配，并检查官方 OBJECT_LOCKED 示例中的标签次序。另核对 19 个视图、4 个图纸主体、同包 VI 设置中的 6 个范围/深度字段，以及钢板模型轴与视图 X 轴。旧 DG 另有 293 项逐字节重建与 293 项语义回归，59 个主体 ID/类型匹配、1,361 条数字引用匹配；35 条未解析引用、断链文本、退化/歧义视图均明确保留。默认 CTest 另有 81 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
 
 GitHub Actions 配置 Linux C++17/20、ASan/UBSan、Windows MSVC、安装后独立消费和 Linux OCCT 构建。运行状态以对应提交的 Actions 结果为准。
 

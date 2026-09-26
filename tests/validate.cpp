@@ -195,11 +195,59 @@ int run(const std::string& mode, const std::filesystem::path& path)
                          <<" independent_vi_volume_fields="<<volumeFields<<" model_plate_axis_checks="<<plateAxes<<'\n';
             }
         }
+        else if (mode=="legacy_drawing_evidence")
+        {
+            tekla::db1::Model model;
+            if (!tekla::db1::parseModelFile(path.parent_path()/"PSDBIM__EXCEL-1246A-BLDG-B"/"EXCEL-1246A-BLDG-B.db1",model,error))
+                throw std::runtime_error(error);
+            std::size_t files=0,subjects=0,matches=0,unresolved=0;
+            for (const auto& file:std::filesystem::directory_iterator(path))
+            {
+                if (file.path().extension()!=".dg") continue;
+                tekla::Drawing d; if (!tekla::parseDrawing(file.path(),d,error)) throw std::runtime_error(error);
+                ++files;
+                if (!d.projectGuid.empty()) throw std::runtime_error("legacy project GUID unexpectedly inferred");
+                if (d.subject && d.subject->kind!=tekla::DrawingSubjectKind::GeneralArrangement)
+                {
+                    const auto& s=*d.subject; bool found=false;
+                    if (s.kind==tekla::DrawingSubjectKind::SinglePart)
+                        found=model.parts.count(s.modelObjectId) && model.parts.at(s.modelObjectId).internalType==2;
+                    if (s.kind==tekla::DrawingSubjectKind::Assembly)
+                        found=std::any_of(model.assemblies.begin(),model.assemblies.end(),[&](const auto& a){return a.id==s.modelObjectId;});
+                    if (!found) throw std::runtime_error("legacy subject ID/type disagrees with accompanying DB1");
+                    ++subjects;
+                }
+                for (const auto& ref:d.modelReferences) (model.parts.count(ref.modelObjectId)?matches:unresolved)++;
+            }
+            // Cross-file ID/type evidence, NOT independent geometric truth or
+            // permission to associate an arbitrary database with these drawings.
+            if (files!=293 || subjects!=59 || matches!=1361 || unresolved!=35)
+                throw std::runtime_error("legacy drawing cross-file evidence changed");
+            std::cout<<"files="<<files<<" subject_id_type_matches="<<subjects<<" numeric_reference_matches="<<matches<<" unresolved_numeric_references="<<unresolved<<'\n';
+        }
         else if (mode=="raw")
         {
             tekla::db1::RawDatabase raw;
             tekla::db1::RawDatabaseOptions options; options.retainDecompressedFileImage=true;
             if (!tekla::db1::parseRawDatabase(path,raw,error,options)) { std::cerr << error << '\n'; return 1; }
+            if (raw.kind==tekla::db1::DatabaseKind::Drawing && raw.storageVersion=="7.82")
+            {
+                auto rebuilt=raw.preamble;
+                const auto word=[&](std::uint32_t n) { for (unsigned i=0;i<4;++i) rebuilt.push_back(static_cast<std::uint8_t>(n>>(i*8))); };
+                for (const auto& t:raw.tables)
+                {
+                    word(0xdbcec066); word(t.payloadSize); word(static_cast<std::uint32_t>(t.fieldDescriptors.size()));
+                    for (auto f:t.fieldDescriptors) word(f);
+                    for (const auto& r:t.records)
+                    {
+                        if (r.payload.size()!=t.payloadSize || r.allocatorMetadata.size()!=40) throw std::runtime_error("legacy record framing lost");
+                        rebuilt.push_back(r.allocationTag); rebuilt.insert(rebuilt.end(),r.payload.begin(),r.payload.end());
+                        rebuilt.insert(rebuilt.end(),r.allocatorMetadata.begin(),r.allocatorMetadata.end());
+                    }
+                    rebuilt.insert(rebuilt.end(),t.trailer.begin(),t.trailer.end());
+                }
+                if (rebuilt!=raw.decompressedFileImage) throw std::runtime_error("legacy drawing raw reconstruction differs from file");
+            }
             std::size_t rows=0,opaque=0; Fingerprint hash;
             for (const auto& table : raw.tables) { rows+=table.records.size(); opaque+=!table.schemaValid; }
             for (auto b : raw.decompressedFileImage) hash.byte(b);
@@ -275,8 +323,14 @@ int run(const std::string& mode, const std::filesystem::path& path)
         {
             tekla::Drawing drawing;
             if (!tekla::parseDrawing(path,drawing,error)) { std::cerr<<error<<'\n'; return 1; }
+            const bool old=drawing.raw.storageVersion=="7.82";
             Fingerprint hash;
-            for (const auto& entry:drawing.strings) { hash.number(entry.first); hash.text(entry.second.text); }
+            std::size_t incomplete=0;
+            for (const auto& entry:drawing.strings)
+            {
+                hash.number(entry.first); hash.text(entry.second.text);
+                if (old) { hash.number(entry.second.complete); hash.number(entry.second.missingContinuationId); incomplete+=!entry.second.complete; }
+            }
             for (const auto& entry:drawing.properties)
             {
                 const auto& p=entry.second; hash.number(p.id); hash.text(p.name); hash.number(p.isString);
@@ -284,24 +338,27 @@ int run(const std::string& mode, const std::filesystem::path& path)
             }
             for (const auto& link:drawing.propertyLinks) { hash.number(link.id); hash.number(link.propertyId); hash.number(link.ownerId); }
             for (const auto& sheet:drawing.sheets) { hash.number(sheet.id); hash.real(sheet.width); hash.real(sheet.height); }
-            for (const auto& ref:drawing.modelReferences) { hash.number(ref.recordId); hash.number(ref.drawingContextId); hash.text(ref.modelGuid); }
-            if (drawing.subject) { hash.number(drawing.subject->recordId); hash.number(drawing.subject->typeCode); hash.text(drawing.subject->modelGuid); }
-            for (const auto& entry:drawing.viewsByContext)
+            for (const auto& ref:drawing.modelReferences) { hash.number(ref.recordId); hash.number(ref.drawingContextId); hash.text(ref.modelGuid); if (old) hash.number(ref.modelObjectId); }
+            if (drawing.subject) { hash.number(drawing.subject->recordId); hash.number(drawing.subject->typeCode); hash.text(drawing.subject->modelGuid); if (old) hash.number(drawing.subject->modelObjectId); }
+            for (const auto& entry:old?drawing.viewsByRecordId:drawing.viewsByContext)
             {
                 const auto& view=entry.second;
                 hash.number(view.recordId); hash.number(view.contextId); hash.text(view.modelGuid); hash.text(view.propertySetName);
+                if (old) for (const auto& name:view.storedPropertySetNames) hash.text(name);
                 for (const auto* cs:{&view.viewCoordinates,&view.displayCoordinates})
                     for (const auto* p:{&cs->origin,&cs->axisX,&cs->axisY,&cs->axisZ}) for (auto x:*p) hash.real(x);
                 for (const auto* v:{&view.restriction,&view.storedAttributeVolume})
                     for (auto x:{v->minX,v->maxX,v->minY,v->maxY,v->depthNegative,v->depthPositive}) hash.real(x);
             }
+            if (old) for (auto id:drawing.unhandledViewRecordIds) hash.number(id);
             std::cout<<"version="<<drawing.raw.storageVersion<<" tables="<<drawing.raw.tables.size()
                      <<" strings="<<drawing.strings.size()<<" properties="<<drawing.properties.size()
                      <<" links="<<drawing.propertyLinks.size()<<" sheets="<<drawing.sheets.size()
                      <<" model_refs="<<drawing.modelReferences.size()
-                     <<" views="<<drawing.viewsByContext.size()<<" subject="<<bool(drawing.subject)
-                     <<" guid="<<drawing.projectGuid<<" stored="<<drawing.storedFileName
-                     <<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
+                     <<" views="<<(old?drawing.viewsByRecordId.size():drawing.viewsByContext.size())<<" subject="<<bool(drawing.subject)
+                     <<" guid="<<drawing.projectGuid<<" stored="<<drawing.storedFileName;
+            if (old) std::cout<<" incomplete_text="<<incomplete<<" unhandled_views="<<drawing.unhandledViewRecordIds.size()<<" unique_contexts="<<drawing.viewsByContext.size();
+            std::cout<<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
         }
         else return 2;
         return 0;

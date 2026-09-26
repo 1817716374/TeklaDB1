@@ -70,6 +70,39 @@ struct DgFixture
         Bytes link(12); put<unsigned>(link,0,7); put<unsigned>(link,4,6); put<unsigned>(link,8,45); rows[21].push_back(link);
     }
 };
+struct Dg782Fixture : DgFixture
+{
+    std::array<unsigned,47> fields{{20,63,185,22,75,451,0,76,11,6,654,162,35,92,48,21,21,6,6,4,5,4,5,50,47,143,7,12,5,10,9,6,9,21,4,10,7,9,24,7,16,17,6,16,20,23,11}};
+    Dg782Fixture()
+    {
+        addView();
+        widths={{128,596,1400,136,524,3328,0,536,52,32,4888,948,224,600,296,496,144,20,45,12,37,12,110,3438,288,860,24,64,16,36,40,20,40,120,12,64,32,56,156,24,60,112,20,60,112,144,60}};
+        auto& v=rows[5][0]; std::memmove(v.data()+40,v.data()+48,240); v.resize(3328);
+        rows[10][0].resize(4888); put<unsigned>(rows[10][0],16,1234);
+        Bytes reference(112); put<unsigned>(reference,0,9); put<unsigned>(reference,4,45); put<unsigned>(reference,8,1234); rows[44]={reference};
+    }
+    Bytes encode()
+    {
+        Bytes b(76); text(b,0,"Xsteel! 7.82"); put<unsigned>(b,12,1); put<unsigned>(b,16,0xdbcec0bc);
+        const auto table=[&](unsigned width,unsigned count,const std::vector<Bytes>& records) {
+            word(b,0xdbcec066); word(b,width); word(b,count);
+            for (unsigned i=0;i<count;++i) word(b,i==0?1:0);
+            for (const auto& r:records)
+            {
+                b.push_back(4); b.insert(b.end(),r.begin(),r.end());
+                // Embedded section magic in metadata must not split a record.
+                word(b,0xdbcec066); b.resize(b.size()+36,0xa5);
+            }
+            b.push_back(0);
+        };
+        std::vector<Bytes> directory;
+        for (unsigned repeat=0;repeat<2;++repeat)
+            for (std::size_t i=types.size();i-- >0;) if (i!=6) { Bytes r(4); put(r,0,types[i]); directory.push_back(r); }
+        table(4,2,directory);
+        for (std::size_t i=0;i<types.size();++i) if (i!=6) table(widths[i],fields[i],rows[i]);
+        return b;
+    }
+};
 }
 int main(int argc,char** argv)
 {
@@ -80,7 +113,58 @@ int main(int argc,char** argv)
         std::filesystem::create_directories(root);
         const auto db2=root/"sample.db2", dg=root/"renamed.dg";
         std::string error="stale"; tekla::NumberingDatabase n; tekla::Drawing d; tekla::db1::RawDatabase raw;
-        if (mode=="numbering_valid")
+        if (mode.find("drawing782_")==0)
+        {
+            Dg782Fixture f;
+            if (mode=="drawing782_missing") put<unsigned>(f.rows[18][1],4,999);
+            if (mode=="drawing782_cycle") put<unsigned>(f.rows[18][1],4,1);
+            if (mode=="drawing782_fields") ++f.fields[5];
+            if (mode=="drawing782_context") { f.rows[5].push_back(f.rows[5][0]); put<unsigned>(f.rows[5][1],4,46); }
+            if (mode=="drawing782_collapsed")
+                for (auto o:{40U,160U}) for (auto point:{24U,48U}) std::memcpy(f.rows[5][0].data()+o+point,f.rows[5][0].data()+o,24);
+            if (mode=="drawing782_nonfinite") put<double>(f.rows[5][0],40,std::numeric_limits<double>::infinity());
+            if (mode=="drawing782_conflict")
+            {
+                auto p=f.rows[22][1]; put<unsigned>(p,0,16); text(p,29,"other-view"); f.rows[22].push_back(p);
+                auto link=f.rows[21][1]; put<unsigned>(link,0,17); put<unsigned>(link,4,16); f.rows[21].push_back(link);
+            }
+            auto b=f.encode(); save(dg,b);
+            if (mode=="drawing782_truncated")
+            {
+                for (auto at:{std::size_t(0),std::size_t(75),std::size_t(80),std::size_t(100),b.size()/2,b.size()-1})
+                {
+                    save(dg,Bytes(b.begin(),b.begin()+static_cast<std::ptrdiff_t>(at)));
+                    check(!tekla::db1::parseRawDatabase(dg,raw,error),"truncated DG 7.82 accepted");
+                    check(raw.tables.empty(),"raw failure output not cleared");
+                }
+                b.push_back(0xff); save(dg,b); check(!tekla::parseDrawing(dg,d,error),"trailing legacy bytes accepted");
+            }
+            else if (mode=="drawing782_cycle" || mode=="drawing782_fields" || mode=="drawing782_nonfinite")
+            {
+                check(!tekla::parseDrawing(dg,d,error),"invalid legacy drawing accepted");
+                check(d.raw.tables.empty() && !error.empty(),"legacy drawing failure output");
+            }
+            else
+            {
+                check(tekla::parseDrawing(dg,d,error,{true}),error);
+                check(d.raw.tables.size()==47 && d.raw.tables[0].records.size()==92,"legacy repeated directory lost");
+                check(d.raw.decompressedFileImage==b && d.raw.tables[0].records[0].allocatorMetadata.size()==40,"legacy raw metadata lost");
+                check(d.sheets[0].width==594 && d.subject->modelObjectId==1234 && d.subject->modelGuid.empty(),"legacy header fields");
+                check(d.modelReferences[0].modelObjectId==1234 && d.modelReferences[0].modelGuid.empty(),"legacy numeric ID became GUID");
+                check(d.strings.at(1).complete==(mode!="drawing782_missing"),"legacy incomplete text flag");
+                if (mode=="drawing782_missing") check(d.strings.at(1).missingContinuationId==999,"missing continuation ID lost");
+                if (mode=="drawing782_context") check(d.viewsByRecordId.size()==2 && d.viewsByContext.empty(),"ambiguous views lost or joined");
+                else if (mode=="drawing782_collapsed") check(d.viewsByRecordId.empty() && d.unhandledViewRecordIds==std::vector<std::uint32_t>{44},"collapsed view not retained raw");
+                else
+                {
+                    const auto& v=d.viewsByContext.at(45);
+                    check(v.viewCoordinates.origin==tekla::DrawingPoint3{100,200,300} && v.restriction.minX==-10,"legacy view offsets");
+                    if (mode=="drawing782_conflict") check(v.propertySetName.empty() && v.storedPropertySetNames.size()==2,"ambiguous properties selected silently");
+                    else check(v.propertySetName=="saved-view","legacy view property join");
+                }
+            }
+        }
+        else if (mode=="numbering_valid")
         {
             for (bool old:{false,true})
             {

@@ -88,8 +88,57 @@ inline void numberingContainer(const Bytes& data, RawDatabase& raw)
         raw.tables.push_back(std::move(table));
     }
 }
+inline void drawing782Container(const Bytes& data, RawDatabase& raw)
+{
+    // 293 pinned files: fixed preamble, modern sections, two 20-byte metadata
+    // slots per record and a one-byte table terminator. Walk rows, never scan
+    // for magic inside text/geometry/metadata.
+    if (data.size()<76 || std::memcmp(data.data(),"Xsteel! 7.82",12)!=0 ||
+        u32(data,12)!=1 || u32(data,16)!=0xdbcec0bc)
+        throw std::runtime_error("unsupported legacy drawing preamble");
+    raw.kind=DatabaseKind::Drawing; raw.layout=DatabaseLayout::ModernSections; raw.storageVersion="7.82";
+    raw.preamble.assign(data.begin(),data.begin()+76);
+    std::size_t pos=76;
+    while (pos<data.size())
+    {
+        if (data.size()-pos<12 || u32(data,pos)!=0xdbcec066) throw std::runtime_error("invalid legacy drawing section header");
+        RawTable t; t.fileOffset=pos; t.schemaValid=true; t.payloadSize=u32(data,pos+4);
+        const auto fields=u32(data,pos+8); pos+=12;
+        if (fields>(data.size()-pos)/4) throw std::runtime_error("truncated legacy drawing field descriptors");
+        for (std::uint32_t i=0;i<fields;++i) { t.fieldDescriptors.push_back(u32(data,pos)); pos+=4; }
+        const auto stride=std::uint64_t(t.payloadSize)+41;
+        while (pos<data.size() && (data[pos]==4 || data[pos]==12))
+        {
+            if (stride>data.size()-pos) throw std::runtime_error("truncated legacy drawing record");
+            RawRecord r; r.fileOffset=pos; r.allocationTag=data[pos];
+            const auto begin=data.begin()+static_cast<std::ptrdiff_t>(pos+1);
+            r.payload.assign(begin,begin+t.payloadSize);
+            r.allocatorMetadata.assign(begin+t.payloadSize,begin+t.payloadSize+40);
+            t.records.push_back(std::move(r)); pos+=static_cast<std::size_t>(stride);
+        }
+        if (pos==data.size() || data[pos]!=0) throw std::runtime_error("missing legacy drawing table terminator");
+        t.trailer={data[pos++]}; raw.tables.push_back(std::move(t));
+    }
+    if (raw.tables.empty() || raw.tables.front().payloadSize!=4 || raw.tables.front().records.empty())
+        throw std::runtime_error("invalid legacy drawing directory");
+    std::set<std::uint32_t> seen; std::vector<std::uint32_t> types;
+    for (const auto& r:raw.tables.front().records)
+    {
+        const auto type=u32(r.payload,0);
+        if (!type) throw std::runtime_error("zero legacy drawing table type");
+        if (seen.insert(type).second) types.push_back(type);
+    }
+    // Repeated directory entries are retained, not interpreted as duplicate
+    // tables. First occurrences list the physical table roles in reverse order.
+    if (types.size()+1!=raw.tables.size()) throw std::runtime_error("legacy drawing directory/table count mismatch");
+    for (std::size_t i=0;i<types.size();++i) raw.tables[i+1].ordinal=types[types.size()-1-i];
+}
 inline void drawingContainer(const Bytes& data, RawDatabase& raw)
 {
+    if (data.size()>=8 && std::memcmp(data.data(),"Xsteel! ",8)==0)
+    {
+        drawing782Container(data,raw); return;
+    }
     auto pos=relatedHeader(data,raw,true);
     auto types=relatedTable(data,pos,false,0);
     if (types.payloadSize!=4 || types.records.empty()) throw std::runtime_error("invalid drawing table directory");
