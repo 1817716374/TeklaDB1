@@ -5,7 +5,7 @@
 ## 样本与可复验依据
 
 - 已固定的64份公开DB2包括7.30、7.82、8.95、9.52、9.60，32份主编号库和32份空组件编号库。实际编号系列出现在7.30、7.82、8.95和9.60样本中；7.30教学工程含20个系列，Construsoft练习的8.95主DB2含12个系列。不能把空库通过视为丰富语义覆盖。
-- 7 份 DG 9.54 来自同一培训模型；另有 293 份 DG 7.82 来自 PSDBIM 工程。两种容器与字段布局分别校验，不能推断其他版本兼容性。
+- 7 份 DG 9.54 来自同一培训模型；另有 293 份 DG 7.82 来自 PSDBIM 工程。另有35份公开教学DG 7.30，其91个视图、文字、图幅及主体已恢复，详见[7.30字段与证据](DG_730.zh-CN.md)。三种布局分别校验，不能推断其他版本兼容性。
 - 培训模型来自 [letstekla 仓库固定提交](https://github.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/tree/efb24b30a722de4afc9052331e2e24b69abba6cf)。模型及 `numberinghistory.txt` 位于同一 ZIP；下载地址、文件大小及 SHA-256 见 `tests/corpus.json`。
 - [Trimble 文件说明](https://support.tekla.com/doc/tekla-structures/2023/sys_files_and_file_extensions)确认 DB2 用于编号、environment.db 用于用户属性定义；这些官方描述不提供下述二进制字段偏移。偏移来自样本分析。
 

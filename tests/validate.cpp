@@ -8,6 +8,7 @@
 #include <fstream>
 #include <regex>
 #include <limits>
+#include <set>
 
 namespace
 {
@@ -29,6 +30,7 @@ struct Fingerprint
 #include "ObjectNumberingValidation.hpp"
 #include "LegacyNumberingValidation.hpp"
 #include "Numbering730Validation.hpp"
+#include "Drawing730Validation.hpp"
 #include "ReinforcementValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
@@ -88,7 +90,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode=="numbering730_evidence") validateNumbering730Evidence(path);
+        if (mode=="drawing730_evidence") validateDrawing730Evidence(path);
+        else if (mode=="numbering730_evidence") validateNumbering730Evidence(path);
         else if (mode=="legacy_number_evidence") validateLegacyNumberEvidence(path);
         else if (mode=="empty_bolt_evidence")
         {
@@ -478,6 +481,21 @@ int run(const std::string& mode, const std::filesystem::path& path)
             tekla::db1::RawDatabase raw;
             tekla::db1::RawDatabaseOptions options; options.retainDecompressedFileImage=true;
             if (!tekla::db1::parseRawDatabase(path,raw,error,options)) { std::cerr << error << '\n'; return 1; }
+            if (raw.kind==tekla::db1::DatabaseKind::Drawing && raw.storageVersion=="7.30")
+            {
+                auto rebuilt=raw.preamble;
+                const auto word=[&](std::uint32_t n) { for(unsigned i=0;i<4;++i)rebuilt.push_back(static_cast<std::uint8_t>(n>>(i*8))); };
+                for(const auto& table:raw.tables)
+                {
+                    word(static_cast<std::uint32_t>(table.records.size()));word(table.payloadSize);
+                    for(const auto& row:table.records)
+                    {
+                        if(row.payload.size()!=table.payloadSize || !row.allocatorMetadata.empty())throw std::runtime_error("7.30 drawing row framing lost");
+                        rebuilt.push_back(row.allocationTag);rebuilt.insert(rebuilt.end(),row.payload.begin(),row.payload.end());
+                    }
+                }
+                if(rebuilt!=raw.decompressedFileImage)throw std::runtime_error("7.30 drawing reconstruction differs from file");
+            }
             if (raw.kind==tekla::db1::DatabaseKind::Drawing && raw.storageVersion=="7.82")
             {
                 auto rebuilt=raw.preamble;
@@ -571,7 +589,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
         {
             tekla::Drawing drawing;
             if (!tekla::parseDrawing(path,drawing,error)) { std::cerr<<error<<'\n'; return 1; }
-            const bool old=drawing.raw.storageVersion=="7.82";
+            const bool old=drawing.raw.storageVersion=="7.82" || drawing.raw.storageVersion=="7.30";
             Fingerprint hash;
             std::size_t incomplete=0;
             for (const auto& entry:drawing.strings)

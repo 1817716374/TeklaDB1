@@ -1,6 +1,7 @@
 #include <tekla/Drawing.hpp>
 #include <tekla/Numbering.hpp>
 #include <array>
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -103,6 +104,7 @@ struct Dg782Fixture : DgFixture
         return b;
     }
 };
+#include "Drawing730Regression.hpp"
 }
 int main(int argc,char** argv)
 {
@@ -113,7 +115,8 @@ int main(int argc,char** argv)
         std::filesystem::create_directories(root);
         const auto db2=root/"sample.db2", dg=root/"renamed.dg";
         std::string error="stale"; tekla::NumberingDatabase n; tekla::Drawing d; tekla::db1::RawDatabase raw;
-        if (mode.find("drawing782_")==0)
+        if (mode.find("drawing730_")==0) drawing730Regression(mode,dg);
+        else if (mode.find("drawing782_")==0)
         {
             Dg782Fixture f;
             if (mode=="drawing782_missing") put<unsigned>(f.rows[18][1],4,999);

@@ -92,6 +92,7 @@ struct Drawing
     std::vector<DrawingPropertyLink> propertyLinks;
     std::vector<DrawingSheet> sheets;
     // DG type 322. 9.54 carries GUIDs; 7.82 carries unscoped numeric IDs.
+    // 7.30 has no type 322; its other model reference layouts remain in raw.
     // Referenced entities are not necessarily ordinary parts.
     std::vector<DrawingModelReference> modelReferences;
     std::vector<std::string> diagnostics;
@@ -102,9 +103,10 @@ struct Drawing
     std::map<std::uint32_t,DrawingView> viewsByRecordId;
     std::vector<std::uint32_t> unhandledViewRecordIds;
 };
-// Partial DG 7.82/9.54 semantics: strings (including mark XML), properties, sheet size,
+// Partial DG 7.30/7.82/9.54 semantics: strings (including mark XML), properties, sheet size,
 // project identity, subject, view coordinate bases/volumes and model references.
 // Paper positioning, scale/shortening, dimensions and rendered primitives remain raw.
+// 7.30 exposes numeric subjects; other model references and type-2 subjects are unverified.
 bool parseDrawing(const std::filesystem::path& path, Drawing& result, std::string& error,
                   const db1::RawDatabaseOptions& options = {});
 }

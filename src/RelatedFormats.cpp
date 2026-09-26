@@ -150,12 +150,28 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
         auto data=db1::detail::readPayload(path,options.maxDecodedBytes);
         db1::detail::drawingContainer(data,result.raw);
         const bool older782=result.raw.storageVersion=="7.82";
-        if (!older782 && result.raw.storageVersion!="9.54") throw std::runtime_error("unsupported drawing semantic version "+result.raw.storageVersion);
+        const bool older730=result.raw.storageVersion=="7.30";
+        const bool numericIdentity=older730 || older782;
+        if (!numericIdentity && result.raw.storageVersion!="9.54") throw std::runtime_error("unsupported drawing semantic version "+result.raw.storageVersion);
         // Complete observed directory signature; unknown layouts stay available
         // through parseRawDatabase, never guessed into this semantic mapping.
         constexpr std::array<std::uint32_t,47> types{{253,254,256,257,259,260,263,264,266,268,269,273,275,277,278,279,280,281,293,295,296,297,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324}};
         constexpr std::array<std::uint32_t,47> widths{{128,620,1496,144,712,4788,580,584,52,32,6196,964,240,608,296,496,144,32,45,12,37,12,110,3438,296,876,24,64,28,72,48,32,64,120,24,64,40,56,164,24,180,112,20,60,144,152,60}};
-        if (older782)
+        if (older730)
+        {
+            constexpr std::array<std::array<unsigned,2>,33> signature{{
+                {{253,128}},{{254,584}},{{256,1400}},{{257,136}},{{259,524}},{{260,3328}},
+                {{264,536}},{{266,52}},{{268,32}},{{269,4888}},{{273,948}},{{275,224}},
+                {{277,704}},{{278,296}},{{279,496}},{{280,144}},{{281,16}},{{293,45}},
+                {{295,12}},{{296,37}},{{297,12}},{{298,110}},{{301,3438}},{{302,240}},
+                {{303,860}},{{304,24}},{{305,64}},{{306,16}},{{307,36}},{{308,40}},
+                {{309,20}},{{310,40}},{{311,120}}}};
+            if(result.raw.tables.size()!=signature.size()+1)throw std::runtime_error("unsupported 7.30 drawing table count");
+            for(std::size_t i=0;i<signature.size();++i)
+                if(result.raw.tables[i+1].ordinal!=signature[i][0] || result.raw.tables[i+1].payloadSize!=signature[i][1])
+                    throw std::runtime_error("unsupported 7.30 drawing table signature");
+        }
+        else if (older782)
         {
             constexpr std::array<std::array<unsigned,3>,47> signature{{
                 {{0,4,2}},{{253,128,20}},{{254,596,63}},{{256,1400,185}},{{257,136,22}},{{259,524,75}},
@@ -271,11 +287,11 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             if (u32(row.payload,0)!=269 || result.subject) throw std::runtime_error("invalid or duplicate drawing subject header");
             DrawingSubject subject; subject.recordId=u32(row.payload,4); subject.typeCode=u32(row.payload,12);
             if (!subject.recordId) throw std::runtime_error("zero drawing subject ID");
-            if (older782) subject.modelObjectId=u32(row.payload,16);
+            if (numericIdentity) subject.modelObjectId=u32(row.payload,16);
             else subject.modelGuid=binaryGuid(row.payload,16);
             if (subject.typeCode==1) subject.kind=DrawingSubjectKind::SinglePart;
-            else if (subject.typeCode==2) subject.kind=DrawingSubjectKind::Assembly;
-            else if (older782 && subject.typeCode==3) subject.kind=DrawingSubjectKind::GeneralArrangement;
+            else if (subject.typeCode==2 && !older730) subject.kind=DrawingSubjectKind::Assembly;
+            else if (numericIdentity && subject.typeCode==3) subject.kind=DrawingSubjectKind::GeneralArrangement;
             else result.diagnostics.emplace_back("unknown drawing subject type code retained without classification");
             result.subject=std::move(subject);
         }
@@ -287,23 +303,23 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             const auto& row=record.payload;
             if (u32(row,0)!=260) throw std::runtime_error("invalid drawing view type");
             DrawingView view; view.recordId=u32(row,4); view.contextId=u32(row,8);
-            if (!older782) view.modelGuid=binaryGuid(row,24);
+            if (!numericIdentity) view.modelGuid=binaryGuid(row,24);
             if (!view.recordId || !view.contextId || !viewIds.insert(view.recordId).second)
                 throw std::runtime_error("zero or duplicate drawing view ID");
             if (!allContexts.insert(view.contextId).second) ambiguousContexts.insert(view.contextId);
-            if (older782 && collapsedCoordinates(row,40) && collapsedCoordinates(row,160))
+            if (numericIdentity && collapsedCoordinates(row,40) && collapsedCoordinates(row,160))
             {
                 result.unhandledViewRecordIds.push_back(view.recordId);
                 result.diagnostics.push_back("legacy drawing view has collapsed coordinate blocks; retained raw: "+std::to_string(view.recordId));
                 continue;
             }
-            view.viewCoordinates=coordinates(row,older782?40:48); view.displayCoordinates=coordinates(row,older782?160:168);
-            view.restriction=volume(row,older782?112:120); view.storedAttributeVolume=volume(row,older782?232:240);
+            view.viewCoordinates=coordinates(row,numericIdentity?40:48); view.displayCoordinates=coordinates(row,numericIdentity?160:168);
+            view.restriction=volume(row,numericIdentity?112:120); view.storedAttributeVolume=volume(row,numericIdentity?232:240);
             const auto context=view.contextId;
             result.viewsByRecordId.emplace(view.recordId,view);
             if (!result.viewsByContext.emplace(context,std::move(view)).second)
             {
-                if (!older782) throw std::runtime_error("duplicate drawing view context");
+                if (!numericIdentity) throw std::runtime_error("duplicate drawing view context");
                 ambiguousContexts.insert(context);
             }
         }
@@ -318,7 +334,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             if (view==result.viewsByContext.end() || property.name!="gr_cl_view_prop" || !property.isString) continue;
             auto& names=view->second.storedPropertySetNames;
             if (std::find(names.begin(),names.end(),property.stringValue)==names.end()) names.push_back(property.stringValue);
-            if (names.size()>1 && !older782) throw std::runtime_error("conflicting drawing view property sets");
+            if (names.size()>1 && !numericIdentity) throw std::runtime_error("conflicting drawing view property sets");
         }
         for (auto& entry:result.viewsByContext)
         {
@@ -329,6 +345,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             result.viewsByRecordId.at(view.recordId)=view;
         }
         std::set<std::uint32_t> referenceIds;
+        if (!older730)
         for (const auto& row:table(result.raw,322).records)
         {
             DrawingModelReference reference; reference.recordId=u32(row.payload,0); reference.drawingContextId=u32(row.payload,4);
@@ -340,7 +357,8 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             result.modelReferences.push_back(std::move(reference));
         }
         result.diagnostics.emplace_back("partial drawing semantics: paper placement, scale/shortening, dimensions, other reference types and rendered primitives remain raw; mark XML is stored text");
-        if (older782) result.diagnostics.emplace_back("legacy numeric model references are unscoped; no project GUID or automatic DB1 join is inferred; record metadata and lifecycle remain unclassified");
+        if (older730) result.diagnostics.emplace_back("7.30 drawing model references remain raw; an empty modelReferences collection does not mean no model references exist");
+        if (numericIdentity) result.diagnostics.emplace_back("legacy numeric model references are unscoped; no project GUID or automatic DB1 join is inferred; record metadata and lifecycle remain unclassified");
         if (options.retainDecompressedFileImage) result.raw.decompressedFileImage=std::move(data);
         return true;
     }
