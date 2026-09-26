@@ -91,6 +91,12 @@ def materialize(spec, destination, archives, data, visiting=None):
 
 
 def main():
+    # Redirected Windows consoles may use a code page that cannot represent a
+    # public sample's filename. Keep progress/error output from aborting a run;
+    # paths, validator output and the UTF-8 JSON report remain unchanged.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="backslashreplace")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=Path(__file__).resolve().parents[1] / "tests/corpus.json")
     parser.add_argument("--data", type=Path, required=True, help="external corpus directory; all downloads stay here")
