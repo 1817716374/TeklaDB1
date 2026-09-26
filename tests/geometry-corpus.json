@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "note": "Optional OCCT evidence, reusing exactly the two pinned files in corpus.json. All 25 UPE parts including eight polybeams retain nominal-source provenance; final volumes and 1724 IFC vertex distances are checked after model operations. This does not claim all complex model geometry is complete.",
+  "archives": {
+    "btscm-ifc730": {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/out.ifcZIP",
+      "size": 2420513,
+      "sha256": "c582a87234285fe885199183dbe65da93ef1b90b41743416a3ddf8e0323efefa"
+    }
+  },
+  "files": [
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelirejulV1.db1",
+      "size": 1090271,
+      "sha256": "6b06855eff3af162ec65add49d0a03576f621870bf903b8a4e9046c27387ad47",
+      "path": "btscm-pechelire/pechelirejulV1.db1"
+    },
+    {
+      "path": "btscm-ifc730/export.ifc",
+      "archive": "btscm-ifc730",
+      "member": "out.ifc",
+      "size": 13124990,
+      "sha256": "d02db80ded529334096fa911f2194978f96b4bc3a0720deee31247992cc295a3"
+    }
+  ],
+  "cases": [
+    {
+      "name": "btscm-ifc730-occt-upe-solids",
+      "path": "btscm-ifc730",
+      "mode": "ifc_geometry",
+      "exit": 0,
+      "stdout": "upe_parts=25 ifc_vertices=1724 nominal_profile_parts=25"
+    }
+  ]
+}

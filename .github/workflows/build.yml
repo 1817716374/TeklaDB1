@@ -56,6 +56,11 @@ jobs:
       - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DTEKLADB1_WITH_OCCT=ON
       - run: cmake --build build --parallel 2
       - run: ctest --test-dir build --output-on-failure
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independent IFC solid geometry
+        run: python -B tools/corpus.py --manifest tests/geometry-corpus.json --data "$RUNNER_TEMP/tekla-geometry-corpus" --download --exe build/tekladb1_ifc_geometry --report build/geometry-corpus-results.json
       - run: cmake --install build --prefix "$GITHUB_WORKSPACE/installed"
       - run: cmake -S tests/consumer -B consumer-build -G Ninja -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/installed"
       - run: cmake --build consumer-build && ctest --test-dir consumer-build --output-on-failure

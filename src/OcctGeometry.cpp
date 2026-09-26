@@ -1,4 +1,5 @@
 #include <tekla/db1/OcctGeometry.hpp>
+#include "NominalSections.hpp"
 
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
@@ -312,8 +313,8 @@ Section sectionFor(const Model& model, const Part& part, std::string& mode)
     const std::regex equalAngle(R"(^L([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
     const std::regex grating(R"(^GRATING([0-9.]+)\*([0-9.]+)(?:-.*)?$)", std::regex::icase);
     const std::regex zee(R"(^ZZ([0-9.]+)-([0-9.]+)-([0-9.]+)-([0-9.]+)$)", std::regex::icase);
-    const std::regex upe(R"(^UPE([0-9.]+)$)", std::regex::icase);
-    const std::regex ipe(R"(^IPE([0-9.]+)$)", std::regex::icase);
+    const std::regex upe(R"(^UPE([0-9]+(?:\.[0-9]+)?)$)", std::regex::icase);
+    const std::regex ipe(R"(^IPE([0-9]+(?:\.[0-9]+)?)$)", std::regex::icase);
     const std::regex channel(R"(^C([0-9.]+)\*([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
     const std::regex sadef(R"(^SADEF-C([0-9.]+)/([0-9.]+)/([0-9.]+)X([0-9.]+)$)", std::regex::icase);
     const std::regex eld(R"(^ELD([0-9.]+)\*([0-9.]+)\*([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
@@ -398,30 +399,36 @@ Section sectionFor(const Model& model, const Part& part, std::string& mode)
     }
     else if (std::regex_match(part.profile, match, upe))
     {
+        // A present but unhandled catalog entry must not be replaced by a
+        // different section inferred from its name.
+        if (catalog) return result;
         const auto height = std::stod(match[1]);
-        const auto width = 0.25 * height + 30.0;
-        const auto web = (std::max)(4.0, height * 0.0275);
-        const auto flange = (std::max)(7.0, height * 0.041);
+        const auto found = std::find_if(detail::nominalUPE.begin(), detail::nominalUPE.end(),
+                                       [&](const auto& entry) { return entry.height == height; });
+        if (found == detail::nominalUPE.end()) return result;
+        const auto width = found->width, web = found->web, flange = found->flange;
         const auto h = height * 0.5, w = width * 0.5;
         result.centerOnCentroid = true;
         result.outer = {{-h, -w}, {-h, w}, {-h + flange, w},
                         {-h + flange, -w + web}, {h - flange, -w + web},
                         {h - flange, w}, {h, w}, {h, -w}};
-        mode = "parametric UPE";
+        mode = "nominal UPE sharp-corner approximation (project catalog unavailable)";
     }
     else if (std::regex_match(part.profile, match, ipe))
     {
+        if (catalog) return result;
         const auto height = std::stod(match[1]);
-        const auto width = 0.45 * height + 10.0;
-        const auto web = (std::max)(4.1, height * 0.041);
-        const auto flange = (std::max)(5.7, height * 0.057);
+        const auto found = std::find_if(detail::nominalIPE.begin(), detail::nominalIPE.end(),
+                                       [&](const auto& entry) { return entry.height == height; });
+        if (found == detail::nominalIPE.end()) return result;
+        const auto width = found->width, web = found->web, flange = found->flange;
         const auto h = height * 0.5, w = width * 0.5, tw = web * 0.5;
         result.centerOnCentroid = true;
         result.outer = {{-h, -w}, {-h + flange, -w}, {-h + flange, -tw},
                         {h - flange, -tw}, {h - flange, -w}, {h, -w},
                         {h, w}, {h - flange, w}, {h - flange, tw},
                         {-h + flange, tw}, {-h + flange, w}, {-h, w}};
-        mode = "parametric IPE";
+        mode = "nominal IPE sharp-corner approximation (project catalog unavailable)";
     }
     else if (std::regex_match(part.profile, match, channel))
     {
@@ -741,6 +748,20 @@ TopoDS_Shape contourSolid(const Part& part)
     return face.IsDone() ? BRepPrimAPI_MakePrism(face.Face(), vector(extrusion)).Shape() : TopoDS_Shape{};
 }
 
+bool clipMiter(TopoDS_Shape& shape, const Vec3& origin, const Vec3& normal, const Vec3& inside)
+{
+    BRepBuilderAPI_MakeFace face(gp_Pln(point(origin), gp_Dir(vector(normal))));
+    if (!face.IsDone()) return false;
+    BRepPrimAPI_MakeHalfSpace halfSpace(face.Face(), point(inside));
+    if (!halfSpace.IsDone()) return false;
+    BRepAlgoAPI_Common common(shape, halfSpace.Solid());
+    if (!common.IsDone() || common.Shape().IsNull()) return false;
+    GProp_GProps properties; BRepGProp::VolumeProperties(common.Shape(), properties);
+    if (std::abs(properties.Mass()) <= kTolerance) return false;
+    shape = common.Shape();
+    return true;
+}
+
 TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mode)
 {
     if (part.contour.size() < 2)
@@ -786,6 +807,7 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
     builder.MakeCompound(result);
     std::string sectionMode;
     const auto section = sectionFor(model, part, sectionMode);
+    if (section.outer.size() < 3) return {};
     double minimumSecondary = (std::numeric_limits<double>::max)();
     double maximumSecondary = (std::numeric_limits<double>::lowest)();
     double minimumNormal = (std::numeric_limits<double>::max)();
@@ -845,10 +867,33 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
         segment.origin = add(add(path[index - 1], scale(segment.secondary, secondaryOffset)),
                              scale(segment.normal, normalOffset));
         segment.length = segmentLength;
+        // Adjacent segments share one bisector plane. Extend before clipping so
+        // the outer corner is filled instead of leaving two perpendicular caps.
+        const auto startNormal = index > 1
+            ? normalized(add(normalized(subtract(path[index - 1], path[index - 2])), segment.axis)) : segment.axis;
+        const auto endNormal = index + 1 < path.size()
+            ? normalized(add(segment.axis, normalized(subtract(path[index + 1], path[index])))) : segment.axis;
+        const auto radius = std::hypot((std::max)(std::abs(minimumSecondary), std::abs(maximumSecondary)) + std::abs(secondaryOffset),
+                                       (std::max)(std::abs(minimumNormal), std::abs(maximumNormal)) + std::abs(normalOffset));
+        const auto extension = [&](const Vec3& normal) {
+            const auto cosine = dot(normal, segment.axis);
+            if (cosine <= 1e-6) return -1.0; // reversal has no finite miter
+            return radius * std::sqrt((std::max)(0.0, 1.0 - cosine * cosine)) / cosine + 1e-4;
+        };
+        const bool clipStart = index > 1 && length(subtract(startNormal, segment.axis)) > kTolerance;
+        const bool clipEnd = index + 1 < path.size() && length(subtract(endNormal, segment.axis)) > kTolerance;
+        const auto startExtension = clipStart ? extension(startNormal) : 0.0;
+        const auto endExtension = clipEnd ? extension(endNormal) : 0.0;
+        if (startExtension < 0 || endExtension < 0) return {};
+        segment.origin = subtract(segment.origin, scale(segment.axis, startExtension));
+        segment.length += startExtension + endExtension;
         std::string segmentMode;
-        const auto solid = linearSolid(model, segment, segmentMode);
+        auto solid = linearSolid(model, segment, segmentMode);
         if (!solid.IsNull())
         {
+            const auto inside = scale(add(path[index - 1], path[index]), 0.5);
+            if ((clipStart && !clipMiter(solid, path[index - 1], startNormal, inside)) ||
+                (clipEnd && !clipMiter(solid, path[index], endNormal, inside))) return {};
             builder.Add(result, solid);
             ++segmentCount;
             mode = segmentMode;
@@ -1130,9 +1175,13 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
         for (const auto partId : model.actualPartIds)
         {
             const auto mode = constructionModes.find(partId);
-            if (mode != constructionModes.end() && mode->second.find("envelope") != std::string::npos)
+            const bool nominal = mode != constructionModes.end() &&
+                (mode->second.find("nominal UPE ") != std::string::npos || mode->second.find("nominal IPE ") != std::string::npos);
+            if (nominal && result.partShapes.count(partId)) result.nominalProfilePartIds.push_back(partId);
+            if (mode != constructionModes.end() && (nominal || mode->second.find("envelope") != std::string::npos))
                 approximationModes.insert(mode->second + " for profile " + model.parts.at(partId).profile);
         }
+        std::sort(result.nominalProfilePartIds.begin(), result.nominalProfilePartIds.end());
         for (const auto& mode : approximationModes)
             result.diagnostics.emplace_back("profile geometry approximation used: " + mode);
         for (const auto& operation : model.fittings)

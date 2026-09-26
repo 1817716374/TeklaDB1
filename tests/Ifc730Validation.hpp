@@ -105,7 +105,7 @@ Frame frame(const Entities& all,unsigned id)
     // to Axis. IfcBuildAxes projects it to obtain the orthonormal X direction.
     f.y=unit(cross(f.z,f.x));f.x=unit(cross(f.y,f.z));return f;
 }
-void near(double a,double b,double tolerance,const std::string& what)
+void coordinateNear(double a,double b,double tolerance,const std::string& what)
 { require(std::isfinite(a) && std::isfinite(b) && std::abs(a-b)<=tolerance,what); }
 Frame placement(const Entities& all,unsigned id)
 {
@@ -117,10 +117,10 @@ Frame placement(const Entities& all,unsigned id)
         const auto& pa=entity(all,p,"IFCLOCALPLACEMENT",2).args;const auto f=frame(all,entityRef(pa[1]));
         for(std::size_t i=0;i<3;++i)
         {
-            near(f.origin[i],0,1e-12,"nonidentity parent origin");
-            near(f.x[i],i==0?1:0,1e-12,"nonidentity parent X");
-            near(f.y[i],i==1?1:0,1e-12,"nonidentity parent Y");
-            near(f.z[i],i==2?1:0,1e-12,"nonidentity parent Z");
+            coordinateNear(f.origin[i],0,1e-12,"nonidentity parent origin");
+            coordinateNear(f.x[i],i==0?1:0,1e-12,"nonidentity parent X");
+            coordinateNear(f.y[i],i==1?1:0,1e-12,"nonidentity parent Y");
+            coordinateNear(f.z[i],i==2?1:0,1e-12,"nonidentity parent Z");
         }
         parent=pa[0];
     }
@@ -207,9 +207,9 @@ void validate(const std::filesystem::path& directory)
         for(std::size_t i=0;i<3;++i)
         {
             const std::string axis(1,"XYZ"[i]);
-            near(p.start[i],real(unwrap("Origine"+axis,"IFCLENGTHMEASURE")),.002,"start "+std::to_string(id));
-            near(p.end[i],real(unwrap("Extr\xc3\xa9mit\xc3\xa9"+axis,"IFCLENGTHMEASURE")),.002,"end "+std::to_string(id));
-            near(p.origin[i],f.origin[i],.002,"origin "+std::to_string(id));
+            coordinateNear(p.start[i],real(unwrap("Origine"+axis,"IFCLENGTHMEASURE")),.002,"start "+std::to_string(id));
+            coordinateNear(p.end[i],real(unwrap("Extr\xc3\xa9mit\xc3\xa9"+axis,"IFCLENGTHMEASURE")),.002,"end "+std::to_string(id));
+            coordinateNear(p.origin[i],f.origin[i],.002,"origin "+std::to_string(id));
         }
         std::smatch dimensions;
         if(modified.count(id) || !p.contour.empty() || !std::regex_match(p.profile,dimensions,rectangular))continue;
@@ -226,7 +226,7 @@ void validate(const std::filesystem::path& directory)
             for(std::size_t i=0;i<3;++i)
             {
                 const unsigned side=std::abs(local[i]-limits[i][1])<std::abs(local[i]-limits[i][0]);corner|=side<<i;
-                near(local[i],limits[i][side],.01,"box corner "+std::to_string(id));
+                coordinateNear(local[i],limits[i][side],.01,"box corner "+std::to_string(id));
             }
             require(corners.insert(corner).second,"duplicate box corner");
         }
