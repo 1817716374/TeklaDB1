@@ -1483,13 +1483,25 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         placements[id] = placement;
     }
 
-    std::unordered_set<uint32_t> partAuxiliaryIds;
     if (verifiedPartOwnership)
         for (std::size_t index = 0; index < all[partAuxiliaryOrdinal].rowCount; ++index)
         {
-            const auto id = read<uint32_t>(row(data, all, partAuxiliaryOrdinal, index), 1);
-            if (!partAuxiliaryIds.insert(id).second)
-                throw std::runtime_error("duplicate part auxiliary record " + std::to_string(id));
+            const auto* value = row(data, all, partAuxiliaryOrdinal, index);
+            PartPosition position;
+            position.id = read<uint32_t>(value, 1);
+            position.startAxialOffset = read<float>(value, 5);
+            position.endAxialOffset = read<float>(value, 17);
+            position.depthCode = read<uint32_t>(value, 29);
+            position.depthOffset = read<float>(value, 33);
+            position.planeCode = read<uint32_t>(value, 45);
+            position.planeOffset = read<float>(value, 49);
+            for (auto number : {position.startAxialOffset, position.endAxialOffset, position.depthOffset, position.planeOffset})
+                if (!std::isfinite(number)) throw std::runtime_error("non-finite part position " + std::to_string(position.id));
+            const std::size_t rawOffsets[] = {9,13,21,25,37,41};
+            for (std::size_t i=0; i<position.rawFields.size(); ++i) position.rawFields[i] = read<uint32_t>(value, rawOffsets[i]);
+            if (position.depthCode>2 || position.planeCode>2)
+                model.diagnostics.push_back("unverified part position code for record " + std::to_string(position.id));
+            insertUnique(model.partPositions, position.id, position, "part position");
         }
     for (std::size_t index = 0; index < all[partOrdinal].rowCount; ++index)
     {
@@ -1499,7 +1511,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         part.definitionId = read<uint32_t>(value, 5);
         part.ownerId = older782 ? 0 : read<uint32_t>(value, 9);
         part.auxiliaryReferenceId = older782 ? 0 : read<uint32_t>(value, 9);
-        if (verifiedPartOwnership && part.auxiliaryReferenceId && !partAuxiliaryIds.count(part.auxiliaryReferenceId))
+        if (verifiedPartOwnership && part.auxiliaryReferenceId && !model.partPositions.count(part.auxiliaryReferenceId))
             throw std::runtime_error("missing part auxiliary reference " + std::to_string(part.auxiliaryReferenceId));
         part.startPointId = read<uint32_t>(value, older782 ? 9 : 13);
         part.endPointId = read<uint32_t>(value, older782 ? 13 : 17);

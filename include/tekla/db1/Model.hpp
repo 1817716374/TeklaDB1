@@ -107,6 +107,19 @@ struct PartDefinition
     std::string classNumber;
 };
 
+struct PartPosition
+{
+    uint32_t id = 0;
+    float startAxialOffset = 0.0f;
+    float endAxialOffset = 0.0f;
+    uint32_t depthCode = 0;
+    float depthOffset = 0.0f;
+    uint32_t planeCode = 0;
+    float planeOffset = 0.0f;
+    // Payload offsets 8,12,20,24,36,40. Their meanings are unverified.
+    std::array<uint32_t, 6> rawFields{};
+};
+
 struct Part
 {
     uint32_t id = 0;
@@ -135,8 +148,8 @@ struct Part
     bool contourKindUnverified = false;
     std::vector<ContourPoint> contour;
     std::vector<Property> properties;
-    // Non-7.82 modern part payload offset 8. Its 52-byte record is available
-    // through parseRawDatabase; placement/flag semantics remain unverified.
+    // Modern payload offset 8, indexes Model::partPositions when supported.
+    // Stored origin/length already contain position adjustments; do not reapply.
     uint32_t auxiliaryReferenceId = 0;
 };
 
@@ -394,5 +407,6 @@ struct Model
     std::unordered_map<uint32_t, IdentityClass> identityClasses;
     std::unordered_map<uint32_t, VariableOwnership> variablesByOwner;
     std::unordered_map<uint32_t, std::vector<uint32_t>> customComponentReferences;
+    std::unordered_map<uint32_t, PartPosition> partPositions;
 };
 }

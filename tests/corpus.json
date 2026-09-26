@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed. Ownership corrections separate 8.95 identity class references from owner contexts and modern part auxiliary references from owners. Sixty model/library ownership checks cover raw references, component lists and all variable scopes; three pinned AUTRA dialogs independently check 15 parameter owner/name matches. Modern xslib distance/formula graphs are enabled with exact signatures. Kind-60 variable owners remain distinct, not fabricated components. Type-4 custom-component associations now preserve point and non-point targets in customComponentReferences; these records no longer fabricate ControlLine objects. Legacy geometry baselines remain unchanged.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed. Ownership corrections separate 8.95 identity class references from owner contexts and modern part auxiliary references from owners. Sixty model/library ownership checks cover raw references, component lists and all variable scopes; three pinned AUTRA dialogs independently check 15 parameter owner/name matches. Modern xslib distance/formula graphs are enabled with exact signatures. Kind-60 variable owners remain distinct, not fabricated components. Type-4 custom-component associations now preserve point and non-point targets in customComponentReferences; these records no longer fabricate ControlLine objects. Legacy geometry baselines remain unchanged. Modern partPositions expose verified axial offsets and depth/plane settings, keeping six uninterpreted words. Position records are not applied again to stored geometry. Two pinned AUTRA C# files corroborate 30 beam and 36 centered column/footing settings; two additional stored-geometry checks are consistency evidence, not independent geometry truth.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -3542,6 +3542,18 @@
       "url": "https://raw.githubusercontent.com/MohamedHasan94/AUTRA/8b96f8b30a0b132ea22fe4d19c96842c9b317063/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/CustomComponentDialogFiles/GenericFormworkPlatform.inp",
       "size": 1005,
       "sha256": "2e5e69615410d09ff6dd62bec7c68f26816fff299e40b1c93203f22a57072067"
+    },
+    {
+      "path": "auxiliary-evidence/Model.cs",
+      "url": "https://raw.githubusercontent.com/MohamedHasan94/AUTRA/8b96f8b30a0b132ea22fe4d19c96842c9b317063/TeklaAPI/ExtensionsLibrary/Model.cs",
+      "size": 23570,
+      "sha256": "adf5a46c132ad4f3575d273e0d2b6a3078ddabf2a363883966ac5648ff9e6255"
+    },
+    {
+      "path": "auxiliary-evidence/AUTRATekla.cs",
+      "url": "https://raw.githubusercontent.com/MohamedHasan94/AUTRA/8b96f8b30a0b132ea22fe4d19c96842c9b317063/TeklaAPI/AUTRATekla.cs",
+      "size": 1398,
+      "sha256": "cbc51bc1d1253224b8132563298f5e45eeb53a4faac3f0510bb8189b56c974e9"
     }
   ],
   "cases": [
@@ -11349,6 +11361,405 @@
       "path": "modern-component-evidence",
       "exit": 0,
       "stdout": "dialogs=3 parameter_owner_matches=15 fingerprint=2f5224a63973df4f"
+    },
+    {
+      "name": "position_model:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db1",
+      "mode": "position_model",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=17 linked_parts=178 fingerprint=57b6490955ba1ca9"
+    },
+    {
+      "name": "position_library:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "mode": "position_library",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=48 linked_parts=1492 fingerprint=35d40cf52bd5364b"
+    },
+    {
+      "name": "position_model:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db1",
+      "mode": "position_model",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_library:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "mode": "position_library",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=48 linked_parts=1492 fingerprint=f87a43f8e6947453"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=10 linked_parts=396 fingerprint=5f4a255209646431"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=8 linked_parts=376 fingerprint=b8509d656a3e05c1"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=13 linked_parts=319 fingerprint=7afa45cfc7dcd49"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=13 linked_parts=316 fingerprint=52927ef815d2289b"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=6 linked_parts=98 fingerprint=e533c477bca84538"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=12 linked_parts=418 fingerprint=7a7058ceac76cfa"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=11 linked_parts=323 fingerprint=4c340f3158658146"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=22 linked_parts=404 fingerprint=97f2426b2892b729"
+    },
+    {
+      "name": "position_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
+      "mode": "position_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=10 linked_parts=585 fingerprint=1c78a1ec71095c57"
+    },
+    {
+      "name": "position_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/xslib.db1",
+      "mode": "position_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_model:steel-detailing/New model 3.db1",
+      "mode": "position_model",
+      "path": "steel-detailing/New model 3.db1",
+      "exit": 0,
+      "stdout": "version=9.52 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_library:steel-detailing/xslib.db1",
+      "mode": "position_library",
+      "path": "steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 positions=22 linked_parts=558 fingerprint=dabcc15baef7c351"
+    },
+    {
+      "name": "position_model:steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
+      "mode": "position_model",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
+      "exit": 0,
+      "stdout": "version=9.60 positions=30 linked_parts=226 fingerprint=c7f31ca943533f5d"
+    },
+    {
+      "name": "position_library:steel-fundamentals/Steel Fundamentals Modeling Assignment/xslib.db1",
+      "mode": "position_library",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.60 positions=0 linked_parts=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "position_source_evidence:AUTRA",
+      "mode": "position_source_evidence",
+      "path": "auxiliary-evidence",
+      "exit": 0,
+      "stdout": "source_beams=30 source_centered=36 stored_geometry_checks=2"
     }
   ]
 }

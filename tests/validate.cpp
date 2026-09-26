@@ -23,6 +23,7 @@ struct Fingerprint
     }
 };
 #include "OwnershipValidation.hpp"
+#include "PositionValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
 {
@@ -81,7 +82,16 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode=="ownership_model" || mode=="ownership_library")
+        if (mode=="position_source_evidence") validatePositionSourceEvidence(path);
+        else if (mode=="position_model" || mode=="position_library")
+        {
+            const bool library=mode=="position_library";
+            tekla::db1::Model model; tekla::db1::RawDatabase raw;
+            const bool ok=library?tekla::db1::parseComponentLibrary(path,model,error):tekla::db1::parseModelFile(path,model,error);
+            if (!ok || !tekla::db1::parseRawDatabase(path,raw,error)) throw std::runtime_error(error);
+            validatePositions(model,raw,library);
+        }
+        else if (mode=="ownership_model" || mode=="ownership_library")
         {
             const bool library=mode=="ownership_library";
             tekla::db1::Model model; tekla::db1::RawDatabase raw;

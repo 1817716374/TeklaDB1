@@ -131,7 +131,8 @@ if(TEKLADB1_BUILD_TESTS)
             ownership_895 ownership_modern ownership_895_class_fields ownership_895_class_width ownership_895_class_missing
             ownership_895_class_duplicate ownership_895_owner_missing ownership_aux_fields ownership_aux_missing ownership_aux_duplicate
             ownership_distance_fields ownership_formula_fields ownership_formula_cycle ownership_formula_missing_chunk ownership_other_scope
-            ownership_custom_reference_missing)
+            ownership_custom_reference_missing ownership_position_start_nan ownership_position_end_inf
+            ownership_position_depth_nan ownership_position_plane_inf ownership_position_unknown)
         add_test(NAME db1.${case} COMMAND tekladb1_regression "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     if(TEKLADB1_WITH_OCCT)

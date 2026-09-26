@@ -211,7 +211,12 @@ std::vector<Table> componentLibrary(bool older895)
         else { put<std::uint32_t>(identity,5,spec[1]); put<std::uint32_t>(identity,29,spec[2]); }
         tables[identityTable].rows.push_back(identity);
     }
-    auto aux=row(tables[215],1000); tables[215].rows={aux}; put<std::uint32_t>(tables[242].rows[0],9,1000);
+    auto aux=row(tables[215],1000);
+    put<float>(aux,5,-25.0f); put<float>(aux,17,25.0f);
+    put<std::uint32_t>(aux,29,2); put<float>(aux,33,-4.0f);
+    put<std::uint32_t>(aux,45,1); put<float>(aux,49,3.3f);
+    put<std::uint32_t>(aux,9,0x7fc01234U); // opaque bytes are not guessed to be floats
+    tables[215].rows={aux}; put<std::uint32_t>(tables[242].rows[0],9,1000);
     tables[162].rows.assign(legacy[162].rows.begin()+1,legacy[162].rows.end());
     for (const auto& spec : std::vector<std::pair<std::uint32_t,std::uint32_t>>{{91,1},{92,2},{93,5}})
     {
@@ -257,6 +262,11 @@ int main(int argc, char** argv)
             if (name=="ownership_aux_fields") s[215].fields[2]=1;
             if (name=="ownership_aux_missing") put<std::uint32_t>(s[242].rows[0],9,999);
             if (name=="ownership_aux_duplicate") s[215].rows.push_back(s[215].rows[0]);
+            if (name=="ownership_position_start_nan") put<float>(s[215].rows[0],5,std::numeric_limits<float>::quiet_NaN());
+            if (name=="ownership_position_end_inf") put<float>(s[215].rows[0],17,std::numeric_limits<float>::infinity());
+            if (name=="ownership_position_depth_nan") put<float>(s[215].rows[0],33,std::numeric_limits<float>::quiet_NaN());
+            if (name=="ownership_position_plane_inf") put<float>(s[215].rows[0],49,std::numeric_limits<float>::infinity());
+            if (name=="ownership_position_unknown") put<std::uint32_t>(s[215].rows[0],29,99);
             if (name=="ownership_distance_fields") s[147].fields[12]=0;
             if (name=="ownership_formula_fields") s[156].fields[4]=0;
             if (name=="ownership_formula_cycle") put<std::uint32_t>(s[53].rows.back(),5,18);
@@ -264,10 +274,15 @@ int main(int argc, char** argv)
             if (name=="ownership_custom_reference_missing") put<std::uint32_t>(s[162].rows.back(),13,999);
             save(path,encode(s,older?"8.95":"9.52"));
             const bool ok=tekla::db1::parseComponentLibrary(path,model,error);
-            if (name=="ownership_895" || name=="ownership_modern" || name=="ownership_other_scope")
+            if (name=="ownership_895" || name=="ownership_modern" || name=="ownership_other_scope" || name=="ownership_position_unknown")
             {
                 check(ok,error.c_str());
                 check(model.identities.at(5).ownerId==50 && model.parts.at(5).ownerId==50 && model.parts.at(5).auxiliaryReferenceId==1000,"owner/auxiliary conflated");
+                const auto& position=model.partPositions.at(1000);
+                check(position.startAxialOffset==-25.0f && position.endAxialOffset==25.0f && position.depthOffset==-4.0f && position.planeOffset==3.3f,"part position values lost");
+                check(position.planeCode==1 && position.depthCode==(name=="ownership_position_unknown"?99U:2U) && position.rawFields[0]==0x7fc01234U,"position codes/opaque fields changed");
+                check(model.parts.at(5).length==10.0 && model.parts.at(5).origin==tekla::db1::Vec3{},"stored geometry adjusted twice");
+                if (name=="ownership_position_unknown") check(std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& x){return x.find("unverified part position code")!=std::string::npos;}),"unknown position code not diagnosed");
                 check(model.customComponentDefinitions.size()==1,"custom definition missing");
                 const auto& c=model.customComponentDefinitions[0];
                 check(c.parameterIds.empty() && c.childObjectIds==std::vector<std::uint32_t>{1,2,5,70,80},"definition ownership lost");
@@ -287,7 +302,7 @@ int main(int argc, char** argv)
                 }
                 else check(model.identities.at(5).contextId==0 && model.identityClasses.empty(),"modern identity read with legacy offsets");
             }
-            else check(!ok && !error.empty() && model.parts.empty() && model.identityClasses.empty() && model.formulaBindings.empty() && model.variablesByOwner.empty(),"malformed ownership accepted or partial output retained");
+            else check(!ok && !error.empty() && model.parts.empty() && model.identityClasses.empty() && model.formulaBindings.empty() && model.variablesByOwner.empty() && model.partPositions.empty(),"malformed ownership accepted or partial output retained");
         }
         else if (name.rfind("782_",0)==0)
         {
