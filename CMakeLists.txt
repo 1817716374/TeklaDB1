@@ -140,6 +140,13 @@ if(TEKLADB1_BUILD_TESTS)
             object_number_collision object_number_duplicate_link object_number_fields object_number_link_fields object_number_width object_number_link_width
             object_number_project object_number_project_guid object_number_project_no_guid object_number_project_absent
             object_number_project_series object_number_project_ambiguous object_number_project_library_scope
+            reinforcement_main reinforcement_library reinforcement_895 reinforcement_null
+            reinforcement_duplicate reinforcement_duplicate_definition reinforcement_definition reinforcement_identity reinforcement_kind reinforcement_missing_instance
+            reinforcement_father reinforcement_father_target reinforcement_father_duplicate reinforcement_placement reinforcement_nonfinite_placement
+            reinforcement_array_missing reinforcement_array_cycle reinforcement_array_tail reinforcement_array_count reinforcement_integer_count
+            reinforcement_array_duplicate reinforcement_nonfinite reinforcement_coordinate_count reinforcement_string
+            reinforcement_fields reinforcement_width reinforcement_array_fields
+            reinforcement_shared reinforcement_budget reinforcement_budget_override reinforcement_duplicate_placement
             legacy_number_main legacy_number_library legacy_number_fields legacy_number_width legacy_number_link_fields
             legacy_number_link_width legacy_number_duplicate legacy_number_collision legacy_number_duplicate_link
             legacy_number_missing_identity legacy_number_missing_target legacy_number_zero legacy_number_special

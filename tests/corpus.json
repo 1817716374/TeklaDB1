@@ -12257,6 +12257,412 @@
       "path": "legacy-dg782",
       "exit": 0,
       "stdout": "drawing_objects=4 parts=2 assemblies=2 explicit_series_links=5192"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=1cca64585af22ccc"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=86fb8f87cea5d8d4"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=e6ee1bac0897d774"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=98a0a5f5ee9f4017"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=cb81053edd81cfc3"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=85ac28898f91909a"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=536986b6da2ed869"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=5de49d4e509a760c"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=dc48981c586a7e54"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=c0dfd8063c013120"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=afba62247746506c"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=2f1dd1aca7a132fd"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=2a301059f67331b4"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=7ca54cb1cc7387e3"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=b048a26a0aaf4334"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=3fd69523e515adc1"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=6 instances=16 coordinates=56 radii=16 spacing_values=16 formulas=110 distances=144 fingerprint=2da8b5daa2a2ce14"
+    },
+    {
+      "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
+      "mode": "reinforcement_model",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_model:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db1",
+      "mode": "reinforcement_model",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=7 instances=67 coordinates=211 radii=67 spacing_values=119 formulas=0 distances=0 fingerprint=612f43c213d283d9"
+    },
+    {
+      "name": "reinforcement_library:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=72 instances=469 coordinates=1420 radii=469 spacing_values=15 formulas=107 distances=900 fingerprint=ad863b5945e19246"
+    },
+    {
+      "name": "reinforcement_model:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db1",
+      "mode": "reinforcement_model",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.95 definitions=72 instances=469 coordinates=1420 radii=469 spacing_values=15 formulas=107 distances=900 fingerprint=ab47d9e3f0ef36f8"
+    },
+    {
+      "name": "reinforcement_model:steel-detailing/New model 3.db1",
+      "mode": "reinforcement_model",
+      "path": "steel-detailing/New model 3.db1",
+      "exit": 0,
+      "stdout": "version=9.52 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:steel-detailing/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 definitions=48 instances=170 coordinates=776 radii=170 spacing_values=16 formulas=110 distances=768 fingerprint=2def3670334085f8"
+    },
+    {
+      "name": "reinforcement_model:steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
+      "mode": "reinforcement_model",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
+      "exit": 0,
+      "stdout": "version=9.60 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_library:steel-fundamentals/Steel Fundamentals Modeling Assignment/xslib.db1",
+      "mode": "reinforcement_library",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.60 definitions=0 instances=0 coordinates=0 radii=0 spacing_values=0 formulas=0 distances=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "reinforcement_evidence:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "mode": "reinforcement_evidence",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
+      "exit": 0,
+      "stdout": "named_fields=64 bending_radii=16 bar_count_parameters=13 target_spacing_parameters=3"
+    },
+    {
+      "name": "reinforcement_evidence:steel-detailing/xslib.db1",
+      "mode": "reinforcement_evidence",
+      "path": "steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "named_fields=64 bending_radii=16 bar_count_parameters=13 target_spacing_parameters=3"
     }
   ]
 }

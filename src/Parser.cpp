@@ -933,7 +933,7 @@ void parseLegacyDatabase(const std::vector<uint8_t>& data, Model& model)
     model.diagnostics.emplace_back("legacy Xsteel 7.x database decoded with table metadata; external profile catalogs are optional for explicit profiles");
 }
 
-void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componentLibrary)
+void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componentLibrary, const ModelReadOptions& options)
 {
     if (data.size() < 64 || std::memcmp(data.data(), "Xsteel", 6) != 0)
         throw std::runtime_error("the main DB1 is not an Xsteel database");
@@ -984,6 +984,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const bool library = componentLibrary;
     const bool componentVariables = library && !older844;
     const bool verifiedPartOwnership = !older782 && !older844;
+    const bool verifiedReinforcement = !older782 && !older844;
+    const std::size_t reinforcementDefinitionOrdinal = library ? 153 : 183;
+    const std::size_t reinforcementOrdinal = library ? 154 : 184;
+    const std::size_t doubleArrayOrdinal = library ? 175 : 205;
+    const std::size_t integerArrayOrdinal = library ? 176 : 206;
     const std::size_t identityClassOrdinal = library ? 279 : 315;
     const std::size_t partAuxiliaryOrdinal = library ? 215 : 245;
     const std::size_t surfaceOrdinal = library ? 117 : 145;
@@ -1037,6 +1042,13 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         required.emplace_back(surfaceDefinitionOrdinal, 292U);
     }
     if (verifiedPartOwnership) required.emplace_back(partAuxiliaryOrdinal, 52U);
+    if (verifiedReinforcement)
+    {
+        required.emplace_back(reinforcementDefinitionOrdinal, 32U);
+        required.emplace_back(reinforcementOrdinal, 56U);
+        required.emplace_back(doubleArrayOrdinal, 120U);
+        required.emplace_back(integerArrayOrdinal, 60U);
+    }
     if (componentVariables)
     {
         required.emplace_back(68, 76U);
@@ -1051,6 +1063,13 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         requireTable(all, spec.first, spec.second);
     if (older895) requireFields(data, all, identityClassOrdinal, 8, {0,1,6,7});
     if (verifiedPartOwnership) requireFields(data, all, partAuxiliaryOrdinal, 14, {0,1});
+    if (verifiedReinforcement)
+    {
+        requireFields(data, all, reinforcementDefinitionOrdinal, 9, {0,1,2,4,5,6,7});
+        requireFields(data, all, reinforcementOrdinal, 12, {0,1,2,3,4,5,6,7,8});
+        requireFields(data, all, doubleArrayOrdinal, 18, {0,1,2});
+        requireFields(data, all, integerArrayOrdinal, 16, {0,1,2});
+    }
     if (componentVariables && !older782)
     {
         requireFields(data, all, 147, 14, {0,1,2,3,12,13});
@@ -1556,6 +1575,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
 
     struct Placement { uint32_t frameId = 0; Vec3 origin{}; double length = 0.0; };
     std::unordered_map<uint32_t, Placement> placements;
+    std::unordered_set<uint32_t> duplicatePlacementIds;
     for (std::size_t index = 0; index < all[placementOrdinal].rowCount; ++index)
     {
         const auto* value = row(data, all, placementOrdinal, index);
@@ -1565,6 +1585,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         for (int axis = 0; axis < 3; ++axis)
             placement.origin[axis] = read<double>(value, 9 + axis * 8);
         placement.length = read<double>(value, 33);
+        if (placements.count(id)) duplicatePlacementIds.insert(id);
         placements[id] = placement;
     }
 
@@ -1804,6 +1825,135 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             std::sort(ids.begin(), ids.end()); ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
         }
         for (auto& entry : model.surfaceTreatmentIdsByFather) std::sort(entry.second.begin(), entry.second.end());
+    }
+
+    if (verifiedReinforcement)
+    {
+        // Validate chunk graphs once, including unused chunks. The words at
+        // offsets 12/16 and padding are opaque, not floating point values.
+        using ArrayRows = std::unordered_map<uint32_t, const uint8_t*>;
+        const auto arrayRows = [&](std::size_t ordinal, bool floating) {
+            ArrayRows result;
+            for (std::size_t index=0; index<all[ordinal].rowCount; ++index)
+            {
+                const auto* value=row(data,all,ordinal,index);
+                const auto id=read<uint32_t>(value,1), count=read<uint32_t>(value,9);
+                if (!id || count>(floating?12U:10U)) throw std::runtime_error("invalid reinforcement array chunk");
+                if (!result.emplace(id,value).second) throw std::runtime_error("duplicate reinforcement array chunk");
+                if (floating) for (uint32_t n=0;n<count;++n)
+                    if (!std::isfinite(read<double>(value,25+n*8))) throw std::runtime_error("non-finite reinforcement array value");
+            }
+            std::unordered_set<uint32_t> complete;
+            for (const auto& entry:result)
+            {
+                uint32_t id=entry.first;
+                std::unordered_set<uint32_t> visiting;
+                while (id && !complete.count(id))
+                {
+                    const auto found=result.find(id);
+                    if (found==result.end()) throw std::runtime_error("missing reinforcement array continuation");
+                    if (!visiting.insert(id).second) throw std::runtime_error("cyclic reinforcement array");
+                    id=read<uint32_t>(found->second,5);
+                }
+                complete.insert(visiting.begin(),visiting.end());
+            }
+            return result;
+        };
+        const auto doubleRows=arrayRows(doubleArrayOrdinal,true), integerRows=arrayRows(integerArrayOrdinal,false);
+        // Bound expanded output and traversal even for maliciously shared tails.
+        std::size_t remainingValues=options.maxReinforcementArrayValues, remainingChunks=options.maxReinforcementArrayValues;
+        const auto resolveArray = [&](uint32_t id, const ArrayRows& source, auto type) {
+            using T=decltype(type);
+            std::vector<T> values;
+            while (id)
+            {
+                if (!remainingChunks) throw std::runtime_error("reinforcement array expansion budget exceeded");
+                --remainingChunks;
+                const auto found=source.find(id);
+                if (found==source.end()) throw std::runtime_error("missing reinforcement array reference");
+                const auto* value=found->second; const auto count=read<uint32_t>(value,9);
+                if (count>remainingValues) throw std::runtime_error("reinforcement array expansion budget exceeded");
+                remainingValues-=count;
+                for (uint32_t n=0;n<count;++n) values.push_back(read<T>(value,(sizeof(T)==8?25:21)+n*sizeof(T)));
+                id=read<uint32_t>(value,5);
+            }
+            return values;
+        };
+        const auto reinforcementString = [&](uint32_t id) {
+            if (id && !stringChunks.count(id)) throw std::runtime_error("missing reinforcement string");
+            return resolveString(id,true);
+        };
+        const auto reinforcementKind = [&](const Identity& identity) {
+            return older895 ? model.identityClasses.at(identity.classReferenceId).recordKind : identity.type;
+        };
+        for (std::size_t index=0;index<all[reinforcementDefinitionOrdinal].rowCount;++index)
+        {
+            const auto* value=row(data,all,reinforcementDefinitionOrdinal,index);
+            ReinforcementDefinition def;
+            def.id=read<uint32_t>(value,1); def.classNumber=read<uint32_t>(value,9);
+            def.name=reinforcementString(read<uint32_t>(value,13));
+            def.grade=reinforcementString(read<uint32_t>(value,17));
+            def.size=reinforcementString(read<uint32_t>(value,21));
+            def.modeArrayId=read<uint32_t>(value,5); def.hookArrayId=read<uint32_t>(value,25);
+            def.modeValues=resolveArray(def.modeArrayId,integerRows,int32_t{});
+            def.hookValues=resolveArray(def.hookArrayId,doubleRows,double{});
+            def.rawPayload=std::vector<uint8_t>(value+1,value+33);
+            insertUnique(model.reinforcementDefinitions,def.id,std::move(def),"reinforcement definition");
+        }
+        std::unordered_map<uint32_t,uint32_t> fathers;
+        for (const auto& association:associations)
+            if (association.table==associationOneOrdinal && association.type==47)
+            {
+                if (!model.parts.count(association.source) || !fathers.emplace(association.target,association.source).second)
+                    throw std::runtime_error("missing or ambiguous reinforcement father");
+            }
+        for (std::size_t index=0;index<all[reinforcementOrdinal].rowCount;++index)
+        {
+            const auto* value=row(data,all,reinforcementOrdinal,index);
+            Reinforcement rebar;
+            rebar.id=read<uint32_t>(value,1); rebar.definitionId=read<uint32_t>(value,5);
+            const auto identity=model.identities.find(rebar.id);
+            const auto placement=placements.find(rebar.id);
+            const auto father=fathers.find(rebar.id);
+            if (identity==model.identities.end() || reinforcementKind(identity->second)!=47 || !model.reinforcementDefinitions.count(rebar.definitionId) ||
+                father==fathers.end() || placement==placements.end() || duplicatePlacementIds.count(rebar.id) || !model.frames.count(placement->second.frameId))
+                throw std::runtime_error("broken reinforcement identity/definition/father/placement " + std::to_string(rebar.id));
+            rebar.fatherPartId=father->second;
+            rebar.ownerId=identity->second.ownerId; rebar.contextId=identity->second.contextId; rebar.guid=identity->second.guid;
+            rebar.orientationId=placement->second.frameId; rebar.origin=placement->second.origin; rebar.storedLength=placement->second.length;
+            if (!std::isfinite(rebar.storedLength) || !std::all_of(rebar.origin.begin(),rebar.origin.end(),[](double n){return std::isfinite(n);}))
+                throw std::runtime_error("non-finite reinforcement placement");
+            for (std::size_t i=0;i<4;++i) rebar.arrayIds[i]=read<uint32_t>(value,17+i*4);
+            const auto shape=resolveArray(rebar.arrayIds[0],doubleRows,double{});
+            if (shape.size()%3) throw std::runtime_error("incomplete reinforcement coordinate triple");
+            for (std::size_t i=0;i<shape.size();i+=3) rebar.storedShapeCoordinates.push_back({shape[i],shape[i+1],shape[i+2]});
+            rebar.radiusValues=resolveArray(rebar.arrayIds[1],doubleRows,double{});
+            rebar.spacingValues=resolveArray(rebar.arrayIds[2],doubleRows,double{});
+            rebar.storedDistributionValues=resolveArray(rebar.arrayIds[3],doubleRows,double{});
+            rebar.rawPayload=std::vector<uint8_t>(value+1,value+57);
+            const auto properties=model.properties.find(rebar.id);
+            if (properties!=model.properties.end()) rebar.properties=properties->second;
+            const auto formulas=model.formulaBindingIdsByTarget.find(rebar.id);
+            if (formulas!=model.formulaBindingIdsByTarget.end()) rebar.formulaBindingIds=formulas->second;
+            model.reinforcementIdsByFather[rebar.fatherPartId].push_back(rebar.id);
+            insertUnique(model.reinforcements,rebar.id,std::move(rebar),"reinforcement");
+        }
+        for (const auto& entry:fathers) if (!model.reinforcements.count(entry.first)) throw std::runtime_error("missing reinforcement father source");
+        for (const auto& identity:model.identities)
+            if (reinforcementKind(identity.second)==47 && !model.reinforcements.count(identity.first)) throw std::runtime_error("missing reinforcement instance");
+        for (const auto& entry:model.distanceParameters)
+            for (const auto target:entry.second.boundObjectIds)
+            {
+                const auto found=model.reinforcements.find(target);
+                if (found!=model.reinforcements.end()) found->second.distanceParameterIds.push_back(entry.first);
+            }
+        for (auto& entry:model.reinforcements)
+        {
+            auto& ids=entry.second.distanceParameterIds;
+            std::sort(ids.begin(),ids.end()); ids.erase(std::unique(ids.begin(),ids.end()),ids.end());
+        }
+        for (auto& entry:model.reinforcementIdsByFather) std::sort(entry.second.begin(),entry.second.end());
+        if (!model.reinforcements.empty()) model.diagnostics.emplace_back("reinforcement stored shapes and parameters recovered; mode enums, polygon partition, hooks, cover offsets and final centerline remain unverified");
     }
 
     for (const auto& id : model.operativePartIds)
@@ -2174,7 +2324,7 @@ bool parseModelFile(const std::filesystem::path& path, Model& model, std::string
             for (const auto& diagnostic : catalog.diagnostics)
                 model.diagnostics.push_back("pgdb.bin: " + diagnostic);
         }
-        parseDatabase(detail::readPayload(model.databasePath, options.maxDecodedBytes), model, false);
+        parseDatabase(detail::readPayload(model.databasePath, options.maxDecodedBytes), model, false, options);
         validateModel(model);
         return true;
     }
@@ -2232,7 +2382,7 @@ bool parseComponentLibrary(const std::filesystem::path& path, Model& model, std:
         const auto profilePath = model.directory / "profdb.bin";
         if (std::filesystem::is_regular_file(profilePath))
             parseProfileDatabase(profilePath, model);
-        parseDatabase(detail::readPayload(path, options.maxDecodedBytes), model, true);
+        parseDatabase(detail::readPayload(path, options.maxDecodedBytes), model, true, options);
         validateModel(model);
         return true;
     }

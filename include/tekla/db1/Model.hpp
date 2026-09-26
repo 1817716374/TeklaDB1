@@ -128,6 +128,38 @@ struct ObjectNumberingReference
     uint32_t numberingRecordId = 0; // zero is retained, not treated as a missing record
 };
 
+struct ReinforcementDefinition
+{
+    uint32_t id = 0;
+    uint32_t classNumber = 0;
+    std::string name, grade, size;
+    uint32_t modeArrayId = 0, hookArrayId = 0;
+    // Stored mode codes and hook parameters; enum/order semantics remain unverified.
+    std::vector<int32_t> modeValues;
+    std::vector<double> hookValues;
+    std::vector<uint8_t> rawPayload;
+};
+
+struct Reinforcement
+{
+    uint32_t id = 0, definitionId = 0, fatherPartId = 0;
+    uint32_t ownerId = 0, contextId = 0, orientationId = 0;
+    std::string guid;
+    Vec3 origin{};
+    double storedLength = 0;
+    // References at payload offsets 16,20,24,28, in the same database namespace.
+    std::array<uint32_t, 4> arrayIds{};
+    // Stored coordinates: polygon partition, offsets and final centerline are not resolved.
+    std::vector<Vec3> storedShapeCoordinates;
+    std::vector<double> radiusValues;
+    // Depending on unverified mode codes, these may be spacings OR a bar count.
+    std::vector<double> spacingValues;
+    std::vector<double> storedDistributionValues;
+    std::vector<uint8_t> rawPayload;
+    std::vector<Property> properties;
+    std::vector<uint32_t> formulaBindingIds, distanceParameterIds;
+};
+
 struct PartPosition
 {
     // Record ID in partPositions; definition ID in partDefinitionPositions.
@@ -476,5 +508,8 @@ struct Model
     std::unordered_map<uint32_t, PartPosition> partDefinitionPositions;
     std::unordered_map<uint32_t, ObjectNumberingRecord> objectNumberingRecords;
     std::unordered_map<uint32_t, ObjectNumberingReference> objectNumberingReferences;
+    std::unordered_map<uint32_t, ReinforcementDefinition> reinforcementDefinitions;
+    std::unordered_map<uint32_t, Reinforcement> reinforcements;
+    std::unordered_map<uint32_t, std::vector<uint32_t>> reinforcementIdsByFather;
 };
 }

@@ -60,6 +60,8 @@ std::vector<Table> schema()
     define(245,52,14,{0,1});
     define(211,12,4,{0,1,2,3}); define(322,68,9,{0,1,2});
     define(323,76,11,{0,1,2}); define(324,44,7,{0,1,2});
+    define(183,32,9,{0,1,2,4,5,6,7}); define(184,56,12,{0,1,2,3,4,5,6,7,8});
+    define(205,120,18,{0,1,2}); define(206,60,16,{0,1,2});
     return tables;
 }
 Bytes row(const Table& t, std::uint32_t id)
@@ -179,7 +181,7 @@ std::vector<Table> componentLibrary(bool older895)
         {61,40},{64,43},{65,44},{75,53},{122,95},{154,126},{160,132},{161,133},{190,160},{191,161},{192,162},
         {355,older895?260:318},{341,older895?264:305},{328,older895?94:292},{340,older895?90:304},
         {274,242},{270,238},{228,198},{300,265},{351,older895?223:314},{310,274},{294,261},{245,215},
-        {211,181},{322,286},{323,287},{324,288}})
+        {211,181},{322,286},{323,287},{324,288},{183,153},{184,154},{205,175},{206,176}})
         tables[pair.second]=main[pair.first];
     if (!older895) tables[296]=main[332];
     const auto define=[&](std::size_t n,std::uint32_t width,std::size_t count,std::initializer_list<std::size_t> refs) {
@@ -244,6 +246,7 @@ std::vector<Table> componentLibrary(bool older895)
 }
 
 #include "ObjectNumberingRegression.hpp"
+#include "ReinforcementRegression.hpp"
 #include "LegacyNumberingRegression.hpp"
 
 int main(int argc, char** argv)
@@ -258,6 +261,7 @@ int main(int argc, char** argv)
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
         if (name.rfind("legacy_number_",0)==0) legacyNumberingRegression(path,name);
         else if (name.rfind("object_number_",0)==0) objectNumberingRegression(path,name);
+        else if (name.rfind("reinforcement_",0)==0) reinforcementRegression(path,name);
         else if (name.rfind("inline_position_",0)==0)
         {
             const bool library=name!="inline_position_main";
