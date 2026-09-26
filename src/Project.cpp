@@ -35,7 +35,7 @@ FileRole roleFor(const std::filesystem::path& path)
     if (ext == ".db2") return FileRole::Numbering;
     if (ext == ".dg") return FileRole::Drawing;
     if (name == "environment.db") return FileRole::Environment;
-    if (name == "options_model.db" || name == "options_drawings.db") return FileRole::Options;
+    if (name == "options_model.db" || name == "options_drawings.db" || name == "options.ini") return FileRole::Options;
     if (name == "history.db") return FileRole::History;
     if (name == "profdb.bin" || name == "pgdb.bin" || name == "matdb.bin" || name == "screwdb.db" ||
         name == "assdb.db" || name == "profitab.inp") return FileRole::Catalog;
@@ -107,7 +107,8 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             // Copy the work list: mark() may append files and invalidate references.
             const auto files = result.files;
             for (const auto& file : files)
-                if (file.role == FileRole::Numbering || file.role == FileRole::Environment || file.role == FileRole::Options)
+                if (file.role == FileRole::Numbering || file.role == FileRole::Environment ||
+                    (file.role == FileRole::Options && lower(db1::detail::pathUtf8(file.path.filename()))!="options.ini"))
                 {
                     db1::RawDatabase raw; std::string diagnostic;
                     if (!db1::parseRawDatabase(file.path, raw, diagnostic, options.rawOptions)) { failure(file.path, diagnostic); continue; }
@@ -128,6 +129,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
         }
 
         const auto companions=result.files;
+        if(options.readOptions)(void)findFile(root,"options.ini"); // reject ambiguous case variants
         std::map<std::string,std::vector<std::uint32_t>> modelIdsByGuid;
         for (const auto& entry:result.model.identities)
             if (!entry.second.guid.empty()) modelIdsByGuid[lower(entry.second.guid)].push_back(entry.first);
@@ -145,6 +147,17 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             }
             if (file.role==FileRole::Options && options.readOptions)
             {
+                if(lower(db1::detail::pathUtf8(file.path.filename()))=="options.ini")
+                {
+                    if(result.optionSettings)throw std::runtime_error("ambiguous project option settings file");
+                    OptionSettingsFile settings;std::string diagnostic;
+                    if(!parseOptionSettingsFile(file.path,settings,diagnostic,(std::min)(std::size_t{4*1024*1024},options.rawOptions.maxDecodedBytes)))
+                    {failure(file.path,diagnostic);continue;}
+                    for(const auto& item:settings.diagnostics)result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
+                    mark(file.path,ReadLevel::PartialSemantic,"ordered option assignments decoded; effective precedence and unknown lines remain unresolved");
+                    result.associations.push_back({result.model.databasePath,file.path,"model-local textual option settings; no runtime evaluation"});
+                    result.optionSettings=std::move(settings);continue;
+                }
                 OptionsDatabase database; std::string diagnostic;
                 if (!parseOptionsDatabase(file.path,database,diagnostic,options.rawOptions)) { failure(file.path,diagnostic); continue; }
                 for (const auto& item:database.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
@@ -206,6 +219,11 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 result.drawings.emplace(file.path,std::move(drawing));
             }
         }
+
+        if(result.optionSettings)
+            for(const auto& database:result.optionsDatabases)
+                for(auto match:matchOptionSettings(*result.optionSettings,database.second))
+                    result.optionSettingAssociations.push_back({database.first,std::move(match)});
 
         if (result.environment)
         {

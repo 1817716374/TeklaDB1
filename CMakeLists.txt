@@ -21,6 +21,7 @@ add_library(tekla_db1
     src/Project.cpp
     src/RelatedFormats.cpp
     src/Environment.cpp
+    src/OptionSettings.cpp
 )
 add_library(TeklaDB1::tekla_db1 ALIAS tekla_db1)
 add_library(TeklaDB1::core ALIAS tekla_db1)
@@ -101,6 +102,11 @@ if(TEKLADB1_BUILD_TESTS)
     target_link_libraries(tekla_related_test PRIVATE TeklaFormats::core)
     add_executable(tekla_environment_test tests/environment.cpp)
     target_link_libraries(tekla_environment_test PRIVATE TeklaFormats::core)
+    add_executable(tekla_option_settings_test tests/option_settings.cpp)
+    target_link_libraries(tekla_option_settings_test PRIVATE TeklaFormats::core)
+    foreach(case settings_text settings_failure settings_matching settings_unknown)
+        add_test(NAME related.${case} COMMAND tekla_option_settings_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     foreach(case environment_valid options_valid dbv_embedded_magic dbv_truncations
             environment_invalid options_invalid dbv_unknown_rows dbv_limit)
         add_test(NAME related.${case} COMMAND tekla_environment_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
@@ -125,6 +131,7 @@ if(TEKLADB1_BUILD_TESTS)
             unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
             gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path
             ambiguity raw_retention project strict_companions catalog_error model_limit
+            settings_project settings_project_no_raw settings_project_off settings_project_invalid settings_project_strict
             dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid
             782_model 782_library 782_library_fields 782_fields 782_width 782_part_join 782_contour_join
             782_string_cycle 782_missing_string 782_bolt_join 782_numeric_nan 782_numeric_overflow 782_assembly_missing

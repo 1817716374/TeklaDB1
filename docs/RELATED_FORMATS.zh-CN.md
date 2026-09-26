@@ -136,4 +136,6 @@ DBV 表沿用 `66 c0 ce db` 节头，记录为 `tag + payload + 8 字节 allocat
 
 早期 EXCEL-1246A 样本的 XS_DRAWING_CHANGE_HIGHLIGHT_COLOR 同时有整数和字符串记录；API 以记录 ID 保存两者并诊断，不按键名静默覆盖。相同存储类型下的重复键、重复 ID 则拒绝。flags 与两个槽的当前/默认含义、环境优先级尚未通过受控差分证实。
 
+新增模型目录`options.ini`文本入口与逐值关联：保留有序赋值、原始字节、空值、重复键和未知行，按DBV存储类型分别比较两个槽；不选择有效值或执行初始化命令。固定29份配套文本的56条赋值，5种键/值证据，其中大量文件复用同一模板。该证据支持所列字面值的对应关系，不能概括flags和运行时优先级；接口与完整限制见[文本选项证据](OPTION_SETTINGS.zh-CN.md)。
+
 工程入口公开 environment、optionsDatabases，并通过精确名称与存储类型生成 attributeDefinitionAssociations；培训模型有 118 条匹配。关联不表示已判断对象类别适用性，不填补缺失值，不把环境定义中的值写入模型对象。可通过 readEnvironment/readOptions 单独关闭语义读取；rawCompanions 继续由 readRawCompanions 控制。

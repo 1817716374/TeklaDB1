@@ -75,6 +75,11 @@ struct ObjectNumberingSeriesAssociation
     std::size_t seriesIndex = 0; // index into Project::numbering.at(numberingDatabase).series
     NumberingPairEvidence pairingEvidence = NumberingPairEvidence::DatabaseGuid;
 };
+struct OptionSettingAssociation
+{
+    std::filesystem::path optionsDatabase;
+    OptionValueMatch match; // index into Project::optionSettings->settings
+};
 struct Project
 {
     db1::Model model;
@@ -98,6 +103,8 @@ struct Project
     // Exact unique name matches into materials->materials, scoped by DB1 path.
     std::vector<SurfaceMaterialAssociation> surfaceMaterialAssociations;
     std::vector<ObjectNumberingSeriesAssociation> objectNumberingSeriesAssociations;
+    std::optional<OptionSettingsFile> optionSettings;
+    std::vector<OptionSettingAssociation> optionSettingAssociations;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

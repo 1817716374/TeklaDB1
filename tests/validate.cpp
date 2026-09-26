@@ -36,6 +36,7 @@ struct Fingerprint
 #include "Drawing730Validation.hpp"
 #include "Ifc730Validation.hpp"
 #include "ReinforcementValidation.hpp"
+#include "OptionSettingsValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
 {
@@ -94,7 +95,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode=="ifc730_evidence") ifc730::validate(path);
+        if(mode=="ini_options" || mode=="ini_project")return optionSettingsEvidence(path,mode=="ini_project");
+        else if (mode=="ifc730_evidence") ifc730::validate(path);
         else if (mode=="drawing730_evidence") validateDrawing730Evidence(path);
         else if (mode=="inline730_history") validateInline730History(path);
         else if (mode=="inline730_backups") validateInline730Backups(path);

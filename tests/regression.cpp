@@ -601,6 +601,29 @@ int main(int argc, char** argv)
             auto b=encode(onePart()); save(path,b); tekla::db1::RawDatabaseOptions options; options.retainDecompressedFileImage=true;
             check(tekla::db1::parseRawDatabase(path,raw,error,options),error.c_str()); check(raw.decompressedFileImage==b,"raw bytes changed"); check(error.empty(),"raw stale error");
         }
+        else if(name=="settings_project" || name=="settings_project_no_raw" || name=="settings_project_off" ||
+                name=="settings_project_invalid" || name=="settings_project_strict")
+        {
+            save(path,encode(onePart()));
+            const std::string text="XS_ROUND_SEGMENTS=40\nXS_ROUND_SEGMENTS=16\n";
+            const bool invalid=name=="settings_project_invalid" || name=="settings_project_strict";
+            save(root/"OPTIONS.INI",invalid?Bytes{0,1,2}:Bytes(text.begin(),text.end()));
+            tekla::Project project;tekla::ProjectOptions options;
+            options.readOptions=name!="settings_project_off";options.readRawCompanions=name!="settings_project_no_raw";
+            options.strictCompanions=name=="settings_project_strict";
+            const bool ok=tekla::readProject(root,project,error,options);
+            if(options.strictCompanions){check(!ok && project.files.empty() && !project.optionSettings,"strict text failure not cleared");}
+            else
+            {
+                check(ok,error.c_str());check(project.rawCompanions.empty(),"INI mistaken for DBV");
+                const auto file=std::find_if(project.files.begin(),project.files.end(),[](const auto& f){return f.path.filename()=="OPTIONS.INI";});
+                check(file!=project.files.end() && file->role==tekla::FileRole::Options,"INI inventory missing");
+                if(invalid)check(!project.optionSettings && file->level==tekla::ReadLevel::Failed,"invalid text silently accepted");
+                else if(!options.readOptions)check(!project.optionSettings && file->level==tekla::ReadLevel::Discovered,"readOptions ignored");
+                else check(project.optionSettings && project.optionSettings->settings.size()==2 &&
+                    file->level==tekla::ReadLevel::PartialSemantic && project.associations.size()==1,"INI semantics missing");
+            }
+        }
         else if (name == "project" || name == "strict_companions")
         {
             save(path,encode(onePart())); const std::string h="Xsteel\x80 9.52 00000000-0000-0000-0000-000000000001";

@@ -17,5 +17,11 @@ int main()
     if (tekla::parseEnvironmentDatabase("this-file-must-not-exist.db",environment,error) || error.empty()) return 7;
     tekla::OptionsDatabase options;
     if (tekla::parseOptionsDatabase("this-file-must-not-exist.db",options,error) || error.empty()) return 8;
+    tekla::OptionSettingsFile settings;
+    if(tekla::parseOptionSettingsFile("this-file-must-not-exist.ini",settings,error) || error.empty())return 9;
+    settings.settings.push_back({1,"XS_TEST","TRUE",false});
+    options.options[1]={1,"XS_TEST",tekla::StoredValueKind::Boolean,{true,false},0};
+    const auto matches=tekla::matchOptionSettings(settings,options);
+    if(matches.size()!=1 || !matches[0].valueParsed || !matches[0].matchingSlots[0] || matches[0].matchingSlots[1])return 10;
     return 0;
 }

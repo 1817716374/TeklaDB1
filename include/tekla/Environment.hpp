@@ -66,6 +66,36 @@ struct OptionsDatabase
     std::map<std::uint32_t,StoredOption> options;
     std::vector<std::string> diagnostics;
 };
+struct OptionSetting
+{
+    std::size_t lineNumber = 0; // one-based source line
+    std::string name;
+    std::string value; // exact bytes after '=', including spaces and empty values
+    bool setPrefix = false;
+};
+struct OptionSettingsFile
+{
+    std::filesystem::path sourcePath;
+    std::string rawText;
+    std::vector<OptionSetting> settings; // ordered; duplicate keys are retained
+    std::vector<std::size_t> uninterpretedLines;
+    std::vector<std::string> diagnostics;
+};
+struct OptionValueMatch
+{
+    std::size_t settingIndex = 0;
+    std::uint32_t optionId = 0;
+    bool valueParsed = false; // text is comparable to this DBV storage type
+    std::array<bool,2> matchingSlots{};
+};
+// Model-local text assignments only. No environment expansion or precedence.
+// UTF-8 BOM is accepted; other bytes are preserved without code-page guessing.
+bool parseOptionSettingsFile(const std::filesystem::path& path,OptionSettingsFile& result,
+                             std::string& error,std::size_t maxBytes = 4*1024*1024);
+// Exact case-sensitive names; every duplicate/cross-type record is retained.
+// Matching a stored slot does not establish that it is the effective value.
+std::vector<OptionValueMatch> matchOptionSettings(const OptionSettingsFile& settings,
+                                                 const OptionsDatabase& database);
 // Text bytes are preserved; no locale/code-page guessing is performed.
 // Both APIs expose partial semantics and retain all unnamed fields in raw.
 bool parseEnvironmentDatabase(const std::filesystem::path& path,EnvironmentDatabase& result,
