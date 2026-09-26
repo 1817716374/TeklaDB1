@@ -135,6 +135,11 @@ if(TEKLADB1_BUILD_TESTS)
             ownership_position_depth_nan ownership_position_plane_inf ownership_position_unknown
             inline_position_main inline_position_library inline_position_start_nan inline_position_end_inf
             inline_position_depth_nan inline_position_plane_inf inline_position_unused_nan inline_position_unknown
+            object_number_main object_number_library object_number_895 object_number_zero object_number_special object_number_overflow
+            object_number_unknown object_number_null object_number_missing object_number_identity object_number_duplicate
+            object_number_collision object_number_duplicate_link object_number_fields object_number_link_fields object_number_width object_number_link_width
+            object_number_project object_number_project_guid object_number_project_no_guid object_number_project_absent
+            object_number_project_series object_number_project_ambiguous object_number_project_library_scope
             surface_main surface_library surface_unknown_profile surface_fields surface_definition_fields surface_width
             surface_definition_missing surface_point_missing surface_frame_missing surface_contour_missing surface_identity_missing
             surface_father_missing surface_father_unknown surface_father_duplicate surface_target_missing surface_duplicate

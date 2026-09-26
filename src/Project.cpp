@@ -157,7 +157,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 NumberingDatabase numbering; std::string diagnostic;
                 if (!parseNumberingDatabase(file.path,numbering,diagnostic,options.rawOptions)) { failure(file.path,diagnostic); continue; }
                 for (const auto& item:numbering.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
-                mark(file.path,ReadLevel::PartialSemantic,"numbering series/counters decoded; object assignments and snapshots remain raw");
+                mark(file.path,ReadLevel::PartialSemantic,"numbering series/counters decoded; comparison snapshots remain raw");
                 // Association also works when raw companions were explicitly disabled.
                 if (!options.readRawCompanions)
                 {
@@ -288,6 +288,41 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 mark(path, ReadLevel::Semantic);
             }
         }
+        const auto linkNumberingSeries = [&](const db1::Model& model) {
+            if (!options.readNumbering || model.objectNumberingRecords.empty()) return;
+            const auto pair = findFile(root, db1::detail::pathUtf8(model.databasePath.stem()) + ".db2");
+            const auto found = result.numbering.find(pair);
+            if (found==result.numbering.end())
+            {
+                result.diagnostics.push_back("object numbering has no parsed DB2 pair: " + db1::detail::pathUtf8(model.databasePath));
+                return;
+            }
+            const auto& database = found->second;
+            if (model.databaseGuid.empty() || database.raw.databaseGuid.empty() || lower(model.databaseGuid)!=lower(database.raw.databaseGuid))
+            {
+                result.diagnostics.push_back("object numbering DB1/DB2 GUID scope is unverified: " + db1::detail::pathUtf8(model.databasePath));
+                return;
+            }
+            std::map<std::pair<std::string,std::uint32_t>,std::vector<std::size_t>> indices;
+            for (std::size_t i=0; i<database.series.size(); ++i)
+                indices[{database.series[i].prefix,database.series[i].startNumber}].push_back(i);
+            std::size_t unresolved = 0;
+            for (const auto& entry : model.objectNumberingReferences)
+            {
+                const auto record = model.objectNumberingRecords.find(entry.second.numberingRecordId);
+                if (record==model.objectNumberingRecords.end() || record->second.kind==db1::ObjectNumberingKind::Unverified) continue;
+                const auto series = indices.find({record->second.prefix,record->second.startNumber});
+                if (series==indices.end() || series->second.size()!=1) { ++unresolved; continue; }
+                result.objectNumberingSeriesAssociations.push_back({model.databasePath,pair,entry.first,record->first,series->second.front()});
+            }
+            if (unresolved) result.diagnostics.push_back(std::to_string(unresolved) + " object numbering references have missing or ambiguous DB2 series: " + db1::detail::pathUtf8(model.databasePath));
+        };
+        linkNumberingSeries(result.model);
+        if (result.componentLibrary) linkNumberingSeries(*result.componentLibrary);
+        std::sort(result.objectNumberingSeriesAssociations.begin(),result.objectNumberingSeriesAssociations.end(),[](const auto& a,const auto& b) {
+            return std::tie(a.database,a.objectId) < std::tie(b.database,b.objectId);
+        });
+
         const auto linkSurfaceMaterials = [&](const db1::Model& model) {
             if (!result.materials)
             {

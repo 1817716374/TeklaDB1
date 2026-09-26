@@ -14,7 +14,7 @@
 | matdb / screwdb / assdb | 材料、螺栓与螺栓组件目录 |
 | profitab / CLB | 规则与语句读取；不等于完整执行所有参数化生成器 |
 | Shapes XML / TEZ | Shape 定义和 Polymesh 点、面、内环、边 |
-| DB2 | `parseNumberingDatabase`：完整顺序表、编号系列与零件/装配序列计数；**逐对象编号分配、比较快照及其余字段尚未恢复** |
+| DB2 | `parseNumberingDatabase`：完整顺序表、编号系列与零件/装配序列计数；现代DB1对象编号记录可关联系列，见[对象编号证据](docs/OBJECT_NUMBERING.zh-CN.md)；**比较快照、旧版对象分配与有效状态尚未恢复** |
 | environment.db | `parseEnvironmentDatabase`：属性名称/标签/存储类型、对象类别关联、整数选项列表；**元数据标志和部分定义值尚未解释** |
 | options_*.db | `parseOptionsDatabase`：布尔/整数/浮点/字符串键与成对值槽位；**当前值/默认值的优先级尚未验证** |
 | DG 图纸 | `parseDrawing`：7.82/9.54 容器、文本/属性、图幅、主体、视图坐标基/范围与模型引用；旧版使用无工程范围的数字 ID，新版使用 GUID；**纸面定位、比例/缩短、尺寸与完整绘图图元尚未恢复** |
@@ -100,6 +100,7 @@ if (!tekla::readProject("/path/to/model", project, error, options)) {
 // project.drawingSubjectAssociations：图纸主体到 DB1 零件/装配的 GUID 关联
 // 匹配不推断对象类别适用性，也不填补对象缺失值或计算有效默认值。
 // project.numbering / drawings：DB2 与 DG 的部分语义
+// project.objectNumberingSeriesAssociations：带DB1/DB2路径范围的对象编号→系列关联
 // project.drawingModelAssociations：用已验证 GUID 连接图纸记录和模型对象
 // project.associations：主库、配套编号库、组件库与资源的关联依据
 // project.diagnostics：部分失败、未支持或缺失信息
@@ -121,7 +122,7 @@ tekla::parseNumberingDatabase("models/model.db2", numbering, error);
 tekla::parseDrawing("models/drawings/example.dg", drawing, error);
 ```
 
-DB2 语义入口当前覆盖 7.82、8.95、9.52、9.60（包括空组件编号库）。`partCounter` / `assemblyCounter` 是保存的序列计数，不是当前构件数量，也不能单独还原某个对象的编号；其余字段和快照保留在 `raw` 中。7.82 DB1 另有独立的部分语义映射，两类文件分别验证。
+DB2 语义入口当前覆盖 7.82、8.95、9.52、9.60（包括空组件编号库）。`partCounter` / `assemblyCounter` 是保存的序列计数，不是当前构件数量，也不能单独还原某个对象的编号；其余字段和快照保留在 `raw` 中。现代DB1提供objectNumberingRecords和objectNumberingReferences，工程入口可关联DB2系列；零序号和高位特殊值不猜成确定编号。7.82 DB1另有独立的部分语义映射，其对象编号仍待恢复。
 
 DG 9.54 会校验完整表目录签名，恢复根字符串（包括跨记录的标记 XML）、属性、属性链接、图幅宽高及一类模型 GUID 引用。标记 XML 当前作为文本返回。`grProjectGuid` 相符后，工程入口才用引用 GUID 连接 DB1 identity；无法匹配或有歧义的引用给出诊断。不会通过图纸文件名猜测构件，也不把这些字段称为完整图纸解析。研究记录与独立编号日志验证见 [DB2 / DG 格式证据](docs/RELATED_FORMATS.zh-CN.md)。
 
@@ -141,7 +142,7 @@ tekla::db1::parseRawDatabase("model.db2", raw, error, options);
 
 ## 可重复的公开语料回归
 
-`tests/corpus.json` 记录 587 个外部文件的固定提交 URL、大小、SHA-256 和 1,181 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
+`tests/corpus.json` 记录 587 个外部文件的固定提交 URL、大小、SHA-256 和 1,238 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
 
 ```powershell
 python -B tools/corpus.py --download `
@@ -152,7 +153,7 @@ python -B tools/corpus.py --download `
 
 Ninja/MinGW 构建的 exe 通常直接位于构建目录，不含 `Release` 子目录；Linux 使用无 `.exe` 的路径。不带 `--download` 时只验证本地文件。下载约 60 MB，完整文件清单以 manifest 为准。
 
-包含 30 份主库、30 份组件库、60 份 DB2、300 份 DG、90 份 DBV 及配套目录。1,181 个用例包含 7.82 的两份主库、两份组件库与两个工程聚合检查；7.82 仍为部分语义，独立螺栓和未命名实体的限制见支持矩阵。一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，同时核对 28 个 DG→DB1 GUID 引用、118 条 DB1→环境定义名称/类型匹配，并检查官方 OBJECT_LOCKED 示例中的标签次序。另核对 19 个视图、4 个图纸主体、同包 VI 设置中的 6 个范围/深度字段，以及钢板模型轴与视图 X 轴。旧 DG 另有 293 项逐字节重建与 293 项语义回归，59 个主体 ID/类型匹配、1,361 条数字引用匹配；35 条未解析引用、断链文本、退化/歧义视图均明确保留。旧 xslib 另核对 40 条构件定义、660 条归属参数和 2,726 条子对象身份；配套目录及四份对话框验证 28 条具名定义与 69 个参数引用；新增 6,838 条距离变量、10,450 条公式绑定及对象引用图，公式尚不求值，详见 [7.82 证据](docs/DB1_782.zh-CN.md)。另有 60 项主库/组件库归属回归和三份现代对话框的 15 个参数匹配；通用变量作用域保留 kind-60 对象，详见 [归属与现代变量](docs/OWNERSHIP.zh-CN.md)。新增60项位置记录回归（含4份7.82主库/组件库）和现代同工程源码对照（30根梁、36个柱/基础），位置设置不重复应用到已存几何。另有4项7.82表面处理回归和1项实体/材质证据，恢复7个表面、32个轮廓点及7条工程材质关联；颜色、完整裁剪/铺贴等仍未解释。默认 CTest 另有 156 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
+包含 30 份主库、30 份组件库、60 份 DB2、300 份 DG、90 份 DBV 及配套目录。1,238 个用例包含 7.82 的两份主库、两份组件库与两个工程聚合检查；7.82 仍为部分语义，独立螺栓和未命名实体的限制见支持矩阵。一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，同时核对 28 个 DG→DB1 GUID 引用、118 条 DB1→环境定义名称/类型匹配，并检查官方 OBJECT_LOCKED 示例中的标签次序。另核对 19 个视图、4 个图纸主体、同包 VI 设置中的 6 个范围/深度字段，以及钢板模型轴与视图 X 轴。旧 DG 另有 293 项逐字节重建与 293 项语义回归，59 个主体 ID/类型匹配、1,361 条数字引用匹配；35 条未解析引用、断链文本、退化/歧义视图均明确保留。旧 xslib 另核对 40 条构件定义、660 条归属参数和 2,726 条子对象身份；配套目录及四份对话框验证 28 条具名定义与 69 个参数引用；新增 6,838 条距离变量、10,450 条公式绑定及对象引用图，公式尚不求值，详见 [7.82 证据](docs/DB1_782.zh-CN.md)。另有 60 项主库/组件库归属回归和三份现代对话框的 15 个参数匹配；通用变量作用域保留 kind-60 对象，详见 [归属与现代变量](docs/OWNERSHIP.zh-CN.md)。新增60项位置记录回归（含4份7.82主库/组件库）和现代同工程源码对照（30根梁、36个柱/基础），位置设置不重复应用到已存几何。另有4项7.82表面处理回归和1项实体/材质证据，恢复7个表面、32个轮廓点及7条工程材质关联；颜色、完整裁剪/铺贴等仍未解释。另有56项现代对象编号回归及一项独立日志核对：187个零件、43个装配与Tekla日志一致，249条对象关联到DB2系列，20条特殊起始值保持未配对。第三种44字节编号记录及生命周期未解释。默认 CTest 另有 180 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
 
 GitHub Actions 配置 Linux C++17/20、ASan/UBSan、Windows MSVC、安装后独立消费和 Linux OCCT 构建。运行状态以对应提交的 Actions 结果为准。
 

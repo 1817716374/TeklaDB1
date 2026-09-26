@@ -20,8 +20,8 @@ struct NumberingDatabase
     std::vector<NumberingSeries> series;
     std::vector<std::string> diagnostics;
 };
-// Partial semantics: series keys/counters. Object assignments and comparison
-// snapshots remain raw, including all tables with large numeric table IDs.
+// Partial semantics: series keys/counters. Object assignments are recovered
+// separately from DB1; comparison snapshots and other DB2 tables remain raw.
 bool parseNumberingDatabase(const std::filesystem::path& path, NumberingDatabase& result,
                             std::string& error, const db1::RawDatabaseOptions& options = {});
 }

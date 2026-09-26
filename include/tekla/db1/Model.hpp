@@ -108,6 +108,26 @@ struct PartDefinition
     std::string classNumber;
 };
 
+enum class ObjectNumberingKind { Unverified, Part, Assembly };
+struct ObjectNumberingRecord
+{
+    uint32_t id = 0;
+    ObjectNumberingKind kind = ObjectNumberingKind::Unverified;
+    uint32_t startNumber = 0;
+    uint32_t sequence = 0;
+    std::string prefix;
+    // Derived only for ordinary positive ranges. Not a lifecycle/currentness claim.
+    std::optional<uint32_t> positionNumber;
+    // Complete stored payload, including unknown flags and unverified record kinds.
+    std::vector<uint8_t> rawPayload;
+};
+struct ObjectNumberingReference
+{
+    uint32_t objectId = 0;
+    uint32_t rawContext = 0;
+    uint32_t numberingRecordId = 0; // zero is retained, not treated as a missing record
+};
+
 struct PartPosition
 {
     // Record ID in partPositions; definition ID in partDefinitionPositions.
@@ -454,5 +474,7 @@ struct Model
     // 7.82 inline positions, keyed by Part::definitionId, including unused definitions.
     // Independent namespace from modern partPositions/auxiliaryReferenceId.
     std::unordered_map<uint32_t, PartPosition> partDefinitionPositions;
+    std::unordered_map<uint32_t, ObjectNumberingRecord> objectNumberingRecords;
+    std::unordered_map<uint32_t, ObjectNumberingReference> objectNumberingReferences;
 };
 }

@@ -26,6 +26,7 @@ struct Fingerprint
 #include "OwnershipValidation.hpp"
 #include "PositionValidation.hpp"
 #include "SurfaceValidation.hpp"
+#include "ObjectNumberingValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
 {
@@ -84,7 +85,16 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode=="surface_evidence") validateSurfaceEvidence(path);
+        if (mode=="object_number_evidence") validateObjectNumberEvidence(path);
+        else if (mode=="object_number_model" || mode=="object_number_library")
+        {
+            const bool library=mode=="object_number_library";
+            tekla::db1::Model model; tekla::db1::RawDatabase raw;
+            const bool ok=library?tekla::db1::parseComponentLibrary(path,model,error):tekla::db1::parseModelFile(path,model,error);
+            if (!ok || !tekla::db1::parseRawDatabase(path,raw,error)) throw std::runtime_error(error);
+            validateObjectNumbers(model,raw,library);
+        }
+        else if (mode=="surface_evidence") validateSurfaceEvidence(path);
         else if (mode=="surface_model" || mode=="surface_library")
         {
             const bool library=mode=="surface_library";

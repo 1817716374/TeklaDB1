@@ -62,6 +62,14 @@ struct SurfaceMaterialAssociation
     std::uint32_t surfaceTreatmentId = 0;
     std::size_t materialIndex = 0;
 };
+struct ObjectNumberingSeriesAssociation
+{
+    std::filesystem::path database;
+    std::filesystem::path numberingDatabase;
+    std::uint32_t objectId = 0;
+    std::uint32_t numberingRecordId = 0;
+    std::size_t seriesIndex = 0; // index into Project::numbering.at(numberingDatabase).series
+};
 struct Project
 {
     db1::Model model;
@@ -84,6 +92,7 @@ struct Project
     std::vector<DrawingModelAssociation> drawingSubjectAssociations;
     // Exact unique name matches into materials->materials, scoped by DB1 path.
     std::vector<SurfaceMaterialAssociation> surfaceMaterialAssociations;
+    std::vector<ObjectNumberingSeriesAssociation> objectNumberingSeriesAssociations;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

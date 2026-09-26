@@ -58,6 +58,8 @@ std::vector<Table> schema()
     define(228,104,18,{0,1,2}); define(300,92,9,{0,1,4,5}); define(351,316,30,{0,1,25,26,27,28,29});
     define(332,48,9,{0,1,3}); define(294,20,6,{0,1,2,4,5});
     define(245,52,14,{0,1});
+    define(211,12,4,{0,1,2,3}); define(322,68,9,{0,1,2});
+    define(323,76,11,{0,1,2}); define(324,44,7,{0,1,2});
     return tables;
 }
 Bytes row(const Table& t, std::uint32_t id)
@@ -175,7 +177,8 @@ std::vector<Table> componentLibrary(bool older895)
     for (const auto& pair : std::vector<std::pair<std::size_t,std::size_t>>{
         {61,40},{64,43},{65,44},{75,53},{122,95},{154,126},{160,132},{161,133},{190,160},{191,161},{192,162},
         {355,older895?260:318},{341,older895?264:305},{328,older895?94:292},{340,older895?90:304},
-        {274,242},{270,238},{228,198},{300,265},{351,older895?223:314},{310,274},{294,261},{245,215}})
+        {274,242},{270,238},{228,198},{300,265},{351,older895?223:314},{310,274},{294,261},{245,215},
+        {211,181},{322,286},{323,287},{324,288}})
         tables[pair.second]=main[pair.first];
     if (!older895) tables[296]=main[332];
     const auto define=[&](std::size_t n,std::uint32_t width,std::size_t count,std::initializer_list<std::size_t> refs) {
@@ -239,6 +242,8 @@ std::vector<Table> componentLibrary(bool older895)
 }
 }
 
+#include "ObjectNumberingRegression.hpp"
+
 int main(int argc, char** argv)
 {
     if (argc != 3) return 2;
@@ -249,7 +254,8 @@ int main(int argc, char** argv)
         const auto path = root / "model.db1";
         tekla::db1::Model model; tekla::db1::RawDatabase raw; std::string error = "stale";
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
-        if (name.rfind("inline_position_",0)==0)
+        if (name.rfind("object_number_",0)==0) objectNumberingRegression(path,name);
+        else if (name.rfind("inline_position_",0)==0)
         {
             const bool library=name!="inline_position_main";
             auto s=onePart782(library);

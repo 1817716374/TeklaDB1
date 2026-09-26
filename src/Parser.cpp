@@ -1410,6 +1410,50 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
     }
 
+    if (verifiedPartOwnership)
+    {
+        const std::size_t first = library ? 286 : 322;
+        const std::size_t links = library ? 181 : 211;
+        const std::size_t widths[] = {68,76,44}, fields[] = {9,11,7};
+        std::size_t unverified = 0;
+        for (std::size_t kind=0; kind<3; ++kind)
+        {
+            requireTable(all, first+kind, static_cast<uint32_t>(widths[kind]));
+            requireFields(data, all, first+kind, fields[kind], {0,1,2});
+            for (std::size_t i=0; i<all[first+kind].rowCount; ++i)
+            {
+                const auto* value = row(data, all, first+kind, i);
+                ObjectNumberingRecord record;
+                record.id = read<uint32_t>(value, 1);
+                record.rawPayload.assign(value+1, value+1+widths[kind]);
+                if (kind<2)
+                {
+                    record.kind = kind==0 ? ObjectNumberingKind::Part : ObjectNumberingKind::Assembly;
+                    record.startNumber = read<uint32_t>(value, 9);
+                    record.sequence = read<uint32_t>(value, 13);
+                    record.prefix = fixedString(value, kind==0 ? 21 : 29, 48);
+                    const auto number = uint64_t(record.startNumber) + record.sequence;
+                    if (record.startNumber>0 && record.startNumber<0x80000000U && record.sequence>0 && number<=0x80000000ULL)
+                        record.positionNumber = static_cast<uint32_t>(number-1);
+                }
+                else ++unverified;
+                insertUnique(model.objectNumberingRecords, record.id, record, "object numbering record");
+            }
+        }
+        requireTable(all, links, 12);
+        requireFields(data, all, links, 4, {0,1,2,3});
+        for (std::size_t i=0; i<all[links].rowCount; ++i)
+        {
+            const auto* value = row(data, all, links, i);
+            ObjectNumberingReference reference{read<uint32_t>(value,1),read<uint32_t>(value,5),read<uint32_t>(value,9)};
+            if (!model.identities.count(reference.objectId)) throw std::runtime_error("missing object numbering identity");
+            if (reference.numberingRecordId && !model.objectNumberingRecords.count(reference.numberingRecordId))
+                throw std::runtime_error("missing object numbering record " + std::to_string(reference.numberingRecordId));
+            insertUnique(model.objectNumberingReferences, reference.objectId, reference, "object numbering reference");
+        }
+        if (unverified) model.diagnostics.push_back(std::to_string(unverified) + " object numbering records retain unverified 44-byte semantics");
+    }
+
     const auto readPosition = [&](const uint8_t* value, uint32_t id, std::size_t start) {
         PartPosition position;
         position.id = id;
