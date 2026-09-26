@@ -1,4 +1,5 @@
 #include <tekla/db1/OcctGeometry.hpp>
+#include "NominalSections.hpp"
 
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
@@ -13,6 +14,7 @@
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <Bnd_Box.hxx>
@@ -27,6 +29,7 @@
 #include <TopTools_ListOfShape.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Dir.hxx>
+#include <gp_Elips.hxx>
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
@@ -82,6 +85,9 @@ struct Section
     std::vector<Point> outer;
     std::vector<std::vector<Point>> holes;
     bool centerOnCentroid = false;
+    // Analytic constant elliptical section. The polygon remains available for
+    // path orientation/extents, but must not replace the curved boundary.
+    std::array<double, 2> ellipseRadii{};
 };
 
 std::vector<Section::Point> rectangle(double height, double width, double radius = 0.0)
@@ -127,7 +133,7 @@ const Profile* profileByName(const Model& model, const std::string& name)
         return &found->second;
 
     const auto signature = [](const std::string& value) {
-        struct Result { std::string family; std::vector<double> dimensions; } result;
+        struct Result { std::string family; std::vector<double> dimensions; bool valid = true; } result;
         const auto firstNumber = value.find_first_of("0123456789");
         result.family = value.substr(0, firstNumber);
         result.family.erase(std::remove_if(result.family.begin(), result.family.end(),
@@ -140,7 +146,15 @@ const Profile* profileByName(const Model& model, const std::string& name)
         const std::regex number(R"(([0-9]+(?:\.[0-9]+)?))");
         for (auto iterator = std::sregex_iterator(value.begin(), value.end(), number);
              iterator != std::sregex_iterator(); ++iterator)
-            result.dimensions.push_back(std::stod((*iterator)[1]));
+        {
+            try
+            {
+                const auto dimension = std::stod((*iterator)[1]);
+                if (!std::isfinite(dimension)) { result.valid = false; return result; }
+                result.dimensions.push_back(dimension);
+            }
+            catch (const std::exception&) { result.valid = false; return result; }
+        }
         const std::pair<const char*, const char*> aliases[] = {
             {"CBLA", "CBL"}, {"LBEAM", "BL"}, {"LSPAN", "LS"},
             {"COLUMN", "CN"}, {"CX", "CN"}, {"ITBEAM", "BT"},
@@ -151,12 +165,13 @@ const Profile* profileByName(const Model& model, const std::string& name)
         return result;
     };
     const auto requested = signature(name);
+    if (!requested.valid) return nullptr;
     for (const auto& entry : model.profiles)
     {
         if (entry.second.source != ProfileSource::SketchSolver)
             continue;
         const auto candidate = signature(entry.first);
-        if (candidate.family != requested.family ||
+        if (!candidate.valid || candidate.family != requested.family ||
             candidate.dimensions.size() != requested.dimensions.size())
             continue;
         bool equal = true;
@@ -312,11 +327,11 @@ Section sectionFor(const Model& model, const Part& part, std::string& mode)
     const std::regex equalAngle(R"(^L([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
     const std::regex grating(R"(^GRATING([0-9.]+)\*([0-9.]+)(?:-.*)?$)", std::regex::icase);
     const std::regex zee(R"(^ZZ([0-9.]+)-([0-9.]+)-([0-9.]+)-([0-9.]+)$)", std::regex::icase);
-    const std::regex upe(R"(^UPE([0-9.]+)$)", std::regex::icase);
-    const std::regex ipe(R"(^IPE([0-9.]+)$)", std::regex::icase);
+    const std::regex upe(R"(^UPE([0-9]+(?:\.[0-9]+)?)$)", std::regex::icase);
+    const std::regex ipe(R"(^IPE([0-9]+(?:\.[0-9]+)?)$)", std::regex::icase);
     const std::regex channel(R"(^C([0-9.]+)\*([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
     const std::regex sadef(R"(^SADEF-C([0-9.]+)/([0-9.]+)/([0-9.]+)X([0-9.]+)$)", std::regex::icase);
-    const std::regex eld(R"(^ELD([0-9.]+)\*([0-9.]+)\*([0-9.]+)\*([0-9.]+)$)", std::regex::icase);
+    const std::regex eld(R"(^ELD([0-9]+(?:\.[0-9]+)?)\*([0-9]+(?:\.[0-9]+)?)\*([0-9]+(?:\.[0-9]+)?)\*([0-9]+(?:\.[0-9]+)?)$)", std::regex::icase);
     if (std::regex_match(part.profile, match, plate))
     {
         result.centerOnCentroid = true;
@@ -398,30 +413,36 @@ Section sectionFor(const Model& model, const Part& part, std::string& mode)
     }
     else if (std::regex_match(part.profile, match, upe))
     {
+        // A present but unhandled catalog entry must not be replaced by a
+        // different section inferred from its name.
+        if (catalog) return result;
         const auto height = std::stod(match[1]);
-        const auto width = 0.25 * height + 30.0;
-        const auto web = (std::max)(4.0, height * 0.0275);
-        const auto flange = (std::max)(7.0, height * 0.041);
+        const auto found = std::find_if(detail::nominalUPE.begin(), detail::nominalUPE.end(),
+                                       [&](const auto& entry) { return entry.height == height; });
+        if (found == detail::nominalUPE.end()) return result;
+        const auto width = found->width, web = found->web, flange = found->flange;
         const auto h = height * 0.5, w = width * 0.5;
         result.centerOnCentroid = true;
         result.outer = {{-h, -w}, {-h, w}, {-h + flange, w},
                         {-h + flange, -w + web}, {h - flange, -w + web},
                         {h - flange, w}, {h, w}, {h, -w}};
-        mode = "parametric UPE";
+        mode = "nominal UPE sharp-corner approximation (project catalog unavailable)";
     }
     else if (std::regex_match(part.profile, match, ipe))
     {
+        if (catalog) return result;
         const auto height = std::stod(match[1]);
-        const auto width = 0.45 * height + 10.0;
-        const auto web = (std::max)(4.1, height * 0.041);
-        const auto flange = (std::max)(5.7, height * 0.057);
+        const auto found = std::find_if(detail::nominalIPE.begin(), detail::nominalIPE.end(),
+                                       [&](const auto& entry) { return entry.height == height; });
+        if (found == detail::nominalIPE.end()) return result;
+        const auto width = found->width, web = found->web, flange = found->flange;
         const auto h = height * 0.5, w = width * 0.5, tw = web * 0.5;
         result.centerOnCentroid = true;
         result.outer = {{-h, -w}, {-h + flange, -w}, {-h + flange, -tw},
                         {h - flange, -tw}, {h - flange, -w}, {h, -w},
                         {h, w}, {h - flange, w}, {h - flange, tw},
                         {-h + flange, tw}, {-h + flange, w}, {-h, w}};
-        mode = "parametric IPE";
+        mode = "nominal IPE sharp-corner approximation (project catalog unavailable)";
     }
     else if (std::regex_match(part.profile, match, channel))
     {
@@ -447,10 +468,25 @@ Section sectionFor(const Model& model, const Part& part, std::string& mode)
     }
     else if (std::regex_match(part.profile, match, eld))
     {
-        const auto height = std::stod(match[1]) + std::stod(match[3]);
-        const auto width = (std::max)(std::stod(match[2]), std::stod(match[4]));
+        if (catalog) return result;
+        std::array<double,4> dimensions{};
+        try { for (unsigned i=0;i<4;++i) dimensions[i]=std::stod(match[i+1]); }
+        catch (const std::exception&) { mode = "invalid ELD dimensions"; return result; }
+        const auto height = dimensions[0], width = dimensions[1];
+        const auto endHeight = dimensions[2], endWidth = dimensions[3];
+        if (!std::isfinite(height) || !std::isfinite(width) || height <= kTolerance || width <= kTolerance ||
+            !std::isfinite(endHeight) || !std::isfinite(endWidth) || endHeight <= kTolerance || endWidth <= kTolerance)
+        { mode = "invalid ELD dimensions"; return result; }
+        if (height != endHeight || width != endWidth)
+        { mode = "unverified tapered ELD section"; return result; }
         result.centerOnCentroid = true;
-        result.outer = rectangle(height, width); mode = "ELD envelope";
+        result.ellipseRadii = {height * 0.5, width * 0.5};
+        for (unsigned i = 0; i < 16; ++i)
+        {
+            const auto theta = 2 * kPi * i / 16;
+            result.outer.emplace_back(result.ellipseRadii[0] * std::cos(theta), result.ellipseRadii[1] * std::sin(theta));
+        }
+        mode = "parametric constant ELD ellipse";
     }
     else if (part.profile.find("ARVAL_") == 0)
     {
@@ -589,18 +625,87 @@ TopoDS_Wire wire(const std::vector<Section::Point>& source, const Part& part, do
     return builder.IsDone() ? builder.Wire() : TopoDS_Wire{};
 }
 
+TopoDS_Wire sectionWire(const Section& section, const Part& part, double along)
+{
+    const auto a = section.ellipseRadii[0], b = section.ellipseRadii[1];
+    if (a <= 0 || b <= 0) return wire(section.outer, part, along);
+    const auto x = normalized(part.secondary);
+    const auto z = normalized(cross(part.secondary, part.normal));
+    const auto y = normalized(cross(z, x));
+    if (length(x) <= kTolerance || length(z) <= kTolerance || length(y) <= kTolerance) return {};
+    const auto major = a >= b ? x : y;
+    const gp_Ax2 frame(point(add(part.origin, scale(part.axis, along))), gp_Dir(vector(z)), gp_Dir(vector(major)));
+    BRepBuilderAPI_MakeEdge edge(gp_Elips(frame, (std::max)(a,b), (std::min)(a,b)));
+    if (!edge.IsDone()) return {};
+    return BRepBuilderAPI_MakeWire(edge.Edge()).Wire();
+}
+
 TopoDS_Shape linearSolid(const Model& model, const Part& part, std::string& mode)
 {
     const auto section = sectionFor(model, part, mode);
     if (section.outer.size() < 3 || part.length <= kTolerance)
         return {};
-    BRepBuilderAPI_MakeFace faceBuilder(wire(section.outer, part, 0.0));
+    BRepBuilderAPI_MakeFace faceBuilder(sectionWire(section, part, 0.0));
     for (const auto& hole : section.holes)
         faceBuilder.Add(wire(hole, part, 0.0));
     if (!faceBuilder.IsDone())
         return {};
     TopoDS_Shape face = faceBuilder.Face();
     return BRepPrimAPI_MakePrism(TopoDS::Face(face), vector(scale(part.axis, part.length))).Shape();
+}
+
+// PartCambering is a deformation property; the ordinary cambering UDA is
+// annotation only. Do not coerce text, non-finite values or conflicting copies.
+bool partCambering(const Part& part, double& value)
+{
+    bool found = false;
+    value = 0.0;
+    for (const auto& property : part.properties)
+    {
+        if (property.name != "PartCambering") continue;
+        if (property.kind == Property::Kind::String) return false;
+        const auto number = property.kind == Property::Kind::Double
+            ? property.doubleValue : static_cast<double>(property.integerValue);
+        if (!std::isfinite(number) || (found && number != value)) return false;
+        value = number;
+        found = true;
+    }
+    return true;
+}
+
+TopoDS_Shape camberedSolid(const Model& model, const Part& part, double camber, std::string& mode)
+{
+    const auto section = sectionFor(model, part, mode);
+    if (section.outer.size() < 3 || !std::isfinite(part.length) || part.length <= kTolerance) return {};
+    const auto magnitude = std::abs(camber), halfChord = part.length * 0.5;
+    const auto radius = (halfChord / magnitude * halfChord + magnitude) * 0.5;
+    const auto centerOffset = camber - std::copysign(radius, camber);
+    if (!std::isfinite(radius) || !std::isfinite(centerOffset)) return {};
+    // The stored value defines a circle, with its minor arc retained even when
+    // |camber| exceeds half the chord. A semicircle uses the stored sign.
+    const auto direction = centerOffset == 0.0 ? std::copysign(1.0, camber) : -std::copysign(1.0, centerOffset);
+    const auto angle = direction * 2.0 * std::atan2(halfChord, std::abs(centerOffset));
+    if (!std::isfinite(angle) || std::abs(angle) <= kTolerance) return {};
+    double sectionExtent = 0.0;
+    for (const auto& p : section.outer) sectionExtent = (std::max)(sectionExtent, std::abs(p.value[0]));
+    if (radius <= sectionExtent + kTolerance) return {}; // sweep crosses its revolution axis
+    // Tekla local Z in the verified DB1 frame is secondary, not normal.
+    const auto x = normalized(part.axis), y = scale(normalized(part.normal), -1.0), z = normalized(part.secondary);
+    if (length(x) <= kTolerance || length(y) <= kTolerance || length(z) <= kTolerance ||
+        std::abs(dot(x,y)) > 1e-5 || std::abs(dot(x,z)) > 1e-5 ||
+        length(subtract(cross(x,y),z)) > 1e-5) return {};
+    Part start = part;
+    start.axis = add(scale(x, std::cos(angle * 0.5)), scale(z, std::sin(angle * 0.5)));
+    start.normal = scale(y, -1.0);
+    start.secondary = add(scale(z, std::cos(angle * 0.5)), scale(x, -std::sin(angle * 0.5)));
+    BRepBuilderAPI_MakeFace face(sectionWire(section, start, 0.0));
+    for (const auto& hole : section.holes) face.Add(wire(hole, start, 0.0));
+    if (!face.IsDone()) return {};
+    const auto center = add(add(part.origin, scale(x, halfChord)), scale(z, centerOffset));
+    BRepPrimAPI_MakeRevol sweep(face.Face(), gp_Ax1(point(center), gp_Dir(vector(scale(y, direction)))), std::abs(angle));
+    if (!sweep.IsDone()) return {};
+    mode += "; cambered circular sweep";
+    return sweep.Shape();
 }
 
 struct ContourPathPoint
@@ -741,6 +846,20 @@ TopoDS_Shape contourSolid(const Part& part)
     return face.IsDone() ? BRepPrimAPI_MakePrism(face.Face(), vector(extrusion)).Shape() : TopoDS_Shape{};
 }
 
+bool clipMiter(TopoDS_Shape& shape, const Vec3& origin, const Vec3& normal, const Vec3& inside)
+{
+    BRepBuilderAPI_MakeFace face(gp_Pln(point(origin), gp_Dir(vector(normal))));
+    if (!face.IsDone()) return false;
+    BRepPrimAPI_MakeHalfSpace halfSpace(face.Face(), point(inside));
+    if (!halfSpace.IsDone()) return false;
+    BRepAlgoAPI_Common common(shape, halfSpace.Solid());
+    if (!common.IsDone() || common.Shape().IsNull()) return false;
+    GProp_GProps properties; BRepGProp::VolumeProperties(common.Shape(), properties);
+    if (std::abs(properties.Mass()) <= kTolerance) return false;
+    shape = common.Shape();
+    return true;
+}
+
 TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mode)
 {
     if (part.contour.size() < 2)
@@ -786,6 +905,7 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
     builder.MakeCompound(result);
     std::string sectionMode;
     const auto section = sectionFor(model, part, sectionMode);
+    if (section.outer.size() < 3) { mode = sectionMode; return {}; }
     double minimumSecondary = (std::numeric_limits<double>::max)();
     double maximumSecondary = (std::numeric_limits<double>::lowest)();
     double minimumNormal = (std::numeric_limits<double>::max)();
@@ -797,21 +917,9 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
         minimumNormal = (std::min)(minimumNormal, point.value[1]);
         maximumNormal = (std::max)(maximumNormal, point.value[1]);
     }
-    Vec3 pathPlaneNormal{};
-    for (std::size_t index = 2; index < path.size(); ++index)
-    {
-        const auto previous = subtract(path[index - 1], path[index - 2]);
-        const auto following = subtract(path[index], path[index - 1]);
-        const auto candidate = cross(previous, following);
-        if (length(candidate) > kTolerance)
-        {
-            pathPlaneNormal = normalized(candidate);
-            break;
-        }
-    }
-    const auto preserveSecondary = length(pathPlaneNormal) > kTolerance
-                                       ? std::abs(dot(part.secondary, pathPlaneNormal)) >= std::abs(dot(part.normal, pathPlaneNormal))
-                                       : maximumSecondary - minimumSecondary >= maximumNormal - minimumNormal;
+    auto previousAxis = normalized(part.axis);
+    auto previousSecondary = normalized(subtract(part.secondary, scale(previousAxis, dot(part.secondary, previousAxis))));
+    if (length(previousAxis) <= kTolerance || length(previousSecondary) <= kTolerance) return {};
     const auto profileOffset = subtract(part.origin, part.start);
     const auto secondaryOffset = dot(profileOffset, part.secondary);
     const auto normalOffset = dot(profileOffset, part.normal);
@@ -825,30 +933,48 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
         Part segment = part;
         segment.contour.clear();
         segment.axis = scale(delta, 1.0 / segmentLength);
-        if (preserveSecondary)
-        {
-            auto secondary = subtract(part.secondary, scale(segment.axis, dot(part.secondary, segment.axis)));
-            if (length(secondary) <= kTolerance)
-                secondary = subtract(part.normal, scale(segment.axis, dot(part.normal, segment.axis)));
-            segment.secondary = normalized(secondary);
-            segment.normal = normalized(cross(segment.axis, segment.secondary));
-        }
-        else
-        {
-            auto normal = subtract(part.normal, scale(segment.axis, dot(part.normal, segment.axis)));
-            if (length(normal) <= kTolerance)
-                normal = subtract(part.secondary, scale(segment.axis, dot(part.secondary, segment.axis)));
-            segment.normal = normalized(normal);
-            segment.secondary = normalized(cross(segment.normal, segment.axis));
-            segment.normal = normalized(cross(segment.axis, segment.secondary));
-        }
+        // Transport the section by the smallest rotation between tangents.
+        // Projecting a fixed initial axis onto every segment introduces twist
+        // when the section is oblique to the path's plane (notably ELD).
+        const auto cosine = (std::max)(-1.0, (std::min)(1.0, dot(previousAxis, segment.axis)));
+        if (cosine <= -1.0 + 1e-10) return {};
+        const auto turn = cross(previousAxis, segment.axis);
+        const auto rotated = add(add(previousSecondary, cross(turn, previousSecondary)),
+                                 scale(cross(turn, cross(turn, previousSecondary)), 1.0 / (1.0 + cosine)));
+        segment.secondary = normalized(subtract(rotated, scale(segment.axis, dot(rotated, segment.axis))));
+        segment.normal = normalized(cross(segment.axis, segment.secondary));
+        previousAxis = segment.axis;
+        previousSecondary = segment.secondary;
         segment.origin = add(add(path[index - 1], scale(segment.secondary, secondaryOffset)),
                              scale(segment.normal, normalOffset));
         segment.length = segmentLength;
+        // Adjacent segments share one bisector plane. Extend before clipping so
+        // the outer corner is filled instead of leaving two perpendicular caps.
+        const auto startNormal = index > 1
+            ? normalized(add(normalized(subtract(path[index - 1], path[index - 2])), segment.axis)) : segment.axis;
+        const auto endNormal = index + 1 < path.size()
+            ? normalized(add(segment.axis, normalized(subtract(path[index + 1], path[index])))) : segment.axis;
+        const auto radius = std::hypot((std::max)(std::abs(minimumSecondary), std::abs(maximumSecondary)) + std::abs(secondaryOffset),
+                                       (std::max)(std::abs(minimumNormal), std::abs(maximumNormal)) + std::abs(normalOffset));
+        const auto extension = [&](const Vec3& normal) {
+            const auto cosine = dot(normal, segment.axis);
+            if (cosine <= 1e-6) return -1.0; // reversal has no finite miter
+            return radius * std::sqrt((std::max)(0.0, 1.0 - cosine * cosine)) / cosine + 1e-4;
+        };
+        const bool clipStart = index > 1 && length(subtract(startNormal, segment.axis)) > kTolerance;
+        const bool clipEnd = index + 1 < path.size() && length(subtract(endNormal, segment.axis)) > kTolerance;
+        const auto startExtension = clipStart ? extension(startNormal) : 0.0;
+        const auto endExtension = clipEnd ? extension(endNormal) : 0.0;
+        if (startExtension < 0 || endExtension < 0) return {};
+        segment.origin = subtract(segment.origin, scale(segment.axis, startExtension));
+        segment.length += startExtension + endExtension;
         std::string segmentMode;
-        const auto solid = linearSolid(model, segment, segmentMode);
+        auto solid = linearSolid(model, segment, segmentMode);
         if (!solid.IsNull())
         {
+            const auto inside = scale(add(path[index - 1], path[index]), 0.5);
+            if ((clipStart && !clipMiter(solid, path[index - 1], startNormal, inside)) ||
+                (clipEnd && !clipMiter(solid, path[index], endNormal, inside))) return {};
             builder.Add(result, solid);
             ++segmentCount;
             mode = segmentMode;
@@ -862,6 +988,27 @@ TopoDS_Shape polybeamSolid(const Model& model, const Part& part, std::string& mo
 
 TopoDS_Shape partSolid(const Model& model, const Part& part, std::string& mode)
 {
+    double camber = 0.0;
+    if (!partCambering(part, camber)) { mode = "invalid or conflicting PartCambering"; return {}; }
+    if (camber != 0.0)
+    {
+        // Applying straight-space cuts to an already curved solid is not the
+        // deformation of the machined part. Keep this missing combination explicit.
+        bool machined = false;
+        for (const auto& operation : model.booleans) machined |= operation.fatherPartId == part.id;
+        for (const auto& operation : model.fittings) machined |= operation.fatherPartId == part.id;
+        for (const auto& operation : model.cutPlanes) machined |= operation.fatherPartId == part.id;
+        for (const auto& group : model.boltGroups)
+            for (const auto& layer : group.layers) machined |= layer.partId == part.id;
+        if (machined || !part.contour.empty() || part.contourKindUnverified)
+        { mode = "unverified cambering with machining or contour"; return {}; }
+        return camberedSolid(model, part, camber, mode);
+    }
+    if (part.contourKindUnverified)
+    {
+        mode = "unverified contour kind";
+        return {};
+    }
     if (!part.contour.empty())
     {
         if (part.contourIsPath)
@@ -1070,7 +1217,7 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
             {
                 result.unbuiltPartIds.push_back(entry.first);
                 result.diagnostics.emplace_back("cannot construct profile " + entry.second.profile +
-                                                " for part " + std::to_string(entry.first));
+                                                " for part " + std::to_string(entry.first) + (mode.empty() ? "" : ": " + mode));
                 continue;
             }
             allPartShapes[entry.first] = std::move(shape);
@@ -1125,9 +1272,16 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
         for (const auto partId : model.actualPartIds)
         {
             const auto mode = constructionModes.find(partId);
-            if (mode != constructionModes.end() && mode->second.find("envelope") != std::string::npos)
+            const bool nominal = mode != constructionModes.end() &&
+                (mode->second.find("nominal UPE ") != std::string::npos || mode->second.find("nominal IPE ") != std::string::npos);
+            if (mode != constructionModes.end() && mode->second.find("; cambered circular sweep") != std::string::npos && result.partShapes.count(partId))
+                result.camberedPartIds.push_back(partId);
+            if (nominal && result.partShapes.count(partId)) result.nominalProfilePartIds.push_back(partId);
+            if (mode != constructionModes.end() && (nominal || mode->second.find("envelope") != std::string::npos))
                 approximationModes.insert(mode->second + " for profile " + model.parts.at(partId).profile);
         }
+        std::sort(result.nominalProfilePartIds.begin(), result.nominalProfilePartIds.end());
+        std::sort(result.camberedPartIds.begin(), result.camberedPartIds.end());
         for (const auto& mode : approximationModes)
             result.diagnostics.emplace_back("profile geometry approximation used: " + mode);
         for (const auto& operation : model.fittings)
@@ -1151,8 +1305,13 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
             if (options.progress)
                 options.progress("bolts", group.id, completed, model.boltGroups.size());
             const auto definition = model.boltDefinitions.find(group.definitionId);
-            if (definition == model.boltDefinitions.end())
+            if (definition == model.boltDefinitions.end() || group.positions.empty())
+            {
+                result.unbuiltBoltGroupIds.push_back(group.id);
+                result.diagnostics.emplace_back("cannot construct bolt group with missing definition or stored positions: " + std::to_string(group.id));
+                ++completed;
                 continue;
+            }
             const auto placements = boltPlacements(group);
             std::vector<TopoDS_Shape> bolts;
             const auto radius = (std::max)(1.0, static_cast<double>(definition->second.diameter) * 0.5);
@@ -1210,6 +1369,12 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
                 result.weldShapes[weld.id] = BRepPrimAPI_MakePrism(face.Face(), vector(scale(weld.axis, weld.length))).Shape();
             ++completed;
         }
+        if (!model.boltGroups.empty())
+            result.diagnostics.emplace_back("bolt geometry is approximate: cylindrical shanks, without heads, nuts or washers");
+        if (!model.welds.empty())
+            result.diagnostics.emplace_back("weld geometry is approximate: triangular straight prisms, not all weld types");
+        if (std::any_of(model.parts.begin(), model.parts.end(), [](const auto& entry) { return entry.second.contourIsPath; }))
+            result.diagnostics.emplace_back("polybeam geometry may approximate curved path segments with eight chords");
         return true;
     }
     catch (const std::exception& exception)
