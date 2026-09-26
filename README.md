@@ -15,11 +15,12 @@
 | profitab / CLB | 规则与语句读取；不等于完整执行所有参数化生成器 |
 | Shapes XML / TEZ | Shape 定义和 Polymesh 点、面、内环、边 |
 | DB2 | `parseNumberingDatabase`：完整顺序表、编号系列与零件/装配序列计数；**逐对象编号分配、比较快照及其余字段尚未恢复** |
-| environment.db / options_*.db | DBV 与旧式容器原始读取；选项键值尚未稳定命名 |
+| environment.db | `parseEnvironmentDatabase`：属性名称/标签/存储类型、对象类别关联、整数选项列表；**元数据标志和部分定义值尚未解释** |
+| options_*.db | `parseOptionsDatabase`：布尔/整数/浮点/字符串键与成对值槽位；**当前值/默认值的优先级尚未验证** |
 | DG 图纸 | `parseDrawing`：9.54 表容器、链式字符串、属性/属性关联、图幅尺寸、工程 GUID 与 type-322 模型对象引用；**视图、尺寸与完整绘图图元尚未恢复** |
 | history.db | 标准 SQLite，交由 SQLite 工具读取 |
 
-文件扩展名 `.db` 并不代表统一格式，目录文件、DBV 和 SQLite 使用不同入口。`readProject` 会区分 `Semantic`、`PartialSemantic`、`Raw`、`Discovered` 和 `Failed`；DG 与 DB2 当前为部分语义，不能把发现文件或读取部分字段当成解析完成。
+文件扩展名 `.db` 并不代表统一格式，目录文件、DBV 和 SQLite 使用不同入口。`readProject` 会区分 `Semantic`、`PartialSemantic`、`Raw`、`Discovered` 和 `Failed`；DG、DB2 与 DBV 当前为部分语义，不能把发现文件或读取部分字段当成解析完成。
 
 | DB1 存储版本 | 语义支持证据 |
 |---|---|
@@ -93,6 +94,9 @@ if (!tekla::readProject("/path/to/model", project, error, options)) {
 // project.model、componentLibrary、materials、bolts、boltAssemblies、shapes
 // project.files：逐文件读取层级与错误
 // project.rawCompanions：DB2、DBV 的原始数据
+// project.environment / optionsDatabases：DBV 属性定义与带类型的存储值
+// project.attributeDefinitionAssociations：DB1 属性与定义的精确名称/存储类型匹配
+// 匹配不推断对象类别适用性，也不填补对象缺失值或计算有效默认值。
 // project.numbering / drawings：DB2 与 DG 的部分语义
 // project.drawingModelAssociations：用已验证 GUID 连接图纸记录和模型对象
 // project.associations：主库、配套编号库、组件库与资源的关联依据
@@ -135,7 +139,7 @@ tekla::db1::parseRawDatabase("model.db2", raw, error, options);
 
 ## 可重复的公开语料回归
 
-`tests/corpus.json` 记录 283 个外部文件的固定提交 URL、大小、SHA-256 和 373 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
+`tests/corpus.json` 记录 283 个外部文件的固定提交 URL、大小、SHA-256 和 463 个用例。第三方模型不随仓库分发。需要 Python 3.11+：
 
 ```powershell
 python -B tools/corpus.py --download `
@@ -146,7 +150,7 @@ python -B tools/corpus.py --download `
 
 Ninja/MinGW 构建的 exe 通常直接位于构建目录，不含 `Release` 子目录；Linux 使用无 `.exe` 的路径。不带 `--download` 时只验证本地文件。下载约 60 MB，完整文件清单以 manifest 为准。
 
-包含 30 份主库、30 份组件库、60 份 DB2、7 份 DG 及配套 DBV/目录。373 个用例中 4 个是 7.82 DB1 语义拒绝测试，不计入语义支持成功数。新增一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，并核对 28 个 DG→DB1 GUID 引用。默认 CTest 另有 43 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
+包含 30 份主库、30 份组件库、60 份 DB2、7 份 DG、90 份 DBV 及配套目录。463 个用例中 4 个是 7.82 DB1 语义拒绝测试，不计入语义支持成功数。一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，同时核对 28 个 DG→DB1 GUID 引用、118 条 DB1→环境定义名称/类型匹配，并检查官方 OBJECT_LOCKED 示例中的标签次序。默认 CTest 另有 51 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
 
 GitHub Actions 配置 Linux C++17/20、ASan/UBSan、Windows MSVC、安装后独立消费和 Linux OCCT 构建。运行状态以对应提交的 Actions 结果为准。
 

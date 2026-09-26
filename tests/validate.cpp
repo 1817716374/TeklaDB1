@@ -84,6 +84,22 @@ int run(const std::string& mode, const std::filesystem::path& path)
             if (failed) return 1;
             if (mode=="related_evidence")
             {
+                if (!project.environment || project.optionsDatabases.size()!=2) throw std::runtime_error("project DBV semantics missing");
+                // Independent documented example, not a claim that every DBV
+                // flag or the training model's whole environment is verified.
+                // https://support.tekla.com/doc/tekla-structures/2025/sys_objects_inp_properties
+                const auto& attributes=project.environment->attributes;
+                const auto locked=std::find_if(attributes.begin(),attributes.end(),[](const auto& e){ return e.second.name=="OBJECT_LOCKED"; });
+                if (locked==attributes.end() || locked->second.label!="j_Locked" || locked->second.choices.size()<3 ||
+                    locked->second.choices[0].label!="" || locked->second.choices[1].label!="j_No" || locked->second.choices[2].label!="j_Yes")
+                    throw std::runtime_error("OBJECT_LOCKED differs from documented option labels/order");
+                if (project.attributeDefinitionAssociations.empty()) throw std::runtime_error("no DB1/environment name/type associations");
+                for (const auto& link:project.attributeDefinitionAssociations)
+                {
+                    const auto& property=project.model.properties.at(link.modelObjectId).at(link.propertyIndex);
+                    if (property.name!=attributes.at(link.attributeDefinitionId).name) throw std::runtime_error("bad attribute definition association");
+                }
+                std::cout<<"documented_attribute_choices=3 model_attribute_definition_links="<<project.attributeDefinitionAssociations.size()<<'\n';
                 // Independent source: Tekla's text log, not output from this parser.
                 std::ifstream log(path/"numberinghistory.txt",std::ios::binary);
                 if (!log) throw std::runtime_error("numbering evidence log missing");
@@ -145,6 +161,55 @@ int run(const std::string& mode, const std::filesystem::path& path)
             std::cout<<"version="<<numbering.raw.storageVersion<<" tables="<<numbering.raw.tables.size()
                      <<" series="<<numbering.series.size()<<" guid="<<numbering.raw.databaseGuid
                      <<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
+        }
+        else if (mode=="environment" || mode=="options")
+        {
+            Fingerprint hash;
+            const auto value=[&](const tekla::StoredValue& v) {
+                hash.number(v.index());
+                std::visit([&](const auto& x) {
+                    using T=std::decay_t<decltype(x)>;
+                    if constexpr(std::is_same_v<T,std::string>) hash.text(x);
+                    else if constexpr(std::is_same_v<T,double>) hash.real(x);
+                    else hash.number(static_cast<std::uint64_t>(x));
+                },v);
+            };
+            if (mode=="environment")
+            {
+                tekla::EnvironmentDatabase db;
+                if (!tekla::parseEnvironmentDatabase(path,db,error)) { std::cerr<<error<<'\n'; return 1; }
+                std::size_t links=0,choices=0;
+                for (const auto& entry:db.objectClasses)
+                {
+                    hash.number(entry.first); hash.text(entry.second.name);
+                    for (auto id:entry.second.attributeIds) { hash.number(id); ++links; }
+                }
+                for (const auto& entry:db.metadata) { hash.number(entry.first); for (auto x:entry.second.fields) hash.number(x); }
+                for (const auto& entry:db.attributes)
+                {
+                    const auto& a=entry.second;
+                    hash.number(a.id); hash.text(a.name); hash.text(a.label); hash.number(static_cast<unsigned>(a.storageKind));
+                    hash.number(a.metadataId); if (a.storedValue) value(*a.storedValue);
+                    for (const auto& v:a.additionalNumericFields) value(v);
+                    for (const auto& c:a.choices) { hash.number(c.id); hash.number(c.index); hash.number(c.integerValue); hash.text(c.label); ++choices; }
+                }
+                std::cout<<"classes="<<db.objectClasses.size()<<" attributes="<<db.attributes.size()<<" metadata="<<db.metadata.size()
+                         <<" links="<<links<<" choices="<<choices;
+            }
+            else
+            {
+                tekla::OptionsDatabase db;
+                if (!tekla::parseOptionsDatabase(path,db,error)) { std::cerr<<error<<'\n'; return 1; }
+                std::array<unsigned,4> counts{}; unsigned differences=0;
+                for (const auto& entry:db.options)
+                {
+                    const auto& o=entry.second; hash.number(o.id); hash.text(o.name); hash.number(o.flags);
+                    ++counts[static_cast<unsigned>(o.kind)]; differences+=o.valueSlots[0]!=o.valueSlots[1];
+                    for (const auto& v:o.valueSlots) value(v);
+                }
+                std::cout<<"options="<<db.options.size()<<" bool="<<counts[0]<<" int="<<counts[1]<<" real="<<counts[2]<<" string="<<counts[3]<<" differing="<<differences;
+            }
+            std::cout<<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
         }
         else if (mode=="drawing")
         {

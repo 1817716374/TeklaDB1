@@ -20,6 +20,7 @@ add_library(tekla_db1
     src/Parser.cpp
     src/Project.cpp
     src/RelatedFormats.cpp
+    src/Environment.cpp
 )
 add_library(TeklaDB1::tekla_db1 ALIAS tekla_db1)
 add_library(TeklaDB1::core ALIAS tekla_db1)
@@ -96,6 +97,12 @@ if(TEKLADB1_BUILD_TESTS)
     target_link_libraries(tekladb1_regression PRIVATE TeklaDB1::core ZLIB::ZLIB)
     add_executable(tekla_related_test tests/related.cpp)
     target_link_libraries(tekla_related_test PRIVATE TeklaFormats::core)
+    add_executable(tekla_environment_test tests/environment.cpp)
+    target_link_libraries(tekla_environment_test PRIVATE TeklaFormats::core)
+    foreach(case environment_valid options_valid dbv_embedded_magic dbv_truncations
+            environment_invalid options_invalid dbv_unknown_rows dbv_limit)
+        add_test(NAME related.${case} COMMAND tekla_environment_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     foreach(case numbering_valid numbering_truncated numbering_invalid drawing_valid drawing_cycle
             drawing_missing_chunk drawing_duplicate drawing_missing_property drawing_signature
             drawing_nonfinite drawing_truncated drawing_limit numbering_unknown drawing_unknown)

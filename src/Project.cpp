@@ -131,6 +131,25 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             if (!entry.second.guid.empty()) modelIdsByGuid[lower(entry.second.guid)].push_back(entry.first);
         for (const auto& file:companions)
         {
+            if (file.role==FileRole::Environment && options.readEnvironment)
+            {
+                EnvironmentDatabase environment; std::string diagnostic;
+                if (!parseEnvironmentDatabase(file.path,environment,diagnostic,options.rawOptions)) { failure(file.path,diagnostic); continue; }
+                if (result.environment) throw std::runtime_error("ambiguous project environment database");
+                for (const auto& item:environment.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
+                mark(file.path,ReadLevel::PartialSemantic,"attribute definitions, classes and integer choices decoded; metadata flags remain raw");
+                result.associations.push_back({result.model.databasePath,file.path,"model-local attribute definitions; object class applicability is not inferred"});
+                result.environment=std::move(environment);
+            }
+            if (file.role==FileRole::Options && options.readOptions)
+            {
+                OptionsDatabase database; std::string diagnostic;
+                if (!parseOptionsDatabase(file.path,database,diagnostic,options.rawOptions)) { failure(file.path,diagnostic); continue; }
+                for (const auto& item:database.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
+                mark(file.path,ReadLevel::PartialSemantic,"typed option slots decoded; effective/default precedence unverified");
+                result.associations.push_back({result.model.databasePath,file.path,"model-local stored options; no effective-value precedence inferred"});
+                result.optionsDatabases.emplace(file.path,std::move(database));
+            }
             if (file.role==FileRole::Numbering && options.readNumbering)
             {
                 NumberingDatabase numbering; std::string diagnostic;
@@ -168,6 +187,25 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 mark(file.path,ReadLevel::PartialSemantic,"drawing properties, strings and sheet size decoded; graphics remain raw");
                 result.drawings.emplace(file.path,std::move(drawing));
             }
+        }
+
+        if (result.environment)
+        {
+            std::map<std::string,const AttributeDefinition*> definitions;
+            for (const auto& entry:result.environment->attributes) definitions.emplace(entry.second.name,&entry.second);
+            for (const auto& entry:result.model.properties)
+                for (std::size_t i=0;i<entry.second.size();++i)
+                {
+                    const auto& property=entry.second[i]; const auto found=definitions.find(property.name);
+                    if (found==definitions.end()) continue;
+                    const auto kind=property.kind==db1::Property::Kind::Integer ? StoredValueKind::Integer :
+                        property.kind==db1::Property::Kind::Double ? StoredValueKind::Real : StoredValueKind::String;
+                    if (kind==found->second->storageKind) result.attributeDefinitionAssociations.push_back({entry.first,i,found->second->id});
+                    else result.diagnostics.push_back("model attribute storage type differs from environment definition: "+property.name);
+                }
+            std::sort(result.attributeDefinitionAssociations.begin(),result.attributeDefinitionAssociations.end(),[](const auto& a,const auto& b) {
+                return std::tie(a.modelObjectId,a.propertyIndex)<std::tie(b.modelObjectId,b.propertyIndex);
+            });
         }
 
         std::vector<std::filesystem::path> roots{root};

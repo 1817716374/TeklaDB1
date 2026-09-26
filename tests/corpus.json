@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. Explicit 7.82 failures are coverage boundaries. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. Explicit 7.82 failures are coverage boundaries. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -1751,7 +1751,7 @@
       "mode": "project",
       "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM",
       "exit": 0,
-      "stdout": "version=8.95 parts=178 operative=0 profiles=3277 bolts=67 welds=269 assemblies=83 components=39 properties=462 parameters=0 custom=0 unhandled=0 fingerprint=9bf382fff30891f7\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=178 operative=0 profiles=3277 bolts=67 welds=269 assemblies=83 components=39 properties=462 parameters=0 custom=0 unhandled=0 fingerprint=9bf382fff30891f7\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db2",
@@ -1765,21 +1765,21 @@
       "mode": "raw",
       "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=144129 fingerprint=f0a74d9973835575"
+      "stdout": "version=DBV tables=15 records=3707 opaque=0 bytes=144129 fingerprint=f0a74d9973835575"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/options_drawings.db",
       "mode": "raw",
       "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=319038 fingerprint=8dc84991d9770fe7"
+      "stdout": "version=DBV tables=9 records=452 opaque=0 bytes=319038 fingerprint=8dc84991d9770fe7"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/options_model.db",
       "mode": "raw",
       "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441904 fingerprint=28a7adbcdf9e326a"
+      "stdout": "version=DBV tables=9 records=1024 opaque=0 bytes=441904 fingerprint=28a7adbcdf9e326a"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/xslib.db1",
@@ -1821,7 +1821,7 @@
       "mode": "project",
       "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico",
       "exit": 0,
-      "stdout": "version=8.95 parts=0 operative=0 profiles=3277 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=0 operative=0 profiles=3277 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db2",
@@ -1835,21 +1835,21 @@
       "mode": "raw",
       "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=149954 fingerprint=2b68321e8b0bd780"
+      "stdout": "version=DBV tables=15 records=3791 opaque=0 bytes=149954 fingerprint=2b68321e8b0bd780"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/options_drawings.db",
       "mode": "raw",
       "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=318526 fingerprint=6150e7c46e6099ff"
+      "stdout": "version=DBV tables=9 records=452 opaque=0 bytes=318526 fingerprint=6150e7c46e6099ff"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/options_model.db",
       "mode": "raw",
       "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441392 fingerprint=16260a23e0307703"
+      "stdout": "version=DBV tables=9 records=1024 opaque=0 bytes=441392 fingerprint=16260a23e0307703"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/xslib.db1",
@@ -1898,21 +1898,21 @@
       "mode": "raw",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B/environment.db",
       "exit": 0,
-      "stdout": "version=DBV-legacy tables=9 records=0 opaque=8 bytes=213197 fingerprint=63b82c9f16db6544"
+      "stdout": "version=DBV-legacy tables=9 records=5022 opaque=0 bytes=213197 fingerprint=63b82c9f16db6544"
     },
     {
       "name": "raw:PSDBIM__EXCEL-1246A-BLDG-B/options_drawings.db",
       "mode": "raw",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV-legacy tables=9 records=0 opaque=5 bytes=322188 fingerprint=e7d5d8548bdd9705"
+      "stdout": "version=DBV-legacy tables=9 records=421 opaque=0 bytes=322188 fingerprint=e7d5d8548bdd9705"
     },
     {
       "name": "raw:PSDBIM__EXCEL-1246A-BLDG-B/options_model.db",
       "mode": "raw",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV-legacy tables=9 records=0 opaque=5 bytes=414396 fingerprint=b70207c0a15e1067"
+      "stdout": "version=DBV-legacy tables=9 records=957 opaque=0 bytes=414396 fingerprint=b70207c0a15e1067"
     },
     {
       "name": "raw:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
@@ -1961,21 +1961,21 @@
       "mode": "raw",
       "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/environment.db",
       "exit": 0,
-      "stdout": "version=DBV-legacy tables=9 records=3067 opaque=1 bytes=99933 fingerprint=9d4362a4642b6a45"
+      "stdout": "version=DBV-legacy tables=9 records=3067 opaque=0 bytes=99933 fingerprint=9d4362a4642b6a45"
     },
     {
       "name": "raw:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/options_drawings.db",
       "mode": "raw",
       "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV-legacy tables=9 records=418 opaque=1 bytes=308775 fingerprint=5d82083dc36cc7da"
+      "stdout": "version=DBV-legacy tables=9 records=418 opaque=0 bytes=308775 fingerprint=5d82083dc36cc7da"
     },
     {
       "name": "raw:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/options_model.db",
       "mode": "raw",
       "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV-legacy tables=9 records=954 opaque=1 bytes=398899 fingerprint=7d3f04e523df7448"
+      "stdout": "version=DBV-legacy tables=9 records=954 opaque=0 bytes=398899 fingerprint=7d3f04e523df7448"
     },
     {
       "name": "raw:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/xslib.db1",
@@ -2017,7 +2017,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291",
       "exit": 0,
-      "stdout": "version=8.95 parts=294 operative=102 profiles=0 bolts=151 welds=181 assemblies=143 components=91 properties=884 parameters=0 custom=0 unhandled=0 fingerprint=71d1740e20f4b6c8\nfiles=7 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=294 operative=102 profiles=0 bolts=151 welds=181 assemblies=143 components=91 properties=884 parameters=0 custom=0 unhandled=0 fingerprint=71d1740e20f4b6c8\nfiles=7 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db2",
@@ -2031,21 +2031,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=98627 fingerprint=d7fd568a27a4cca8"
+      "stdout": "version=DBV tables=15 records=2423 opaque=0 bytes=98627 fingerprint=d7fd568a27a4cca8"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=ce969d4fd3d1ae55"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=ce969d4fd3d1ae55"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=19414a6d3c368714"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=19414a6d3c368714"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/xslib.db1",
@@ -2087,7 +2087,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472",
       "exit": 0,
-      "stdout": "version=8.95 parts=270 operative=106 profiles=0 bolts=138 welds=166 assemblies=132 components=82 properties=822 parameters=0 custom=0 unhandled=0 fingerprint=42f6a0573c8ae868\nfiles=7 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=270 operative=106 profiles=0 bolts=138 welds=166 assemblies=132 components=82 properties=822 parameters=0 custom=0 unhandled=0 fingerprint=42f6a0573c8ae868\nfiles=7 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db2",
@@ -2101,21 +2101,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=98627 fingerprint=ca7f18a08bfde938"
+      "stdout": "version=DBV tables=15 records=2423 opaque=0 bytes=98627 fingerprint=ca7f18a08bfde938"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=38e78ff5caa4985"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=38e78ff5caa4985"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=8d72ace49c9be168"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=8d72ace49c9be168"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/xslib.db1",
@@ -2157,7 +2157,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=88 profiles=0 bolts=118 welds=142 assemblies=113 components=70 properties=701 parameters=0 custom=0 unhandled=0 fingerprint=25f0651ee68bda62\nfiles=7 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=88 profiles=0 bolts=118 welds=142 assemblies=113 components=70 properties=701 parameters=0 custom=0 unhandled=0 fingerprint=25f0651ee68bda62\nfiles=7 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db2",
@@ -2171,21 +2171,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=98627 fingerprint=5595cde55d3b1064"
+      "stdout": "version=DBV tables=15 records=2423 opaque=0 bytes=98627 fingerprint=5595cde55d3b1064"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=c66bd04a8359dbc5"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=c66bd04a8359dbc5"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=1bc8eb12b42c73f0"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=1bc8eb12b42c73f0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/xslib.db1",
@@ -2227,7 +2227,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35",
       "exit": 0,
-      "stdout": "version=8.95 parts=234 operative=82 profiles=3375 bolts=120 welds=144 assemblies=114 components=72 properties=705 parameters=0 custom=0 unhandled=0 fingerprint=7ec7b50213d15e9c\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=234 operative=82 profiles=3375 bolts=120 welds=144 assemblies=114 components=72 properties=705 parameters=0 custom=0 unhandled=0 fingerprint=7ec7b50213d15e9c\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db2",
@@ -2241,21 +2241,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=76af8d50f9d6ce6f"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=76af8d50f9d6ce6f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=7b9192adbeea9cd7"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=7b9192adbeea9cd7"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=cdc58fb9d346b77"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=cdc58fb9d346b77"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/xslib.db1",
@@ -2297,7 +2297,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104",
       "exit": 0,
-      "stdout": "version=8.95 parts=66 operative=32 profiles=0 bolts=32 welds=40 assemblies=34 components=16 properties=204 parameters=0 custom=0 unhandled=0 fingerprint=bcdb6bf1befc5780\nfiles=7 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=66 operative=32 profiles=0 bolts=32 welds=40 assemblies=34 components=16 properties=204 parameters=0 custom=0 unhandled=0 fingerprint=bcdb6bf1befc5780\nfiles=7 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db2",
@@ -2311,21 +2311,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=98627 fingerprint=bd04feebe12621c8"
+      "stdout": "version=DBV tables=15 records=2423 opaque=0 bytes=98627 fingerprint=bd04feebe12621c8"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=b065a42a1c102399"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=b065a42a1c102399"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=c6b445755f1f6780"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=c6b445755f1f6780"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/xslib.db1",
@@ -2367,7 +2367,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279",
       "exit": 0,
-      "stdout": "version=8.95 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=7 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=7 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db2",
@@ -2381,21 +2381,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=98595 fingerprint=2f6b7ae270523c45"
+      "stdout": "version=DBV tables=15 records=2423 opaque=0 bytes=98595 fingerprint=2f6b7ae270523c45"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311688 fingerprint=b8449b3fd6f0346b"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311688 fingerprint=b8449b3fd6f0346b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441169 fingerprint=ef0c0ff4c3335cab"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441169 fingerprint=ef0c0ff4c3335cab"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/xslib.db1",
@@ -2437,7 +2437,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67",
       "exit": 0,
-      "stdout": "version=8.95 parts=318 operative=100 profiles=0 bolts=164 welds=196 assemblies=154 components=100 properties=948 parameters=0 custom=0 unhandled=0 fingerprint=16d11c7637ad9f\nfiles=7 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=318 operative=100 profiles=0 bolts=164 welds=196 assemblies=154 components=100 properties=948 parameters=0 custom=0 unhandled=0 fingerprint=16d11c7637ad9f\nfiles=7 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db2",
@@ -2451,21 +2451,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=98627 fingerprint=46a8f885158cbc74"
+      "stdout": "version=DBV tables=15 records=2423 opaque=0 bytes=98627 fingerprint=46a8f885158cbc74"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=b9625d4dd44bdda5"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=b9625d4dd44bdda5"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=734ec16938cb8328"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=734ec16938cb8328"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/xslib.db1",
@@ -2493,7 +2493,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=e57743ac4f6f884f"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=e57743ac4f6f884f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db1",
@@ -2514,7 +2514,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b59d886a73e379bf\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b59d886a73e379bf\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db2",
@@ -2528,14 +2528,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=d00cb4d1e6b9589f"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=d00cb4d1e6b9589f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=cbe7897b76ade693"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=cbe7897b76ade693"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/xslib.db1",
@@ -2563,7 +2563,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=9ebe9dc515e3dc6b"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=9ebe9dc515e3dc6b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db1",
@@ -2584,7 +2584,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=31bb2d8dd292e6b0\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=31bb2d8dd292e6b0\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db2",
@@ -2598,14 +2598,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=a3c3b2fe8460035f"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=a3c3b2fe8460035f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=92884908ceb15f33"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=92884908ceb15f33"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/xslib.db1",
@@ -2633,7 +2633,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=c7b18c6ee7f8f367"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=c7b18c6ee7f8f367"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db1",
@@ -2654,7 +2654,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=86c37407798fb8c1\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=86c37407798fb8c1\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db2",
@@ -2668,14 +2668,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=771e8049c8a2353b"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=771e8049c8a2353b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=eb03f2a66cd1655b"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=eb03f2a66cd1655b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/xslib.db1",
@@ -2703,7 +2703,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=fb6fe11f466222e"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=fb6fe11f466222e"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db1",
@@ -2724,7 +2724,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=93fbf509962c4573\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=93fbf509962c4573\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db2",
@@ -2738,14 +2738,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=538ecc6be565ca0b"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=538ecc6be565ca0b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=2ac4ccf93536c6bb"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=2ac4ccf93536c6bb"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/xslib.db1",
@@ -2773,7 +2773,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=d5aaba8f863f30c3"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=d5aaba8f863f30c3"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db1",
@@ -2794,7 +2794,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=9430c812aa1d32b3\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=9430c812aa1d32b3\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db2",
@@ -2808,14 +2808,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=189162e37f87a40f"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=189162e37f87a40f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=696ceb24b423cf1f"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=696ceb24b423cf1f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/xslib.db1",
@@ -2843,7 +2843,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=364dcd8ad2796e70"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=364dcd8ad2796e70"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db1",
@@ -2864,7 +2864,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=46c52df263cc7cb7\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=46c52df263cc7cb7\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db2",
@@ -2878,14 +2878,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=7b1553b74b61dbc7"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=7b1553b74b61dbc7"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=4cb6bd44ffe326bb"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=4cb6bd44ffe326bb"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/xslib.db1",
@@ -2913,7 +2913,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=b7bc2456ee3e203f"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=b7bc2456ee3e203f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db1",
@@ -2934,7 +2934,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=4c866a42e9d3ece9\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=4c866a42e9d3ece9\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db2",
@@ -2948,14 +2948,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=38ce90c98960b0f3"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=38ce90c98960b0f3"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=a58e791244b111b7"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=a58e791244b111b7"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/xslib.db1",
@@ -2983,7 +2983,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=5441cae1c5f187b"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=5441cae1c5f187b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db1",
@@ -3004,7 +3004,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=d070294075484b55\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=d070294075484b55\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db2",
@@ -3018,14 +3018,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=5ca195431c9c06bf"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=5ca195431c9c06bf"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=3a63ac28c7c6922b"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=3a63ac28c7c6922b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/xslib.db1",
@@ -3053,7 +3053,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=9841ca7494a25897"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=9841ca7494a25897"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db1",
@@ -3074,7 +3074,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=e318598901f08067\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=e318598901f08067\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db2",
@@ -3088,14 +3088,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=9004d78b83bf0eea"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=9004d78b83bf0eea"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=85ddd50eeadd3a24"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=85ddd50eeadd3a24"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/xslib.db1",
@@ -3123,7 +3123,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=1eea67daf54e444f"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=1eea67daf54e444f"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db1",
@@ -3144,7 +3144,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=c9414f0c6474fedd\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=c9414f0c6474fedd\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db2",
@@ -3158,14 +3158,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=3a15f6b3e708a217"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=3a15f6b3e708a217"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=40a5988f594b1853"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=40a5988f594b1853"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/xslib.db1",
@@ -3193,7 +3193,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=5db5dada70a0009b"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=5db5dada70a0009b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db1",
@@ -3214,7 +3214,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=b0fc2b1ad004922d\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=b0fc2b1ad004922d\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db2",
@@ -3228,14 +3228,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=2d7d13a307815f73"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=2d7d13a307815f73"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=226e3839b7ce23ef"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=226e3839b7ce23ef"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/xslib.db1",
@@ -3263,7 +3263,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=3b9144b96e98c9fb"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=3b9144b96e98c9fb"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db1",
@@ -3284,7 +3284,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b852afea0e3e0218\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b852afea0e3e0218\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db2",
@@ -3298,14 +3298,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=c350c5354f6b3367"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=c350c5354f6b3367"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=2464bf39204072cb"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=2464bf39204072cb"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/xslib.db1",
@@ -3333,7 +3333,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=30fd8d797e63cfd7"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=30fd8d797e63cfd7"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db1",
@@ -3354,7 +3354,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=becdfa5c27a7e2a9\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=becdfa5c27a7e2a9\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db2",
@@ -3368,14 +3368,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=a3635f929360c803"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=a3635f929360c803"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=54c08349971a647b"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=54c08349971a647b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/xslib.db1",
@@ -3403,7 +3403,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=300942e01323eb0b"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=300942e01323eb0b"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db1",
@@ -3424,7 +3424,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=551d3737eea4864b\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=551d3737eea4864b\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db2",
@@ -3438,14 +3438,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=8f576699bb4a61c7"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=8f576699bb4a61c7"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=20eeba7466fbcbd3"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=20eeba7466fbcbd3"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/xslib.db1",
@@ -3473,7 +3473,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109214 fingerprint=6707cf51861aedef"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109214 fingerprint=6707cf51861aedef"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db1",
@@ -3494,7 +3494,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=1cef2c594e2b7e48\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=1cef2c594e2b7e48\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db2",
@@ -3508,14 +3508,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=74dcf2b126fdda83"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=74dcf2b126fdda83"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=7413c0d885f0fd87"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=7413c0d885f0fd87"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/xslib.db1",
@@ -3543,7 +3543,7 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=109182 fingerprint=712fd7ae12f0bd8d"
+      "stdout": "version=DBV tables=15 records=2629 opaque=0 bytes=109182 fingerprint=712fd7ae12f0bd8d"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db1",
@@ -3564,7 +3564,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764",
       "exit": 0,
-      "stdout": "version=8.95 parts=0 operative=0 profiles=3375 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=4 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=0 operative=0 profiles=3375 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db2",
@@ -3578,14 +3578,14 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311688 fingerprint=4f52d51af35165d3"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311688 fingerprint=4f52d51af35165d3"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441169 fingerprint=2698e88ab87895f7"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441169 fingerprint=2698e88ab87895f7"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/xslib.db1",
@@ -3613,21 +3613,21 @@
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=98627 fingerprint=5a5647bbfd9f9de4"
+      "stdout": "version=DBV tables=15 records=2423 opaque=0 bytes=98627 fingerprint=5a5647bbfd9f9de4"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/options_drawings.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=311720 fingerprint=ec1c6915ec85127d"
+      "stdout": "version=DBV tables=9 records=446 opaque=0 bytes=311720 fingerprint=ec1c6915ec85127d"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/options_model.db",
       "mode": "raw",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=441201 fingerprint=682e93909ca0ff8c"
+      "stdout": "version=DBV tables=9 records=1023 opaque=0 bytes=441201 fingerprint=682e93909ca0ff8c"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db1",
@@ -3648,7 +3648,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143",
       "exit": 0,
-      "stdout": "version=8.95 parts=423 operative=162 profiles=0 bolts=222 welds=262 assemblies=201 components=142 properties=1305 parameters=0 custom=0 unhandled=0 fingerprint=aa4e35d2479afa79\nfiles=7 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=423 operative=162 profiles=0 bolts=222 welds=262 assemblies=201 components=142 properties=1305 parameters=0 custom=0 unhandled=0 fingerprint=aa4e35d2479afa79\nfiles=7 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db2",
@@ -3683,7 +3683,7 @@
       "mode": "raw",
       "path": "steel-detailing/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=2825 opaque=1 bytes=118167 fingerprint=6a2e92e389dcfd3d"
+      "stdout": "version=DBV tables=15 records=2825 opaque=0 bytes=118167 fingerprint=6a2e92e389dcfd3d"
     },
     {
       "name": "raw:steel-detailing/New model 3.db1",
@@ -3704,7 +3704,7 @@
       "mode": "project",
       "path": "steel-detailing",
       "exit": 0,
-      "stdout": "version=9.52 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=3 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=3 raw=5 failed=0 drawings=0"
+      "stdout": "version=9.52 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=3 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=6 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:steel-detailing/New model 3.db2",
@@ -3718,14 +3718,14 @@
       "mode": "raw",
       "path": "steel-detailing/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=459 opaque=1 bytes=333363 fingerprint=2fbb3be29fff1abf"
+      "stdout": "version=DBV tables=9 records=459 opaque=0 bytes=333363 fingerprint=2fbb3be29fff1abf"
     },
     {
       "name": "raw:steel-detailing/options_model.db",
       "mode": "raw",
       "path": "steel-detailing/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=1069 opaque=1 bytes=450267 fingerprint=a15d2c14804acf03"
+      "stdout": "version=DBV tables=9 records=1069 opaque=0 bytes=450267 fingerprint=a15d2c14804acf03"
     },
     {
       "name": "raw:steel-detailing/xslib.db1",
@@ -3753,21 +3753,21 @@
       "mode": "raw",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/environment.db",
       "exit": 0,
-      "stdout": "version=DBV tables=15 records=0 opaque=8 bytes=143776 fingerprint=11d49e98205654d1"
+      "stdout": "version=DBV tables=15 records=3483 opaque=0 bytes=143776 fingerprint=11d49e98205654d1"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/options_drawings.db",
       "mode": "raw",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/options_drawings.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=342370 fingerprint=efedaefec6a5bcbc"
+      "stdout": "version=DBV tables=9 records=464 opaque=0 bytes=342370 fingerprint=efedaefec6a5bcbc"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/options_model.db",
       "mode": "raw",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/options_model.db",
       "exit": 0,
-      "stdout": "version=DBV tables=9 records=0 opaque=5 bytes=459619 fingerprint=72a070bfcc305cc6"
+      "stdout": "version=DBV tables=9 records=1077 opaque=0 bytes=459619 fingerprint=72a070bfcc305cc6"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db1",
@@ -3788,7 +3788,7 @@
       "mode": "project",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
       "exit": 0,
-      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=15 associations=10 raw=5 failed=0 drawings=7"
+      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=15 associations=13 raw=5 failed=0 drawings=7"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db2",
@@ -4341,7 +4341,637 @@
       "mode": "related_evidence",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
       "exit": 0,
-      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=15 associations=10 raw=5 failed=0 drawings=7\nindependent_numbering_counters=10 drawing_model_guid_links=28"
+      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=15 associations=13 raw=5 failed=0 drawings=7\ndocumented_attribute_choices=3 model_attribute_definition_links=118\nindependent_numbering_counters=10 drawing_model_guid_links=28"
+    },
+    {
+      "name": "dbv-semantic-1",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=251 metadata=25 links=1905 choices=200 fingerprint=ed543f90eead35b8"
+    },
+    {
+      "name": "dbv-semantic-2",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=93 fingerprint=fac3f687f061cc42"
+    },
+    {
+      "name": "dbv-semantic-3",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=243 fingerprint=ac781c6e62b3c9c8"
+    },
+    {
+      "name": "dbv-semantic-4",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=251 metadata=25 links=1905 choices=200 fingerprint=ed543f90eead35b8"
+    },
+    {
+      "name": "dbv-semantic-5",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=93 fingerprint=fac3f687f061cc42"
+    },
+    {
+      "name": "dbv-semantic-6",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=243 fingerprint=ac781c6e62b3c9c8"
+    },
+    {
+      "name": "dbv-semantic-7",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=251 metadata=25 links=1905 choices=200 fingerprint=ed543f90eead35b8"
+    },
+    {
+      "name": "dbv-semantic-8",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=93 fingerprint=fac3f687f061cc42"
+    },
+    {
+      "name": "dbv-semantic-9",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=243 fingerprint=ac781c6e62b3c9c8"
+    },
+    {
+      "name": "dbv-semantic-10",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-11",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-12",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-13",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=251 metadata=25 links=1905 choices=200 fingerprint=ed543f90eead35b8"
+    },
+    {
+      "name": "dbv-semantic-14",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=93 fingerprint=fac3f687f061cc42"
+    },
+    {
+      "name": "dbv-semantic-15",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=243 fingerprint=ac781c6e62b3c9c8"
+    },
+    {
+      "name": "dbv-semantic-16",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=251 metadata=25 links=1905 choices=200 fingerprint=a516a06b5c4fbf1c"
+    },
+    {
+      "name": "dbv-semantic-17",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=93 fingerprint=3a9823de041c4fce"
+    },
+    {
+      "name": "dbv-semantic-18",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=243 fingerprint=2478352fc870805"
+    },
+    {
+      "name": "dbv-semantic-19",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=251 metadata=25 links=1905 choices=200 fingerprint=ed543f90eead35b8"
+    },
+    {
+      "name": "dbv-semantic-20",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=93 fingerprint=fac3f687f061cc42"
+    },
+    {
+      "name": "dbv-semantic-21",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=243 fingerprint=ac781c6e62b3c9c8"
+    },
+    {
+      "name": "dbv-semantic-22",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-23",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-24",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-25",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-26",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-27",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-28",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-29",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-30",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-31",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-32",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-33",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-34",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-35",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-36",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-37",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-38",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-39",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-40",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-41",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-42",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-43",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-44",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-45",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-46",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-47",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-48",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-49",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-50",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-51",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-52",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-53",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-54",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-55",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-56",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-57",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-58",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-59",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-60",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-61",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-62",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-63",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-64",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=a217fc26e9a902df"
+    },
+    {
+      "name": "dbv-semantic-65",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=d1c53e5d804f8f65"
+    },
+    {
+      "name": "dbv-semantic-66",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=39759e4f5a0b6251"
+    },
+    {
+      "name": "dbv-semantic-67",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=277 metadata=29 links=2032 choices=249 fingerprint=9cf8638d2b995865"
+    },
+    {
+      "name": "dbv-semantic-68",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=94 fingerprint=2c40d114a559ffb5"
+    },
+    {
+      "name": "dbv-semantic-69",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=242 fingerprint=27f589b6fc616e90"
+    },
+    {
+      "name": "dbv-semantic-70",
+      "mode": "environment",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=251 metadata=25 links=1905 choices=200 fingerprint=ed543f90eead35b8"
+    },
+    {
+      "name": "dbv-semantic-71",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=446 bool=178 int=72 real=66 string=130 differing=93 fingerprint=fac3f687f061cc42"
+    },
+    {
+      "name": "dbv-semantic-72",
+      "mode": "options",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/options_model.db",
+      "exit": 0,
+      "stdout": "options=1023 bool=228 int=128 real=507 string=160 differing=243 fingerprint=ac781c6e62b3c9c8"
+    },
+    {
+      "name": "dbv-semantic-73",
+      "mode": "environment",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/environment.db",
+      "exit": 0,
+      "stdout": "classes=34 attributes=679 metadata=31 links=3630 choices=648 fingerprint=2c84174c3b6ffb49"
+    },
+    {
+      "name": "dbv-semantic-74",
+      "mode": "options",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=421 bool=160 int=67 real=63 string=131 differing=127 fingerprint=f5d2b58373e4fe70"
+    },
+    {
+      "name": "dbv-semantic-75",
+      "mode": "options",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/options_model.db",
+      "exit": 0,
+      "stdout": "options=957 bool=212 int=120 real=480 string=145 differing=242 fingerprint=9a555eeea3d03df"
+    },
+    {
+      "name": "dbv-semantic-76",
+      "mode": "environment",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/environment.db",
+      "exit": 0,
+      "stdout": "classes=34 attributes=288 metadata=21 links=2595 choices=129 fingerprint=1b15a22dcad6363d"
+    },
+    {
+      "name": "dbv-semantic-77",
+      "mode": "options",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=418 bool=159 int=67 real=62 string=130 differing=92 fingerprint=bb6294a74c629a1c"
+    },
+    {
+      "name": "dbv-semantic-78",
+      "mode": "options",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/options_model.db",
+      "exit": 0,
+      "stdout": "options=954 bool=212 int=119 real=480 string=143 differing=220 fingerprint=942a23e5e5f87048"
+    },
+    {
+      "name": "dbv-semantic-79",
+      "mode": "environment",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/environment.db",
+      "exit": 0,
+      "stdout": "classes=43 attributes=330 metadata=29 links=2992 choices=313 fingerprint=56d75630257bb26b"
+    },
+    {
+      "name": "dbv-semantic-80",
+      "mode": "options",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=452 bool=179 int=74 real=66 string=133 differing=108 fingerprint=e097a01ef33bffa"
+    },
+    {
+      "name": "dbv-semantic-81",
+      "mode": "options",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/options_model.db",
+      "exit": 0,
+      "stdout": "options=1024 bool=229 int=128 real=507 string=160 differing=257 fingerprint=a3e4813f03c2abf6"
+    },
+    {
+      "name": "dbv-semantic-82",
+      "mode": "environment",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/environment.db",
+      "exit": 0,
+      "stdout": "classes=43 attributes=341 metadata=31 links=3014 choices=362 fingerprint=f5103573d5c28403"
+    },
+    {
+      "name": "dbv-semantic-83",
+      "mode": "options",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=452 bool=179 int=74 real=66 string=133 differing=108 fingerprint=5af852d28a722ab6"
+    },
+    {
+      "name": "dbv-semantic-84",
+      "mode": "options",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/options_model.db",
+      "exit": 0,
+      "stdout": "options=1024 bool=229 int=128 real=507 string=160 differing=257 fingerprint=fed2cc165c0ad5a3"
+    },
+    {
+      "name": "dbv-semantic-85",
+      "mode": "environment",
+      "path": "steel-detailing/environment.db",
+      "exit": 0,
+      "stdout": "classes=45 attributes=308 metadata=26 links=2183 choices=263 fingerprint=e01efac285e99607"
+    },
+    {
+      "name": "dbv-semantic-86",
+      "mode": "options",
+      "path": "steel-detailing/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=459 bool=179 int=74 real=66 string=140 differing=95 fingerprint=a3fda260182d4cf8"
+    },
+    {
+      "name": "dbv-semantic-87",
+      "mode": "options",
+      "path": "steel-detailing/options_model.db",
+      "exit": 0,
+      "stdout": "options=1069 bool=234 int=154 real=519 string=162 differing=245 fingerprint=d1c37bea66853eae"
+    },
+    {
+      "name": "dbv-semantic-88",
+      "mode": "environment",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/environment.db",
+      "exit": 0,
+      "stdout": "classes=48 attributes=349 metadata=28 links=2775 choices=283 fingerprint=cde534bff098c68a"
+    },
+    {
+      "name": "dbv-semantic-89",
+      "mode": "options",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=464 bool=181 int=75 real=66 string=142 differing=75 fingerprint=8686b5e07951f611"
+    },
+    {
+      "name": "dbv-semantic-90",
+      "mode": "options",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/options_model.db",
+      "exit": 0,
+      "stdout": "options=1077 bool=238 int=155 real=520 string=164 differing=215 fingerprint=b966584ca72a48d8"
     }
   ]
 }

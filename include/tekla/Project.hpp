@@ -3,6 +3,7 @@
 #include <tekla/db1/Catalogs.hpp>
 #include <tekla/Drawing.hpp>
 #include <tekla/Numbering.hpp>
+#include <tekla/Environment.hpp>
 #include <optional>
 
 namespace tekla
@@ -36,6 +37,8 @@ struct ProjectOptions
     db1::RawDatabaseOptions rawOptions{true};
     bool readNumbering = true;
     bool readDrawings = true;
+    bool readEnvironment = true;
+    bool readOptions = true;
 };
 struct DrawingModelAssociation
 {
@@ -43,6 +46,14 @@ struct DrawingModelAssociation
     std::uint32_t drawingRecordId = 0;
     std::uint32_t modelObjectId = 0;
     std::string modelGuid;
+};
+struct AttributeDefinitionAssociation
+{
+    std::uint32_t modelObjectId = 0;
+    std::size_t propertyIndex = 0;
+    std::uint32_t attributeDefinitionId = 0;
+    // Exact case-sensitive name and storage-type match only. This does not
+    // establish class applicability or supply an object's missing/default value.
 };
 struct Project
 {
@@ -60,6 +71,9 @@ struct Project
     std::map<std::filesystem::path, NumberingDatabase> numbering;
     std::map<std::filesystem::path, Drawing> drawings;
     std::vector<DrawingModelAssociation> drawingModelAssociations;
+    std::optional<EnvironmentDatabase> environment;
+    std::map<std::filesystem::path, OptionsDatabase> optionsDatabases;
+    std::vector<AttributeDefinitionAssociation> attributeDefinitionAssociations;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

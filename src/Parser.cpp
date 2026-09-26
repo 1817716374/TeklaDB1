@@ -153,7 +153,7 @@ std::vector<uint8_t> inflateGzip(const std::filesystem::path& path)
     return detail::readPayload(path);
 }
 
-std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data)
+std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data, bool variableDatabase = false)
 {
     std::vector<std::size_t> result;
     if (data.size() < kSectionMagic.size())
@@ -175,7 +175,7 @@ std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data)
                 {
                     cursor = offset + 12 + static_cast<std::size_t>(fields) * 4;
                     const auto stride = static_cast<std::size_t>(payload) + 9;
-                    while (cursor < data.size() && (data[cursor] == 4 || data[cursor] == 12))
+                    while (cursor < data.size() && (data[cursor] == 4 || data[cursor] == 12 || (variableDatabase && data[cursor] == 1)))
                     {
                         if (stride > data.size() - cursor)
                             break;
@@ -189,7 +189,7 @@ std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data)
     return result;
 }
 
-std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<std::size_t>& offsets)
+std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<std::size_t>& offsets, bool variableDatabase = false)
 {
     std::vector<Table> result;
     result.reserve(offsets.size());
@@ -211,7 +211,9 @@ std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<st
         // contain an allocator sentinel. Do not discard those early records.
         for (const auto trailer : {std::size_t(9), std::size_t(5), std::size_t(1)})
         {
-            if (ordinal + 1 == offsets.size() && trailer != 5)
+            if (variableDatabase && trailer != 1)
+                continue;
+            if (!variableDatabase && ordinal + 1 == offsets.size() && trailer != 5)
                 continue;
             if (ordinal + 1 != offsets.size() && trailer == 5)
                 continue;
@@ -222,7 +224,7 @@ std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<st
                 continue;
             bool tagsValid = true;
             for (std::size_t cursor = table.offset + table.headerSize; cursor < next - trailer; cursor += table.rowStride)
-                if (data[cursor] != 4 && data[cursor] != 12) { tagsValid = false; break; }
+                if (data[cursor] != 4 && data[cursor] != 12 && !(variableDatabase && data[cursor] == 1)) { tagsValid = false; break; }
             if (!tagsValid)
                 continue;
             table.trailerSize = trailer;
@@ -1852,11 +1854,11 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
                 database.databaseGuid = header.substr(guidAt, 36);
         }
 
-        const auto offsets = sectionOffsets(data);
+        const auto offsets = sectionOffsets(data, variableDatabase);
         if (!offsets.empty())
         {
             database.layout = DatabaseLayout::ModernSections;
-            const auto all = tables(data, offsets);
+            const auto all = tables(data, offsets, variableDatabase);
             if (all.size() != offsets.size())
                 throw std::runtime_error("DB1 section enumeration is inconsistent");
             database.preamble.assign(data.begin(), data.begin() + static_cast<std::ptrdiff_t>(offsets.front()));
