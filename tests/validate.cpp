@@ -37,6 +37,7 @@ struct Fingerprint
 #include "InlineNumbering730Validation.hpp"
 #include "Drawing730Validation.hpp"
 #include "Ifc730Validation.hpp"
+#include "Schema764Validation.hpp"
 #include "Profile844Validation.hpp"
 #include "Schema908Validation.hpp"
 #include "Numbering908Validation.hpp"
@@ -76,7 +77,7 @@ void summary(const tekla::db1::Model& model)
         if (!model.boltDefinitions.count(group.definitionId)) throw std::runtime_error("bolt definition missing");
         for (const auto& point : group.positions) for (auto coordinate : point) if (!std::isfinite(coordinate)) throw std::runtime_error("non-finite bolt coordinate");
     }
-    if (model.storageVersion == "7.82")
+    if (model.storageVersion == "7.64" || model.storageVersion == "7.82")
     {
         auto bolts = model.individualBolts;
         std::sort(bolts.begin(), bolts.end(), [](const auto& a, const auto& b) { return a.id < b.id; });
@@ -100,7 +101,7 @@ void summary(const tekla::db1::Model& model)
               << " assemblies=" << model.assemblies.size() << " components=" << model.components.size()
               << " properties=" << model.properties.size() << " parameters=" << model.parameterDefinitions.size()
               << " custom=" << model.customComponentDefinitions.size() << " unhandled=" << model.unhandledPartIds.size();
-    if (model.storageVersion == "7.82") std::cout << " individual_bolts=" << model.individualBolts.size();
+    if (model.storageVersion == "7.64" || model.storageVersion == "7.82") std::cout << " individual_bolts=" << model.individualBolts.size();
     std::cout << " fingerprint=" << std::hex << hash.value << std::dec << '\n';
 }
 int run(const std::string& mode, const std::filesystem::path& path)
@@ -111,6 +112,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
         if(mode.rfind("analysis_settings",0)==0)return analysisSettingsValidation(path,mode);
         if(mode.rfind("analysis_project",0)==0)return analysisProjectValidation(path,mode);
         if(mode=="drawing_metadata" || mode=="drawing_metadata_fields" || mode.rfind("drawing_metadata_project",0)==0)return drawingMetadataValidation(path,mode);
+        if (mode == "schema764_evidence") return schema764Validation(path);
         if (mode == "schema908_evidence") return schema908Validation(path);
         if (mode == "numbering908_evidence" || mode == "numbering908_unpaired") return numbering908Validation(path,mode=="numbering908_unpaired");
         if(mode=="drawing_exam_fields" || mode=="drawing_exam_project" || mode=="drawing_exam_unpaired")return drawingExamValidation(path,mode);

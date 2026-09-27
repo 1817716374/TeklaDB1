@@ -64,6 +64,9 @@ jobs:
       - name: Independent native analysis preset values and project boundaries
         if: matrix.standard == 17
         run: python -B tools/test_analysis_settings_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-analysis-settings-tests"
+      - name: Independent 7.64 IFC and snapshot evidence
+        if: matrix.standard == 17
+        run: python -B tools/test_schema764_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-schema764-tests"
       - name: Full pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json

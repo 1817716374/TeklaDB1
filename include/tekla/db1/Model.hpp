@@ -337,7 +337,7 @@ struct WeldDefinition
     uint32_t type = 0;
 };
 
-// Xsteel 7.82 stores each bolt as a type-10 Part, not a modern BoltGroup.
+// Xsteel 7.64/7.82 stores each bolt as a type-10 Part, not a modern BoltGroup.
 // id resolves into Model::parts for its definition, stored profile parameters,
 // placement, contour and properties. Head/nut/hole geometry is not yet decoded.
 struct IndividualBolt

@@ -439,55 +439,77 @@ int main(int argc, char** argv)
             }
             else check(!ok && !error.empty() && model.parts.empty() && model.identityClasses.empty() && model.formulaBindings.empty() && model.variablesByOwner.empty() && model.partPositions.empty(),"malformed ownership accepted or partial output retained");
         }
-        else if (name.rfind("782_",0)==0)
+        else if (name.rfind("782_",0)==0 || name.rfind("764_",0)==0)
         {
-            const bool library=name.rfind("782_library",0)==0;
+            const bool version764=name.rfind("764_",0)==0;
+            const std::string legacyCase="782_"+name.substr(4);
+            const auto encodeLegacy=[&](std::vector<Table> tables){
+                if(version764)
+                {
+                    const bool lib=tables.size()==198;
+                    tables[lib?158:188]=tables[lib?196:226];
+                    tables.resize(lib?187:217);
+                    if(name=="764_wrong_count")tables.push_back(Table{});
+                    if(name=="764_wrong_weld_table")tables[lib?158:188]=Table{};
+                }
+                return encode(tables,version764?"7.64":"7.82",true);
+            };
+            const bool library=legacyCase.rfind("782_library",0)==0;
             auto s=onePart782(library);
-            if (name=="782_library_fields") s[68].fields[1]=1;
-            if (name=="782_library_definition_fields") s[125].fields[1]=1;
-            if (name=="782_library_definition_width") { s[125].payload=36; s[125].rows.clear(); }
-            if (name=="782_library_definition_string")
+            if(name=="764_weld_fields")s[226].fields[1]=1;
+            if(name=="764_weld_width"){s[226].payload=64;s[226].rows.clear();}
+            if(name=="764_weld" || name=="764_library_weld")
+            {
+                auto& table=s[library?196:226];auto definition=row(table,90);
+                put<float>(definition,9,6.5f);put<std::uint32_t>(definition,13,10);table.rows={definition};
+            }
+            if (legacyCase=="782_library_fields") s[68].fields[1]=1;
+            if (legacyCase=="782_library_definition_fields") s[125].fields[1]=1;
+            if (legacyCase=="782_library_definition_width") { s[125].payload=36; s[125].rows.clear(); }
+            if (legacyCase=="782_library_definition_string")
             {
                 put<std::uint32_t>(s[125].rows[0],29,999);
                 // A prior permissive lookup must not fabricate a valid string chunk.
                 auto component=row(s[126],90); put<std::uint32_t>(component,13,999); s[126].rows={component};
             }
-            if (name=="782_library_definition_identity") s[179].rows.pop_back();
-            if (name=="782_library_definition_duplicate") s[125].rows.push_back(s[125].rows[0]);
-            if (name=="782_library_parameter_string") put<std::uint32_t>(s[68].rows[0],69,999);
-            if (name=="782_library_parameter_identity") s[179].rows.erase(s[179].rows.begin()+2);
-            if (name=="782_library_parameter_duplicate") s[68].rows.push_back(s[68].rows[0]);
-            if (name=="782_library_distance_fields") s[147].fields[2]=1;
-            if (name=="782_library_distance_width") { s[147].payload=68; s[147].rows.clear(); }
-            if (name=="782_library_distance_string") put<std::uint32_t>(s[147].rows[0],61,999);
-            if (name=="782_library_distance_identity") put<std::uint32_t>(s[147].rows[0],1,999);
-            if (name=="782_library_distance_nan") put<double>(s[147].rows[0],17,std::numeric_limits<double>::quiet_NaN());
-            if (name=="782_library_distance_secondary_nan") put<double>(s[147].rows[0],25,std::numeric_limits<double>::infinity());
-            if (name=="782_library_distance_bindings") s[162].rows.erase(s[162].rows.begin()+1);
-            if (name=="782_library_distance_duplicate") s[147].rows.push_back(s[147].rows[0]);
-            if (name=="782_library_formula_fields") s[156].fields[2]=1;
-            if (name=="782_library_formula_width") { s[156].payload=101; s[156].rows.clear(); }
-            if (name=="782_library_formula_string") put<std::uint32_t>(s[156].rows[0],13,999);
-            if (name=="782_library_formula_target") put<std::uint32_t>(s[156].rows[0],5,999);
-            if (name=="782_library_formula_identity") put<std::uint32_t>(s[156].rows[0],1,999);
-            if (name=="782_library_formula_duplicate") s[156].rows.push_back(s[156].rows[0]);
-            if (name=="782_library_formula_refs") put<std::uint32_t>(s[162].rows.back(),13,999);
-            if (name=="782_library_formula_output") s[162].rows.erase(s[162].rows.begin()+3);
-            if (name=="782_fields") s[207].fields[2]=1;
-            if (name=="782_width") { s[207].payload=372; s[207].rows.clear(); }
-            if (name=="782_part_join") put<std::uint32_t>(s[193].rows[0],9,999);
-            if (name=="782_contour_join") put<std::uint32_t>(s[193].rows[0],17,999);
-            if (name=="782_string_cycle") put<std::uint32_t>(s[75].rows[1],5,10);
-            if (name=="782_missing_string") put<std::uint32_t>(s[75].rows[1],5,999);
-            if (name=="782_bolt_join") put<std::uint32_t>(s[192].rows[0],13,999);
-            if (name=="782_numeric_nan") put<double>(s[122].rows[0],9,std::numeric_limits<double>::quiet_NaN());
-            if (name=="782_numeric_overflow") put<double>(s[122].rows[0],9,1e30);
-            if (name=="782_assembly_missing") put<std::uint32_t>(s[209].rows[0],21,999);
-            save(path,encode(s,"7.82",true));
+            if (legacyCase=="782_library_definition_identity") s[179].rows.pop_back();
+            if (legacyCase=="782_library_definition_duplicate") s[125].rows.push_back(s[125].rows[0]);
+            if (legacyCase=="782_library_parameter_string") put<std::uint32_t>(s[68].rows[0],69,999);
+            if (legacyCase=="782_library_parameter_identity") s[179].rows.erase(s[179].rows.begin()+2);
+            if (legacyCase=="782_library_parameter_duplicate") s[68].rows.push_back(s[68].rows[0]);
+            if (legacyCase=="782_library_distance_fields") s[147].fields[2]=1;
+            if (legacyCase=="782_library_distance_width") { s[147].payload=68; s[147].rows.clear(); }
+            if (legacyCase=="782_library_distance_string") put<std::uint32_t>(s[147].rows[0],61,999);
+            if (legacyCase=="782_library_distance_identity") put<std::uint32_t>(s[147].rows[0],1,999);
+            if (legacyCase=="782_library_distance_nan") put<double>(s[147].rows[0],17,std::numeric_limits<double>::quiet_NaN());
+            if (legacyCase=="782_library_distance_secondary_nan") put<double>(s[147].rows[0],25,std::numeric_limits<double>::infinity());
+            if (legacyCase=="782_library_distance_bindings") s[162].rows.erase(s[162].rows.begin()+1);
+            if (legacyCase=="782_library_distance_duplicate") s[147].rows.push_back(s[147].rows[0]);
+            if (legacyCase=="782_library_formula_fields") s[156].fields[2]=1;
+            if (legacyCase=="782_library_formula_width") { s[156].payload=101; s[156].rows.clear(); }
+            if (legacyCase=="782_library_formula_string") put<std::uint32_t>(s[156].rows[0],13,999);
+            if (legacyCase=="782_library_formula_target") put<std::uint32_t>(s[156].rows[0],5,999);
+            if (legacyCase=="782_library_formula_identity") put<std::uint32_t>(s[156].rows[0],1,999);
+            if (legacyCase=="782_library_formula_duplicate") s[156].rows.push_back(s[156].rows[0]);
+            if (legacyCase=="782_library_formula_refs") put<std::uint32_t>(s[162].rows.back(),13,999);
+            if (legacyCase=="782_library_formula_output") s[162].rows.erase(s[162].rows.begin()+3);
+            if (legacyCase=="782_fields") s[207].fields[2]=1;
+            if (legacyCase=="782_width") { s[207].payload=372; s[207].rows.clear(); }
+            if (legacyCase=="782_part_join") put<std::uint32_t>(s[193].rows[0],9,999);
+            if (legacyCase=="782_contour_join") put<std::uint32_t>(s[193].rows[0],17,999);
+            if (legacyCase=="782_string_cycle") put<std::uint32_t>(s[75].rows[1],5,10);
+            if (legacyCase=="782_missing_string") put<std::uint32_t>(s[75].rows[1],5,999);
+            if (legacyCase=="782_bolt_join") put<std::uint32_t>(s[192].rows[0],13,999);
+            if (legacyCase=="782_numeric_nan") put<double>(s[122].rows[0],9,std::numeric_limits<double>::quiet_NaN());
+            if (legacyCase=="782_numeric_overflow") put<double>(s[122].rows[0],9,1e30);
+            if (legacyCase=="782_assembly_missing") put<std::uint32_t>(s[209].rows[0],21,999);
+            save(path,encodeLegacy(s));
             const bool ok=library?tekla::db1::parseComponentLibrary(path,model,error):parse();
-            if (name=="782_model" || name=="782_library" || name=="782_assembly_missing")
+            if (legacyCase=="782_model" || legacyCase=="782_library" || legacyCase=="782_assembly_missing" || name=="764_weld" || name=="764_library_weld")
             {
-                check(ok,error.c_str()); const auto& p=model.parts.at(5);
+                check(ok,error.c_str()); check(model.storageVersion==(version764?"7.64":"7.82"),"legacy version lost");
+                if(name=="764_weld" || name=="764_library_weld")check(model.weldDefinitions.at(90).size==6.5f && model.weldDefinitions.at(90).type==10,"7.64 weld definition ordinal");
+                const auto& p=model.parts.at(5);
                 check(p.profile=="PL10*20" && p.material=="S235" && p.name=="PLATE","7.82 definition offsets");
                 check(p.origin[0]==123 && p.length==100 && p.ownerId==50,"7.82 placement/owner offsets");
                 check(p.contour.size()==2 && p.contour[0].value[0]==2 && p.contour[1].value[0]==8,"7.82 explicit first contour point");
@@ -516,16 +538,16 @@ int main(int argc, char** argv)
                     check(f.referencedObjectIds==std::vector<std::uint32_t>{60,70} && f.inputObjectIds==std::vector<std::uint32_t>{60},"formula input/output references");
                     check(model.formulaBindingIdsByTarget.at(70)==std::vector<std::uint32_t>{80},"formula target index");
                 }
-                if (name=="782_model")
+                if (legacyCase=="782_model")
                 {
-                    save(root/"xslib.db1",encode(onePart782(true),"7.82",true));
+                    save(root/"xslib.db1",encodeLegacy(onePart782(true)));
                     tekla::Project project;
                     check(tekla::readProject(root,project,error),error.c_str());
                     check(project.componentLibrary.has_value(),"7.82 project library missing");
                     check(project.files.size()==2,"7.82 project inventory");
                     for (const auto& file : project.files) check(file.level==tekla::ReadLevel::PartialSemantic,"7.82 coverage overstated");
                 }
-                if (name=="782_assembly_missing")
+                if (legacyCase=="782_assembly_missing")
                 {
                     check(model.identities.at(5).flags==999,"unresolved assembly reference lost");
                     check(std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& x){return x.find("unresolved stored assembly reference 999")!=std::string::npos;}),"unresolved assembly diagnostic");
@@ -537,12 +559,12 @@ int main(int argc, char** argv)
                 check(!error.empty() && model.parts.empty() && model.distanceParameters.empty() && model.formulaBindings.empty() &&
                       model.formulaBindingIdsByTarget.empty(),"7.82 failure contract");
             }
-            if (name=="782_part_join")
+            if (legacyCase=="782_part_join")
             {
                 s=onePart782(); s[209].rows.erase(s[209].rows.begin());
                 auto relation=row(s[191],31); put<std::uint32_t>(relation,5,11);
                 put<std::uint32_t>(relation,9,15); put<std::uint32_t>(relation,13,5); s[191].rows={relation};
-                save(path,encode(s,"7.82",true));
+                save(path,encodeLegacy(s));
                 check(!parse() && error.find("association identity")!=std::string::npos,"association fabricated missing identity");
             }
         }

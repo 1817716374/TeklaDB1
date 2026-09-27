@@ -37,6 +37,23 @@
       "url": "https://dl.construsoft.com/install/2024/Models/Defining%20drawing%20views%20steel.zip",
       "size": 580037,
       "sha256": "a4cf636d45b4ff0dbd2679adbb64ea0ab07c1713cfe631c62a6c940d83025139"
+    },
+    "btscm-u52": {
+      "url": "https://btscm.fr/dicocm/R/realisations/u52_2007vierge.zip",
+      "size": 698895,
+      "sha256": "e146458c37e73c6488184a971630296b12629a611fb1d87d848a197b60060a2c"
+    },
+    "btscm-u52-tbp": {
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/Tekla BIMsight Models/U52_2007V4.tbp",
+      "size": 295405,
+      "sha256": "2b48974d3c7968fe97558bbb33385ecd30ee8ac8a2311de34c17d9f3ff674418"
+    },
+    "btscm-u52-ifc": {
+      "archive": "btscm-u52-tbp",
+      "member": "3150b841-e590-42bc-b6d4-777a86f04053/files/Models/U52_2007V4.ifcZIP",
+      "size": 314195,
+      "sha256": "31af1d4807b39815f79e790d55f993096bfa0ac1b60c27fc74dd10c8f474de78"
     }
   },
   "files": [
@@ -4807,6 +4824,48 @@
       "member": "API_Developer_Exam_01/API_Developer_Exam_01.db1",
       "size": 7781363,
       "sha256": "6f2121f0bb031fa03cc6860997f1a62b76daa0c453315ee505ad7d595f776d2c"
+    },
+    {
+      "path": "u52-764/u52_2007vierge.db1",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/u52_2007vierge.db1",
+      "size": 83544,
+      "sha256": "6a2f93fed8e54eddd9ba3347d889a38fd1e68990cf28edc81da4caaf995e909a"
+    },
+    {
+      "path": "u52-764/xslib.db1",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/xslib.db1",
+      "size": 6704,
+      "sha256": "b6d96d218c1502807182cde532f2ae1cab533e5a5bd45c21235ffcb7121e991a"
+    },
+    {
+      "path": "u52-764/u52_2007vierge.db1.bak",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/u52_2007vierge.db1.bak",
+      "size": 83419,
+      "sha256": "f4314b2db88796eaeb5d33d6a70d5455219330093a7e47255fdf4d725fe4dc70"
+    },
+    {
+      "path": "u52-764/xslib.db1.bak",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/xslib.db1.bak",
+      "size": 6656,
+      "sha256": "2b1322c033c3492f3cbb8db08212e7e2f3a08c9d46d9fc7684e87ccdd471c685"
+    },
+    {
+      "path": "u52-764/u52_2007v4.db1.bak",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/u52_2007v4.db1.bak",
+      "size": 70602,
+      "sha256": "a3f7cc9e99433773289c2bd989b9530229cbf7d69627b3a9b7e81c1ac5dfc62e"
+    },
+    {
+      "path": "u52-764/U52_2007V4.ifc",
+      "archive": "btscm-u52-ifc",
+      "member": "U52_2007V4.ifc",
+      "size": 1700274,
+      "sha256": "e44f7841d4e5680ddb2c485a454ee65d194efb8caac81aef3058b253ab55df42"
     }
   ],
   "cases": [
@@ -16415,6 +16474,83 @@
       "mode": "analysis_settings_project_raw_disabled",
       "exit": 0,
       "stdout": "files=1 parsed=1 failed=0 discovered=0 fields=125 designs=3 associations=0"
+    },
+    {
+      "name": "u52-764 model u52_2007vierge.db1",
+      "mode": "model",
+      "path": "u52-764/u52_2007vierge.db1",
+      "exit": 0,
+      "stdout": "version=7.64 parts=67 operative=9 profiles=0 bolts=0 welds=21 assemblies=57 components=1 properties=195 parameters=0 custom=0 unhandled=0 individual_bolts=20 fingerprint=6063830906bd75f7"
+    },
+    {
+      "name": "u52-764 raw u52_2007vierge.db1",
+      "mode": "raw",
+      "path": "u52-764/u52_2007vierge.db1",
+      "exit": 0,
+      "stdout": "version=7.64 tables=217 records=3999 opaque=1 bytes=366329 fingerprint=9fc203dc2006d328"
+    },
+    {
+      "name": "u52-764 library xslib.db1",
+      "mode": "library",
+      "path": "u52-764/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.64 parts=5 operative=0 profiles=0 bolts=0 welds=0 assemblies=5 components=1 properties=17 parameters=0 custom=0 unhandled=0 individual_bolts=2 fingerprint=cbf116ad9f1bff35"
+    },
+    {
+      "name": "u52-764 raw xslib.db1",
+      "mode": "raw",
+      "path": "u52-764/xslib.db1",
+      "exit": 0,
+      "stdout": "version=7.64 tables=187 records=254 opaque=1 bytes=31498 fingerprint=5173f423128211ed"
+    },
+    {
+      "name": "u52-764 model u52_2007vierge.db1.bak",
+      "mode": "model",
+      "path": "u52-764/u52_2007vierge.db1.bak",
+      "exit": 0,
+      "stdout": "version=7.64 parts=67 operative=9 profiles=0 bolts=0 welds=21 assemblies=57 components=1 properties=195 parameters=0 custom=0 unhandled=0 individual_bolts=20 fingerprint=6063830906bd75f7"
+    },
+    {
+      "name": "u52-764 raw u52_2007vierge.db1.bak",
+      "mode": "raw",
+      "path": "u52-764/u52_2007vierge.db1.bak",
+      "exit": 0,
+      "stdout": "version=7.64 tables=217 records=3993 opaque=1 bytes=365949 fingerprint=9e921786d705af46"
+    },
+    {
+      "name": "u52-764 library xslib.db1.bak",
+      "mode": "library",
+      "path": "u52-764/xslib.db1.bak",
+      "exit": 0,
+      "stdout": "version=7.64 parts=5 operative=0 profiles=0 bolts=0 welds=0 assemblies=5 components=1 properties=17 parameters=0 custom=0 unhandled=0 individual_bolts=2 fingerprint=cbf116ad9f1bff35"
+    },
+    {
+      "name": "u52-764 raw xslib.db1.bak",
+      "mode": "raw",
+      "path": "u52-764/xslib.db1.bak",
+      "exit": 0,
+      "stdout": "version=7.64 tables=187 records=254 opaque=1 bytes=31442 fingerprint=3b80e4bd4e41618a"
+    },
+    {
+      "name": "u52-764 model u52_2007v4.db1.bak",
+      "mode": "model",
+      "path": "u52-764/u52_2007v4.db1.bak",
+      "exit": 0,
+      "stdout": "version=7.30 parts=67 operative=9 profiles=0 bolts=20 welds=21 assemblies=57 components=1 properties=176 parameters=0 custom=0 unhandled=0 fingerprint=2cca620be9770200"
+    },
+    {
+      "name": "u52-764 raw u52_2007v4.db1.bak",
+      "mode": "raw",
+      "path": "u52-764/u52_2007v4.db1.bak",
+      "exit": 0,
+      "stdout": "version=7.30 tables=75 records=4193 opaque=0 bytes=334851 fingerprint=6cb551e2adfcc0ef"
+    },
+    {
+      "name": "u52-764 independent IFC and snapshot evidence",
+      "mode": "schema764_evidence",
+      "path": "u52-764",
+      "exit": 0,
+      "stdout": "7.64: 67 snapshot parts, 66 IFC parts, 20 IFC bolt placements, 44 exact IFC profiles; GUID migration and remaining geometry unverified"
     }
   ]
 }

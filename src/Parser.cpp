@@ -999,6 +999,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         return;
     }
     const auto all = tables(data, offsets);
+    const bool schema764 = !componentLibrary && model.storageVersion == "7.64" && offsets.size() == 217;
+    const bool library764 = componentLibrary && model.storageVersion == "7.64" && offsets.size() == 187;
     const bool schema782 = !componentLibrary && model.storageVersion == "7.82" && offsets.size() == 228;
     const bool library782 = componentLibrary && model.storageVersion == "7.82" && offsets.size() == 198;
     const bool schema844 = !componentLibrary && model.storageVersion == "8.44" && offsets.size() == 286;
@@ -1011,23 +1013,24 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const bool library895 = componentLibrary && model.storageVersion == "8.95" && offsets.size() == 290;
     const bool library908 = componentLibrary && model.storageVersion == "9.08" && offsets.size() == 303;
     const bool library952OrNewer = componentLibrary && modernVersion && offsets.size() >= 319;
-    if (!schema782 && !schema844 && !schema895 && !schema908 && !schema952OrNewer &&
+    if (!schema764 && !library764 && !schema782 && !schema844 && !schema895 && !schema908 && !schema952OrNewer &&
         !library782 && !library844 && !library895 && !library908 && !library952OrNewer)
         throw std::runtime_error("unsupported DB1 semantic schema " + model.storageVersion + " with " +
                                  std::to_string(offsets.size()) + " sections; use parseRawDatabase for lossless access");
 
     const std::size_t noTable = (std::numeric_limits<std::size_t>::max)();
-    const bool older782 = schema782 || library782;
+    const bool older764Or782 = schema764 || library764 || schema782 || library782;
+    const bool legacyLibrary = library764 || library782;
     const bool older844 = schema844 || library844;
     const bool older895 = schema895 || library895;
     const bool hybrid908 = schema908 || library908;
     const bool classIdentity = older895 || hybrid908;
-    const bool floatContours = older782 || older844 || older895;
+    const bool floatContours = older764Or782 || older844 || older895;
     const bool olderSchema = floatContours || hybrid908;
     const bool library = componentLibrary;
     const bool componentVariables = library && !older844;
-    const bool verifiedPartOwnership = !older782 && !older844;
-    const bool verifiedReinforcement = !older782 && !older844;
+    const bool verifiedPartOwnership = !older764Or782 && !older844;
+    const bool verifiedReinforcement = !older764Or782 && !older844;
     const std::size_t reinforcementDefinitionOrdinal = library ? 153 : 183;
     const std::size_t reinforcementOrdinal = library ? 154 : 184;
     const std::size_t doubleArrayOrdinal = library ? 175 : 205;
@@ -1047,39 +1050,39 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const std::size_t weldOrdinal = library ? 160 : 190;
     const std::size_t associationOneOrdinal = library ? 161 : 191;
     const std::size_t associationTwoOrdinal = library ? 162 : 192;
-    const std::size_t identityOrdinal = (older782 || older844) ? (library ? 179 : 209) :
+    const std::size_t identityOrdinal = (older764Or782 || older844) ? (library ? 179 : 209) :
                                                 (classIdentity ? (library ? 260 : 293) : (library ? 318 : 355));
-    const std::size_t partDefinitionOrdinal = older782 ? (library ? 177 : 207) : older844 ? (library ? 215 : 245) :
+    const std::size_t partDefinitionOrdinal = older764Or782 ? (library ? 177 : 207) : older844 ? (library ? 215 : 245) :
                                                       (classIdentity ? (library ? 264 : 299) : (library ? 305 : 341));
     const std::size_t contourBlockOrdinal = floatContours ? (library ? 94 : 121) : (library ? 292 : 328);
     const std::size_t stringPropertyOrdinal = olderSchema ? (library ? 90 : 116) : (library ? 304 : 340);
-    const std::size_t partOrdinal = older782 ? (library ? 163 : 193) : older844 ? (library ? 241 : 273) : (library ? 242 : 274);
-    const std::size_t contourLinkOrdinal = older782 ? noTable : older844 ? (library ? 237 : 269) : (library ? 238 : 270);
-    const std::size_t boltDefinitionOrdinal = older782 ? noTable : older844 ? (library ? 222 : 252) :
+    const std::size_t partOrdinal = older764Or782 ? (library ? 163 : 193) : older844 ? (library ? 241 : 273) : (library ? 242 : 274);
+    const std::size_t contourLinkOrdinal = older764Or782 ? noTable : older844 ? (library ? 237 : 269) : (library ? 238 : 270);
+    const std::size_t boltDefinitionOrdinal = older764Or782 ? noTable : older844 ? (library ? 222 : 252) :
                                                        older895 ? (library ? 223 : 253) : hybrid908 ? (library ? 291 : 327) : (library ? 314 : 351);
     const std::size_t boltLayerOrdinal = floatContours ? noTable : (library ? 296 : 332);
-    const std::size_t boltGroupOrdinal = older782 ? noTable : older844 ? (library ? 221 : 251) : (library ? 274 : 310);
-    const std::size_t weldDefinitionOrdinal = older782 ? (library ? 196 : 226) : older844 ? (library ? 197 : 227) : (library ? 198 : 228);
-    const std::size_t relationOrdinal = (older782 || older844) ? noTable : (library ? 261 : 294);
-    const std::size_t assemblyOrdinal = (older782 || older844) ? (library ? 151 : 181) : (library ? 265 : 300);
+    const std::size_t boltGroupOrdinal = older764Or782 ? noTable : older844 ? (library ? 221 : 251) : (library ? 274 : 310);
+    const std::size_t weldDefinitionOrdinal = (schema764 || library764) ? (library ? 158 : 188) : older764Or782 ? (library ? 196 : 226) : older844 ? (library ? 197 : 227) : (library ? 198 : 228);
+    const std::size_t relationOrdinal = (older764Or782 || older844) ? noTable : (library ? 261 : 294);
+    const std::size_t assemblyOrdinal = (older764Or782 || older844) ? (library ? 151 : 181) : (library ? 265 : 300);
 
     std::vector<std::pair<std::size_t, uint32_t>> required = {
         {pointOrdinal, 32}, {placementOrdinal, 40}, {frameOrdinal, 52}, {profileStringOrdinal, 45},
         {numericPropertyOrdinal, 44}, {componentOrdinal, 104}, {propertyLinkOneOrdinal, 24},
         {propertyLinkTwoOrdinal, 24}, {weldOrdinal, 24}, {associationOneOrdinal, 60},
-        {associationTwoOrdinal, 60}, {identityOrdinal, (older782 || older844) ? 63U : (classIdentity ? 55U : 72U)},
-        {partDefinitionOrdinal, older782 ? 380U : older844 ? 322U : (classIdentity ? 332U : 372U)},
+        {associationTwoOrdinal, 60}, {identityOrdinal, (older764Or782 || older844) ? 63U : (classIdentity ? 55U : 72U)},
+        {partDefinitionOrdinal, older764Or782 ? 380U : older844 ? 322U : (classIdentity ? 332U : 372U)},
         {contourBlockOrdinal, floatContours ? 332U : 456U},
-        {stringPropertyOrdinal, olderSchema ? 116U : 120U}, {partOrdinal, older782 ? 56U : 64U},
-        {weldDefinitionOrdinal, older782 ? 60U : older844 ? 100U : 104U},
-        {assemblyOrdinal, (older782 || older844) ? 88U : 92U}};
+        {stringPropertyOrdinal, olderSchema ? 116U : 120U}, {partOrdinal, older764Or782 ? 56U : 64U},
+        {weldDefinitionOrdinal, older764Or782 ? 60U : older844 ? 100U : 104U},
+        {assemblyOrdinal, (older764Or782 || older844) ? 88U : 92U}};
     if (contourLinkOrdinal != noTable) required.emplace_back(contourLinkOrdinal, 24U);
     if (boltDefinitionOrdinal != noTable) required.emplace_back(boltDefinitionOrdinal, (older844 || older895) ? 308U : hybrid908 ? 312U : 316U);
     if (boltLayerOrdinal != noTable) required.emplace_back(boltLayerOrdinal, 48U);
     if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, older844 ? 64U : 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
     if (classIdentity) required.emplace_back(identityClassOrdinal, hybrid908 ? 44U : 28U);
-    if (older782)
+    if (older764Or782)
     {
         required.emplace_back(surfaceOrdinal, 78U);
         required.emplace_back(surfaceDefinitionOrdinal, 292U);
@@ -1096,9 +1099,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     {
         required.emplace_back(68, 76U);
         required.emplace_back(147, 64U); required.emplace_back(156, 97U);
-        if (!older782) required.emplace_back(226, 36U);
+        if (!older764Or782) required.emplace_back(226, 36U);
     }
-    if (library782)
+    if (legacyLibrary)
     {
         required.emplace_back(125, 32U);
     }
@@ -1119,16 +1122,17 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         requireFields(data, all, doubleArrayOrdinal, 18, {0,1,2});
         requireFields(data, all, integerArrayOrdinal, 16, {0,1,2});
     }
-    if (componentVariables && !older782)
+    if (componentVariables && !older764Or782)
     {
         requireFields(data, all, 147, 14, {0,1,2,3,12,13});
         requireFields(data, all, 156, 6, {0,1,2,4});
     }
-    if (older782)
+    if (older764Or782)
     {
         requireFields(data, all, surfaceOrdinal, 12, {0});
         requireFields(data, all, surfaceDefinitionOrdinal, 29, {0});
-        // Both independent 7.82 models and their libraries share exact signatures.
+        // Pinned 7.64 and 7.82 main/library tables share these field signatures.
+        // The weld definition ordinal differs and is selected separately above.
         const std::pair<std::size_t, std::size_t> fields[] = {
             {pointOrdinal,6}, {placementOrdinal,7}, {frameOrdinal,8}, {profileStringOrdinal,6},
             {numericPropertyOrdinal,6}, {componentOrdinal,22}, {propertyLinkOneOrdinal,7},
@@ -1137,13 +1141,13 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             {contourBlockOrdinal,84}, {stringPropertyOrdinal,6}, {partOrdinal,11},
             {weldDefinitionOrdinal,16}, {assemblyOrdinal,8}};
         for (const auto& field : fields) requireFields(data, all, field.first, field.second, {0});
-        if (library782)
+        if (legacyLibrary)
         {
             requireFields(data, all, 68, 6, {0}); requireFields(data, all, 125, 9, {0});
             requireFields(data, all, 147, 14, {0}); requireFields(data, all, 156, 6, {0});
         }
-        model.diagnostics.emplace_back("Xsteel 7.82 partial semantics: individual bolts retain stored placement/profile parameters; non-plate contours and unnamed tables need further validation");
-        if (library782) model.diagnostics.emplace_back("Xsteel 7.82 custom definitions preserve anonymous and repeated names; classification, lifecycle and formula evaluation remain unverified");
+        model.diagnostics.emplace_back("Xsteel " + model.storageVersion + " partial semantics: individual bolts retain stored placement/profile parameters; non-plate contours and unnamed tables need further validation");
+        if (legacyLibrary) model.diagnostics.emplace_back("Xsteel " + model.storageVersion + " custom definitions preserve anonymous and repeated names; classification, lifecycle and formula evaluation remain unverified");
     }
     else if (!older844)
     {
@@ -1210,14 +1214,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         {
             if (!visited.insert(current).second)
             {
-                if (older782 || strict) throw std::runtime_error("cycle in DB1 chained string at " + std::to_string(current));
+                if (older764Or782 || strict) throw std::runtime_error("cycle in DB1 chained string at " + std::to_string(current));
                 model.diagnostics.push_back("cycle in DB1 chained string at " + std::to_string(current));
                 break;
             }
             const auto found = stringChunks.find(current);
             if (found == stringChunks.end())
             {
-                if (older782 || strict) throw std::runtime_error("missing DB1 chained string chunk " + std::to_string(current));
+                if (older764Or782 || strict) throw std::runtime_error("missing DB1 chained string chunk " + std::to_string(current));
                 model.diagnostics.push_back("missing DB1 chained string chunk " + std::to_string(current));
                 break;
             }
@@ -1269,7 +1273,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         Identity identity;
         identity.rowTag = value[0];
         identity.id = read<uint32_t>(value, 1);
-        identity.ownerId = read<uint32_t>(value, older782 ? 17 : classIdentity ? 9 : 5);
+        identity.ownerId = read<uint32_t>(value, older764Or782 ? 17 : classIdentity ? 9 : 5);
         identity.contextId = read<uint32_t>(value, 9);
         if (classIdentity)
         {
@@ -1278,8 +1282,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 throw std::runtime_error("missing identity class " + std::to_string(identity.classReferenceId));
             if (hybrid908) identity.type = model.identityClasses.at(identity.classReferenceId).recordKind;
         }
-        if (older782) identity.flags = read<uint32_t>(value, 21); // legacy assembly reference
-        if (older782 || older844)
+        if (older764Or782) identity.flags = read<uint32_t>(value, 21); // legacy assembly reference
+        if (older764Or782 || older844)
             identity.guid = fixedString(value, 25, 39);
         else if (classIdentity)
             identity.guid = fixedString(value, 17, 36);
@@ -1298,7 +1302,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
 
     if (library && all.size() > 68 && all[68].valid && all[68].payloadSize == 76)
     {
-        if (older782) requireFields(data, all, 68, 6, {0});
+        if (older764Or782) requireFields(data, all, 68, 6, {0});
         else if (!older844) requireFields(data, all, 68, 6, {0,1,4});
         for (std::size_t index = 0; index < all[68].rowCount; ++index)
         {
@@ -1463,7 +1467,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     if (olderSchema && !hybrid908)
     {
         const auto assignType = [&](uint32_t id, uint32_t type) {
-            if (older782 && !model.identities.count(id))
+            if (older764Or782 && !model.identities.count(id))
                 throw std::runtime_error("broken DB1 association identity " + std::to_string(id));
             model.identities[id].type = type;
         };
@@ -1474,7 +1478,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             else if (association.type == 13 || association.type == 4)
                 assignType(association.source, association.type);
         }
-        if (!older782)
+        if (!older764Or782)
         for (std::size_t index = 0; index < all[partOrdinal].rowCount; ++index)
         {
             const auto id = read<uint32_t>(row(data, all, partOrdinal, index), 1);
@@ -1483,17 +1487,17 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
     }
 
-    if (verifiedPartOwnership || older782)
+    if (verifiedPartOwnership || older764Or782)
     {
-        const std::size_t first = older782 ? (library ? 185 : 215) : (library ? 286 : 322);
+        const std::size_t first = older764Or782 ? (library ? 185 : 215) : (library ? 286 : 322);
         const std::size_t links = library ? 181 : 211;
-        const std::size_t widths[] = {older782?64U:68U,older782?72U:76U,44};
-        const std::size_t fields[] = {older782?8U:9U,older782?10U:11U,7};
+        const std::size_t widths[] = {older764Or782?64U:68U,older764Or782?72U:76U,44};
+        const std::size_t fields[] = {older764Or782?8U:9U,older764Or782?10U:11U,7};
         std::size_t unverified = 0;
-        for (std::size_t kind=0; kind<(older782?2U:3U); ++kind)
+        for (std::size_t kind=0; kind<(older764Or782?2U:3U); ++kind)
         {
             requireTable(all, first+kind, static_cast<uint32_t>(widths[kind]));
-            if (older782) requireFields(data, all, first+kind, fields[kind], {0});
+            if (older764Or782) requireFields(data, all, first+kind, fields[kind], {0});
             else requireFields(data, all, first+kind, fields[kind], {0,1,2});
             for (std::size_t i=0; i<all[first+kind].rowCount; ++i)
             {
@@ -1505,9 +1509,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 if (kind<2)
                 {
                     record.kind = kind==0 ? ObjectNumberingKind::Part : ObjectNumberingKind::Assembly;
-                    record.startNumber = read<uint32_t>(value, older782 ? 5 : 9);
-                    record.sequence = read<uint32_t>(value, older782 ? 9 : 13);
-                    record.prefix = fixedString(value, (kind==0 ? 21 : 29) - (older782 ? 4 : 0), 48);
+                    record.startNumber = read<uint32_t>(value, older764Or782 ? 5 : 9);
+                    record.sequence = read<uint32_t>(value, older764Or782 ? 9 : 13);
+                    record.prefix = fixedString(value, (kind==0 ? 21 : 29) - (older764Or782 ? 4 : 0), 48);
                     const auto number = uint64_t(record.startNumber) + record.sequence;
                     if (record.startNumber>0 && record.startNumber<0x80000000U && record.sequence>0 && number<=0x80000000ULL)
                         record.positionNumber = static_cast<uint32_t>(number-1);
@@ -1525,7 +1529,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             }
         }
         requireTable(all, links, 12);
-        if (older782) requireFields(data, all, links, 4, {0});
+        if (older764Or782) requireFields(data, all, links, 4, {0});
         else requireFields(data, all, links, 4, {0,1,2,3});
         for (std::size_t i=0; i<all[links].rowCount; ++i)
         {
@@ -1568,23 +1572,23 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         const auto* value = row(data, all, partDefinitionOrdinal, index);
         PartDefinition definition;
         definition.id = read<uint32_t>(value, 1);
-        definition.classNumber = fixedString(value, older782 ? 81 : 33, 22);
+        definition.classNumber = fixedString(value, older764Or782 ? 81 : 33, 22);
         definition.subtype = read<uint32_t>(value, 9);
         const auto nameLength = olderSchema ? std::size_t(22) : std::size_t(62);
-        definition.name = fixedString(value, older782 ? 103 : 55, nameLength);
+        definition.name = fixedString(value, older764Or782 ? 103 : 55, nameLength);
         // 8.44 stores the profile family before the dimension reference. The
         // string after it is a numbering prefix, not the 8.95 profile field.
-        const auto family = fixedString(value, older782 ? 125 : (older844 || hybrid908) ? 77 : older895 ? 145 : 117,
-                                        (older782 || older844 || hybrid908) ? 64 : older895 ? 22 : 60);
-        const auto dimensionId = read<uint32_t>(value, older782 ? 189 : olderSchema ? 141 : 181);
-        if (older782 && dimensionId && !stringChunks.count(dimensionId))
+        const auto family = fixedString(value, older764Or782 ? 125 : (older844 || hybrid908) ? 77 : older895 ? 145 : 117,
+                                        (older764Or782 || older844 || hybrid908) ? 64 : older895 ? 22 : 60);
+        const auto dimensionId = read<uint32_t>(value, older764Or782 ? 189 : olderSchema ? 141 : 181);
+        if (older764Or782 && dimensionId && !stringChunks.count(dimensionId))
             throw std::runtime_error("broken DB1 profile string reference for definition " + std::to_string(definition.id));
         definition.profile = family + ((older844 || hybrid908) ? resolveString(dimensionId, true) : strings[dimensionId]);
-        definition.secondaryName = fixedString(value, older782 ? 215 : olderSchema ? 167 : 207, 62);
-        definition.material = fixedString(value, older782 ? 277 : olderSchema ? 229 : 269, (older782 || older844 || hybrid908) ? 32 : 95);
-        if (older782) definitionTypes[definition.id] = read<uint32_t>(value, 5);
+        definition.secondaryName = fixedString(value, older764Or782 ? 215 : olderSchema ? 167 : 207, 62);
+        definition.material = fixedString(value, older764Or782 ? 277 : olderSchema ? 229 : 269, (older764Or782 || older844 || hybrid908) ? 32 : 95);
+        if (older764Or782) definitionTypes[definition.id] = read<uint32_t>(value, 5);
         insertUnique(model.definitions, definition.id, definition, "definition");
-        if (older782)
+        if (older764Or782)
             insertUnique(model.partDefinitionPositions, definition.id, readPosition(value, definition.id, 21), "definition position");
     }
 
@@ -1603,24 +1607,24 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             contour.points.push_back(ContourPoint{});
         for (int pointIndex = 0; pointIndex < 10; ++pointIndex)
         {
-            const auto typeOffset = (older782 || older844) ? 213 : floatContours ? 217 : 337;
+            const auto typeOffset = (older764Or782 || older844) ? 213 : floatContours ? 217 : 337;
             const auto type = read<uint32_t>(value, typeOffset + pointIndex * 4);
             if (type == 0x7fffffff)
                 break;
             ContourPoint point;
             if (floatContours)
-                point.value = {read<float>(value, ((older782 || older844) ? 13 : 17) + pointIndex * 4),
-                               read<float>(value, ((older782 || older844) ? 53 : 57) + pointIndex * 4),
-                               read<float>(value, ((older782 || older844) ? 93 : 97) + pointIndex * 4)};
+                point.value = {read<float>(value, ((older764Or782 || older844) ? 13 : 17) + pointIndex * 4),
+                               read<float>(value, ((older764Or782 || older844) ? 53 : 57) + pointIndex * 4),
+                               read<float>(value, ((older764Or782 || older844) ? 93 : 97) + pointIndex * 4)};
             else
                 point.value = {read<double>(value, 17 + pointIndex * 8),
                                read<double>(value, 97 + pointIndex * 8),
                                read<double>(value, 177 + pointIndex * 8)};
-            point.chamferX = read<float>(value, ((older782 || older844) ? 133 : floatContours ? 137 : 257) + pointIndex * 4);
-            point.chamferY = read<float>(value, ((older782 || older844) ? 173 : floatContours ? 177 : 297) + pointIndex * 4);
+            point.chamferX = read<float>(value, ((older764Or782 || older844) ? 133 : floatContours ? 137 : 257) + pointIndex * 4);
+            point.chamferY = read<float>(value, ((older764Or782 || older844) ? 173 : floatContours ? 177 : 297) + pointIndex * 4);
             point.chamferType = type;
-            point.chamferDz1 = read<float>(value, ((older782 || older844) ? 253 : floatContours ? 257 : 377) + pointIndex * 4);
-            point.chamferDz2 = read<float>(value, ((older782 || older844) ? 293 : floatContours ? 297 : 417) + pointIndex * 4);
+            point.chamferDz1 = read<float>(value, ((older764Or782 || older844) ? 253 : floatContours ? 257 : 377) + pointIndex * 4);
+            point.chamferDz2 = read<float>(value, ((older764Or782 || older844) ? 293 : floatContours ? 297 : 417) + pointIndex * 4);
             contour.points.push_back(point);
         }
         contourChunks[read<uint32_t>(value, 1)].push_back(std::move(contour));
@@ -1673,14 +1677,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         Part part;
         part.id = read<uint32_t>(value, 1);
         part.definitionId = read<uint32_t>(value, 5);
-        part.ownerId = older782 ? 0 : read<uint32_t>(value, 9);
-        part.auxiliaryReferenceId = older782 ? 0 : read<uint32_t>(value, 9);
+        part.ownerId = older764Or782 ? 0 : read<uint32_t>(value, 9);
+        part.auxiliaryReferenceId = older764Or782 ? 0 : read<uint32_t>(value, 9);
         if (verifiedPartOwnership && part.auxiliaryReferenceId && !model.partPositions.count(part.auxiliaryReferenceId))
             throw std::runtime_error("missing part auxiliary reference " + std::to_string(part.auxiliaryReferenceId));
-        part.startPointId = read<uint32_t>(value, older782 ? 9 : 13);
-        part.endPointId = read<uint32_t>(value, older782 ? 13 : 17);
-        part.geometryReferenceId = read<uint32_t>(value, older782 ? 17 : 21);
-        part.orientationId = read<uint32_t>(value, older782 ? 21 : 25);
+        part.startPointId = read<uint32_t>(value, older764Or782 ? 9 : 13);
+        part.endPointId = read<uint32_t>(value, older764Or782 ? 13 : 17);
+        part.geometryReferenceId = read<uint32_t>(value, older764Or782 ? 17 : 21);
+        part.orientationId = read<uint32_t>(value, older764Or782 ? 21 : 25);
         auto identity = model.identities.find(part.id);
         auto definition = model.definitions.find(part.definitionId);
         auto start = model.points.find(part.startPointId);
@@ -1689,7 +1693,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         if (identity == model.identities.end() || definition == model.definitions.end() ||
             start == model.points.end() || end == model.points.end() || frame == model.frames.end())
             throw std::runtime_error("broken DB1 part join for object " + std::to_string(part.id));
-        if (older782)
+        if (older764Or782)
         {
             identity->second.type = definitionTypes.at(part.definitionId);
             part.ownerId = identity->second.ownerId;
@@ -1708,9 +1712,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         part.secondary = frame->second.secondary;
         part.normal = frame->second.normal;
         for (int axis = 0; axis < 3; ++axis)
-            part.origin[axis] = read<double>(value, (older782 ? 25 : 33) + axis * 8);
-        part.length = read<double>(value, older782 ? 49 : 57);
-        if (older782 && part.geometryReferenceId)
+            part.origin[axis] = read<double>(value, (older764Or782 ? 25 : 33) + axis * 8);
+        part.length = read<double>(value, older764Or782 ? 49 : 57);
+        if (older764Or782 && part.geometryReferenceId)
         {
             const auto contour = contours.find(part.geometryReferenceId);
             if (contour == contours.end())
@@ -1734,7 +1738,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             model.actualPartIds.push_back(part.id);
         else if (part.internalType == 11 || part.internalType == 38)
             model.operativePartIds.push_back(part.id);
-        else if (older782 && part.internalType == 10)
+        else if (older764Or782 && part.internalType == 10)
         {
             IndividualBolt bolt;
             bolt.id = part.id;
@@ -1814,7 +1818,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     for (auto& entry : model.parts)
         entry.second.properties = model.properties[entry.first];
 
-    if (older782)
+    if (older764Or782)
     {
         const std::regex thicknessPattern(R"(^PL([+]?[0-9]+(?:\.[0-9]+)?)$)");
         for (std::size_t index = 0; index < all[surfaceDefinitionOrdinal].rowCount; ++index)
@@ -2256,14 +2260,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     for (std::size_t index = 0; index < all[assemblyOrdinal].rowCount; ++index)
     {
         const auto* value = row(data, all, assemblyOrdinal, index);
-        if ((older782 || older844) && read<uint32_t>(value, 5) != 15)
+        if ((older764Or782 || older844) && read<uint32_t>(value, 5) != 15)
             continue;
         Assembly assembly;
         assembly.id = read<uint32_t>(value, 1);
         assembly.guid = model.identities[assembly.id].guid;
-        assembly.name = (older782 || older844) ? legacyString(value, 21, 68) : fixedString(value, 21, 71);
+        assembly.name = (older764Or782 || older844) ? legacyString(value, 21, 68) : fixedString(value, 21, 71);
         assembly.properties = model.properties[assembly.id];
-        if (older782 || older844)
+        if (older764Or782 || older844)
         {
             const auto primary = read<uint32_t>(value, 13);
             if (model.parts.count(primary) && model.parts.at(primary).internalType == 2)
@@ -2282,15 +2286,15 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         if (model.parts.count(partId) && model.parts.at(partId).internalType == 2)
             assemblies[relation.owner].memberIds.push_back(partId);
     }
-    if (older782 || older844)
+    if (older764Or782 || older844)
         for (const auto partId : model.actualPartIds)
         {
             const auto identity = model.identities.find(partId);
             if (identity != model.identities.end())
             {
-                const auto assemblyId = older782 ? identity->second.flags : identity->second.ownerId;
+                const auto assemblyId = older764Or782 ? identity->second.flags : identity->second.ownerId;
                 if (assemblies.count(assemblyId)) assemblies[assemblyId].memberIds.push_back(partId);
-                else if (older782 && assemblyId)
+                else if (older764Or782 && assemblyId)
                     model.diagnostics.push_back("unresolved stored assembly reference " + std::to_string(assemblyId) +
                                                 " for part " + std::to_string(partId));
             }
@@ -2344,11 +2348,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         if (!model.customComponentReferences.empty())
             model.diagnostics.emplace_back("type-4 associations are custom component object references, not control lines; control-object decoding remains unverified");
     }
-    const std::size_t customDefinitionOrdinal = library782 ? 125 : 226;
+    const std::size_t customDefinitionOrdinal = legacyLibrary ? 125 : 226;
     if (library && all.size() > customDefinitionOrdinal && all[customDefinitionOrdinal].valid &&
-        all[customDefinitionOrdinal].payloadSize == (library782 ? 32U : 36U))
+        all[customDefinitionOrdinal].payloadSize == (legacyLibrary ? 32U : 36U))
     {
-        if (!older782 && !older844) requireFields(data, all, customDefinitionOrdinal, 10, {0,1,7,8,9});
+        if (!older764Or782 && !older844) requireFields(data, all, customDefinitionOrdinal, 10, {0,1,7,8,9});
         std::unordered_set<uint32_t> definitionIds;
         for (std::size_t index = 0; index < all[customDefinitionOrdinal].rowCount; ++index)
         {
@@ -2359,9 +2363,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 throw std::runtime_error("duplicate custom component definition " + std::to_string(definition.id));
             definition.kind = read<uint32_t>(value, 5);
             definition.classificationCode = read<uint32_t>(value, 21);
-            for (std::size_t item = 0; item < (library782 ? 2U : definition.referenceIds.size()); ++item)
+            for (std::size_t item = 0; item < (legacyLibrary ? 2U : definition.referenceIds.size()); ++item)
                 definition.referenceIds[item] = read<uint32_t>(value, 25 + item * 4);
-            if (library782)
+            if (legacyLibrary)
             {
                 for (auto ref : definition.referenceIds)
                     if (ref && !stringChunks.count(ref))

@@ -176,6 +176,17 @@ if(TEKLADB1_BUILD_TESTS)
             drawing782_collapsed drawing782_nonfinite drawing782_conflict drawing782_truncated)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
+    foreach(case 764_model 764_library 764_library_fields 764_fields 764_width
+            764_part_join 764_contour_join 764_string_cycle 764_missing_string 764_bolt_join
+            764_numeric_nan 764_numeric_overflow 764_assembly_missing 764_library_definition_fields 764_library_definition_width
+            764_library_definition_string 764_library_definition_identity 764_library_definition_duplicate 764_library_parameter_string 764_library_parameter_identity
+            764_library_parameter_duplicate 764_library_distance_fields 764_library_distance_width 764_library_distance_string 764_library_distance_identity
+            764_library_distance_nan 764_library_distance_secondary_nan 764_library_distance_bindings 764_library_distance_duplicate 764_library_formula_fields
+            764_library_formula_width 764_library_formula_string 764_library_formula_target 764_library_formula_identity 764_library_formula_duplicate
+            764_library_formula_refs 764_library_formula_output 764_weld 764_library_weld 764_weld_fields
+            764_weld_width 764_wrong_count 764_wrong_weld_table)
+        add_test(NAME db1.${case} COMMAND tekladb1_regression "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     foreach(case bolt844_valid bolt844_library bolt844_multi bolt844_library_multi bolt844_empty bolt844_null
             bolt844_missing_definition bolt844_missing_point bolt844_missing_frame bolt844_missing_array bolt844_missing_identity
             bolt844_duplicate_group bolt844_duplicate_definition bolt844_origin_nan bolt844_position_nan bolt844_diameter_nan

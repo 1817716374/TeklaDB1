@@ -102,10 +102,10 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                             mark(file.path(),ReadLevel::Discovered,"analysis data and presets are not automatically associated with model objects");
             }
         const auto modelLevel = [](const db1::Model& model) {
-            return model.storageVersion == "7.82" || model.storageVersion == "9.08" ? ReadLevel::PartialSemantic : ReadLevel::Semantic;
+            return model.storageVersion == "7.64" || model.storageVersion == "7.82" || model.storageVersion == "9.08" ? ReadLevel::PartialSemantic : ReadLevel::Semantic;
         };
         const auto modelDiagnostic = [](const db1::Model& model) -> std::string {
-            if (model.storageVersion == "7.82") return "7.82 object graph decoded; individual bolt geometry and non-plate contours remain partial";
+            if (model.storageVersion == "7.64" || model.storageVersion == "7.82") return model.storageVersion + " object graph decoded; individual bolt geometry and non-plate contours remain partial";
             if (model.storageVersion == "9.08") return "9.08 object graph decoded; bolt numeric parameters, generation flags and complete geometry remain partial";
             return {};
         };

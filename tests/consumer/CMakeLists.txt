@@ -59,3 +59,7 @@ if(TARGET TeklaFormats::occt)
     add_test(NAME installed-bolt844-geometry-consumer COMMAND geometry_consumer bolt844)
     add_test(NAME installed-bolt908-geometry-consumer COMMAND geometry_consumer bolt908)
 endif()
+
+foreach(case 764_model 764_library 764_fields 764_part_join)
+    add_test(NAME installed-${case}-consumer COMMAND bolt844_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+endforeach()
