@@ -5,6 +5,8 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError
 import warnings
 import zipfile
 import corpus
@@ -58,6 +60,19 @@ class Archives(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "hash/size"):
             self.run_fetch()
         self.assertFalse(self.dest.exists())
+
+    def test_download_error_identifies_source(self):
+        url = "https://example.invalid/pinned-model.zip"
+        spec = dict(url=url, **digest(self.value))
+        self.dest.parent.mkdir(parents=True, exist_ok=True)
+        self.dest.write_bytes(b"existing-cache")
+        partial = self.dest.with_name(self.dest.name + ".partial")
+        partial.write_bytes(b"interrupted-download")
+        with patch("corpus.urllib.request.urlopen", side_effect=HTTPError(url, 403, "Forbidden", {}, None)):
+            with self.assertRaisesRegex(ValueError, "cannot fetch https://example.invalid/pinned-model.zip: HTTP Error 403"):
+                corpus.fetch(spec, self.dest)
+        self.assertEqual(self.dest.read_bytes(), b"existing-cache")
+        self.assertFalse(partial.exists())
 
     def test_member_size(self):
         self.spec["size"] += 1

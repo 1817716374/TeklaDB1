@@ -51,6 +51,8 @@ def fetch(spec, destination):
         if not verify(temporary, spec):
             raise ValueError(f"download hash/size mismatch: {spec['url']}")
         os.replace(temporary, destination)
+    except OSError as exc:
+        raise ValueError(f"cannot fetch {spec['url']}: {exc}") from exc
     finally:
         temporary.unlink(missing_ok=True)
 
