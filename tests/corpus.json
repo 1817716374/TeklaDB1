@@ -32,6 +32,11 @@
       "url": "https://raw.githubusercontent.com/TrimbleSolutionsCorporation/TSOpenAPI_Model_Exam/d6bead19ff88c05c6a079c406bbaa64766063753/API_Developer_Exam_01.zip",
       "size": 30863134,
       "sha256": "014d4edbc72bafefaf5865c2d822001163b47cb95afc0b36852ec57e336aceeb"
+    },
+    "construsoft-drawing-views": {
+      "url": "https://dl.construsoft.com/install/2024/Models/Defining%20drawing%20views%20steel.zip",
+      "size": 580037,
+      "sha256": "a4cf636d45b4ff0dbd2679adbb64ea0ab07c1713cfe631c62a6c940d83025139"
     }
   },
   "files": [
@@ -4774,6 +4779,20 @@
       "member": "API_Developer_Exam_01/profdb.bin",
       "size": 590733,
       "sha256": "69fc9eacc3e1bf6a24276904316989c68c27a83ab0a2ba3928b2df4dd133e7d5"
+    },
+    {
+      "path": "analysis-defaults/AnalysisPartDefaults.db6",
+      "archive": "construsoft-drawing-views",
+      "member": "Defining drawing views steel/AnalysisPartDefaults.db6",
+      "size": 2293,
+      "sha256": "160d632251d4c0bd49f4d3d3c416b9d6710dc5046b1c9046fdb635c14319c068"
+    },
+    {
+      "path": "analysis-defaults/Defining drawing views steel.db1",
+      "archive": "construsoft-drawing-views",
+      "member": "Defining drawing views steel/Defining drawing views steel.db1",
+      "size": 184181,
+      "sha256": "e4c84217cfb5f18a75112f288fd8e9c4feec94754728c852a97942806cbf9195"
     }
   ],
   "cases": [
@@ -16312,6 +16331,41 @@
       "mode": "drawing_metadata_project",
       "exit": 0,
       "stdout": "metadata=5 pairs=5 objects=1 failed=0 discovered=0 drawings=5"
+    },
+    {
+      "name": "db6-raw",
+      "path": "analysis-defaults/AnalysisPartDefaults.db6",
+      "mode": "raw",
+      "exit": 0,
+      "stdout": "version=DB6-10014 tables=86 records=79 opaque=0 bytes=57113 fingerprint=f45527ce8a82a1b1"
+    },
+    {
+      "name": "db6-model",
+      "path": "analysis-defaults/Defining drawing views steel.db1",
+      "mode": "model",
+      "exit": 0,
+      "stdout": "version=9.52 parts=22 operative=0 profiles=0 bolts=10 welds=84 assemblies=2 components=7 properties=77 parameters=0 custom=0 unhandled=0 fingerprint=568ff6e7acc6c18f"
+    },
+    {
+      "name": "db6-analysis_project",
+      "path": "analysis-defaults",
+      "mode": "analysis_project",
+      "exit": 0,
+      "stdout": "analysis_files=1 raw=1 failed=0 discovered=0 rows=79 associations=0"
+    },
+    {
+      "name": "db6-analysis_project_disabled",
+      "path": "analysis-defaults",
+      "mode": "analysis_project_disabled",
+      "exit": 0,
+      "stdout": "analysis_files=1 raw=0 failed=0 discovered=1 rows=0 associations=0"
+    },
+    {
+      "name": "db6-analysis_project_strict",
+      "path": "analysis-defaults",
+      "mode": "analysis_project_strict",
+      "exit": 0,
+      "stdout": "analysis_files=1 raw=1 failed=0 discovered=0 rows=79 associations=0"
     }
   ]
 }

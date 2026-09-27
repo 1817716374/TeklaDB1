@@ -24,7 +24,8 @@ enum class DatabaseKind
     ComponentLibrary,
     Environment,
     Numbering,
-    Drawing
+    Drawing,
+    Analysis
 };
 
 struct RawRecord

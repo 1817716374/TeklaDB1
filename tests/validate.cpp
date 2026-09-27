@@ -26,6 +26,7 @@ struct Fingerprint
     }
 };
 #include "OwnershipValidation.hpp"
+#include "AnalysisValidation.hpp"
 #include "PositionValidation.hpp"
 #include "SurfaceValidation.hpp"
 #include "ObjectNumberingValidation.hpp"
@@ -106,6 +107,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if(mode.rfind("analysis_project",0)==0)return analysisProjectValidation(path,mode);
         if(mode=="drawing_metadata" || mode=="drawing_metadata_fields" || mode.rfind("drawing_metadata_project",0)==0)return drawingMetadataValidation(path,mode);
         if (mode == "schema908_evidence") return schema908Validation(path);
         if (mode == "numbering908_evidence" || mode == "numbering908_unpaired") return numbering908Validation(path,mode=="numbering908_unpaired");
@@ -550,7 +552,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 }
                 if(rebuilt!=raw.decompressedFileImage)throw std::runtime_error("7.30 drawing reconstruction differs from file");
             }
-            if (raw.kind==tekla::db1::DatabaseKind::Drawing && (raw.storageVersion=="7.82" || raw.storageVersion=="8.44" || raw.storageVersion=="9.08"))
+            if (raw.kind==tekla::db1::DatabaseKind::Analysis ||
+                (raw.kind==tekla::db1::DatabaseKind::Drawing && (raw.storageVersion=="7.82" || raw.storageVersion=="8.44" || raw.storageVersion=="9.08")))
             {
                 auto rebuilt=raw.preamble;
                 const auto word=[&](std::uint32_t n) { for (unsigned i=0;i<4;++i) rebuilt.push_back(static_cast<std::uint8_t>(n>>(i*8))); };
@@ -560,7 +563,9 @@ int run(const std::string& mode, const std::filesystem::path& path)
                     for (auto f:t.fieldDescriptors) word(f);
                     for (const auto& r:t.records)
                     {
-                        if (r.payload.size()!=t.payloadSize || r.allocatorMetadata.size()!=(raw.storageVersion!="7.82"?24+16*std::count(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),1U):40)) throw std::runtime_error("legacy record framing lost");
+                        const auto metadataBytes=raw.kind==tekla::db1::DatabaseKind::Analysis ? 8 :
+                            (raw.storageVersion!="7.82"?24+16*std::count(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),1U):40);
+                        if (r.payload.size()!=t.payloadSize || r.allocatorMetadata.size()!=static_cast<std::size_t>(metadataBytes)) throw std::runtime_error("raw record framing lost");
                         rebuilt.push_back(r.allocationTag); rebuilt.insert(rebuilt.end(),r.payload.begin(),r.payload.end());
                         rebuilt.insert(rebuilt.end(),r.allocatorMetadata.begin(),r.allocatorMetadata.end());
                     }

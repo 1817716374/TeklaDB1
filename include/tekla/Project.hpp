@@ -10,7 +10,7 @@
 
 namespace tekla
 {
-enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping, DrawingMetadata };
+enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping, DrawingMetadata, Analysis };
 enum class ReadLevel { Discovered, Raw, Semantic, Failed, External, PartialSemantic };
 struct ProjectFile
 {

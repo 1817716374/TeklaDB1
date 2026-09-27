@@ -34,6 +34,7 @@ FileRole roleFor(const std::filesystem::path& path)
     if (name == "xslib.db1") return FileRole::ComponentLibrary;
     if (ext == ".db1") return FileRole::Model;
     if (ext == ".db2") return FileRole::Numbering;
+    if (ext == ".db6") return FileRole::Analysis;
     if (ext == ".dg") return FileRole::Drawing;
     if (ext == ".metadata" && lower(db1::detail::pathUtf8(path.stem().extension()))==".dg") return FileRole::DrawingMetadata;
     if (name == "environment.db") return FileRole::Environment;
@@ -86,6 +87,13 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             for (const auto& entry : std::filesystem::directory_iterator(drawings))
                 if (entry.is_regular_file() && (roleFor(entry.path()) == FileRole::Drawing || roleFor(entry.path()) == FileRole::DrawingMetadata))
                     mark(entry.path(), ReadLevel::Discovered, "DG reading is optional; full drawing semantics are not implemented");
+        // Directory spelling is case-insensitive, including on Linux. Keep
+        // paths as separate inventories; no basename-based DB1 association.
+        for (const auto& entry : std::filesystem::directory_iterator(root))
+            if (entry.is_directory() && lower(db1::detail::pathUtf8(entry.path().filename()))=="analysis")
+                for (const auto& file : std::filesystem::directory_iterator(entry.path()))
+                    if (file.is_regular_file() && roleFor(file.path())==FileRole::Analysis)
+                        mark(file.path(),ReadLevel::Discovered,"analysis semantics and DB1 object associations are unverified");
         const auto modelLevel = [](const db1::Model& model) {
             return model.storageVersion == "7.82" || model.storageVersion == "9.08" ? ReadLevel::PartialSemantic : ReadLevel::Semantic;
         };
@@ -117,11 +125,13 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             // Copy the work list: mark() may append files and invalidate references.
             const auto files = result.files;
             for (const auto& file : files)
-                if (file.role == FileRole::Numbering || file.role == FileRole::Environment ||
+                if (file.role == FileRole::Numbering || file.role == FileRole::Environment || file.role == FileRole::Analysis ||
                     (file.role == FileRole::Options && lower(db1::detail::pathUtf8(file.path.filename()))!="options.ini"))
                 {
                     db1::RawDatabase raw; std::string diagnostic;
                     if (!db1::parseRawDatabase(file.path, raw, diagnostic, options.rawOptions)) { failure(file.path, diagnostic); continue; }
+                    if (file.role==FileRole::Analysis && raw.kind!=db1::DatabaseKind::Analysis)
+                    { failure(file.path,"unsupported DB6 analysis container"); continue; }
                     mark(file.path, ReadLevel::Raw, "container only; stable semantic field mapping is not implemented");
                     if (file.role == FileRole::Numbering)
                     {

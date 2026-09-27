@@ -3,6 +3,7 @@
 #include "Path.hpp"
 #include "BinaryIO.hpp"
 #include "RelatedContainers.hpp"
+#include "AnalysisContainer.hpp"
 
 #include <zlib.h>
 
@@ -2540,6 +2541,12 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
         auto data = detail::readPayload(path, options.maxDecodedBytes);
         if (data.size() < 8)
             throw std::runtime_error("DB1 file is truncated");
+        if (detail::u32(data,0)==10014)
+        {
+            detail::analysisContainer(data,database);
+            if (options.retainDecompressedFileImage) database.decompressedFileImage=std::move(data);
+            return true;
+        }
         const bool xsteel = data.size() >= 6 && std::memcmp(data.data(), "Xsteel", 6) == 0;
         const bool namedVariableDatabase = data.size() >= 8 && std::memcmp(data.data(), "DBV@", 4) == 0;
         const bool legacyVariableDatabase = data.size() >= 24 && read<uint32_t>(data.data(),0) == 1 &&
