@@ -4564,6 +4564,18 @@
       "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/drawing_history.log",
       "size": 257889,
       "sha256": "a6244e2db3cd8049177b9e20fad79bb50d373d76f51a5737686113c2e737b164"
+    },
+    {
+      "path": "shapes-auvent/Shapes/712cacb7-119f-4da3-8738-9c5dca170300.xml",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/Shapes/712cacb7-119f-4da3-8738-9c5dca170300.xml",
+      "size": 557,
+      "sha256": "2136596f8106e17a96eb1e36fdd2ad44578f88ecb1de255131294542e1583a2a"
+    },
+    {
+      "path": "shapes-auvent/ShapeGeometries/a1d452b2-d351-4a0a-9376-d4e4cfad751e.xml",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/ShapeGeometries/a1d452b2-d351-4a0a-9376-d4e4cfad751e.xml",
+      "size": 25157,
+      "sha256": "a5853f60331dac68770738edf515e31ebbb8d551b1bd1dbc12944968847bfedb"
     }
   ],
   "cases": [
@@ -15745,6 +15757,27 @@
       "path": "auvent844-drawing",
       "exit": 0,
       "stdout": "version=8.44 strings=41 properties=5 links=5 mark_history=1 project_history=1 deferred_views=1 deferred_dimensions=13"
+    },
+    {
+      "name": "AUVENT shape_definition",
+      "mode": "shape_definition",
+      "path": "shapes-auvent/Shapes/712cacb7-119f-4da3-8738-9c5dca170300.xml",
+      "exit": 0,
+      "stdout": "raw_bytes=557 fingerprint=da5418fc3e873e2a"
+    },
+    {
+      "name": "AUVENT shape_geometry",
+      "mode": "shape_geometry",
+      "path": "shapes-auvent/ShapeGeometries/a1d452b2-d351-4a0a-9376-d4e4cfad751e.xml",
+      "exit": 0,
+      "stdout": "points=60 faces=58 edges=117 raw_bytes=25157 fingerprint=be117a806fbe3f7d"
+    },
+    {
+      "name": "AUVENT shape definition/geometry bounds",
+      "mode": "shape_pair_evidence",
+      "path": "shapes-auvent",
+      "exit": 0,
+      "stdout": "definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0"
     }
   ]
 }

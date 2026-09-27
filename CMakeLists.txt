@@ -17,6 +17,7 @@ find_package(ZLIB REQUIRED)
 
 add_library(tekla_db1
     src/Catalogs.cpp
+    src/ShapeXml.cpp
     src/MetadataXml.cpp
     src/GuidMappings.cpp
     src/TinyXmlPrivate.cpp
@@ -92,6 +93,11 @@ if(TEKLADB1_BUILD_TESTS)
     target_link_libraries(tekladb1_guid_mapping_test PRIVATE TeklaFormats::core)
     foreach(case mapper_text mapper_duplicates mapper_failure mapper_targets)
         add_test(NAME related.${case} COMMAND tekladb1_guid_mapping_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
+    add_executable(tekladb1_shapes_test tests/shapes.cpp)
+    target_link_libraries(tekladb1_shapes_test PRIVATE TeklaFormats::core ZLIB::ZLIB)
+    foreach(case shapes_scope shapes_geometry shapes_numbers shapes_structure shapes_entities shapes_limits shapes_gzip shapes_catalog)
+        add_test(NAME related.${case} COMMAND tekladb1_shapes_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     add_executable(tekladb1_metadata_test tests/metadata.cpp)
     target_link_libraries(tekladb1_metadata_test PRIVATE TeklaFormats::core)

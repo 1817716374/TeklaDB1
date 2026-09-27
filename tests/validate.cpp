@@ -42,6 +42,7 @@ struct Fingerprint
 #include "DrawingDimensionValidation.hpp"
 #include "GuidMappingValidation.hpp"
 #include "Drawing844Validation.hpp"
+#include "ShapeValidation.hpp"
 #include "Drawing730DimensionValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
@@ -101,6 +102,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if (mode == "shape_definition" || mode == "shape_geometry" || mode == "shape_pair_evidence") return shapeValidation(mode,path);
         if (mode == "drawing844_evidence") return drawing844Validation(path);
         if (mode == "bolt844_evidence") return bolt844Validation(path);
         if (mode == "profile844_evidence") return profile844Validation(path);
