@@ -1305,10 +1305,11 @@ bool buildOcctGeometry(const Model& model, OcctGeometryModel& result, std::strin
             if (options.progress)
                 options.progress("bolts", group.id, completed, model.boltGroups.size());
             const auto definition = model.boltDefinitions.find(group.definitionId);
-            if (definition != model.boltDefinitions.end() && definition->second.legacy844Parameters)
+            if (definition != model.boltDefinitions.end() &&
+                (definition->second.legacy844Parameters || definition->second.legacy908Parameters))
             {
                 result.unbuiltBoltGroupIds.push_back(group.id);
-                result.diagnostics.emplace_back("8.44 hole/bolt generation flags remain unverified: " + std::to_string(group.id));
+                result.diagnostics.emplace_back(std::string(definition->second.legacy908Parameters ? "9.08 bolt parameters and generation flags" : "8.44 hole/bolt generation flags") + " remain unverified: " + std::to_string(group.id));
                 ++completed;
                 continue;
             }

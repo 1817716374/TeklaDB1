@@ -22,6 +22,16 @@
       "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/out.ifcZIP",
       "size": 2420513,
       "sha256": "c582a87234285fe885199183dbe65da93ef1b90b41743416a3ddf8e0323efefa"
+    },
+    "api-exam908-july": {
+      "url": "https://raw.githubusercontent.com/TrimbleSolutionsCorporation/TSOpenAPI_Model_Exam/7345e5f14c86bf94f9da073705c56526d6895c6d/API_Developer_Exam_01.zip",
+      "size": 30805086,
+      "sha256": "f4038c7723c480aab63240841c77020d7d2c07b090003153f19e5c179afd000c"
+    },
+    "api-exam908-september": {
+      "url": "https://raw.githubusercontent.com/TrimbleSolutionsCorporation/TSOpenAPI_Model_Exam/d6bead19ff88c05c6a079c406bbaa64766063753/API_Developer_Exam_01.zip",
+      "size": 30863134,
+      "sha256": "014d4edbc72bafefaf5865c2d822001163b47cb95afc0b36852ec57e336aceeb"
     }
   },
   "files": [
@@ -4576,6 +4586,68 @@
       "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/ShapeGeometries/a1d452b2-d351-4a0a-9376-d4e4cfad751e.xml",
       "size": 25157,
       "sha256": "a5853f60331dac68770738edf515e31ebbb8d551b1bd1dbc12944968847bfedb"
+    },
+    {
+      "path": "api-exam908-july/API_Developer_Exam_01.db1",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/API_Developer_Exam_01.db1",
+      "size": 7781363,
+      "sha256": "6f2121f0bb031fa03cc6860997f1a62b76daa0c453315ee505ad7d595f776d2c"
+    },
+    {
+      "path": "api-exam908-july/xslib.db1",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/xslib.db1",
+      "size": 199972,
+      "sha256": "8685055d81771d4f85d0438d9fa67c0a71b8ec98dca9c4162bf6e0188f93b5a2"
+    },
+    {
+      "path": "api-exam908-july/profdb.bin",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/profdb.bin",
+      "size": 590733,
+      "sha256": "69fc9eacc3e1bf6a24276904316989c68c27a83ab0a2ba3928b2df4dd133e7d5"
+    },
+    {
+      "path": "api-exam908-july/TeklaStructuresModel.xml",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/TeklaStructuresModel.xml",
+      "size": 902,
+      "sha256": "e5e4e074d0cc0c99235eba8afa035b86d2d3d55307fd84a7d0809e4e780ef714"
+    },
+    {
+      "path": "api-exam908-september/API_Developer_Exam_01.db1",
+      "archive": "api-exam908-september",
+      "member": "API_Developer_Exam_01/API_Developer_Exam_01.db1",
+      "size": 7804280,
+      "sha256": "8019a8f4e7970e3bd7e3ceaedaf25d4616680ff28d7aea8e1d1c6e127c66b18a"
+    },
+    {
+      "path": "api-exam908-september/xslib.db1",
+      "archive": "api-exam908-september",
+      "member": "API_Developer_Exam_01/xslib.db1",
+      "size": 200437,
+      "sha256": "a5c920f4185a8b32875d7c85bd329a84f006dcbc907dfbee798d81c47c6c3bc2"
+    },
+    {
+      "path": "api-exam908-september/profdb.bin",
+      "archive": "api-exam908-september",
+      "member": "API_Developer_Exam_01/profdb.bin",
+      "size": 590733,
+      "sha256": "69fc9eacc3e1bf6a24276904316989c68c27a83ab0a2ba3928b2df4dd133e7d5"
+    },
+    {
+      "path": "api-exam908-september/TeklaStructuresModel.xml",
+      "archive": "api-exam908-september",
+      "member": "API_Developer_Exam_01/TeklaStructuresModel.xml",
+      "size": 902,
+      "sha256": "e5e4e074d0cc0c99235eba8afa035b86d2d3d55307fd84a7d0809e4e780ef714"
+    },
+    {
+      "path": "api-exam908-july/Form1.cs",
+      "url": "https://raw.githubusercontent.com/TrimbleSolutionsCorporation/TSOpenAPI_Model_Exam/7345e5f14c86bf94f9da073705c56526d6895c6d/Example_Test_Project/Form1.cs",
+      "size": 2544,
+      "sha256": "a574c3a568e339bb96b4479761bc63fe07f6ca5d8176298c58b1c7ec0e1a5a44"
     }
   ],
   "cases": [
@@ -15778,6 +15850,90 @@
       "path": "shapes-auvent",
       "exit": 0,
       "stdout": "definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0"
+    },
+    {
+      "name": "api-exam908-july model API_Developer_Exam_01.db1",
+      "mode": "model",
+      "path": "api-exam908-july/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "version=9.08 parts=5360 operative=1683 profiles=3050 bolts=1850 welds=6500 assemblies=1901 components=1378 properties=27559 parameters=0 custom=0 unhandled=104 fingerprint=7daa31da4554a444"
+    },
+    {
+      "name": "api-exam908-july library xslib.db1",
+      "mode": "library",
+      "path": "api-exam908-july/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.08 parts=42 operative=0 profiles=3050 bolts=0 welds=0 assemblies=34 components=0 properties=610 parameters=179 custom=9 unhandled=0 fingerprint=d445782f77da0798"
+    },
+    {
+      "name": "api-exam908-july raw API_Developer_Exam_01.db1",
+      "mode": "raw",
+      "path": "api-exam908-july/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "version=9.08 tables=339 records=514615 opaque=1 bytes=23221777 fingerprint=3d8be8c667526f33"
+    },
+    {
+      "name": "api-exam908-july raw xslib.db1",
+      "mode": "raw",
+      "path": "api-exam908-july/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.08 tables=303 records=10366 opaque=1 bytes=543181 fingerprint=64c8216927360e7e"
+    },
+    {
+      "name": "api-exam908-july model_metadata TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "api-exam908-july/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=902 fingerprint=b43b8059dd70139f"
+    },
+    {
+      "name": "api-exam908-july schema908_evidence ",
+      "mode": "schema908_evidence",
+      "path": "api-exam908-july",
+      "exit": 0,
+      "stdout": "version=9.08 classes=139 identities=47664 retained_bolt_parameters=316 catalog_profiles=49 beam_candidates=4237 official_api_count=checked"
+    },
+    {
+      "name": "api-exam908-september model API_Developer_Exam_01.db1",
+      "mode": "model",
+      "path": "api-exam908-september/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "version=9.08 parts=5381 operative=1683 profiles=3050 bolts=1850 welds=6529 assemblies=1901 components=1378 properties=27580 parameters=0 custom=0 unhandled=104 fingerprint=640d4ab3b89dbf91"
+    },
+    {
+      "name": "api-exam908-september library xslib.db1",
+      "mode": "library",
+      "path": "api-exam908-september/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.08 parts=42 operative=0 profiles=3050 bolts=0 welds=0 assemblies=34 components=0 properties=610 parameters=179 custom=9 unhandled=0 fingerprint=d445782f77da0798"
+    },
+    {
+      "name": "api-exam908-september raw API_Developer_Exam_01.db1",
+      "mode": "raw",
+      "path": "api-exam908-september/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "version=9.08 tables=339 records=515563 opaque=1 bytes=23282589 fingerprint=532436fe1463195e"
+    },
+    {
+      "name": "api-exam908-september raw xslib.db1",
+      "mode": "raw",
+      "path": "api-exam908-september/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.08 tables=303 records=10366 opaque=1 bytes=544957 fingerprint=9277e33c5d121ad2"
+    },
+    {
+      "name": "api-exam908-september model_metadata TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "api-exam908-september/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=902 fingerprint=b43b8059dd70139f"
+    },
+    {
+      "name": "api-exam908-september schema908_evidence ",
+      "mode": "schema908_evidence",
+      "path": "api-exam908-september",
+      "exit": 0,
+      "stdout": "version=9.08 classes=140 identities=47756 retained_bolt_parameters=316 catalog_profiles=49 beam_candidates=4254 official_api_count=not_applicable"
     }
   ]
 }

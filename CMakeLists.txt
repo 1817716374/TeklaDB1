@@ -166,6 +166,12 @@ if(TEKLADB1_BUILD_TESTS)
             dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid
             project_shapes_pair project_shapes_sibling project_shapes_internal project_shapes_precedence
             project_shapes_lower_conflict project_shapes_missing project_shapes_split project_shapes_malformed project_shapes_strict
+            schema908_valid schema908_library schema908_bolt schema908_library_bolt schema908_unknown_kind
+            schema908_bad_class schema908_library_bad_class schema908_bad_owner schema908_bad_signature
+            schema908_bad_bolt_signature schema908_bad_contour_signature schema908_missing_string schema908_string_cycle
+            schema908_bad_point schema908_nonfinite schema908_wrong_count
+            schema908_bolt_missing_identity schema908_bolt_duplicate schema908_bolt_wrong_kind
+            schema908_bolt_missing_placement schema908_bolt_origin_nan
             782_model 782_library 782_library_fields 782_fields 782_width 782_part_join 782_contour_join
             782_string_cycle 782_missing_string 782_bolt_join 782_numeric_nan 782_numeric_overflow 782_assembly_missing
             782_library_definition_fields 782_library_definition_width 782_library_definition_string
@@ -224,6 +230,7 @@ if(TEKLADB1_BUILD_TESTS)
         add_test(NAME db1.geometry_cambering COMMAND tekladb1_geometry_test camber)
         add_test(NAME db1.geometry_ellipses COMMAND tekladb1_geometry_test ellipse)
         add_test(NAME db1.geometry_bolt844_deferred COMMAND tekladb1_geometry_test bolt844)
+        add_test(NAME db1.geometry_bolt908_deferred COMMAND tekladb1_geometry_test bolt908)
         add_executable(tekladb1_ifc_geometry tests/ifc_geometry.cpp)
         target_link_libraries(tekladb1_ifc_geometry PRIVATE TeklaDB1::occt)
         add_test(NAME db1.ifc_volume_evidence COMMAND tekladb1_ifc_geometry ifc_volume_evidence)

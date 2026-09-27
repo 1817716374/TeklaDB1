@@ -1002,14 +1002,16 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const bool library782 = componentLibrary && model.storageVersion == "7.82" && offsets.size() == 198;
     const bool schema844 = !componentLibrary && model.storageVersion == "8.44" && offsets.size() == 286;
     const bool schema895 = !componentLibrary && model.storageVersion == "8.95" && offsets.size() == 326;
+    const bool schema908 = !componentLibrary && model.storageVersion == "9.08" && offsets.size() == 339;
     const bool modernVersion = model.storageVersion == "9.52" || model.storageVersion == "9.60" ||
                                model.storageVersion == "9.65" || model.storageVersion == "9.66";
     const bool schema952OrNewer = !componentLibrary && modernVersion && offsets.size() >= 356;
     const bool library844 = componentLibrary && model.storageVersion == "8.44" && offsets.size() == 254;
     const bool library895 = componentLibrary && model.storageVersion == "8.95" && offsets.size() == 290;
+    const bool library908 = componentLibrary && model.storageVersion == "9.08" && offsets.size() == 303;
     const bool library952OrNewer = componentLibrary && modernVersion && offsets.size() >= 319;
-    if (!schema782 && !schema844 && !schema895 && !schema952OrNewer &&
-        !library782 && !library844 && !library895 && !library952OrNewer)
+    if (!schema782 && !schema844 && !schema895 && !schema908 && !schema952OrNewer &&
+        !library782 && !library844 && !library895 && !library908 && !library952OrNewer)
         throw std::runtime_error("unsupported DB1 semantic schema " + model.storageVersion + " with " +
                                  std::to_string(offsets.size()) + " sections; use parseRawDatabase for lossless access");
 
@@ -1017,7 +1019,10 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const bool older782 = schema782 || library782;
     const bool older844 = schema844 || library844;
     const bool older895 = schema895 || library895;
-    const bool olderSchema = older782 || older844 || older895;
+    const bool hybrid908 = schema908 || library908;
+    const bool classIdentity = older895 || hybrid908;
+    const bool floatContours = older782 || older844 || older895;
+    const bool olderSchema = floatContours || hybrid908;
     const bool library = componentLibrary;
     const bool componentVariables = library && !older844;
     const bool verifiedPartOwnership = !older782 && !older844;
@@ -1026,7 +1031,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const std::size_t reinforcementOrdinal = library ? 154 : 184;
     const std::size_t doubleArrayOrdinal = library ? 175 : 205;
     const std::size_t integerArrayOrdinal = library ? 176 : 206;
-    const std::size_t identityClassOrdinal = library ? 279 : 315;
+    const std::size_t identityClassOrdinal = hybrid908 ? (library ? 293 : 329) : (library ? 279 : 315);
     const std::size_t partAuxiliaryOrdinal = library ? 215 : 245;
     const std::size_t surfaceOrdinal = library ? 117 : 145;
     const std::size_t surfaceDefinitionOrdinal = library ? 118 : 146;
@@ -1042,16 +1047,16 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const std::size_t associationOneOrdinal = library ? 161 : 191;
     const std::size_t associationTwoOrdinal = library ? 162 : 192;
     const std::size_t identityOrdinal = (older782 || older844) ? (library ? 179 : 209) :
-                                                (older895 ? (library ? 260 : 293) : (library ? 318 : 355));
+                                                (classIdentity ? (library ? 260 : 293) : (library ? 318 : 355));
     const std::size_t partDefinitionOrdinal = older782 ? (library ? 177 : 207) : older844 ? (library ? 215 : 245) :
-                                                      (older895 ? (library ? 264 : 299) : (library ? 305 : 341));
-    const std::size_t contourBlockOrdinal = olderSchema ? (library ? 94 : 121) : (library ? 292 : 328);
+                                                      (classIdentity ? (library ? 264 : 299) : (library ? 305 : 341));
+    const std::size_t contourBlockOrdinal = floatContours ? (library ? 94 : 121) : (library ? 292 : 328);
     const std::size_t stringPropertyOrdinal = olderSchema ? (library ? 90 : 116) : (library ? 304 : 340);
     const std::size_t partOrdinal = older782 ? (library ? 163 : 193) : older844 ? (library ? 241 : 273) : (library ? 242 : 274);
     const std::size_t contourLinkOrdinal = older782 ? noTable : older844 ? (library ? 237 : 269) : (library ? 238 : 270);
     const std::size_t boltDefinitionOrdinal = older782 ? noTable : older844 ? (library ? 222 : 252) :
-                                                       (older895 ? (library ? 223 : 253) : (library ? 314 : 351));
-    const std::size_t boltLayerOrdinal = olderSchema ? noTable : (library ? 296 : 332);
+                                                       older895 ? (library ? 223 : 253) : hybrid908 ? (library ? 291 : 327) : (library ? 314 : 351);
+    const std::size_t boltLayerOrdinal = floatContours ? noTable : (library ? 296 : 332);
     const std::size_t boltGroupOrdinal = older782 ? noTable : older844 ? (library ? 221 : 251) : (library ? 274 : 310);
     const std::size_t weldDefinitionOrdinal = older782 ? (library ? 196 : 226) : older844 ? (library ? 197 : 227) : (library ? 198 : 228);
     const std::size_t relationOrdinal = (older782 || older844) ? noTable : (library ? 261 : 294);
@@ -1061,18 +1066,18 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         {pointOrdinal, 32}, {placementOrdinal, 40}, {frameOrdinal, 52}, {profileStringOrdinal, 45},
         {numericPropertyOrdinal, 44}, {componentOrdinal, 104}, {propertyLinkOneOrdinal, 24},
         {propertyLinkTwoOrdinal, 24}, {weldOrdinal, 24}, {associationOneOrdinal, 60},
-        {associationTwoOrdinal, 60}, {identityOrdinal, (older782 || older844) ? 63U : (older895 ? 55U : 72U)},
-        {partDefinitionOrdinal, older782 ? 380U : older844 ? 322U : (older895 ? 332U : 372U)},
-        {contourBlockOrdinal, olderSchema ? 332U : 456U},
+        {associationTwoOrdinal, 60}, {identityOrdinal, (older782 || older844) ? 63U : (classIdentity ? 55U : 72U)},
+        {partDefinitionOrdinal, older782 ? 380U : older844 ? 322U : (classIdentity ? 332U : 372U)},
+        {contourBlockOrdinal, floatContours ? 332U : 456U},
         {stringPropertyOrdinal, olderSchema ? 116U : 120U}, {partOrdinal, older782 ? 56U : 64U},
         {weldDefinitionOrdinal, older782 ? 60U : older844 ? 100U : 104U},
         {assemblyOrdinal, (older782 || older844) ? 88U : 92U}};
     if (contourLinkOrdinal != noTable) required.emplace_back(contourLinkOrdinal, 24U);
-    if (boltDefinitionOrdinal != noTable) required.emplace_back(boltDefinitionOrdinal, (older844 || older895) ? 308U : 316U);
+    if (boltDefinitionOrdinal != noTable) required.emplace_back(boltDefinitionOrdinal, (older844 || older895) ? 308U : hybrid908 ? 312U : 316U);
     if (boltLayerOrdinal != noTable) required.emplace_back(boltLayerOrdinal, 48U);
     if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, older844 ? 64U : 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
-    if (older895) required.emplace_back(identityClassOrdinal, 28U);
+    if (classIdentity) required.emplace_back(identityClassOrdinal, hybrid908 ? 44U : 28U);
     if (older782)
     {
         required.emplace_back(surfaceOrdinal, 78U);
@@ -1104,6 +1109,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         requireFields(data, all, boltGroupOrdinal, 12, {0,1,2,3,4,5,6,7});
     }
     if (older895) requireFields(data, all, identityClassOrdinal, 8, {0,1,6,7});
+    if (hybrid908) requireFields(data, all, identityClassOrdinal, 9, {0,1,7,8});
     if (verifiedPartOwnership) requireFields(data, all, partAuxiliaryOrdinal, 14, {0,1});
     if (verifiedReinforcement)
     {
@@ -1154,19 +1160,20 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             requireFields(data, all, ordinal, 7, {0,1,2,3,4,5,6});
         for (auto ordinal : {associationOneOrdinal, associationTwoOrdinal})
             requireFields(data, all, ordinal, 7, {0,1,3,4});
-        if (older895) requireFields(data, all, identityOrdinal, 6, {0,1,2,3,4});
+        if (classIdentity) requireFields(data, all, identityOrdinal, 6, {0,1,2,3,4});
         else requireFields(data, all, identityOrdinal, 13, {0,1,2,3,11,12});
         requireFields(data, all, partDefinitionOrdinal, 19, {0,1,12});
         requireFields(data, all, contourBlockOrdinal, 84, {0,1});
-        if (older895) requireFields(data, all, stringPropertyOrdinal, 6, {0,1,5});
+        if (classIdentity) requireFields(data, all, stringPropertyOrdinal, 6, {0,1,5});
         else requireFields(data, all, stringPropertyOrdinal, 7, {0,1,5,6});
         requireFields(data, all, partOrdinal, 12, {0,1,2,3,4,5,6,7});
         requireFields(data, all, contourLinkOrdinal, 7, {0,1,2,5,6});
         requireFields(data, all, weldDefinitionOrdinal, 18, {0,1,2});
         requireFields(data, all, assemblyOrdinal, 9, {0,1,4,5});
         if (older895) requireFields(data, all, boltDefinitionOrdinal, 28, {0,1});
+        else if (hybrid908) requireFields(data, all, boltDefinitionOrdinal, 29, {0,1});
         else requireFields(data, all, boltDefinitionOrdinal, 30, {0,1,25,26,27,28,29});
-        if (!olderSchema) requireFields(data, all, boltLayerOrdinal, 9, {0,1,3});
+        if (!floatContours) requireFields(data, all, boltLayerOrdinal, 9, {0,1,3});
         requireFields(data, all, relationOrdinal, 6, {0,1,2,4,5});
     }
     else
@@ -1183,6 +1190,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     else if (older895)
         model.diagnostics.emplace_back(
             "Xsteel 8.95 bolt-layer records are preserved by parseRawDatabase but their field semantics remain unnamed");
+    else if (hybrid908)
+        model.diagnostics.emplace_back("Xsteel 9.08 partial semantics: bolt numeric parameters and generation flags, non-plate contour kinds and complete geometry remain unverified");
 
     struct StringChunk { uint32_t next = 0; std::string text; };
     std::unordered_map<uint32_t, StringChunk> stringChunks;
@@ -1241,7 +1250,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         frame.id = read<uint32_t>(value, 49);
         insertUnique(model.frames, frame.id, frame, "frame");
     }
-    if (older895)
+    if (classIdentity)
         for (std::size_t index = 0; index < all[identityClassOrdinal].rowCount; ++index)
         {
             const auto* value = row(data, all, identityClassOrdinal, index);
@@ -1250,6 +1259,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             identityClass.recordKind = read<uint32_t>(value, 5);
             for (std::size_t i = 0; i < identityClass.rawFields.size(); ++i)
                 identityClass.rawFields[i] = read<uint32_t>(value, 9 + i * 4);
+            identityClass.rawPayload.assign(value + 1, value + 1 + all[identityClassOrdinal].payloadSize);
             insertUnique(model.identityClasses, identityClass.id, identityClass, "identity class");
         }
     for (std::size_t index = 0; index < all[identityOrdinal].rowCount; ++index)
@@ -1258,18 +1268,19 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         Identity identity;
         identity.rowTag = value[0];
         identity.id = read<uint32_t>(value, 1);
-        identity.ownerId = read<uint32_t>(value, older782 ? 17 : older895 ? 9 : 5);
+        identity.ownerId = read<uint32_t>(value, older782 ? 17 : classIdentity ? 9 : 5);
         identity.contextId = read<uint32_t>(value, 9);
-        if (older895)
+        if (classIdentity)
         {
             identity.classReferenceId = read<uint32_t>(value, 5);
             if (!model.identityClasses.count(identity.classReferenceId))
                 throw std::runtime_error("missing identity class " + std::to_string(identity.classReferenceId));
+            if (hybrid908) identity.type = model.identityClasses.at(identity.classReferenceId).recordKind;
         }
         if (older782) identity.flags = read<uint32_t>(value, 21); // legacy assembly reference
         if (older782 || older844)
             identity.guid = fixedString(value, 25, 39);
-        else if (older895)
+        else if (classIdentity)
             identity.guid = fixedString(value, 17, 36);
         else
         {
@@ -1279,7 +1290,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         }
         insertUnique(model.identities, identity.id, identity, "identity");
     }
-    if (older895)
+    if (classIdentity)
         for (const auto& entry : model.identities)
             if (entry.second.ownerId && !model.identities.count(entry.second.ownerId))
                 throw std::runtime_error("missing identity owner " + std::to_string(entry.second.ownerId));
@@ -1448,7 +1459,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     for (const auto& entry : distancesByOwner) model.variablesByOwner[entry.first].distanceParameterIds = entry.second;
     for (const auto& entry : formulasByOwner) model.variablesByOwner[entry.first].formulaBindingIds = entry.second;
 
-    if (olderSchema)
+    if (olderSchema && !hybrid908)
     {
         const auto assignType = [&](uint32_t id, uint32_t type) {
             if (older782 && !model.identities.count(id))
@@ -1525,7 +1536,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             if (reference.numberingRecordId && model.objectNumberingRecords.at(reference.numberingRecordId).kind==ObjectNumberingKind::Reinforcement)
             {
                 const auto& identity = model.identities.at(reference.objectId);
-                const auto sourceKind = older895 ? model.identityClasses.at(identity.classReferenceId).recordKind : identity.type;
+                const auto sourceKind = classIdentity ? model.identityClasses.at(identity.classReferenceId).recordKind : identity.type;
                 if (sourceKind!=47) throw std::runtime_error("reinforcement numbering reference has non-reinforcement identity");
             }
             insertUnique(model.objectNumberingReferences, reference.objectId, reference, "object numbering reference");
@@ -1562,14 +1573,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         definition.name = fixedString(value, older782 ? 103 : 55, nameLength);
         // 8.44 stores the profile family before the dimension reference. The
         // string after it is a numbering prefix, not the 8.95 profile field.
-        const auto family = fixedString(value, older782 ? 125 : older844 ? 77 : older895 ? 145 : 117,
-                                        (older782 || older844) ? 64 : older895 ? 22 : 60);
+        const auto family = fixedString(value, older782 ? 125 : (older844 || hybrid908) ? 77 : older895 ? 145 : 117,
+                                        (older782 || older844 || hybrid908) ? 64 : older895 ? 22 : 60);
         const auto dimensionId = read<uint32_t>(value, older782 ? 189 : olderSchema ? 141 : 181);
         if (older782 && dimensionId && !stringChunks.count(dimensionId))
             throw std::runtime_error("broken DB1 profile string reference for definition " + std::to_string(definition.id));
-        definition.profile = family + (older844 ? resolveString(dimensionId, true) : strings[dimensionId]);
+        definition.profile = family + ((older844 || hybrid908) ? resolveString(dimensionId, true) : strings[dimensionId]);
         definition.secondaryName = fixedString(value, older782 ? 215 : olderSchema ? 167 : 207, 62);
-        definition.material = fixedString(value, older782 ? 277 : olderSchema ? 229 : 269, (older782 || older844) ? 32 : 95);
+        definition.material = fixedString(value, older782 ? 277 : olderSchema ? 229 : 269, (older782 || older844 || hybrid908) ? 32 : 95);
         if (older782) definitionTypes[definition.id] = read<uint32_t>(value, 5);
         insertUnique(model.definitions, definition.id, definition, "definition");
         if (older782)
@@ -1591,12 +1602,12 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             contour.points.push_back(ContourPoint{});
         for (int pointIndex = 0; pointIndex < 10; ++pointIndex)
         {
-            const auto typeOffset = (older782 || older844) ? 213 : olderSchema ? 217 : 337;
+            const auto typeOffset = (older782 || older844) ? 213 : floatContours ? 217 : 337;
             const auto type = read<uint32_t>(value, typeOffset + pointIndex * 4);
             if (type == 0x7fffffff)
                 break;
             ContourPoint point;
-            if (olderSchema)
+            if (floatContours)
                 point.value = {read<float>(value, ((older782 || older844) ? 13 : 17) + pointIndex * 4),
                                read<float>(value, ((older782 || older844) ? 53 : 57) + pointIndex * 4),
                                read<float>(value, ((older782 || older844) ? 93 : 97) + pointIndex * 4)};
@@ -1604,11 +1615,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 point.value = {read<double>(value, 17 + pointIndex * 8),
                                read<double>(value, 97 + pointIndex * 8),
                                read<double>(value, 177 + pointIndex * 8)};
-            point.chamferX = read<float>(value, ((older782 || older844) ? 133 : olderSchema ? 137 : 257) + pointIndex * 4);
-            point.chamferY = read<float>(value, ((older782 || older844) ? 173 : olderSchema ? 177 : 297) + pointIndex * 4);
+            point.chamferX = read<float>(value, ((older782 || older844) ? 133 : floatContours ? 137 : 257) + pointIndex * 4);
+            point.chamferY = read<float>(value, ((older782 || older844) ? 173 : floatContours ? 177 : 297) + pointIndex * 4);
             point.chamferType = type;
-            point.chamferDz1 = read<float>(value, ((older782 || older844) ? 253 : olderSchema ? 257 : 377) + pointIndex * 4);
-            point.chamferDz2 = read<float>(value, ((older782 || older844) ? 293 : olderSchema ? 297 : 417) + pointIndex * 4);
+            point.chamferDz1 = read<float>(value, ((older782 || older844) ? 253 : floatContours ? 257 : 377) + pointIndex * 4);
+            point.chamferDz2 = read<float>(value, ((older782 || older844) ? 293 : floatContours ? 297 : 417) + pointIndex * 4);
             contour.points.push_back(point);
         }
         contourChunks[read<uint32_t>(value, 1)].push_back(std::move(contour));
@@ -1943,7 +1954,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             return resolveString(id,true);
         };
         const auto reinforcementKind = [&](const Identity& identity) {
-            return older895 ? model.identityClasses.at(identity.classReferenceId).recordKind : identity.type;
+            return classIdentity ? model.identityClasses.at(identity.classReferenceId).recordKind : identity.type;
         };
         for (std::size_t index=0;index<all[reinforcementDefinitionOrdinal].rowCount;++index)
         {
@@ -2063,6 +2074,13 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         definition.classNumber = fixedString(value, 29, 20);
         definition.name = fixedString(value, 51, 42);
         definition.standard = fixedString(value, 157, 94);
+        if (hybrid908)
+        {
+            definition.legacy908Parameters.emplace();
+            std::copy(value + 253, value + 313, definition.legacy908Parameters->begin());
+            insertUnique(model.boltDefinitions, definition.id, definition, "9.08 bolt definition");
+            continue;
+        }
         definition.diameter = read<float>(value, older844 ? 261 : 253);
         definition.tolerance = read<float>(value, older844 ? 273 : 257);
         definition.length = read<float>(value, older844 ? 297 : 265);
@@ -2105,6 +2123,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         const auto secondId = read<uint32_t>(value, 17);
         const auto pointArrayId = read<uint32_t>(value, 21);
         group.positionArrayId = pointArrayId;
+        if (hybrid908 && (!legacy844BoltIds.insert(group.id).second || !model.identities.count(group.id) ||
+            model.identities.at(group.id).type != 10))
+            throw std::runtime_error("duplicate, missing or wrong-kind 9.08 bolt identity");
         if (!model.points.count(firstId) || !model.points.count(secondId) || (pointArrayId && !contours.count(pointArrayId)) ||
             !model.boltDefinitions.count(group.definitionId))
             throw std::runtime_error("broken DB1 bolt-group join");
@@ -2137,6 +2158,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
                 group.positions.push_back(point.value);
         if (group.positions.empty())
             model.diagnostics.emplace_back("bolt group has no stored positions; geometry remains unavailable: " + std::to_string(group.id));
+        if (hybrid908)
+        {
+            const auto finite = [](const Vec3& v) { return std::all_of(v.begin(),v.end(),[](double x){return std::isfinite(x);}); };
+            if (!finite(group.origin) || !std::isfinite(group.placementLength) ||
+                !finite(group.first) || !finite(group.second) ||
+                !std::all_of(group.positions.begin(),group.positions.end(),finite))
+                throw std::runtime_error("non-finite 9.08 bolt placement or positions");
+        }
         if (older844)
         {
             const auto finite = [](const Vec3& v) { return std::all_of(v.begin(),v.end(),[](double x){return std::isfinite(x);}); };

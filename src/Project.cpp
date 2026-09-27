@@ -85,8 +85,15 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             for (const auto& entry : std::filesystem::directory_iterator(drawings))
                 if (entry.is_regular_file() && roleFor(entry.path()) == FileRole::Drawing)
                     mark(entry.path(), ReadLevel::Discovered, "DG reading is optional; full drawing semantics are not implemented");
-        mark(result.model.databasePath, result.model.storageVersion == "7.82" ? ReadLevel::PartialSemantic : ReadLevel::Semantic,
-             result.model.storageVersion == "7.82" ? "7.82 object graph decoded; individual bolt geometry and non-plate contours remain partial" : "");
+        const auto modelLevel = [](const db1::Model& model) {
+            return model.storageVersion == "7.82" || model.storageVersion == "9.08" ? ReadLevel::PartialSemantic : ReadLevel::Semantic;
+        };
+        const auto modelDiagnostic = [](const db1::Model& model) -> std::string {
+            if (model.storageVersion == "7.82") return "7.82 object graph decoded; individual bolt geometry and non-plate contours remain partial";
+            if (model.storageVersion == "9.08") return "9.08 object graph decoded; bolt numeric parameters, generation flags and complete geometry remain partial";
+            return {};
+        };
+        mark(result.model.databasePath, modelLevel(result.model), modelDiagnostic(result.model));
 
         const auto library = findFile(root, "xslib.db1");
         if (!library.empty() && options.readComponentLibrary)
@@ -98,8 +105,8 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                     result.diagnostics.push_back("component library database GUID differs from main model");
                 for (const auto& item : model.diagnostics) result.diagnostics.push_back("xslib: " + item);
                 result.componentLibrary = std::move(model);
-                mark(library, result.componentLibrary->storageVersion == "7.82" ? ReadLevel::PartialSemantic : ReadLevel::Semantic,
-                     result.componentLibrary->storageVersion == "7.82" ? "7.82 objects and parameters decoded; custom definition tables remain unnamed" : "");
+                mark(library, modelLevel(*result.componentLibrary),
+                     result.componentLibrary->storageVersion == "7.82" ? "7.82 objects and parameters decoded; custom definition tables remain unnamed" : modelDiagnostic(*result.componentLibrary));
                 result.associations.push_back({result.model.databasePath, library, "model-local component library"});
             }
             else failure(library, diagnostic);

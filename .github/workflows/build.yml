@@ -46,6 +46,9 @@ jobs:
       - name: Independent shape XML and geometry evidence
         if: matrix.standard == 17
         run: python -B tools/test_shape_xml_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-shape-tests"
+      - name: Independent 9.08 API count and profile catalog evidence
+        if: matrix.standard == 17
+        run: python -B tools/test_schema908_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-schema908-tests"
       - name: Full pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json

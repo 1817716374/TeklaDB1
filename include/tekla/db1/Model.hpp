@@ -34,7 +34,7 @@ struct Identity
     uint32_t flags = 0;
     uint8_t rowTag = 0;
     std::string guid;
-    // 8.95: reference to IdentityClass, not an owner ID.
+    // 8.95/9.08: reference to IdentityClass, not an owner ID.
     uint32_t classReferenceId = 0;
 };
 
@@ -43,6 +43,8 @@ struct IdentityClass
     uint32_t id = 0;
     uint32_t recordKind = 0;
     std::array<uint32_t, 5> rawFields{};
+    // Complete class record, including additional 9.08 fields.
+    std::vector<uint8_t> rawPayload;
 };
 
 struct Point
@@ -293,6 +295,10 @@ struct BoltDefinition
     // boltType remain unavailable (zero defaults). Hole/bolt generation flags
     // and connected layers still need independent interpretation.
     std::optional<std::array<uint8_t, 56>> legacy844Parameters;
+    // 9.08 payload[252,312). Numeric parameters and generation flags remain
+    // unverified; diameter/tolerance/length/extraLength/boltType are unavailable
+    // (zero defaults), not measured zeros. Count and string fields are decoded.
+    std::optional<std::array<uint8_t, 60>> legacy908Parameters;
 };
 
 struct BoltLayer
