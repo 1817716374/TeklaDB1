@@ -4513,7 +4513,7 @@
     },
     {
       "path": "drawing-output-evidence/Krozanovski_Edgar.pdf",
-      "url": "https://www.theseus.fi/bitstream/handle/10024/920230/Krozanovski_Edgar.pdf?sequence=2&isAllowed=y",
+      "url": "https://www.theseus.fi/server/api/core/bitstreams/780a2817-5167-4713-8ddc-b7774e74f740/content",
       "size": 11102676,
       "sha256": "b39df60ffb61d5c456ff4e6b60bf508d9e554a73143817c0a2b703c871d8cc5b"
     }

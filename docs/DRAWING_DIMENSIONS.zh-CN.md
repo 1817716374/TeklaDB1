@@ -34,7 +34,7 @@ if (tekla::parseDrawing("drawing.dg", drawing, error)) {
 
 ## 独立图纸证据
 
-来源为工程作者的论文 [Tekla Structures Drawing Automation Through Grasshopper in Rhinoceros 3D](https://www.theseus.fi/bitstream/handle/10024/920230/Krozanovski_Edgar.pdf?sequence=2&isAllowed=y)，附录2第1和第4页（PDF第58和61页）。PDF的来源、11,102,676字节大小及SHA-256固定在`tests/corpus.json`；论文和模型均不打包进源码。
+来源为工程作者的论文 [Tekla Structures Drawing Automation Through Grasshopper in Rhinoceros 3D](https://www.theseus.fi/items/1f6c48ea-7fc0-4b56-8f04-b7093939c35f)，附录2第1和第4页（PDF第58和61页）。PDF的来源、11,102,676字节大小及SHA-256固定在`tests/corpus.json`；论文和模型均不打包进源码。原bitstream/handle下载重定向在GitHub托管运行器返回403；清单改用同一条目公开提供的bitstream内容API，UUID为780a2817-5167-4713-8ddc-b7774e74f740，已核对文件大小及SHA-256完全一致。
 
 先通过DG主体GUID关联DB1，再核对论文中的图号：钢板509825对应1010，装配467268对应C/2。测试使用人工转录的图上尺寸作为独立期望值，不由解析器生成期望值，也不声称测试代码可以解析PDF图形。
 
