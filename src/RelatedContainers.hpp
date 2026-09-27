@@ -29,8 +29,13 @@ inline std::size_t relatedHeader(const Bytes& data, RawDatabase& raw, bool drawi
     const char* prefix = drawing ? "Xsteel  " : "Xsteel\x80 ";
     const bool legacyNumbering = !drawing && data.size()>=12 && std::memcmp(data.data(),"Xsteel  7.30",12)==0;
     if (data.size()<12 || (!legacyNumbering && std::memcmp(data.data(),prefix,8)!=0)) throw std::runtime_error("unsupported related database header");
-    std::size_t end=legacyNumbering ? 12 : 8;
-    while (!legacyNumbering && end<data.size() && end<24 && ((data[end]>='0' && data[end]<='9') || data[end]=='.')) ++end;
+    // Sequential DG uses the fixed N.NN version field. Its immediately
+    // following binary table count may itself be '.' or an ASCII digit.
+    if (drawing && (!(data[8]>='0' && data[8]<='9') || data[9]!='.' ||
+        !(data[10]>='0' && data[10]<='9') || !(data[11]>='0' && data[11]<='9')))
+        throw std::runtime_error("unsupported drawing version field");
+    std::size_t end=(legacyNumbering || drawing) ? 12 : 8;
+    while (!drawing && !legacyNumbering && end<data.size() && end<24 && ((data[end]>='0' && data[end]<='9') || data[end]=='.')) ++end;
     raw.storageVersion.assign(data.begin()+8,data.begin()+static_cast<std::ptrdiff_t>(end));
     const auto dot=raw.storageVersion.find('.');
     if (dot==std::string::npos || dot==0 || dot+1==raw.storageVersion.size() || raw.storageVersion.find('.',dot+1)!=std::string::npos)
@@ -95,10 +100,11 @@ inline void sectionedDrawingContainer(const Bytes& data, RawDatabase& raw)
     // 7.82 has fixed record tails; 8.44 adds 16 bytes per additional
     // reference descriptor. Walk lengths, never scan payloads for magic.
     const bool older844=data.size()>=12 && std::memcmp(data.data(),"Xsteel# 8.44",12)==0;
-    if (data.size()<76 || (!older844 && std::memcmp(data.data(),"Xsteel! 7.82",12)!=0) ||
+    const bool exam908=data.size()>=12 && std::memcmp(data.data(),"Xsteel# 9.08",12)==0;
+    if (data.size()<76 || (!older844 && !exam908 && std::memcmp(data.data(),"Xsteel! 7.82",12)!=0) ||
         u32(data,12)!=1 || u32(data,16)!=0xdbcec0bc)
         throw std::runtime_error("unsupported legacy drawing preamble");
-    raw.kind=DatabaseKind::Drawing; raw.layout=DatabaseLayout::ModernSections; raw.storageVersion=older844?"8.44":"7.82";
+    raw.kind=DatabaseKind::Drawing; raw.layout=DatabaseLayout::ModernSections; raw.storageVersion=exam908?"9.08":older844?"8.44":"7.82";
     raw.preamble.assign(data.begin(),data.begin()+76);
     std::size_t pos=76;
     while (pos<data.size())
@@ -109,7 +115,7 @@ inline void sectionedDrawingContainer(const Bytes& data, RawDatabase& raw)
         if (fields>(data.size()-pos)/4) throw std::runtime_error("truncated legacy drawing field descriptors");
         for (std::uint32_t i=0;i<fields;++i) { t.fieldDescriptors.push_back(u32(data,pos)); pos+=4; }
         std::uint64_t metadataSize=40;
-        if (older844)
+        if (older844 || exam908)
         {
             if (t.fieldDescriptors.empty() || t.fieldDescriptors.front()!=1 ||
                 std::any_of(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),[](auto f){return f>1;}))

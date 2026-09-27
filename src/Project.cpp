@@ -222,33 +222,50 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 if (!drawing.projectGuid.empty() && !result.model.databaseGuid.empty() && lower(drawing.projectGuid)==lower(result.model.databaseGuid))
                 {
                     result.associations.push_back({result.model.databasePath,file.path,"DG grProjectGuid matches model database GUID"});
+                    // Verified exam DG layouts carry numeric IDs despite also
+                    // storing a project GUID. Never pair these across versions.
+                    const bool numericDrawing=drawing.raw.storageVersion=="8.95" || drawing.raw.storageVersion=="9.08";
+                    const bool numericScope=drawing.raw.storageVersion=="9.08" && drawing.raw.storageVersion==result.model.storageVersion;
+                    if(numericDrawing && !numericScope)result.diagnostics.push_back("numeric drawing/model version pairing is unverified: "+db1::detail::pathUtf8(file.path));
+                    const auto resolveDrawingIdentity = [&](const std::string& guid,std::uint32_t numericId) -> std::optional<std::uint32_t> {
+                        if(numericDrawing)
+                        {
+                            if(numericScope && numericId && result.model.identities.count(numericId))return numericId;
+                            return {};
+                        }
+                        const auto found=modelIdsByGuid.find(lower(guid));
+                        if(found!=modelIdsByGuid.end() && found->second.size()==1)return found->second.front();
+                        return {};
+                    };
                     if (drawing.subject)
                     {
                         const auto& subject=*drawing.subject;
-                        const auto found=modelIdsByGuid.find(lower(subject.modelGuid));
-                        if (found!=modelIdsByGuid.end() && found->second.size()==1)
+                        const auto found=resolveDrawingIdentity(subject.modelGuid,subject.modelObjectId);
+                        if (found)
                         {
-                            const auto id=found->second.front();
+                            const auto id=*found;
                             const auto matches=subject.kind==DrawingSubjectKind::Unknown ||
                                 (subject.kind==DrawingSubjectKind::SinglePart && result.model.parts.count(id)) ||
                                 (subject.kind==DrawingSubjectKind::Assembly && std::any_of(result.model.assemblies.begin(),result.model.assemblies.end(),
                                     [&](const auto& assembly) { return assembly.id==id; }));
-                            if (matches) result.drawingSubjectAssociations.push_back({file.path,subject.recordId,id,subject.modelGuid});
+                            if (matches) result.drawingSubjectAssociations.push_back({file.path,subject.recordId,id,numericDrawing?result.model.identities.at(id).guid:subject.modelGuid});
                             else result.diagnostics.push_back("drawing subject type differs from matching model object: "+subject.modelGuid);
                         }
-                        else result.diagnostics.push_back("drawing subject GUID is unresolved or ambiguous: "+subject.modelGuid);
+                        else if(!numericDrawing || subject.kind!=DrawingSubjectKind::GeneralArrangement)result.diagnostics.push_back(numericDrawing?"drawing subject numeric identity is unresolved: "+std::to_string(subject.modelObjectId):"drawing subject GUID is unresolved or ambiguous: "+subject.modelGuid);
                     }
                     for (const auto& reference:drawing.modelReferences)
                     {
-                        const auto found=modelIdsByGuid.find(lower(reference.modelGuid));
-                        if (found!=modelIdsByGuid.end() && found->second.size()==1)
-                            result.drawingModelAssociations.push_back({file.path,reference.recordId,found->second.front(),reference.modelGuid,reference.drawingContextId});
-                        else result.diagnostics.push_back("drawing model GUID is unresolved or ambiguous: "+reference.modelGuid);
+                        const auto found=resolveDrawingIdentity(reference.modelGuid,reference.modelObjectId);
+                        if (found)
+                            result.drawingModelAssociations.push_back({file.path,reference.recordId,*found,numericDrawing?result.model.identities.at(*found).guid:reference.modelGuid,reference.drawingContextId});
+                        else result.diagnostics.push_back(numericDrawing?"drawing model numeric identity is unresolved: "+std::to_string(reference.modelObjectId):"drawing model GUID is unresolved or ambiguous: "+reference.modelGuid);
                     }
                 }
                 else result.diagnostics.push_back("drawing project GUID is missing or differs from main model: "+db1::detail::pathUtf8(file.path));
                 for (const auto& item:drawing.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
-                mark(file.path,ReadLevel::PartialSemantic,"drawing subject, view bases/volumes, properties, strings and sheet size decoded; graphics remain raw");
+                mark(file.path,ReadLevel::PartialSemantic,(drawing.raw.storageVersion=="8.95" || drawing.raw.storageVersion=="9.08")?
+                    "drawing numeric subject/references, properties, strings and sheet size decoded; views, dimensions and graphics remain raw":
+                    "drawing subject, view bases/volumes, properties, strings and sheet size decoded; graphics remain raw");
                 result.drawings.emplace(file.path,std::move(drawing));
             }
         }

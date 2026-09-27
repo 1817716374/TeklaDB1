@@ -4683,6 +4683,97 @@
       "member": "API_Developer_Exam_01/xslib.db2",
       "size": 89,
       "sha256": "84e815e3799186f60ad40e548170a7da99742345e2e48eb31071c865c7db6c52"
+    },
+    {
+      "path": "exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "size": 307055,
+      "sha256": "a211e9dec5e24512ade8872855d82a3ee3952e11d94792c7e1f4278806f65550"
+    },
+    {
+      "path": "exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg.metadata",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg.metadata",
+      "size": 730,
+      "sha256": "19fdfaeaa9e8103b77b08757b625ef45773f851132d3006e9d6b0af3a496599d"
+    },
+    {
+      "path": "exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "size": 82721,
+      "sha256": "31b73eb5ff0c289c38fb53be66df4b4852c57c152b423041f84213a998d15ca1"
+    },
+    {
+      "path": "exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg.metadata",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg.metadata",
+      "size": 727,
+      "sha256": "e1a515226e0f3058905efd1d34fbe73287d08a2e774250c9184284402916d0e8"
+    },
+    {
+      "path": "exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "size": 7730,
+      "sha256": "9076b24aa8d759c59adb413867e1fcaf8464be86da1b3b5ec8caf26b128106d2"
+    },
+    {
+      "path": "exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg.metadata",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg.metadata",
+      "size": 745,
+      "sha256": "4cb349e587ccf2d8921e8635976dd0956253c3de3bb49439eae90c9f4f478ff9"
+    },
+    {
+      "path": "exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "size": 39235,
+      "sha256": "9aca294736decc4a4d164308fc09a020589aedf0702ce781d92c201c61473094"
+    },
+    {
+      "path": "exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg.metadata",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg.metadata",
+      "size": 725,
+      "sha256": "64b2593bcae9ecfc5aa7348f1169a14f9ff228bec6eedcc0b0cba22f51cc79a0"
+    },
+    {
+      "path": "exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "size": 68615,
+      "sha256": "0d38a067164d08e62157db064ee2b3ebaf820c012e3abea55d72d3cc3b5adfcc"
+    },
+    {
+      "path": "exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg.metadata",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg.metadata",
+      "size": 721,
+      "sha256": "500052a6c9ace634f9764ffa6ff09630d49406822fd623d3e2bd06f9791ac733"
+    },
+    {
+      "path": "exam-drawings/API_Developer_Exam_01.db1",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/API_Developer_Exam_01.db1",
+      "size": 7781363,
+      "sha256": "6f2121f0bb031fa03cc6860997f1a62b76daa0c453315ee505ad7d595f776d2c"
+    },
+    {
+      "path": "exam-drawings/API_Developer_Exam_01.db2",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/API_Developer_Exam_01.db2",
+      "size": 200,
+      "sha256": "f3f5922a4656659dc2769a0874102f9b52fd0e32fb9f82791807eba39185cc22"
+    },
+    {
+      "path": "exam-drawings/profdb.bin",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/profdb.bin",
+      "size": 590733,
+      "sha256": "69fc9eacc3e1bf6a24276904316989c68c27a83ab0a2ba3928b2df4dd133e7d5"
     }
   ],
   "cases": [
@@ -16067,6 +16158,118 @@
       "path": "api-exam908-september",
       "exit": 0,
       "stdout": "version=9.08 log_parts=4677 log_assemblies=257 historical_missing=2 counters=3 project_series_links=6163"
+    },
+    {
+      "name": "raw:exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "mode": "raw",
+      "path": "exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 records=38531 opaque=0 bytes=6979939 fingerprint=93c8b26ae6142cbd"
+    },
+    {
+      "name": "drawing:exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "mode": "drawing",
+      "path": "exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 strings=30 properties=5 links=5 sheets=1 model_refs=0 views=0 subject=1 guid=aa364402-22b3-4b77-a990-285a1a3c1b65 stored=D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg fingerprint=5fd9d84a2a416eae"
+    },
+    {
+      "name": "drawing_exam_fields:exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "mode": "drawing_exam_fields",
+      "path": "exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg",
+      "exit": 0,
+      "stdout": "width=804 height=557 type=3 subject_id=0"
+    },
+    {
+      "name": "raw:exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "mode": "raw",
+      "path": "exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 records=7087 opaque=0 bytes=1578663 fingerprint=4486472a7e265e7e"
+    },
+    {
+      "name": "drawing:exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "mode": "drawing",
+      "path": "exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 strings=85 properties=6 links=6 sheets=1 model_refs=0 views=0 subject=1 guid=aa364402-22b3-4b77-a990-285a1a3c1b65 stored=D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg fingerprint=8573b86da638a154"
+    },
+    {
+      "name": "drawing_exam_fields:exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "mode": "drawing_exam_fields",
+      "path": "exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg",
+      "exit": 0,
+      "stdout": "width=804 height=557 type=3 subject_id=0"
+    },
+    {
+      "name": "raw:exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "mode": "raw",
+      "path": "exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "exit": 0,
+      "stdout": "version=9.08 tables=48 records=269 opaque=0 bytes=47199 fingerprint=533ac294e8cb8ebf"
+    },
+    {
+      "name": "drawing:exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "mode": "drawing",
+      "path": "exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "exit": 0,
+      "stdout": "version=9.08 tables=48 strings=24 properties=5 links=5 sheets=1 model_refs=1 views=0 subject=1 guid=a09d32dc-547d-4f09-a597-b4bd338e81fa stored=D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg fingerprint=10d88493f703123f"
+    },
+    {
+      "name": "drawing_exam_fields:exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "mode": "drawing_exam_fields",
+      "path": "exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg",
+      "exit": 0,
+      "stdout": "width=297 height=210 type=1 subject_id=3040545"
+    },
+    {
+      "name": "raw:exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "mode": "raw",
+      "path": "exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 records=2939 opaque=0 bytes=356534 fingerprint=df034544228e6345"
+    },
+    {
+      "name": "drawing:exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "mode": "drawing",
+      "path": "exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 strings=61 properties=5 links=5 sheets=1 model_refs=0 views=0 subject=1 guid=aa364402-22b3-4b77-a990-285a1a3c1b65 stored=Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg fingerprint=38e057691469233e"
+    },
+    {
+      "name": "drawing_exam_fields:exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "mode": "drawing_exam_fields",
+      "path": "exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg",
+      "exit": 0,
+      "stdout": "width=804 height=557 type=3 subject_id=0"
+    },
+    {
+      "name": "raw:exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "mode": "raw",
+      "path": "exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 records=5828 opaque=0 bytes=966978 fingerprint=aa8c6b1fd4529d05"
+    },
+    {
+      "name": "drawing:exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "mode": "drawing",
+      "path": "exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "exit": 0,
+      "stdout": "version=8.95 tables=47 strings=125 properties=25 links=123 sheets=1 model_refs=2 views=0 subject=1 guid=aa364402-22b3-4b77-a990-285a1a3c1b65 stored=Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg fingerprint=16133fc9d5226ae"
+    },
+    {
+      "name": "drawing_exam_fields:exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "mode": "drawing_exam_fields",
+      "path": "exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg",
+      "exit": 0,
+      "stdout": "width=804 height=557 type=3 subject_id=0"
+    },
+    {
+      "name": "drawing_exam_project:exam-drawings",
+      "mode": "drawing_exam_project",
+      "path": "exam-drawings",
+      "exit": 0,
+      "stdout": "drawings=5 subject_links=1 reference_links=1 guid=02f6a87b-e776-431e-a2db-9f8f1865e98c prefix=M number=92"
     }
   ]
 }

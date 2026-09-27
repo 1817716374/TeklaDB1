@@ -38,8 +38,8 @@ struct DrawingModelReference
     std::uint32_t recordId = 0;
     std::uint32_t drawingContextId = 0;
     std::string modelGuid;
-    // 7.82 stores an unscoped model object ID instead of a GUID. This alone
-    // is insufficient to choose a model database for an automatic join.
+    // 7.82, 8.95 and 9.08 store numeric IDs instead of GUIDs. Automatic pairing
+    // is verified for 9.08 with matching project GUID AND storage version.
     std::uint32_t modelObjectId = 0;
 };
 using DrawingPoint3 = std::array<double,3>;
@@ -113,7 +113,8 @@ struct Drawing
     std::map<std::uint32_t, DrawingProperty> properties;
     std::vector<DrawingPropertyLink> propertyLinks;
     std::vector<DrawingSheet> sheets;
-    // DG type 322. 9.54 carries GUIDs; 7.82 carries unscoped numeric IDs.
+    // DG type 322. 9.54 carries GUIDs; 7.82/8.95/9.08 carry numeric IDs.
+    // Automatic numeric pairing is currently verified only for scoped 9.08.
     // 7.30 has no type 322; its other model reference layouts remain in raw.
     // Referenced entities are not necessarily ordinary parts.
     std::vector<DrawingModelReference> modelReferences;
@@ -135,6 +136,8 @@ struct Drawing
 // DG 7.30/9.54 also expose verified straight dimension anchors and set ownership.
 // DG 8.44 currently exposes only text chains, properties, links and saved sheet size;
 // its views, subject, dimensions and model references are retained raw with diagnostics.
+// DG 8.95/9.08 additionally expose numeric subjects/references; their view and
+// dimension geometry stays raw. Read project scope before joining numeric IDs.
 // Paper positioning, scale/shortening, dimension styling and other primitives remain raw.
 // 7.30 exposes numeric subjects; other model references and type-2 subjects are unverified.
 bool parseDrawing(const std::filesystem::path& path, Drawing& result, std::string& error,

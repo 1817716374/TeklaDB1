@@ -108,6 +108,7 @@ struct Dg782Fixture : DgFixture
 #include "Drawing844Regression.hpp"
 #include "DrawingDimensionRegression.hpp"
 #include "Numbering908Regression.hpp"
+#include "DrawingExamRegression.hpp"
 }
 int main(int argc,char** argv)
 {
@@ -120,6 +121,8 @@ int main(int argc,char** argv)
         std::string error="stale"; tekla::NumberingDatabase n; tekla::Drawing d; tekla::db1::RawDatabase raw;
         if (mode.find("dimensions_")==0 || mode.find("dimensions730_")==0) drawingDimensionRegression(mode,dg);
         else if (mode.find("numbering908_")==0) numbering908Regression(mode,db2);
+        else if (mode=="drawing_header_boundary") drawingHeaderBoundary(dg);
+        else if (mode.find("drawing895_")==0 || mode.find("drawing908_")==0) drawingExamRegression(mode,dg);
         else if (mode.find("drawing844_")==0) drawing844Regression(mode,dg);
         else if (mode.find("drawing730_")==0) drawing730Regression(mode,dg);
         else if (mode.find("drawing782_")==0)

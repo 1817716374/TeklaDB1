@@ -131,6 +131,12 @@ if(TEKLADB1_BUILD_TESTS)
         add_test(NAME related.${case} COMMAND tekla_environment_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     foreach(case numbering_valid numbering_truncated numbering_invalid
+            drawing_header_boundary drawing895_valid drawing895_signature drawing895_missing drawing895_cycle
+            drawing895_sheet_nan drawing895_subject_duplicate drawing895_subject_zero drawing895_subject_type
+            drawing895_reference_duplicate drawing895_guid drawing895_property drawing895_version drawing895_truncated
+            drawing908_valid drawing908_signature drawing908_reference drawing908_missing drawing908_cycle
+            drawing908_sheet_nan drawing908_subject_duplicate drawing908_subject_zero drawing908_subject_type
+            drawing908_reference_duplicate drawing908_guid drawing908_property drawing908_version drawing908_truncated
             numbering908_valid numbering908_empty numbering908_width numbering908_guid numbering908_duplicate
             numbering908_key numbering908_tail numbering908_truncated numbering908_unknown_table
             numbering730_valid numbering730_empty numbering730_truncated numbering730_header numbering730_width numbering730_invalid

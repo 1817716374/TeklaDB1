@@ -50,6 +50,7 @@ struct DrawingModelAssociation
     std::filesystem::path drawing;
     std::uint32_t drawingRecordId = 0;
     std::uint32_t modelObjectId = 0;
+    // For numeric DG identities this is the matched DB1 identity's GUID.
     std::string modelGuid;
     std::uint32_t drawingContextId = 0;
 };

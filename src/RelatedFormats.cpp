@@ -86,6 +86,7 @@ template<class Map,class T> void unique(Map& items,std::uint32_t id,T&& value)
 {
     if (!id || !items.emplace(id,std::forward<T>(value)).second) throw std::runtime_error("zero or duplicate related object ID");
 }
+#include "DrawingExamSchema.hpp"
 }
 
 bool parseNumberingDatabase(const std::filesystem::path& path,NumberingDatabase& result,
@@ -152,13 +153,16 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
         const bool older782=result.raw.storageVersion=="7.82";
         const bool older730=result.raw.storageVersion=="7.30";
         const bool older844=result.raw.storageVersion=="8.44";
-        const bool numericIdentity=older730 || older782;
+        const bool exam895=result.raw.storageVersion=="8.95",exam908=result.raw.storageVersion=="9.08";
+        const bool examDrawing=exam895 || exam908;
+        const bool numericIdentity=older730 || older782 || examDrawing;
         if (!numericIdentity && !older844 && result.raw.storageVersion!="9.54") throw std::runtime_error("unsupported drawing semantic version "+result.raw.storageVersion);
         // Complete observed directory signature; unknown layouts stay available
         // through parseRawDatabase, never guessed into this semantic mapping.
         constexpr std::array<std::uint32_t,47> types{{253,254,256,257,259,260,263,264,266,268,269,273,275,277,278,279,280,281,293,295,296,297,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324}};
         constexpr std::array<std::uint32_t,47> widths{{128,620,1496,144,712,4788,580,584,52,32,6196,964,240,608,296,496,144,32,45,12,37,12,110,3438,296,876,24,64,28,72,48,32,64,120,24,64,40,56,164,24,180,112,20,60,144,152,60}};
-        if (older730)
+        if (examDrawing) requireExamDrawingSchema(result.raw,exam908);
+        else if (older730)
         {
             constexpr std::array<std::array<unsigned,2>,33> signature{{
                 {{253,128}},{{254,584}},{{256,1400}},{{257,136}},{{259,524}},{{260,3328}},
@@ -368,10 +372,27 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             if (numericIdentity) subject.modelObjectId=u32(row.payload,16);
             else subject.modelGuid=binaryGuid(row.payload,16);
             if (subject.typeCode==1) subject.kind=DrawingSubjectKind::SinglePart;
-            else if (subject.typeCode==2 && !older730) subject.kind=DrawingSubjectKind::Assembly;
+            else if (subject.typeCode==2 && !older730 && !examDrawing) subject.kind=DrawingSubjectKind::Assembly;
             else if (numericIdentity && subject.typeCode==3) subject.kind=DrawingSubjectKind::GeneralArrangement;
             else result.diagnostics.emplace_back("unknown drawing subject type code retained without classification");
             result.subject=std::move(subject);
+        }
+        if(examDrawing)
+        {
+            std::set<std::uint32_t> ids;
+            for(const auto& row:table(result.raw,322).records)
+            {
+                DrawingModelReference reference;
+                reference.recordId=u32(row.payload,0);reference.drawingContextId=u32(row.payload,4);
+                reference.modelObjectId=u32(row.payload,8);
+                if(!reference.recordId || !ids.insert(reference.recordId).second)throw std::runtime_error("zero or duplicate drawing model reference ID");
+                result.modelReferences.push_back(std::move(reference));
+            }
+            for(const auto& row:table(result.raw,260).records)result.unhandledViewRecordIds.push_back(u32(row.payload,4));
+            for(const auto& row:table(result.raw,256).records)result.unhandledDimensionRecordIds.push_back(u32(row.payload,4));
+            result.diagnostics.emplace_back("8.95/9.08 drawing numeric subjects and references decoded; views, dimensions, graphics and lifecycle remain raw; automatic numeric pairing is verified only for 9.08 with matching project GUID and storage version");
+            if(options.retainDecompressedFileImage)result.raw.decompressedFileImage=std::move(data);
+            return true;
         }
         std::set<std::uint32_t> viewIds;
         std::set<std::uint32_t> ambiguousContexts;
