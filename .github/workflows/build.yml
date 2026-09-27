@@ -49,6 +49,9 @@ jobs:
       - name: Independent 9.08 API count and profile catalog evidence
         if: matrix.standard == 17
         run: python -B tools/test_schema908_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-schema908-tests"
+      - name: Independent 9.08 numbering history and project associations
+        if: matrix.standard == 17
+        run: python -B tools/test_numbering908_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-numbering908-tests"
       - name: Full pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json

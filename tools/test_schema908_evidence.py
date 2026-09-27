@@ -23,7 +23,8 @@ def main():
     parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
     manifest = json.loads((Path(__file__).resolve().parents[1] / "tests/corpus.json").read_text(encoding="utf8"))
-    specs = [f for f in manifest["files"] if f["path"].startswith("api-exam908-")]
+    inputs = {"API_Developer_Exam_01.db1", "xslib.db1", "profdb.bin", "TeklaStructuresModel.xml", "Form1.cs"}
+    specs = [f for f in manifest["files"] if f["path"].startswith("api-exam908-") and Path(f["path"]).name in inputs]
     if len(specs) != 9:
         raise ValueError("missing pinned 9.08 evidence inputs")
     for spec in specs:

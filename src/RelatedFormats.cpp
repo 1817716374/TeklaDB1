@@ -100,7 +100,7 @@ bool parseNumberingDatabase(const std::filesystem::path& path,NumberingDatabase&
         const bool legacy = version=="7.30" || version=="7.82";
         if (version=="7.30" && (result.raw.preamble.size()!=12 || result.raw.preamble[6]!=' '))
             throw std::runtime_error("unsupported 7.30 numbering preamble");
-        if (!legacy && version!="8.95" && version!="9.52" && version!="9.60")
+        if (!legacy && version!="8.95" && version!="9.08" && version!="9.52" && version!="9.60")
             throw std::runtime_error("unsupported numbering semantic version "+version);
         if (!legacy && result.raw.databaseGuid.empty()) throw std::runtime_error("numbering database GUID missing");
         std::set<std::string> keys;

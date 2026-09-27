@@ -4648,6 +4648,41 @@
       "url": "https://raw.githubusercontent.com/TrimbleSolutionsCorporation/TSOpenAPI_Model_Exam/7345e5f14c86bf94f9da073705c56526d6895c6d/Example_Test_Project/Form1.cs",
       "size": 2544,
       "sha256": "a574c3a568e339bb96b4479761bc63fe07f6ca5d8176298c58b1c7ec0e1a5a44"
+    },
+    {
+      "path": "api-exam908-july/API_Developer_Exam_01.db2",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/API_Developer_Exam_01.db2",
+      "size": 200,
+      "sha256": "f3f5922a4656659dc2769a0874102f9b52fd0e32fb9f82791807eba39185cc22"
+    },
+    {
+      "path": "api-exam908-july/xslib.db2",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/xslib.db2",
+      "size": 89,
+      "sha256": "84e815e3799186f60ad40e548170a7da99742345e2e48eb31071c865c7db6c52"
+    },
+    {
+      "path": "api-exam908-july/numberinghistory.txt",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/numberinghistory.txt",
+      "size": 391887,
+      "sha256": "23576ac3c5ebfef244ede60cd8aad2c0ab77b1273bec8dcb3a75f25065e8eca0"
+    },
+    {
+      "path": "api-exam908-september/API_Developer_Exam_01.db2",
+      "archive": "api-exam908-september",
+      "member": "API_Developer_Exam_01/API_Developer_Exam_01.db2",
+      "size": 196,
+      "sha256": "7a08e4f4888d6b267182d0d311cd2fa034848768ced95325763db6e9ee8129b9"
+    },
+    {
+      "path": "api-exam908-september/xslib.db2",
+      "archive": "api-exam908-september",
+      "member": "API_Developer_Exam_01/xslib.db2",
+      "size": 89,
+      "sha256": "84e815e3799186f60ad40e548170a7da99742345e2e48eb31071c865c7db6c52"
     }
   ],
   "cases": [
@@ -15934,6 +15969,104 @@
       "path": "api-exam908-september",
       "exit": 0,
       "stdout": "version=9.08 classes=140 identities=47756 retained_bolt_parameters=316 catalog_profiles=49 beam_candidates=4254 official_api_count=not_applicable"
+    },
+    {
+      "name": "api-exam908-july raw API_Developer_Exam_01.db2",
+      "mode": "raw",
+      "path": "api-exam908-july/API_Developer_Exam_01.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=10 records=3 opaque=0 bytes=452 fingerprint=6d364603d53e37d2"
+    },
+    {
+      "name": "api-exam908-july raw xslib.db2",
+      "mode": "raw",
+      "path": "api-exam908-july/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=0 records=0 opaque=0 bytes=49 fingerprint=d6e1a3ce7810adf5"
+    },
+    {
+      "name": "api-exam908-july numbering API_Developer_Exam_01.db2",
+      "mode": "numbering",
+      "path": "api-exam908-july/API_Developer_Exam_01.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=10 series=3 guid=a09d32dc-547d-4f09-a597-b4bd338e81fa fingerprint=8e11d9580dd561fd"
+    },
+    {
+      "name": "api-exam908-july numbering xslib.db2",
+      "mode": "numbering",
+      "path": "api-exam908-july/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=0 series=0 guid=a09d32dc-547d-4f09-a597-b4bd338e81fa fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "api-exam908-july object_number_model API_Developer_Exam_01.db1",
+      "mode": "object_number_model",
+      "path": "api-exam908-july/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "version=9.08 records=890 derived=808 references=46393 linked=11882 unverified=0 null=34511 fingerprint=e28ef2de3f74c1dc"
+    },
+    {
+      "name": "api-exam908-july object_number_library xslib.db1",
+      "mode": "object_number_library",
+      "path": "api-exam908-july/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.08 records=13 derived=0 references=1271 linked=76 unverified=0 null=1195 fingerprint=870db159c1a35bfe"
+    },
+    {
+      "name": "api-exam908-july numbering908_evidence ",
+      "mode": "numbering908_evidence",
+      "path": "api-exam908-july",
+      "exit": 0,
+      "stdout": "version=9.08 log_parts=4677 log_assemblies=259 historical_missing=0 counters=3 project_series_links=6158"
+    },
+    {
+      "name": "api-exam908-september raw API_Developer_Exam_01.db2",
+      "mode": "raw",
+      "path": "api-exam908-september/API_Developer_Exam_01.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=10 records=3 opaque=0 bytes=452 fingerprint=3e215b6416654a96"
+    },
+    {
+      "name": "api-exam908-september raw xslib.db2",
+      "mode": "raw",
+      "path": "api-exam908-september/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=0 records=0 opaque=0 bytes=49 fingerprint=d6e1a3ce7810adf5"
+    },
+    {
+      "name": "api-exam908-september numbering API_Developer_Exam_01.db2",
+      "mode": "numbering",
+      "path": "api-exam908-september/API_Developer_Exam_01.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=10 series=3 guid=a09d32dc-547d-4f09-a597-b4bd338e81fa fingerprint=1359d45fc1cb1405"
+    },
+    {
+      "name": "api-exam908-september numbering xslib.db2",
+      "mode": "numbering",
+      "path": "api-exam908-september/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.08 tables=0 series=0 guid=a09d32dc-547d-4f09-a597-b4bd338e81fa fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "api-exam908-september object_number_model API_Developer_Exam_01.db1",
+      "mode": "object_number_model",
+      "path": "api-exam908-september/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "version=9.08 records=886 derived=804 references=46485 linked=11903 unverified=0 null=34582 fingerprint=28306a627c750272"
+    },
+    {
+      "name": "api-exam908-september object_number_library xslib.db1",
+      "mode": "object_number_library",
+      "path": "api-exam908-september/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.08 records=13 derived=0 references=1271 linked=76 unverified=0 null=1195 fingerprint=c6894a25c61ad7ea"
+    },
+    {
+      "name": "api-exam908-september numbering908_evidence ",
+      "mode": "numbering908_evidence",
+      "path": "api-exam908-september",
+      "exit": 0,
+      "stdout": "version=9.08 log_parts=4677 log_assemblies=257 historical_missing=2 counters=3 project_series_links=6163"
     }
   ]
 }

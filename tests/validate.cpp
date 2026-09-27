@@ -37,6 +37,7 @@ struct Fingerprint
 #include "Ifc730Validation.hpp"
 #include "Profile844Validation.hpp"
 #include "Schema908Validation.hpp"
+#include "Numbering908Validation.hpp"
 #include "Bolt844Validation.hpp"
 #include "ReinforcementValidation.hpp"
 #include "OptionSettingsValidation.hpp"
@@ -104,6 +105,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     {
         std::string error;
         if (mode == "schema908_evidence") return schema908Validation(path);
+        if (mode == "numbering908_evidence" || mode == "numbering908_unpaired") return numbering908Validation(path,mode=="numbering908_unpaired");
         if (mode == "shape_definition" || mode == "shape_geometry" || mode == "shape_pair_evidence" || mode == "shape_project_evidence") return shapeValidation(mode,path);
         if (mode == "drawing844_evidence") return drawing844Validation(path);
         if (mode == "bolt844_evidence") return bolt844Validation(path);

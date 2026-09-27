@@ -29,6 +29,8 @@ add_test(NAME installed-metadata-entities-consumer COMMAND metadata_consumer "${
 add_test(NAME installed-consumer COMMAND consumer)
 add_executable(drawing_consumer ../related.cpp)
 target_link_libraries(drawing_consumer PRIVATE TeklaFormats::core)
+add_test(NAME installed-numbering908-consumer COMMAND drawing_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" numbering908_valid)
+add_test(NAME installed-numbering908-empty-consumer COMMAND drawing_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" numbering908_empty)
 add_test(NAME installed-drawing-dimensions-consumer COMMAND drawing_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" dimensions_valid)
 add_test(NAME installed-drawing844-consumer COMMAND drawing_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" drawing844_valid)
 add_test(NAME installed-drawing730-dimensions-consumer COMMAND drawing_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" dimensions730_valid)
