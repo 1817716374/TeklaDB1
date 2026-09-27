@@ -25,6 +25,15 @@ struct OcctGeometryModel
     // They remain visible to callers instead of being silently discarded.
     std::vector<std::uint32_t> unbuiltPartIds;
     std::vector<std::string> diagnostics;
+    // No empty compounds or invented placements are reported as built bolts.
+    std::vector<std::uint32_t> unbuiltBoltGroupIds;
+    // Built parts whose own UPE/IPE section used a discrete nominal dimension
+    // table because no project catalog was available. These have sharp corners,
+    // not verified catalog fillets. This is not a list of all geometric uncertainty
+    // (for example, a cutting tool or an envelope can also be approximate).
+    std::vector<std::uint32_t> nominalProfilePartIds;
+    // Built actual parts using the PartCambering circular deformation.
+    std::vector<std::uint32_t> camberedPartIds;
 };
 
 struct OcctGeometryOptions

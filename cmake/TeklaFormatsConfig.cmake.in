@@ -1,0 +1,11 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(TeklaDB1 @PROJECT_VERSION@ CONFIG HINTS "${CMAKE_CURRENT_LIST_DIR}/../TeklaDB1")
+if(NOT TARGET TeklaFormats::core)
+    add_library(TeklaFormats::core INTERFACE IMPORTED)
+    set_target_properties(TeklaFormats::core PROPERTIES INTERFACE_LINK_LIBRARIES TeklaDB1::core)
+endif()
+if(TARGET TeklaDB1::occt AND NOT TARGET TeklaFormats::occt)
+    add_library(TeklaFormats::occt INTERFACE IMPORTED)
+    set_target_properties(TeklaFormats::occt PROPERTIES INTERFACE_LINK_LIBRARIES TeklaDB1::occt)
+endif()

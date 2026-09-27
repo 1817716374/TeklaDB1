@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -218,6 +219,9 @@ struct ShapeDefinition
     std::uint32_t geometryType = 0;
     std::string fingerprint;
     std::filesystem::path sourcePath;
+    bool hasGeometryType = false; // geometryType is a default when absent
+    std::optional<bool> isSolid; // saved declaration, not a topology verdict
+    std::string rawXml;
 };
 
 struct ShapeFace
@@ -248,6 +252,12 @@ struct ShapeGeometry
     std::vector<ShapeFace> faces;
     std::vector<ShapeEdge> edges;
     std::filesystem::path sourcePath;
+    std::string rawXml;
+};
+
+struct ShapeReadOptions
+{
+    std::size_t maxDecodedBytes = 128ULL * 1024 * 1024;
 };
 
 struct ShapeCatalog
@@ -258,6 +268,8 @@ struct ShapeCatalog
 };
 
 bool parseProfileCatalog(const std::filesystem::path& path, ProfileCatalog& result, std::string& error);
+// UTF-8 TeklaStructuresModels with one direct Model; decoded size <= 16 MiB.
+// Retains raw XML. Unsupported DTD/entities and ambiguous known fields fail.
 bool parseModelMetadata(const std::filesystem::path& path, ModelMetadata& result, std::string& error);
 bool parseProfileGeometryCatalog(const std::filesystem::path& path, ProfileGeometryCatalog& result,
                                  std::string& error);
@@ -266,7 +278,13 @@ bool parseBoltCatalog(const std::filesystem::path& path, BoltCatalog& result, st
 bool parseBoltAssemblyCatalog(const std::filesystem::path& path, BoltAssemblyCatalog& result, std::string& error);
 bool parseProfitabCatalog(const std::filesystem::path& path, ProfitabCatalog& result, std::string& error);
 bool parseClbDocument(const std::filesystem::path& path, ClbDocument& result, std::string& error);
+// UTF-8 ImportPart/Info and Polymesh; raw XML and unknown extensions retained.
+// Existing three-argument calls use the default decoded size limit.
 bool parseShapeDefinition(const std::filesystem::path& path, ShapeDefinition& result, std::string& error);
+bool parseShapeDefinition(const std::filesystem::path& path, ShapeDefinition& result, std::string& error,
+                          const ShapeReadOptions& options);
 bool parseShapeGeometry(const std::filesystem::path& path, ShapeGeometry& result, std::string& error);
+bool parseShapeGeometry(const std::filesystem::path& path, ShapeGeometry& result, std::string& error,
+                        const ShapeReadOptions& options);
 bool parseShapeCatalog(const std::filesystem::path& directory, ShapeCatalog& result, std::string& error);
 }
