@@ -328,6 +328,60 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             result.viewsByContext.erase(context);
             result.diagnostics.push_back("ambiguous legacy drawing view context retained by record ID: "+std::to_string(context));
         }
+        if (!numericIdentity)
+        {
+            for (const auto& record:table(result.raw,257).records)
+            {
+                const auto& row=record.payload;
+                if (u32(row,0)!=257) throw std::runtime_error("invalid straight dimension set type");
+                DrawingStraightDimensionSet set;
+                set.recordId=u32(row,4); set.contextId=u32(row,8);
+                if (!result.viewsByContext.count(set.contextId))
+                    throw std::runtime_error("straight dimension set view is missing");
+                const auto id=set.recordId; unique(result.straightDimensionSets,id,std::move(set));
+            }
+            std::set<std::uint32_t> dimensionIds;
+            for (const auto& record:table(result.raw,256).records)
+            {
+                const auto& row=record.payload;
+                if (u32(row,0)!=256) throw std::runtime_error("invalid straight dimension type");
+                DrawingStraightDimension dimension;
+                dimension.recordId=u32(row,4); dimension.contextId=u32(row,8);
+                dimension.dimensionSetId=u32(row,12); dimension.subtypeCode=u32(row,16);
+                if (!dimension.recordId || !dimensionIds.insert(dimension.recordId).second)
+                    throw std::runtime_error("zero or duplicate straight dimension ID");
+                const auto set=result.straightDimensionSets.find(dimension.dimensionSetId);
+                if (set==result.straightDimensionSets.end()) throw std::runtime_error("straight dimension set is missing");
+                if (dimension.contextId!=set->second.contextId)
+                    throw std::runtime_error("straight dimension context differs from its set");
+                set->second.dimensionIds.push_back(dimension.recordId);
+                if (dimension.subtypeCode!=1)
+                {
+                    result.unhandledDimensionRecordIds.push_back(dimension.recordId);
+                    result.diagnostics.push_back("unknown straight dimension subtype retained raw: "+std::to_string(dimension.recordId));
+                    continue;
+                }
+                for (std::size_t i=0;i<3;++i)
+                {
+                    dimension.startPoint[i]=real(row,24+i*8);
+                    dimension.endPoint[i]=real(row,48+i*8);
+                    dimension.upDirection[i]=real(row,168+i*8);
+                }
+                dimension.distance=real(row,192);
+                const auto& up=dimension.upDirection;
+                const double norm=std::hypot(up[0],up[1]);
+                if (std::abs(norm-1)<=1e-8 && std::abs(up[2])<=1e-8 &&
+                    std::abs(dimension.endPoint[2]-dimension.startPoint[2])<=1e-8)
+                {
+                    const double value=std::abs((dimension.endPoint[0]-dimension.startPoint[0])*up[1]-
+                                                (dimension.endPoint[1]-dimension.startPoint[1])*up[0]);
+                    if (!std::isfinite(value)) throw std::runtime_error("straight dimension projection overflow");
+                    dimension.projectedLength=value;
+                }
+                else result.diagnostics.push_back("straight dimension projection requires a unit XY direction and coplanar endpoints: "+std::to_string(dimension.recordId));
+                const auto id=dimension.recordId; result.straightDimensions.emplace(id,std::move(dimension));
+            }
+        }
         for (const auto& link:result.propertyLinks)
         {
             auto view=result.viewsByContext.find(link.ownerId); const auto& property=result.properties.at(link.propertyId);
@@ -356,7 +410,9 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
                 result.diagnostics.emplace_back("drawing model reference has no decoded view context: "+std::to_string(reference.drawingContextId));
             result.modelReferences.push_back(std::move(reference));
         }
-        result.diagnostics.emplace_back("partial drawing semantics: paper placement, scale/shortening, dimensions, other reference types and rendered primitives remain raw; mark XML is stored text");
+        result.diagnostics.emplace_back("partial drawing semantics: paper placement, scale/shortening, dimension styling, other reference types and rendered primitives remain raw; mark XML is stored text");
+        if (numericIdentity && (!table(result.raw,256).records.empty() || !table(result.raw,257).records.empty()))
+            result.diagnostics.emplace_back("legacy drawing dimension layouts remain raw");
         if (older730) result.diagnostics.emplace_back("7.30 drawing model references remain raw; an empty modelReferences collection does not mean no model references exist");
         if (numericIdentity) result.diagnostics.emplace_back("legacy numeric model references are unscoped; no project GUID or automatic DB1 join is inferred; record metadata and lifecycle remain unclassified");
         if (options.retainDecompressedFileImage) result.raw.decompressedFileImage=std::move(data);

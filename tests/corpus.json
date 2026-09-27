@@ -4510,6 +4510,12 @@
       "sha256": "7796ba5f8c209cc02c5f1ec2962099925d3d44d82b069831bbec20b68092f3e4",
       "archive": "steel-fundamentals",
       "member": "Steel Fundamentals Modeling Assignment/options.ini"
+    },
+    {
+      "path": "drawing-output-evidence/Krozanovski_Edgar.pdf",
+      "url": "https://www.theseus.fi/bitstream/handle/10024/920230/Krozanovski_Edgar.pdf?sequence=2&isAllowed=y",
+      "size": 11102676,
+      "sha256": "b39df60ffb61d5c456ff4e6b60bf508d9e554a73143817c0a2b703c871d8cc5b"
     }
   ],
   "cases": [
@@ -15110,6 +15116,62 @@
       "path": "construsoft-wapening/oefening W3/options.ini",
       "exit": 0,
       "stdout": "ini_assignments=1 dbv_matches=1 project=1 fingerprint=6fb33c47825fb2b7"
+    },
+    {
+      "name": "drawing_dimensions:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D0af4f427-b208-4018-b750-6bb0549b6dda.dg",
+      "mode": "drawing_dimensions",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D0af4f427-b208-4018-b750-6bb0549b6dda.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=33 dimensions=87 unhandled=0 fingerprint=562d78bd4aef5d1f"
+    },
+    {
+      "name": "drawing_dimensions:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg",
+      "mode": "drawing_dimensions",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=4 dimensions=7 unhandled=0 fingerprint=f692eebcbcf92231"
+    },
+    {
+      "name": "drawing_dimensions:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg",
+      "mode": "drawing_dimensions",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=10 dimensions=25 unhandled=0 fingerprint=882371823a188752"
+    },
+    {
+      "name": "drawing_dimensions:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Db2ae07cb-3c9e-4c0b-af76-7b96284a737b.dg",
+      "mode": "drawing_dimensions",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Db2ae07cb-3c9e-4c0b-af76-7b96284a737b.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Dd51e7c0b-f390-4f85-9e82-40ea1ef5d642.dg",
+      "mode": "drawing_dimensions",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Dd51e7c0b-f390-4f85-9e82-40ea1ef5d642.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/De22c5500-3c8c-445e-8d3c-84d72a7dd4be.dg",
+      "mode": "drawing_dimensions",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/De22c5500-3c8c-445e-8d3c-84d72a7dd4be.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg",
+      "mode": "drawing_dimensions",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=10 dimensions=25 unhandled=0 fingerprint=6eb7659f4fe3743f"
+    },
+    {
+      "name": "drawing_dimension_evidence:thesis",
+      "mode": "drawing_dimension_evidence",
+      "path": "drawing-output-evidence",
+      "exit": 0,
+      "stdout": "independent_dimension_values=13 drawings=2 plate_chains=4"
     }
   ]
 }

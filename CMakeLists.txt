@@ -118,7 +118,8 @@ if(TEKLADB1_BUILD_TESTS)
             drawing_nonfinite drawing_truncated drawing_limit numbering_unknown drawing_unknown)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
-    foreach(case drawing730_valid drawing730_signature drawing730_cycle drawing730_missing drawing730_property
+    foreach(case dimensions_valid dimensions_angled dimensions_deferred dimensions_nonplanar dimensions_unknown dimensions_invalid dimensions_legacy
+            drawing730_valid drawing730_signature drawing730_cycle drawing730_missing drawing730_property
             drawing730_nonfinite drawing730_volume drawing730_duplicate drawing730_context drawing730_collapsed
             drawing730_subject_unknown drawing730_general drawing730_truncated drawing730_limit
             drawing_view_valid drawing_view_duplicate drawing_view_basis drawing_view_nonfinite
