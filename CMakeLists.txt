@@ -17,6 +17,8 @@ find_package(ZLIB REQUIRED)
 
 add_library(tekla_db1
     src/Catalogs.cpp
+    src/MetadataXml.cpp
+    src/TinyXmlPrivate.cpp
     src/Parser.cpp
     src/Project.cpp
     src/RelatedFormats.cpp
@@ -85,6 +87,11 @@ endif()
 
 if(TEKLADB1_BUILD_TESTS)
     enable_testing()
+    add_executable(tekladb1_metadata_test tests/metadata.cpp)
+    target_link_libraries(tekladb1_metadata_test PRIVATE TeklaFormats::core)
+    foreach(case metadata_scope metadata_entities metadata_boolean metadata_structure metadata_declarations metadata_encoding metadata_limits)
+        add_test(NAME related.${case} COMMAND tekladb1_metadata_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     add_executable(tekladb1_inspect tests/inspect.cpp)
     target_link_libraries(tekladb1_inspect PRIVATE TeklaDB1::tekla_db1)
     add_executable(tekladb1_catalog_inspect tests/catalog_inspect.cpp)
@@ -216,6 +223,8 @@ if(TEKLADB1_WITH_OCCT)
     )
 endif()
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES third_party/tinyxml2/LICENSE.txt
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/TeklaDB1/licenses/tinyxml2)
 install(EXPORT TeklaDB1Targets
     FILE TeklaDB1Targets.cmake
     NAMESPACE TeklaDB1::

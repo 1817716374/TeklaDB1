@@ -258,6 +258,8 @@ struct ShapeCatalog
 };
 
 bool parseProfileCatalog(const std::filesystem::path& path, ProfileCatalog& result, std::string& error);
+// UTF-8 TeklaStructuresModels with one direct Model; decoded size <= 16 MiB.
+// Retains raw XML. Unsupported DTD/entities and ambiguous known fields fail.
 bool parseModelMetadata(const std::filesystem::path& path, ModelMetadata& result, std::string& error);
 bool parseProfileGeometryCatalog(const std::filesystem::path& path, ProfileGeometryCatalog& result,
                                  std::string& error);

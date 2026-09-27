@@ -20,6 +20,7 @@
 | options_*.db | `parseOptionsDatabase`：布尔/整数/浮点/字符串键与成对值槽位；**当前值/默认值的优先级尚未验证** |
 | options.ini | `parseOptionSettingsFile`：模型文本赋值、行号、原始值与重复键；`matchOptionSettings`逐项比较DBV两个槽，工程入口保留文件/记录关联；**不推断运行时展开和最终有效值**，见[文本选项证据](docs/OPTION_SETTINGS.zh-CN.md) |
 | DG 图纸 | `parseDrawing`：7.30/7.82/9.54 容器、文本/属性、图幅、主体、视图坐标基/范围；7.82/9.54另有模型引用，7.30其余引用未恢复，见[7.30证据](docs/DG_730.zh-CN.md)；旧版使用无工程范围的数字 ID，新版使用 GUID；**7.30/9.54另恢复[直线尺寸与尺寸链](docs/DRAWING_DIMENSIONS.zh-CN.md)；纸面定位、比例/缩短、尺寸样式与完整绘图图元尚未恢复** |
+| TeklaStructuresModel.xml | 13个具名字段、严格直接节点匹配、UTF-8实体读取及完整原文保留；32份独立XML对照，见[工程元数据](docs/MODEL_METADATA.zh-CN.md) |
 | history.db | 标准 SQLite，交由 SQLite 工具读取 |
 
 文件扩展名 `.db` 并不代表统一格式，目录文件、DBV 和 SQLite 使用不同入口。`readProject` 会区分 `Semantic`、`PartialSemantic`、`Raw`、`Discovered` 和 `Failed`；DG、DB2 与 DBV 当前为部分语义，不能把发现文件或读取部分字段当成解析完成。

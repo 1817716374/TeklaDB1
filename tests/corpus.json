@@ -15430,6 +15430,230 @@
       "path": "legacy-drawing-output-evidence",
       "exit": 0,
       "stdout": "independent_dwg_dimensions=5 endpoints=10 contexts=3 catalog_titles=1"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=846 fingerprint=24cac4aeb7de9f6"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=846 fingerprint=8fe1dcb7b1f858ac"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=844 fingerprint=9e14fbf886796c5a"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=848 fingerprint=9af759d9c1708b88"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=40039dfd53f2d9a2"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=2bf8b48767bb7a7e"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=841 fingerprint=ab5d7ce9cd2dc256"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=791bb6af087da672"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=653ce4321c2a3032"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=7f0b7d0425481412"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=842 fingerprint=973f2f2bed361d82"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=73a51af832739256"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=842 fingerprint=6f73a2b4c094dd6a"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=227637e97808d8e2"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=c3de66768be2988e"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=448a34a4c4461ec2"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=eb36cf6ce5fc7e4e"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=56de2b38fe0c8072"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=c8c2be087a7d7a46"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=e26287fd2b40cdea"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=37e409ebcf75324a"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=843 fingerprint=99de14f665db11e"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=845 fingerprint=fa0f4a5bf55695ee"
+    },
+    {
+      "name": "model metadata MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=844 fingerprint=575c30b88b202ce6"
+    },
+    {
+      "name": "model metadata PSDBIM__EXCEL-1246A-BLDG-B/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=807 fingerprint=906c57fd9cd76d52"
+    },
+    {
+      "name": "model metadata mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=828 fingerprint=82995157e61ffe13"
+    },
+    {
+      "name": "model metadata renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=915 fingerprint=70da5827ad2f6669"
+    },
+    {
+      "name": "model metadata renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=900 fingerprint=d989f0c89a94ddf5"
+    },
+    {
+      "name": "model metadata steel-detailing/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "steel-detailing/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=928 fingerprint=4213a335dfd219cf"
+    },
+    {
+      "name": "model metadata steel-fundamentals/Steel Fundamentals Modeling Assignment/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=2282 fingerprint=a07edc6d667f585c"
+    },
+    {
+      "name": "model metadata construsoft-wapening/oefening W3/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "construsoft-wapening/oefening W3/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=1025 fingerprint=e56b5afb3bad3600"
+    },
+    {
+      "name": "model metadata btscm-pechelire/TeklaStructuresModel.xml",
+      "mode": "model_metadata",
+      "path": "btscm-pechelire/TeklaStructuresModel.xml",
+      "exit": 0,
+      "stdout": "fields=13 raw_bytes=761 fingerprint=7f7b00235374445c"
     }
   ]
 }

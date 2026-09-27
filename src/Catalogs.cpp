@@ -449,42 +449,6 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
     }
 }
 
-bool parseModelMetadata(const std::filesystem::path& path, ModelMetadata& result, std::string& error)
-{
-    try
-    {
-        error.clear();
-        result = {};
-        const auto xml = readText(path);
-        if (xml.find("<TeklaStructuresModels") == std::string::npos ||
-            xml.find("<Model>") == std::string::npos)
-            throw std::runtime_error("XML is not TeklaStructuresModel metadata");
-        result.name = elementText(xml, "Name");
-        result.designer = elementText(xml, "Designer");
-        result.description = elementText(xml, "Description");
-        result.version = elementText(xml, "Version");
-        result.productVersion = elementText(xml, "ProductVersion");
-        result.language = elementText(xml, "Language");
-        result.templateName = elementText(xml, "Template");
-        result.environment = elementText(xml, "Environment");
-        auto isTemplate = elementText(xml, "IsTemplate");
-        std::transform(isTemplate.begin(), isTemplate.end(), isTemplate.begin(),
-                       [](unsigned char value) { return static_cast<char>(std::toupper(value)); });
-        result.isTemplate = isTemplate == "TRUE" || isTemplate == "1";
-        result.projectSearchPath = elementText(xml, "XS_PROJECT");
-        result.firmSearchPath = elementText(xml, "XS_FIRM");
-        result.systemSearchPath = elementText(xml, "XS_SYSTEM");
-        result.connectedId = elementText(xml, "ConnectedId");
-        return true;
-    }
-    catch (const std::exception& exception)
-    {
-        error = exception.what();
-        result = {};
-        return false;
-    }
-}
-
 bool parseMaterialCatalog(const std::filesystem::path& path, MaterialCatalog& result, std::string& error)
 {
     try

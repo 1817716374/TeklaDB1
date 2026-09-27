@@ -97,6 +97,21 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if (mode == "model_metadata")
+        {
+            tekla::db1::ModelMetadata metadata;
+            if (!tekla::db1::parseModelMetadata(path, metadata, error)) throw std::runtime_error(error);
+            Fingerprint hash;
+            for (const auto* text : {&metadata.name, &metadata.designer, &metadata.description,
+                &metadata.version, &metadata.productVersion, &metadata.language, &metadata.templateName,
+                &metadata.environment, &metadata.projectSearchPath, &metadata.firmSearchPath,
+                &metadata.systemSearchPath, &metadata.connectedId}) hash.text(*text);
+            hash.number(metadata.isTemplate);
+            hash.text(metadata.rawXml);
+            std::cout << "fields=13 raw_bytes=" << metadata.rawXml.size() << " fingerprint="
+                      << std::hex << hash.value << std::dec << '\n';
+            return 0;
+        }
         if(mode=="drawing_dimensions")return validateDrawingDimensions(path);
         if(mode=="drawing_dimension_evidence")return drawingDimensionEvidence(path);
         if(mode=="drawing730_dimension_evidence")return drawing730DimensionEvidence(path);

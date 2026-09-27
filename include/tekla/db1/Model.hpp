@@ -472,6 +472,9 @@ struct ModelMetadata
     std::string firmSearchPath;
     std::string systemSearchPath;
     std::string connectedId;
+    // Complete decompressed XML source bytes, including BOM/whitespace and unknown fields.
+    // Named fields preserve whitespace with XML line-ending/entity decoding.
+    std::string rawXml;
 };
 
 struct Model

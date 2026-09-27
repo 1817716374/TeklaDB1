@@ -28,7 +28,10 @@ jobs:
       - name: Pinned archive extraction tests
         if: matrix.standard == 17
         run: python -B tools/test_corpus.py "$RUNNER_TEMP/tekla-archive-tests"
-      - name: Pinned public corpus
+      - name: Independent model metadata XML evidence
+        if: matrix.standard == 17
+        run: python -B tools/test_metadata_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate
+      - name: Full pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json
       - name: Independent IFC evidence mutation checks
