@@ -151,8 +151,9 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
         db1::detail::drawingContainer(data,result.raw);
         const bool older782=result.raw.storageVersion=="7.82";
         const bool older730=result.raw.storageVersion=="7.30";
+        const bool older844=result.raw.storageVersion=="8.44";
         const bool numericIdentity=older730 || older782;
-        if (!numericIdentity && result.raw.storageVersion!="9.54") throw std::runtime_error("unsupported drawing semantic version "+result.raw.storageVersion);
+        if (!numericIdentity && !older844 && result.raw.storageVersion!="9.54") throw std::runtime_error("unsupported drawing semantic version "+result.raw.storageVersion);
         // Complete observed directory signature; unknown layouts stay available
         // through parseRawDatabase, never guessed into this semantic mapping.
         constexpr std::array<std::uint32_t,47> types{{253,254,256,257,259,260,263,264,266,268,269,273,275,277,278,279,280,281,293,295,296,297,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324}};
@@ -170,6 +171,69 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             for(std::size_t i=0;i<signature.size();++i)
                 if(result.raw.tables[i+1].ordinal!=signature[i][0] || result.raw.tables[i+1].payloadSize!=signature[i][1])
                     throw std::runtime_error("unsupported 7.30 drawing table signature");
+        }
+        else if (older844)
+        {
+            struct Signature { unsigned type, width, fields; std::vector<unsigned> references; };
+            const std::array<Signature,47> signature{{
+                {0,4,2,{0}},
+                {253,128,20,{0}},
+                {254,596,63,{0,61,62}},
+                {256,1400,185,{0,65}},
+                {257,136,22,{0,6}},
+                {259,624,97,{0,5}},
+                {260,4568,632,{0,7,117,326,432}},
+                {264,536,76,{0,59}},
+                {266,52,11,{0}},
+                {268,32,6,{0}},
+                {269,5968,793,{0,5}},
+                {273,948,162,{0,32}},
+                {275,232,37,{0,24}},
+                {277,600,92,{0,4}},
+                {278,296,48,{0}},
+                {279,496,21,{0}},
+                {280,144,21,{0}},
+                {281,20,6,{0,4}},
+                {293,45,6,{0}},
+                {295,12,4,{0}},
+                {296,37,5,{0}},
+                {297,12,4,{0}},
+                {298,110,5,{0}},
+                {301,3438,50,{0}},
+                {302,288,47,{0,31}},
+                {303,860,143,{0,20}},
+                {304,24,7,{0}},
+                {305,64,12,{0}},
+                {306,16,5,{0,4}},
+                {307,36,10,{0,4,6,8}},
+                {308,40,9,{0,4}},
+                {309,20,6,{0,4}},
+                {310,40,9,{0,4,6}},
+                {311,120,21,{0}},
+                {312,12,4,{0,2}},
+                {313,64,10,{0}},
+                {314,32,7,{0,3}},
+                {315,56,9,{0}},
+                {316,156,24,{0,4}},
+                {317,24,7,{0}},
+                {318,60,16,{0,6,7,8,9,10,11,12,13,14,15}},
+                {319,112,17,{0}},
+                {320,20,6,{0}},
+                {321,60,16,{0}},
+                {322,112,20,{0,3,8}},
+                {323,144,23,{0,3}},
+                {324,60,11,{0}}
+            }};
+            if (result.raw.tables.size()!=signature.size()) throw std::runtime_error("unsupported 8.44 drawing table count");
+            for (std::size_t i=0;i<signature.size();++i)
+            {
+                const auto& t=result.raw.tables[i]; const auto& s=signature[i];
+                if (t.ordinal!=s.type || t.payloadSize!=s.width || t.fieldDescriptors.size()!=s.fields)
+                    throw std::runtime_error("unsupported 8.44 drawing table signature");
+                for (std::size_t f=0;f<s.fields;++f)
+                    if (t.fieldDescriptors[f]!=(std::find(s.references.begin(),s.references.end(),f)!=s.references.end()?1U:0U))
+                        throw std::runtime_error("unsupported 8.44 drawing reference signature");
+            }
         }
         else if (older782)
         {
@@ -243,9 +307,11 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             DrawingProperty p; p.id=u32(row.payload,0); p.name=fixed(row.payload,8,21); p.stringValue=fixed(row.payload,29,81);
             if (p.name=="grProjectGuid")
             {
-                if (!db1::detail::guidText(p.stringValue) || (!result.projectGuid.empty() && result.projectGuid!=p.stringValue))
+                auto guid=p.stringValue;
+                if (older844 && guid.size()==38 && guid.compare(0,2,"ID")==0) guid.erase(0,2);
+                if (!db1::detail::guidText(guid) || (!result.projectGuid.empty() && result.projectGuid!=guid))
                     throw std::runtime_error("invalid or conflicting drawing project GUID");
-                result.projectGuid=p.stringValue;
+                result.projectGuid=std::move(guid);
             }
             if (p.name=="grFileName")
             {
@@ -276,6 +342,18 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             DrawingSheet sheet{u32(row.payload,4),real(row.payload,16),real(row.payload,24)};
             if (sheet.width<=0 || sheet.height<=0) throw std::runtime_error("invalid drawing sheet dimensions");
             result.sheets.push_back(sheet);
+        }
+        if (older844)
+        {
+            // These records need independent geometry/identity evidence. Empty
+            // semantic collections must not imply that the source has none.
+            for (const auto& row:table(result.raw,260).records)
+                result.unhandledViewRecordIds.push_back(u32(row.payload,4));
+            for (const auto& row:table(result.raw,256).records)
+                result.unhandledDimensionRecordIds.push_back(u32(row.payload,4));
+            result.diagnostics.emplace_back("8.44 drawing views, subject, dimensions, graphics and model references remain raw; empty semantic collections do not imply absent source records");
+            if (options.retainDecompressedFileImage) result.raw.decompressedFileImage=std::move(data);
+            return true;
         }
         for (const auto& row:table(result.raw,269).records)
         {

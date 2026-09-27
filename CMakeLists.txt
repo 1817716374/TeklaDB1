@@ -138,6 +138,9 @@ if(TEKLADB1_BUILD_TESTS)
             drawing730_subject_unknown drawing730_general drawing730_truncated drawing730_limit
             drawing_view_valid drawing_view_duplicate drawing_view_basis drawing_view_nonfinite
             drawing_view_volume drawing_view_depth drawing_view_subject drawing_view_unknown
+            drawing844_valid drawing844_signature drawing844_reference drawing844_missing drawing844_cycle
+            drawing844_guid drawing844_conflict drawing844_property drawing844_nonfinite drawing844_header
+            drawing844_descriptor drawing844_zero_descriptor drawing844_truncated drawing844_limit
             drawing782_valid drawing782_missing drawing782_cycle drawing782_fields drawing782_context
             drawing782_collapsed drawing782_nonfinite drawing782_conflict drawing782_truncated)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})

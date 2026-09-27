@@ -90,15 +90,15 @@ inline void numberingContainer(const Bytes& data, RawDatabase& raw)
         raw.tables.push_back(std::move(table));
     }
 }
-inline void drawing782Container(const Bytes& data, RawDatabase& raw)
+inline void sectionedDrawingContainer(const Bytes& data, RawDatabase& raw)
 {
-    // 293 pinned files: fixed preamble, modern sections, two 20-byte metadata
-    // slots per record and a one-byte table terminator. Walk rows, never scan
-    // for magic inside text/geometry/metadata.
-    if (data.size()<76 || std::memcmp(data.data(),"Xsteel! 7.82",12)!=0 ||
+    // 7.82 has fixed record tails; 8.44 adds 16 bytes per additional
+    // reference descriptor. Walk lengths, never scan payloads for magic.
+    const bool older844=data.size()>=12 && std::memcmp(data.data(),"Xsteel# 8.44",12)==0;
+    if (data.size()<76 || (!older844 && std::memcmp(data.data(),"Xsteel! 7.82",12)!=0) ||
         u32(data,12)!=1 || u32(data,16)!=0xdbcec0bc)
         throw std::runtime_error("unsupported legacy drawing preamble");
-    raw.kind=DatabaseKind::Drawing; raw.layout=DatabaseLayout::ModernSections; raw.storageVersion="7.82";
+    raw.kind=DatabaseKind::Drawing; raw.layout=DatabaseLayout::ModernSections; raw.storageVersion=older844?"8.44":"7.82";
     raw.preamble.assign(data.begin(),data.begin()+76);
     std::size_t pos=76;
     while (pos<data.size())
@@ -108,14 +108,22 @@ inline void drawing782Container(const Bytes& data, RawDatabase& raw)
         const auto fields=u32(data,pos+8); pos+=12;
         if (fields>(data.size()-pos)/4) throw std::runtime_error("truncated legacy drawing field descriptors");
         for (std::uint32_t i=0;i<fields;++i) { t.fieldDescriptors.push_back(u32(data,pos)); pos+=4; }
-        const auto stride=std::uint64_t(t.payloadSize)+41;
+        std::uint64_t metadataSize=40;
+        if (older844)
+        {
+            if (t.fieldDescriptors.empty() || t.fieldDescriptors.front()!=1 ||
+                std::any_of(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),[](auto f){return f>1;}))
+                throw std::runtime_error("unsupported 8.44 drawing reference descriptors");
+            metadataSize=24+16*std::uint64_t(std::count(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),1U));
+        }
+        const auto stride=std::uint64_t(t.payloadSize)+1+metadataSize;
         while (pos<data.size() && (data[pos]==4 || data[pos]==12))
         {
             if (stride>data.size()-pos) throw std::runtime_error("truncated legacy drawing record");
             RawRecord r; r.fileOffset=pos; r.allocationTag=data[pos];
             const auto begin=data.begin()+static_cast<std::ptrdiff_t>(pos+1);
             r.payload.assign(begin,begin+t.payloadSize);
-            r.allocatorMetadata.assign(begin+t.payloadSize,begin+t.payloadSize+40);
+            r.allocatorMetadata.assign(begin+t.payloadSize,begin+t.payloadSize+static_cast<std::ptrdiff_t>(metadataSize));
             t.records.push_back(std::move(r)); pos+=static_cast<std::size_t>(stride);
         }
         if (pos==data.size() || data[pos]!=0) throw std::runtime_error("missing legacy drawing table terminator");
@@ -137,9 +145,9 @@ inline void drawing782Container(const Bytes& data, RawDatabase& raw)
 }
 inline void drawingContainer(const Bytes& data, RawDatabase& raw)
 {
-    if (data.size()>=8 && std::memcmp(data.data(),"Xsteel! ",8)==0)
+    if (data.size()>=8 && (std::memcmp(data.data(),"Xsteel! ",8)==0 || std::memcmp(data.data(),"Xsteel# ",8)==0))
     {
-        drawing782Container(data,raw); return;
+        sectionedDrawingContainer(data,raw); return;
     }
     auto pos=relatedHeader(data,raw,true);
     auto types=relatedTable(data,pos,false,0);

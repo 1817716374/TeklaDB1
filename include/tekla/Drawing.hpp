@@ -133,6 +133,8 @@ struct Drawing
 // Partial DG 7.30/7.82/9.54 semantics: strings (including mark XML), properties, sheet size,
 // project identity, subject, view coordinate bases/volumes and model references.
 // DG 7.30/9.54 also expose verified straight dimension anchors and set ownership.
+// DG 8.44 currently exposes only text chains, properties, links and saved sheet size;
+// its views, subject, dimensions and model references are retained raw with diagnostics.
 // Paper positioning, scale/shortening, dimension styling and other primitives remain raw.
 // 7.30 exposes numeric subjects; other model references and type-2 subjects are unverified.
 bool parseDrawing(const std::filesystem::path& path, Drawing& result, std::string& error,

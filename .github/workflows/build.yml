@@ -40,6 +40,9 @@ jobs:
       - name: Independent 8.44 bolt IFC evidence
         if: matrix.standard == 17
         run: python -B tools/test_profile844_evidence.py --mode bolt844_evidence --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-bolt844-tests"
+      - name: Independent DG 8.44 history evidence
+        if: matrix.standard == 17
+        run: python -B tools/test_drawing844_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-drawing844-tests"
       - name: Full pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json

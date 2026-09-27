@@ -105,6 +105,7 @@ struct Dg782Fixture : DgFixture
     }
 };
 #include "Drawing730Regression.hpp"
+#include "Drawing844Regression.hpp"
 #include "DrawingDimensionRegression.hpp"
 }
 int main(int argc,char** argv)
@@ -117,6 +118,7 @@ int main(int argc,char** argv)
         const auto db2=root/"sample.db2", dg=root/"renamed.dg";
         std::string error="stale"; tekla::NumberingDatabase n; tekla::Drawing d; tekla::db1::RawDatabase raw;
         if (mode.find("dimensions_")==0 || mode.find("dimensions730_")==0) drawingDimensionRegression(mode,dg);
+        else if (mode.find("drawing844_")==0) drawing844Regression(mode,dg);
         else if (mode.find("drawing730_")==0) drawing730Regression(mode,dg);
         else if (mode.find("drawing782_")==0)
         {

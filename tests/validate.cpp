@@ -41,6 +41,7 @@ struct Fingerprint
 #include "OptionSettingsValidation.hpp"
 #include "DrawingDimensionValidation.hpp"
 #include "GuidMappingValidation.hpp"
+#include "Drawing844Validation.hpp"
 #include "Drawing730DimensionValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
@@ -100,6 +101,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if (mode == "drawing844_evidence") return drawing844Validation(path);
         if (mode == "bolt844_evidence") return bolt844Validation(path);
         if (mode == "profile844_evidence") return profile844Validation(path);
         if (mode == "guid_mappings" || mode == "guid_mapping_evidence") return guidMappingValidation(path, mode == "guid_mapping_evidence");
@@ -538,7 +540,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 }
                 if(rebuilt!=raw.decompressedFileImage)throw std::runtime_error("7.30 drawing reconstruction differs from file");
             }
-            if (raw.kind==tekla::db1::DatabaseKind::Drawing && raw.storageVersion=="7.82")
+            if (raw.kind==tekla::db1::DatabaseKind::Drawing && (raw.storageVersion=="7.82" || raw.storageVersion=="8.44"))
             {
                 auto rebuilt=raw.preamble;
                 const auto word=[&](std::uint32_t n) { for (unsigned i=0;i<4;++i) rebuilt.push_back(static_cast<std::uint8_t>(n>>(i*8))); };
@@ -548,7 +550,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                     for (auto f:t.fieldDescriptors) word(f);
                     for (const auto& r:t.records)
                     {
-                        if (r.payload.size()!=t.payloadSize || r.allocatorMetadata.size()!=40) throw std::runtime_error("legacy record framing lost");
+                        if (r.payload.size()!=t.payloadSize || r.allocatorMetadata.size()!=(raw.storageVersion=="8.44"?24+16*std::count(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),1U):40)) throw std::runtime_error("legacy record framing lost");
                         rebuilt.push_back(r.allocationTag); rebuilt.insert(rebuilt.end(),r.payload.begin(),r.payload.end());
                         rebuilt.insert(rebuilt.end(),r.allocatorMetadata.begin(),r.allocatorMetadata.end());
                     }

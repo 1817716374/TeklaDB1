@@ -4552,6 +4552,18 @@
       "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/IFC/PB_AUVENT.ifc",
       "size": 204806,
       "sha256": "492b45ff3ef68134b7ea936a1abaf0522c30c2c0bde3ae68ddbbfa1183eee41c"
+    },
+    {
+      "path": "auvent844-drawing/DID54A03D14-3328-47D1-B298-9B37193B88A2.dg",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/drawings/DID54A03D14-3328-47D1-B298-9B37193B88A2.dg",
+      "size": 16079,
+      "sha256": "1055ed3cc3f7e6c8fe15f566eeeda09ef4db0b3d117e42862e096a3cfc93e893"
+    },
+    {
+      "path": "auvent844-drawing/drawing_history.log",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/drawing_history.log",
+      "size": 257889,
+      "sha256": "a6244e2db3cd8049177b9e20fad79bb50d373d76f51a5737686113c2e737b164"
     }
   ],
   "cases": [
@@ -15712,6 +15724,27 @@
       "path": "auvent844-ifc",
       "exit": 0,
       "stdout": "version=8.44 groups=79 positions=201 diameters=79 lengths=79 standards=79 origins=79 tolerance_pairs=1"
+    },
+    {
+      "name": "DG 8.44 raw",
+      "mode": "raw",
+      "path": "auvent844-drawing/DID54A03D14-3328-47D1-B298-9B37193B88A2.dg",
+      "exit": 0,
+      "stdout": "version=8.44 tables=47 records=662 opaque=0 bytes=104678 fingerprint=4ac9f5b4b6c8db9f"
+    },
+    {
+      "name": "DG 8.44 drawing",
+      "mode": "drawing",
+      "path": "auvent844-drawing/DID54A03D14-3328-47D1-B298-9B37193B88A2.dg",
+      "exit": 0,
+      "stdout": "version=8.44 tables=47 strings=41 properties=5 links=5 sheets=1 model_refs=0 views=0 subject=0 guid=152F6ED8-4DAA-4276-B493-0AEA86E0BD65 stored=DID54A03D14-3328-47D1-B298-9B37193B88A2.dg fingerprint=701b9a1e78bc86ff"
+    },
+    {
+      "name": "DG 8.44 independent mark and project history",
+      "mode": "drawing844_evidence",
+      "path": "auvent844-drawing",
+      "exit": 0,
+      "stdout": "version=8.44 strings=41 properties=5 links=5 mark_history=1 project_history=1 deferred_views=1 deferred_dimensions=13"
     }
   ]
 }
