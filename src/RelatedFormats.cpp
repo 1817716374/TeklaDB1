@@ -328,7 +328,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             result.viewsByContext.erase(context);
             result.diagnostics.push_back("ambiguous legacy drawing view context retained by record ID: "+std::to_string(context));
         }
-        if (!numericIdentity)
+        if (!older782)
         {
             for (const auto& record:table(result.raw,257).records)
             {
@@ -336,8 +336,10 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
                 if (u32(row,0)!=257) throw std::runtime_error("invalid straight dimension set type");
                 DrawingStraightDimensionSet set;
                 set.recordId=u32(row,4); set.contextId=u32(row,8);
-                if (!result.viewsByContext.count(set.contextId))
+                if (!(older730 ? allContexts.count(set.contextId) : result.viewsByContext.count(set.contextId)))
                     throw std::runtime_error("straight dimension set view is missing");
+                if (older730 && !result.viewsByContext.count(set.contextId))
+                    result.diagnostics.push_back("straight dimension set has no uniquely decoded legacy view: "+std::to_string(set.recordId));
                 const auto id=set.recordId; unique(result.straightDimensionSets,id,std::move(set));
             }
             std::set<std::uint32_t> dimensionIds;
@@ -355,7 +357,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
                 if (dimension.contextId!=set->second.contextId)
                     throw std::runtime_error("straight dimension context differs from its set");
                 set->second.dimensionIds.push_back(dimension.recordId);
-                if (dimension.subtypeCode!=1)
+                if (dimension.subtypeCode!=(older730 ? 0U : 1U))
                 {
                     result.unhandledDimensionRecordIds.push_back(dimension.recordId);
                     result.diagnostics.push_back("unknown straight dimension subtype retained raw: "+std::to_string(dimension.recordId));
@@ -411,7 +413,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
             result.modelReferences.push_back(std::move(reference));
         }
         result.diagnostics.emplace_back("partial drawing semantics: paper placement, scale/shortening, dimension styling, other reference types and rendered primitives remain raw; mark XML is stored text");
-        if (numericIdentity && (!table(result.raw,256).records.empty() || !table(result.raw,257).records.empty()))
+        if (older782 && (!table(result.raw,256).records.empty() || !table(result.raw,257).records.empty()))
             result.diagnostics.emplace_back("legacy drawing dimension layouts remain raw");
         if (older730) result.diagnostics.emplace_back("7.30 drawing model references remain raw; an empty modelReferences collection does not mean no model references exist");
         if (numericIdentity) result.diagnostics.emplace_back("legacy numeric model references are unscoped; no project GUID or automatic DB1 join is inferred; record metadata and lifecycle remain unclassified");

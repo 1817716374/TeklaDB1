@@ -38,6 +38,7 @@ struct Fingerprint
 #include "ReinforcementValidation.hpp"
 #include "OptionSettingsValidation.hpp"
 #include "DrawingDimensionValidation.hpp"
+#include "Drawing730DimensionValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
 {
@@ -98,6 +99,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
         std::string error;
         if(mode=="drawing_dimensions")return validateDrawingDimensions(path);
         if(mode=="drawing_dimension_evidence")return drawingDimensionEvidence(path);
+        if(mode=="drawing730_dimension_evidence")return drawing730DimensionEvidence(path);
         if(mode=="ini_options" || mode=="ini_project")return optionSettingsEvidence(path,mode=="ini_project");
         else if (mode=="ifc730_evidence") ifc730::validate(path);
         else if (mode=="drawing730_evidence") validateDrawing730Evidence(path);

@@ -124,14 +124,15 @@ struct Drawing
     // contains unambiguous contexts and must not be used to count all views.
     std::map<std::uint32_t,DrawingView> viewsByRecordId;
     std::vector<std::uint32_t> unhandledViewRecordIds;
-    // DG 9.54 only. Older layouts and unknown subtypes remain in raw.
+    // DG 7.30 subtype 0 and 9.54 subtype 1. 7.82 and other subtypes remain raw.
+    // Legacy context IDs need not resolve to a unique decoded view.
     std::map<std::uint32_t,DrawingStraightDimensionSet> straightDimensionSets;
     std::map<std::uint32_t,DrawingStraightDimension> straightDimensions;
     std::vector<std::uint32_t> unhandledDimensionRecordIds;
 };
 // Partial DG 7.30/7.82/9.54 semantics: strings (including mark XML), properties, sheet size,
 // project identity, subject, view coordinate bases/volumes and model references.
-// DG 9.54 also exposes straight dimension anchors, directions and set ownership.
+// DG 7.30/9.54 also expose verified straight dimension anchors and set ownership.
 // Paper positioning, scale/shortening, dimension styling and other primitives remain raw.
 // 7.30 exposes numeric subjects; other model references and type-2 subjects are unverified.
 bool parseDrawing(const std::filesystem::path& path, Drawing& result, std::string& error,

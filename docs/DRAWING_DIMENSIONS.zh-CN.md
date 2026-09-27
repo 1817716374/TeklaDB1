@@ -1,6 +1,6 @@
 # DG 直线尺寸与尺寸链
 
-`Drawing::straightDimensions` 和 `straightDimensionSets` 公开 DG 9.54 的直线尺寸记录及所属关系。记录保存端点、方向、已存偏移、视图上下文、尺寸链 ID 和子类型码；`Drawing::raw` 继续保留全部字段。7.30/7.82 的尺寸布局尚未验证，保持原始记录及诊断。
+`Drawing::straightDimensions` 和 `straightDimensionSets` 公开 DG 9.54 子类型1及7.30子类型0的直线尺寸记录与所属关系。记录保存端点、方向、已存偏移、视图上下文、尺寸链 ID 和子类型码；`Drawing::raw` 继续保留全部字段。7.82及其他未验证子类型保持原始记录与诊断。7.30的独立DWG证据与边界见[专门说明](DRAWING_DIMENSIONS_730.zh-CN.md)。
 
 ```cpp
 tekla::Drawing drawing;
@@ -8,7 +8,8 @@ std::string error;
 if (tekla::parseDrawing("drawing.dg", drawing, error)) {
     for (const auto& entry : drawing.straightDimensions) {
         const auto& dimension = entry.second;
-        const auto& view = drawing.viewsByContext.at(dimension.contextId);
+        const auto view = drawing.viewsByContext.find(dimension.contextId);
+        // 旧版歧义或退化视图可能不在唯一视图索引内。
         const auto& set = drawing.straightDimensionSets.at(dimension.dimensionSetId);
         // startPoint/endPoint/upDirection 保留视图中的已存坐标。
         // distance 保留符号；不应用尚未验证的纸面比例转换。
@@ -26,7 +27,7 @@ if (tekla::parseDrawing("drawing.dg", drawing, error)) {
 | 256 | 1496 | 类型@0、ID@4、视图上下文@8、尺寸链ID@12、子类型@16、起点3d@24、终点3d@48、方向3d@168、偏移double@192 |
 | 257 | 144 | 类型@0、ID@4、视图上下文@8；其余字段不命名 |
 
-子类型1已有证据。未知子类型保留在原始表及`unhandledDimensionRecordIds`，其ID仍列入尺寸链，未套用已知的坐标布局。`dimensionIds`按文件记录顺序保存，不能当成尺寸链的空间顺序。
+9.54的子类型1已有证据；下表尺寸与偏移描述9.54，7.30宽度不同且仅子类型0有独立证据。未知子类型保留在原始表及`unhandledDimensionRecordIds`，其ID仍列入尺寸链，未套用已知的坐标布局。`dimensionIds`按文件记录顺序保存，不能当成尺寸链的空间顺序。
 
 已解码字段要求有限值，ID不能为零或在同类记录中重复；所属链、视图必须存在，链与尺寸的上下文必须一致。异常读取清空结果并返回错误。方向不静默归一化：非单位XY方向或端点Z不一致时，参数仍保留，投影值为空并诊断。
 

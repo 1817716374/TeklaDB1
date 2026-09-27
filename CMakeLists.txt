@@ -119,6 +119,7 @@ if(TEKLADB1_BUILD_TESTS)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     foreach(case dimensions_valid dimensions_angled dimensions_deferred dimensions_nonplanar dimensions_unknown dimensions_invalid dimensions_legacy
+        dimensions730_valid dimensions730_angled dimensions730_deferred dimensions730_nonplanar dimensions730_unknown dimensions730_invalid dimensions730_ambiguous dimensions730_collapsed
             drawing730_valid drawing730_signature drawing730_cycle drawing730_missing drawing730_property
             drawing730_nonfinite drawing730_volume drawing730_duplicate drawing730_context drawing730_collapsed
             drawing730_subject_unknown drawing730_general drawing730_truncated drawing730_limit

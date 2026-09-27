@@ -140,4 +140,4 @@ DBV 表沿用 `66 c0 ce db` 节头，记录为 `tag + payload + 8 字节 allocat
 
 工程入口公开 environment、optionsDatabases，并通过精确名称与存储类型生成 attributeDefinitionAssociations；培训模型有 118 条匹配。关联不表示已判断对象类别适用性，不填补缺失值，不把环境定义中的值写入模型对象。可通过 readEnvironment/readOptions 单独关闭语义读取；rawCompanions 继续由 readRawCompanions 控制。
 
-9.54直线尺寸新增具名端点、方向、已存偏移、视图与尺寸链关联；144条记录及57条链已有回归，另用同作者论文核对13个图上尺寸值。旧版布局、样式、格式化标注和完整重绘仍未恢复。比例候选字段存在正倒数差异，详见[尺寸与纸面边界](DRAWING_DIMENSIONS.zh-CN.md)。
+9.54直线尺寸新增具名端点、方向、已存偏移、视图与尺寸链关联；144条记录及57条链已有回归，另用同作者论文核对13个图上尺寸值。7.30另恢复313条子类型0尺寸及187条链，以同工程DWG的五条尺寸线精确几何核对；28条其他子类型仍保留原始记录，见[旧版尺寸证据](DRAWING_DIMENSIONS_730.zh-CN.md)。7.82布局、样式、格式化标注和完整重绘仍未恢复。比例候选字段存在正倒数差异，详见[尺寸与纸面边界](DRAWING_DIMENSIONS.zh-CN.md)。

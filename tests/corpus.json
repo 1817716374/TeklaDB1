@@ -4516,6 +4516,12 @@
       "url": "https://www.theseus.fi/server/api/core/bitstreams/780a2817-5167-4713-8ddc-b7774e74f740/content",
       "size": 11102676,
       "sha256": "b39df60ffb61d5c456ff4e6b60bf508d9e554a73143817c0a2b703c871d8cc5b"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/Fichiers_DWG/ensemble%20passerelle.dwg",
+      "size": 878357,
+      "sha256": "6bc0e634d711f7eaac3a39baf9f4e98188b0e933e70a3f043f232526783e700c",
+      "path": "legacy-drawing-output-evidence/ensemble passerelle.dwg"
     }
   ],
   "cases": [
@@ -15172,6 +15178,258 @@
       "path": "drawing-output-evidence",
       "exit": 0,
       "stdout": "independent_dimension_values=13 drawings=2 plate_chains=4"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000299600.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000299600.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=12 dimensions=8 unhandled=11 fingerprint=7a947f8fddb10e1"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000302002.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000302002.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=5 dimensions=8 unhandled=0 fingerprint=5ead5e07ee419f32"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000312352.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000312352.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=4 dimensions=3 unhandled=3 fingerprint=60688f1fcf5328f4"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000496033.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000496033.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=9 dimensions=24 unhandled=0 fingerprint=47a010ec03613d73"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000499914.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000499914.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=1 dimensions=1 unhandled=0 fingerprint=e5bfa94078604cfc"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000506409.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000506409.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000507715.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000507715.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=3 dimensions=4 unhandled=0 fingerprint=d7cc384fd9269093"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000507727.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000507727.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=7 dimensions=9 unhandled=0 fingerprint=4ef1e696b29c30fe"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000507833.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000507833.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000507943.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000507943.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=14 dimensions=36 unhandled=0 fingerprint=2d28aea877689587"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000508214.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000508214.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=2 dimensions=2 unhandled=0 fingerprint=fc9e94095580cc94"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000515545.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000515545.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=7 dimensions=7 unhandled=0 fingerprint=21d9ec031017c0f0"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000516635.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000516635.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000516743.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000516743.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=2 dimensions=2 unhandled=0 fingerprint=fc9e94095580cc94"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000516747.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000516747.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000516859.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000516859.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=2 dimensions=2 unhandled=0 fingerprint=aeabc5a920a48a6f"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000516871.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000516871.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=2 dimensions=2 unhandled=0 fingerprint=aeabc5a920a48a6f"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000516925.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000516925.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=5 dimensions=5 unhandled=0 fingerprint=9508907d0f48764"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000517257.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000517257.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000517267.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000517267.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000517553.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000517553.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=19 dimensions=43 unhandled=0 fingerprint=f755488b6d63e608"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/D0000517573.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/D0000517573.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=20 dimensions=44 unhandled=0 fingerprint=257e2cf18a019130"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-000A-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-000A-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=12 dimensions=8 unhandled=11 fingerprint=7a947f8fddb10e1"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-000B-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-000B-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=5 dimensions=5 unhandled=0 fingerprint=9508907d0f48764"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-000C-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-000C-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=3 dimensions=4 unhandled=0 fingerprint=d7cc384fd9269093"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-000D-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-000D-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=7 dimensions=9 unhandled=0 fingerprint=4ef1e696b29c30fe"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0001-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0001-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0002-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0002-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0003-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0003-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=9 dimensions=24 unhandled=0 fingerprint=47a010ec03613d73"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0004-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0004-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=4 dimensions=3 unhandled=3 fingerprint=60688f1fcf5328f4"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0005-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0005-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=20 dimensions=44 unhandled=0 fingerprint=257e2cf18a019130"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0006-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0006-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=7 dimensions=7 unhandled=0 fingerprint=21d9ec031017c0f0"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0007-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0007-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=0 dimensions=0 unhandled=0 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0008-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0008-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=5 dimensions=8 unhandled=0 fingerprint=5ead5e07ee419f32"
+    },
+    {
+      "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0009-3134-353031313737.dg",
+      "mode": "drawing_dimensions",
+      "path": "btscm-dg730/DID566F0A5C-0000-0009-3134-353031313737.dg",
+      "exit": 0,
+      "stdout": "dimension_sets=1 dimensions=1 unhandled=0 fingerprint=e5bfa94078604cfc"
+    },
+    {
+      "name": "drawing730_dimension_evidence",
+      "mode": "drawing730_dimension_evidence",
+      "path": "legacy-drawing-output-evidence",
+      "exit": 0,
+      "stdout": "independent_dwg_dimensions=5 endpoints=10 contexts=3 catalog_titles=1"
     }
   ]
 }
