@@ -26,7 +26,24 @@ int shapeValidation(const std::string& mode,const std::filesystem::path& path)
         std::cout<<"points="<<g.points.size()<<" faces="<<g.faces.size()<<" edges="<<g.edges.size()<<" raw_bytes="<<g.rawXml.size()<<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';return 0;
     }
     tekla::db1::ShapeCatalog catalog;
-    if(!tekla::db1::parseShapeCatalog(path,catalog,error))throw std::runtime_error(error);
+    if(mode=="shape_project_evidence")
+    {
+        tekla::Project project;tekla::ProjectOptions options;options.strictCompanions=true;
+        if(!tekla::readProject(path,project,error,options))throw std::runtime_error(error);
+        const auto source=path/"Shapes/712cacb7-119f-4da3-8738-9c5dca170300.xml";
+        const auto target=path/"ShapeGeometries/a1d452b2-d351-4a0a-9376-d4e4cfad751e.xml";
+        if(project.associations.size()!=1 || project.associations.front().source!=source ||
+           project.associations.front().target!=target)throw std::runtime_error("real shape project association differs from XML storage ID and file paths");
+        std::size_t directories=0;
+        for(const auto& file:project.files)if(file.path==source.parent_path() || file.path==target.parent_path())
+        {
+            if(file.role!=tekla::FileRole::Catalog || file.level!=tekla::ReadLevel::Semantic)throw std::runtime_error("valid shape directories not semantic catalogs");
+            ++directories;
+        }
+        if(directories!=2)throw std::runtime_error("shape directory inventory missing");
+        catalog=std::move(project.shapes);
+    }
+    else if(!tekla::db1::parseShapeCatalog(path,catalog,error))throw std::runtime_error(error);
     if(catalog.definitionsByGuid.size()!=1 || catalog.geometriesByStorageId.size()!=1 || !catalog.diagnostics.empty())throw std::runtime_error("real XML shape pair not recovered");
     const auto& d=catalog.definitionsByGuid.at("712cacb7-119f-4da3-8738-9c5dca170300");
     const auto& g=catalog.geometriesByStorageId.at(d.brepStorageId);
@@ -37,5 +54,7 @@ int shapeValidation(const std::string& mode,const std::filesystem::path& path)
         for(const auto& p:g.points){lo=std::min(lo,p[axis]);hi=std::max(hi,p[axis]);}
         if(std::abs(lo-d.minimum[axis])>1e-9 || std::abs(hi-d.maximum[axis])>1e-9)throw std::runtime_error("independent definition/geometry bounds disagree");
     }
-    std::cout<<"definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0\n";return 0;
+    std::cout<<"definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0";
+    if(mode=="shape_project_evidence")std::cout<<" project_links=1";
+    std::cout<<'\n';return 0;
 }

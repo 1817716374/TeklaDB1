@@ -1,6 +1,7 @@
 #include <tekla/db1/Catalogs.hpp>
 #include "BinaryIO.hpp"
 #include "XmlPrivate.hpp"
+#include "ShapeCatalogPrivate.hpp"
 #include <charconv>
 #include <cmath>
 #include <cctype>
@@ -168,15 +169,19 @@ bool parseShapeGeometry(const std::filesystem::path& path,ShapeGeometry& result,
 }
 bool parseShapeGeometry(const std::filesystem::path& path,ShapeGeometry& result,std::string& error)
 {return parseShapeGeometry(path,result,error,ShapeReadOptions{});}
-bool parseShapeCatalog(const std::filesystem::path& directory,ShapeCatalog& result,std::string& error)
+bool detail::readShapeDirectories(const std::vector<std::filesystem::path>& directories,ShapeDirectoryScan& scan,std::string& error)
 {
-    result={};error.clear();
+    scan={};error.clear();auto& result=scan.catalog;
     try
     {
-        if(!std::filesystem::is_directory(directory))throw std::runtime_error("shape catalog input is not a directory");
         std::vector<std::filesystem::path> paths;
-        for(const auto& item:std::filesystem::recursive_directory_iterator(directory))if(item.is_regular_file())paths.push_back(item.path());
-        std::sort(paths.begin(),paths.end());std::set<std::string> ambiguousDefinitions,ambiguousGeometries;
+        for(const auto& directory:directories)
+        {
+            if(!std::filesystem::is_directory(directory))throw std::runtime_error("shape catalog input is not a directory");
+            for(const auto& item:std::filesystem::recursive_directory_iterator(directory))if(item.is_regular_file())paths.push_back(item.path());
+        }
+        std::sort(paths.begin(),paths.end());paths.erase(std::unique(paths.begin(),paths.end()),paths.end());
+        auto& ambiguousDefinitions=scan.ambiguousDefinitions;auto& ambiguousGeometries=scan.ambiguousGeometries;
         for(const auto& path:paths)
         {
             auto ext=detail::pathUtf8(path.extension());
@@ -200,10 +205,17 @@ bool parseShapeCatalog(const std::filesystem::path& directory,ShapeCatalog& resu
             }
             catch(const std::exception& e){result.diagnostics.push_back(detail::pathUtf8(path)+": "+e.what());}
         }
-        for(const auto& entry:result.definitionsByGuid)
-            if(!result.geometriesByStorageId.count(entry.second.brepStorageId))result.diagnostics.push_back("shape "+entry.second.name+" references missing geometry "+entry.second.brepStorageId);
         return true;
     }
-    catch(const std::exception& e){result={};error=e.what();return false;}
+    catch(const std::exception& e){scan={};error=e.what();return false;}
+}
+bool parseShapeCatalog(const std::filesystem::path& directory,ShapeCatalog& result,std::string& error)
+{
+    result={};detail::ShapeDirectoryScan scan;
+    if(!detail::readShapeDirectories({directory},scan,error))return false;
+    result=std::move(scan.catalog);
+    for(const auto& entry:result.definitionsByGuid)
+        if(!result.geometriesByStorageId.count(entry.second.brepStorageId))result.diagnostics.push_back("shape "+entry.second.name+" references missing geometry "+entry.second.brepStorageId);
+    return true;
 }
 }

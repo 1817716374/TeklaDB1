@@ -112,6 +112,20 @@ def main():
         paths[mode] = dest
         originals[mode] = raw
 
+    # Use the pinned DB1 from the same public engineering directory. This is a
+    # file-resource association check, not evidence of a model part's placement.
+    model_spec = next(f for f in manifest["files"] if f["path"] == "guid-mapping-auvent/AUVENT_CCF_BE_AMCR1_2019_final.db1")
+    source = safe_path(args.data.resolve(), model_spec["path"])
+    if args.download:
+        materialize(model_spec, source, manifest.get("archives", {}), args.data.resolve())
+    if not verify(source, model_spec):
+        raise ValueError(f"missing or changed model evidence: {source}")
+    project_root = args.work.resolve() / "shapes-auvent"
+    model_copy = project_root / "model.db1"
+    if source.resolve() == model_copy.resolve():
+        raise ValueError("work must differ from model source")
+    shutil.copyfile(source, model_copy)
+
     def run(mode, path, oracle=None):
         result = subprocess.run([str(args.exe.resolve()), mode, str(path)], capture_output=True, encoding="utf8", timeout=60)
         if oracle is None:
@@ -125,6 +139,8 @@ def main():
             run(mode, path, expected(originals[mode], mode, path.stem))
         run("shape_pair_evidence", args.work.resolve() / "shapes-auvent",
             "definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0")
+        run("shape_project_evidence", project_root,
+            "definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0 project_links=1")
 
     control()
     definition = originals["shape_definition"]
@@ -151,6 +167,26 @@ def main():
             paths[mode].write_bytes(raw)
             run(mode, paths[mode])
             paths[mode].write_bytes(originals[mode])
+        storage = ET.fromstring(definition).findtext("Info/BrepStorageId").encode("utf8")
+        wrong_reference = definition.replace(storage, b"unresolved-storage-id")
+        if wrong_reference == definition:
+            raise ValueError("storage ID mutation did not reach its target")
+        paths["shape_definition"].write_bytes(wrong_reference)
+        run("shape_project_evidence", project_root)
+        paths["shape_definition"].write_bytes(definition)
+        # Collisions span the two sibling directories, which must share a
+        # uniqueness scope. Both copies remain individually valid XML.
+        for duplicate, raw in [
+            (paths["shape_geometry"].parent / "duplicate-definition.xml", definition),
+            (paths["shape_definition"].parent / paths["shape_geometry"].name, geometry),
+        ]:
+            if duplicate.exists():
+                raise ValueError(f"mutation destination already exists: {duplicate}")
+            try:
+                duplicate.write_bytes(raw)
+                run("shape_project_evidence", project_root)
+            finally:
+                duplicate.unlink(missing_ok=True)
         # Explicit synthetic compression of the public XML, not another vendor sample.
         compressed = args.work.resolve() / "gzip" / (paths["shape_geometry"].stem + ".tez")
         compressed.parent.mkdir(parents=True, exist_ok=True)
@@ -160,7 +196,7 @@ def main():
         for mode, path in paths.items():
             path.write_bytes(originals[mode])
     control()
-    print("2/2 independent shape XML comparisons, paired bounds, 3 structure/entity variants, 3 invalid mutations and gzip equivalence passed")
+    print("2/2 independent shape XML comparisons, paired bounds, real project association, 3 structure/entity variants, 3 invalid mutations, 3 association mutations and gzip equivalence passed")
 
 
 if __name__ == "__main__":

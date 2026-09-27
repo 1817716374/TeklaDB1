@@ -697,6 +697,56 @@ int main(int argc, char** argv)
             put<std::uint32_t>(b,4,0xffffffffU); save(p,b);
             check(!tekla::db1::parseRawDatabase(p,raw,error),"invalid DBV name length accepted");
         }
+        else if (name.rfind("project_shapes_",0)==0)
+        {
+            save(path,encode(onePart()));
+            const std::string definition="<ImportPart version='1.0'><Info><Name>local</Name><Guid>guid</Guid><BrepStorageId>geom</BrepStorageId><Extrema><MinPoint X='0' Y='0' Z='0'/><MaxPoint X='1' Y='1' Z='0'/></Extrema></Info></ImportPart>";
+            const std::string geometry="<Polymesh><Points><Point><X>0</X><Y>0</Y><Z>0</Z></Point><Point><X>1</X><Y>0</Y><Z>0</Z></Point><Point><X>0</X><Y>1</Y><Z>0</Z></Point></Points><Faces><Face><OuterLoop><Index>0</Index><Index>1</Index><Index>2</Index></OuterLoop></Face></Faces></Polymesh>";
+            const auto xml=[&](const std::filesystem::path& file,const std::string& value){save(root/file,Bytes(value.begin(),value.end()));};
+            xml("Shapes/def.xml",definition);
+            const bool missing=name=="project_shapes_missing", split=name=="project_shapes_split";
+            if(!missing && !split)xml("ShapeGeometries/geom.xml",geometry);
+            tekla::Project project;tekla::ProjectOptions options;
+            const bool sibling=name=="project_shapes_sibling", internal=name=="project_shapes_internal";
+            const bool lowConflict=name=="project_shapes_lower_conflict";
+            if(sibling){xml("ShapeGeometries/second.xml",definition);xml("Shapes/geom.xml",geometry);}
+            if(internal){xml("Shapes/second.xml",definition);xml("ShapeGeometries/sub/geom.xml",geometry);}
+            const bool external=sibling || internal || split || lowConflict || name=="project_shapes_precedence";
+            if(external)
+            {
+                options.resourceDirectories={"resources"};
+                auto other=definition;other.replace(other.find("local"),5,"external");
+                xml("resources/Shapes/def.xml",other);xml("resources/ShapeGeometries/geom.xml",geometry);
+                if(lowConflict){xml("resources/Shapes/other.xml",other);xml("resources/ShapeGeometries/sub/geom.xml",geometry);}
+            }
+            const bool malformed=name=="project_shapes_malformed" || name=="project_shapes_strict";
+            if(malformed)xml("Shapes/bad.xml","<ImportPart>");
+            options.strictCompanions=name=="project_shapes_strict";
+            const bool ok=tekla::readProject(root,project,error,options);
+            if(options.strictCompanions)check(!ok && project.files.empty() && project.shapes.definitionsByGuid.empty(),"strict shape failure retained output");
+            else
+            {
+                check(ok,error.c_str());
+                if(sibling || internal)check(project.shapes.definitionsByGuid.empty() && project.shapes.geometriesByStorageId.empty() && project.associations.empty(),"ambiguous shapes selected or replaced from lower resource");
+                else
+                {
+                    check(project.shapes.definitionsByGuid.size()==1 && project.shapes.definitionsByGuid.at("guid").name=="local","shape definition resource precedence");
+                    check(project.shapes.geometriesByStorageId.size()==(missing?0:1),"shape geometry merge");
+                    check(project.associations.size()==(missing?0:1),"shape file association absent or fabricated");
+                    if(!missing)
+                    {
+                        const auto& a=project.associations.front();
+                        check(a.source==root/"Shapes/def.xml" && a.target==root/(split?"resources/ShapeGeometries/geom.xml":"ShapeGeometries/geom.xml"),"shape association provenance or precedence");
+                    }
+                }
+                const bool partial=missing || malformed || sibling || internal || lowConflict;
+                check(project.shapes.diagnostics.empty()!=partial,"shape diagnostics lost from catalog");
+                bool foundPartial=false;
+                for(const auto& file:project.files)if(file.path.filename()=="Shapes" || file.path.filename()=="ShapeGeometries")
+                {check(file.role==tekla::FileRole::Catalog,"shape directory not catalog");foundPartial |= file.level==tekla::ReadLevel::PartialSemantic;}
+                check(foundPartial==partial,"partial shape catalog reported as complete");
+            }
+        }
         else if (name == "project_precedence")
         {
             save(path,encode(onePart())); const std::string a="LOCAL!TYPE!0!0!1!1", b="EXTERNAL!TYPE!0!0!1!1";

@@ -1,5 +1,6 @@
 #include <tekla/Project.hpp>
 #include "Path.hpp"
+#include "ShapeCatalogPrivate.hpp"
 #include <algorithm>
 #include <cctype>
 #include <set>
@@ -39,7 +40,7 @@ FileRole roleFor(const std::filesystem::path& path)
     if (name == "history.db") return FileRole::History;
     if (name == "guid.mapper") return FileRole::IdentityMapping;
     if (name == "profdb.bin" || name == "pgdb.bin" || name == "matdb.bin" || name == "screwdb.db" ||
-        name == "assdb.db" || name == "profitab.inp") return FileRole::Catalog;
+        name == "assdb.db" || name == "profitab.inp" || name == "shapes" || name == "shapegeometries") return FileRole::Catalog;
     return FileRole::Other;
 }
 }
@@ -276,6 +277,8 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             if (!std::filesystem::is_directory(path)) { failure(path, "resource directory does not exist"); continue; }
             if (std::find(roots.begin(), roots.end(), path) == roots.end()) roots.push_back(path);
         }
+        std::set<std::string> claimedShapeDefinitions, claimedShapeGeometries;
+        std::vector<std::filesystem::path> shapeDirectories;
         for (const auto& resourceRoot : roots)
         {
             const auto load = [&](const std::string& name, auto& destination, auto parser) {
@@ -316,19 +319,43 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 mark(path, ReadLevel::Semantic);
                 result.associations.push_back({result.model.databasePath, path, "profile name lookup; earlier resources take precedence"});
             }
+            std::vector<std::filesystem::path> directories;
             for (const auto* name : {"Shapes", "ShapeGeometries"})
             {
                 const auto path = resourceRoot / name;
-                if (!std::filesystem::is_directory(path)) continue;
-                db1::ShapeCatalog catalog; std::string diagnostic;
-                if (!db1::parseShapeCatalog(path, catalog, diagnostic)) { failure(path, diagnostic); continue; }
-                // Geometry may be in the other sibling directory; validate after merging.
-                for (auto& entry : catalog.definitionsByGuid) result.shapes.definitionsByGuid.emplace(entry.first, std::move(entry.second));
-                for (auto& entry : catalog.geometriesByStorageId) result.shapes.geometriesByStorageId.emplace(entry.first, std::move(entry.second));
+                if (std::filesystem::is_directory(path)) directories.push_back(path);
+            }
+            if (!directories.empty())
+            {
+                db1::detail::ShapeDirectoryScan scan; std::string diagnostic;
+                if (!db1::detail::readShapeDirectories(directories, scan, diagnostic))
+                {
+                    for (const auto& path : directories) failure(path, diagnostic);
+                    continue;
+                }
+                auto& catalog = scan.catalog;
+                if (options.strictCompanions && !catalog.diagnostics.empty())
+                    throw std::runtime_error(catalog.diagnostics.front());
+                // Ambiguity at an earlier priority is not an absent resource.
+                claimedShapeDefinitions.insert(scan.ambiguousDefinitions.begin(), scan.ambiguousDefinitions.end());
+                claimedShapeGeometries.insert(scan.ambiguousGeometries.begin(), scan.ambiguousGeometries.end());
+                for (auto& entry : catalog.definitionsByGuid)
+                    if (claimedShapeDefinitions.insert(entry.first).second)
+                        result.shapes.definitionsByGuid.emplace(entry.first, std::move(entry.second));
+                for (auto& entry : catalog.geometriesByStorageId)
+                    if (claimedShapeGeometries.insert(entry.first).second)
+                        result.shapes.geometriesByStorageId.emplace(entry.first, std::move(entry.second));
                 for (const auto& item : catalog.diagnostics)
-                    if (item.find("references missing geometry") == std::string::npos)
-                        result.diagnostics.push_back(db1::detail::pathUtf8(path) + ": " + item);
-                mark(path, ReadLevel::Semantic);
+                {
+                    result.shapes.diagnostics.push_back(item);
+                    result.diagnostics.push_back(item);
+                }
+                for (const auto& path : directories)
+                {
+                    shapeDirectories.push_back(path);
+                    mark(path, catalog.diagnostics.empty() ? ReadLevel::Semantic : ReadLevel::PartialSemantic,
+                         catalog.diagnostics.empty() ? "" : "shape resource contains invalid or ambiguous entries");
+                }
             }
         }
         const auto linkNumberingSeries = [&](const db1::Model& model) {
@@ -400,8 +427,25 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             return std::tie(a.database,a.surfaceTreatmentId)<std::tie(b.database,b.surfaceTreatmentId);
         });
         for (const auto& entry : result.shapes.definitionsByGuid)
-            if (!result.shapes.geometriesByStorageId.count(entry.second.brepStorageId))
-                result.diagnostics.push_back("shape " + entry.second.name + " references missing geometry " + entry.second.brepStorageId);
+        {
+            const auto& definition = entry.second;
+            const auto geometry = result.shapes.geometriesByStorageId.find(definition.brepStorageId);
+            if (geometry != result.shapes.geometriesByStorageId.end())
+                result.associations.push_back({definition.sourcePath, geometry->second.sourcePath,
+                                               "shape BrepStorageId matches geometry storage ID"});
+            else
+            {
+                const auto diagnostic = "shape " + definition.name + " references missing or ambiguous geometry " + definition.brepStorageId;
+                result.shapes.diagnostics.push_back(diagnostic);
+                result.diagnostics.push_back(diagnostic);
+                for (const auto& path : shapeDirectories)
+                {
+                    const auto relative = definition.sourcePath.lexically_relative(path);
+                    if (!relative.empty() && *relative.begin() != "..")
+                        mark(path, ReadLevel::PartialSemantic, "shape resource has unresolved geometry references");
+                }
+            }
+        }
         if (result.profileRules)
             for (const auto& item : result.profileRules->diagnostics) result.diagnostics.push_back("profitab: " + item);
         std::sort(result.files.begin(), result.files.end(), [](const auto& a, const auto& b) { return a.path < b.path; });

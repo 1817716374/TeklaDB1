@@ -102,7 +102,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
-        if (mode == "shape_definition" || mode == "shape_geometry" || mode == "shape_pair_evidence") return shapeValidation(mode,path);
+        if (mode == "shape_definition" || mode == "shape_geometry" || mode == "shape_pair_evidence" || mode == "shape_project_evidence") return shapeValidation(mode,path);
         if (mode == "drawing844_evidence") return drawing844Validation(path);
         if (mode == "bolt844_evidence") return bolt844Validation(path);
         if (mode == "profile844_evidence") return profile844Validation(path);

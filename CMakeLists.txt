@@ -164,6 +164,8 @@ if(TEKLADB1_BUILD_TESTS)
             settings_project settings_project_no_raw settings_project_off settings_project_invalid settings_project_strict
             mapper_project mapper_project_gzip mapper_project_no_raw mapper_project_off mapper_project_invalid mapper_project_strict
             dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid
+            project_shapes_pair project_shapes_sibling project_shapes_internal project_shapes_precedence
+            project_shapes_lower_conflict project_shapes_missing project_shapes_split project_shapes_malformed project_shapes_strict
             782_model 782_library 782_library_fields 782_fields 782_width 782_part_join 782_contour_join
             782_string_cycle 782_missing_string 782_bolt_join 782_numeric_nan 782_numeric_overflow 782_assembly_missing
             782_library_definition_fields 782_library_definition_width 782_library_definition_string
