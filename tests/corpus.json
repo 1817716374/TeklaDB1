@@ -16270,6 +16270,48 @@
       "path": "exam-drawings",
       "exit": 0,
       "stdout": "drawings=5 subject_links=1 reference_links=1 guid=02f6a87b-e776-431e-a2db-9f8f1865e98c prefix=M number=92"
+    },
+    {
+      "name": "metadata-D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg.metadata",
+      "path": "exam-drawings/drawings/D26b16740-a8c9-4a01-b34f-0d1bcccb63b4.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=11 raw_bytes=730 fingerprint=154572d83bca3d1b"
+    },
+    {
+      "name": "metadata-D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg.metadata",
+      "path": "exam-drawings/drawings/D29afa67a-deb1-444c-a0a0-1fbd107b0739.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=11 raw_bytes=727 fingerprint=11029a4970e389c4"
+    },
+    {
+      "name": "metadata-D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg.metadata",
+      "path": "exam-drawings/drawings/D9654e52e-2e28-4ee5-85cd-75a8d8e605e9.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=11 raw_bytes=745 fingerprint=9718a95344d663db"
+    },
+    {
+      "name": "metadata-Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg.metadata",
+      "path": "exam-drawings/drawings/Da97c185d-ee46-42ad-8ab3-bd3dfcdebb7a.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=11 raw_bytes=725 fingerprint=8e146ec9d8159f29"
+    },
+    {
+      "name": "metadata-Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg.metadata",
+      "path": "exam-drawings/drawings/Df1e0e8aa-208a-4135-9af9-0cbf3729e08f.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=11 raw_bytes=721 fingerprint=e458dd529663b995"
+    },
+    {
+      "name": "drawing-version-metadata-project",
+      "path": "exam-drawings",
+      "mode": "drawing_metadata_project",
+      "exit": 0,
+      "stdout": "metadata=5 pairs=5 objects=1 failed=0 discovered=0 drawings=5"
     }
   ]
 }

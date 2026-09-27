@@ -33,7 +33,7 @@
 
 四张旧8.95图纸保存工程GUID `aa364402-22b3-4b77-a990-285a1a3c1b65`，当前DB1为 `a09d32dc-547d-4f09-a597-b4bd338e81fa`。因此五张都可读取，但只建立9.08的一条主体关联和一条模型引用关联。8.95数字ID与配套旧模型仍需更多独立验证，不自动与当前模型配对。错工程GUID或改为有效8.95容器的测试副本也不会得到9.08对象关联。
 
-未解读视图和尺寸的记录ID公开于 `unhandledViewRecordIds` / `unhandledDimensionRecordIds`；空几何集合不表示文件没有几何。XML中的绘图版本GUID、标题、作者和生命周期字段目前仅用作外部研究资料，尚无完整的绘图版本元数据API。
+未解读视图和尺寸的记录ID公开于 `unhandledViewRecordIds` / `unhandledDimensionRecordIds`；空几何集合不表示文件没有几何。配套XML现有独立的[图纸版本元数据接口](DRAWING_METADATA.zh-CN.md)，公开图纸GUID、标题、作者、图幅及已存整数，并校验工程配对；生命周期字段的运行时含义和最新版本选择仍未解释。
 
 ## 复验
 

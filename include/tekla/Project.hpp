@@ -2,6 +2,7 @@
 #include <tekla/db1/Parser.hpp>
 #include <tekla/db1/Catalogs.hpp>
 #include <tekla/Drawing.hpp>
+#include <tekla/DrawingMetadata.hpp>
 #include <tekla/Numbering.hpp>
 #include <tekla/Environment.hpp>
 #include <tekla/GuidMappings.hpp>
@@ -9,7 +10,7 @@
 
 namespace tekla
 {
-enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping };
+enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping, DrawingMetadata };
 enum class ReadLevel { Discovered, Raw, Semantic, Failed, External, PartialSemantic };
 struct ProjectFile
 {
@@ -44,6 +45,7 @@ struct ProjectOptions
     // when both lack GUIDs. Never bypasses a GUID or storage-version conflict.
     bool trustLegacyNumberingBasenames = false;
     bool readGuidMappings = true;
+    bool readDrawingMetadata = true;
 };
 struct DrawingModelAssociation
 {
@@ -83,6 +85,14 @@ struct OptionSettingAssociation
     std::filesystem::path optionsDatabase;
     OptionValueMatch match; // index into Project::optionSettings->settings
 };
+struct DrawingMetadataAssociation
+{
+    std::filesystem::path metadata;
+    std::filesystem::path drawing;
+    // Present only when an existing scoped DG-to-DB1 subject association agrees
+    // with MainObjectGuid. Metadata never supplies missing DG subject identity.
+    std::optional<std::uint32_t> modelObjectId;
+};
 struct Project
 {
     db1::Model model;
@@ -110,6 +120,11 @@ struct Project
     std::vector<OptionSettingAssociation> optionSettingAssociations;
     std::optional<GuidMappingFile> guidMappings;
     std::vector<GuidMappingTarget> guidMappingTargets;
+    std::map<std::filesystem::path,DrawingVersionMetadata> drawingMetadata;
+    // Same-directory filename pairing plus matching DG saved filename, sheet
+    // and subject type. Conflicting/missing fields are diagnosed, not guessed.
+    // No DrawingGuid equality or "latest version" selection is inferred.
+    std::vector<DrawingMetadataAssociation> drawingMetadataAssociations;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

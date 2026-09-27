@@ -19,6 +19,7 @@ add_library(tekla_db1
     src/Catalogs.cpp
     src/ShapeXml.cpp
     src/MetadataXml.cpp
+    src/DrawingMetadata.cpp
     src/GuidMappings.cpp
     src/TinyXmlPrivate.cpp
     src/Parser.cpp
@@ -89,6 +90,11 @@ endif()
 
 if(TEKLADB1_BUILD_TESTS)
     enable_testing()
+    add_executable(tekladb1_drawing_metadata_test tests/drawing_metadata.cpp)
+    target_link_libraries(tekladb1_drawing_metadata_test PRIVATE TeklaFormats::core)
+    foreach(case drawing_metadata_fields drawing_metadata_scope drawing_metadata_entities drawing_metadata_numbers drawing_metadata_guid drawing_metadata_declarations drawing_metadata_limits)
+        add_test(NAME related.${case} COMMAND tekladb1_drawing_metadata_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     add_executable(tekladb1_guid_mapping_test tests/guid_mappings.cpp)
     target_link_libraries(tekladb1_guid_mapping_test PRIVATE TeklaFormats::core)
     foreach(case mapper_text mapper_duplicates mapper_failure mapper_targets)

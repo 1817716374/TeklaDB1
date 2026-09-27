@@ -55,6 +55,9 @@ jobs:
       - name: Independent DG 8.95 and 9.08 XML and model evidence
         if: matrix.standard == 17
         run: python -B tools/test_drawing_exam_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-drawing-exam-tests"
+      - name: Independent drawing version metadata and scoped pairing
+        if: matrix.standard == 17
+        run: python -B tools/test_drawing_metadata_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-drawing-metadata-tests"
       - name: Full pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json

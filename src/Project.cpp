@@ -35,6 +35,7 @@ FileRole roleFor(const std::filesystem::path& path)
     if (ext == ".db1") return FileRole::Model;
     if (ext == ".db2") return FileRole::Numbering;
     if (ext == ".dg") return FileRole::Drawing;
+    if (ext == ".metadata" && lower(db1::detail::pathUtf8(path.stem().extension()))==".dg") return FileRole::DrawingMetadata;
     if (name == "environment.db") return FileRole::Environment;
     if (name == "options_model.db" || name == "options_drawings.db" || name == "options.ini") return FileRole::Options;
     if (name == "history.db") return FileRole::History;
@@ -83,7 +84,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
         const auto drawings = root / "drawings";
         if (std::filesystem::is_directory(drawings))
             for (const auto& entry : std::filesystem::directory_iterator(drawings))
-                if (entry.is_regular_file() && roleFor(entry.path()) == FileRole::Drawing)
+                if (entry.is_regular_file() && (roleFor(entry.path()) == FileRole::Drawing || roleFor(entry.path()) == FileRole::DrawingMetadata))
                     mark(entry.path(), ReadLevel::Discovered, "DG reading is optional; full drawing semantics are not implemented");
         const auto modelLevel = [](const db1::Model& model) {
             return model.storageVersion == "7.82" || model.storageVersion == "9.08" ? ReadLevel::PartialSemantic : ReadLevel::Semantic;
@@ -168,6 +169,16 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             if (!entry.second.guid.empty()) modelIdsByGuid[lower(entry.second.guid)].push_back(entry.first);
         for (const auto& file:companions)
         {
+            if(file.role==FileRole::DrawingMetadata && options.readDrawingMetadata)
+            {
+                DrawingVersionMetadata metadata;std::string diagnostic;
+                if(!parseDrawingVersionMetadata(file.path,metadata,diagnostic,
+                    (std::min)(std::size_t{16*1024*1024},options.rawOptions.maxDecodedBytes)))
+                {failure(file.path,diagnostic);continue;}
+                for(const auto& item:metadata.diagnostics)result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
+                mark(file.path,ReadLevel::PartialSemantic,"saved drawing version fields decoded; dates, flags and lifecycle precedence remain uninterpreted");
+                result.drawingMetadata.emplace(file.path,std::move(metadata));
+            }
             if (file.role==FileRole::Environment && options.readEnvironment)
             {
                 EnvironmentDatabase environment; std::string diagnostic;
@@ -268,6 +279,46 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                     "drawing subject, view bases/volumes, properties, strings and sheet size decoded; graphics remain raw");
                 result.drawings.emplace(file.path,std::move(drawing));
             }
+        }
+
+        // Compare sidecars only after DG parsing and its existing scoped model
+        // associations. A metadata GUID must never repair a missing/wrong DG ID.
+        std::map<std::string,std::size_t> drawingPathCounts,metadataPathCounts;
+        const auto pathKey=[](const std::filesystem::path& p){return lower(db1::detail::pathUtf8(p.lexically_normal()));};
+        for(const auto& file:companions)
+        {
+            if(file.role==FileRole::Drawing)++drawingPathCounts[pathKey(file.path)];
+            if(file.role==FileRole::DrawingMetadata)++metadataPathCounts[pathKey(file.path.parent_path()/file.path.stem())];
+        }
+        for(const auto& entry:result.drawingMetadata)
+        {
+            const auto& metadata=entry.second;const auto key=pathKey(entry.first.parent_path()/entry.first.stem());
+            const auto diagnostic=[&](const std::string& message){result.diagnostics.push_back(db1::detail::pathUtf8(entry.first)+": "+message);};
+            if(drawingPathCounts[key]!=1 || metadataPathCounts[key]!=1)
+            {diagnostic("drawing metadata filename pairing is missing or ambiguous");continue;}
+            const auto found=std::find_if(result.drawings.begin(),result.drawings.end(),[&](const auto& d){return pathKey(d.first)==key;});
+            if(found==result.drawings.end()){diagnostic("drawing metadata has no decoded DG companion");continue;}
+            const auto& drawing=found->second;
+            if(drawing.storedFileName.empty() || lower(drawing.storedFileName)!=lower(db1::detail::pathUtf8(found->first.filename())))
+            {diagnostic("drawing metadata filename differs from DG stored filename");continue;}
+            if(metadata.drawingGuid.empty() || !metadata.width || !metadata.height || !metadata.drawingType ||
+                drawing.sheets.size()!=1 || !drawing.subject)
+            {diagnostic("drawing metadata pairing lacks required identity, sheet or subject fields");continue;}
+            if(*metadata.width!=drawing.sheets[0].width || *metadata.height!=drawing.sheets[0].height || *metadata.drawingType!=drawing.subject->typeCode)
+            {diagnostic("drawing metadata sheet or type conflicts with DG");continue;}
+            DrawingMetadataAssociation association{entry.first,found->first,{}};
+            if(!metadata.mainObjectGuid.empty())
+            {
+                const auto subject=std::find_if(result.drawingSubjectAssociations.begin(),result.drawingSubjectAssociations.end(),
+                    [&](const auto& s){return s.drawing==found->first;});
+                if(subject==result.drawingSubjectAssociations.end() || lower(subject->modelGuid)!=metadata.mainObjectGuid)
+                {diagnostic("drawing metadata main object GUID has no matching scoped DG subject");continue;}
+                association.modelObjectId=subject->modelObjectId;
+            }
+            else if(drawing.subject->modelObjectId || !drawing.subject->modelGuid.empty())
+            {diagnostic("drawing metadata omits the DG main object GUID");continue;}
+            result.drawingMetadataAssociations.push_back(std::move(association));
+            result.associations.push_back({entry.first,found->first,"DG metadata filename, saved sheet and subject agree; no active-version inference"});
         }
 
         if(result.optionSettings)

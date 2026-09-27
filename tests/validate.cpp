@@ -39,6 +39,7 @@ struct Fingerprint
 #include "Schema908Validation.hpp"
 #include "Numbering908Validation.hpp"
 #include "DrawingExamValidation.hpp"
+#include "DrawingMetadataValidation.hpp"
 #include "Bolt844Validation.hpp"
 #include "ReinforcementValidation.hpp"
 #include "OptionSettingsValidation.hpp"
@@ -105,6 +106,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if(mode=="drawing_metadata" || mode=="drawing_metadata_fields" || mode.rfind("drawing_metadata_project",0)==0)return drawingMetadataValidation(path,mode);
         if (mode == "schema908_evidence") return schema908Validation(path);
         if (mode == "numbering908_evidence" || mode == "numbering908_unpaired") return numbering908Validation(path,mode=="numbering908_unpaired");
         if(mode=="drawing_exam_fields" || mode=="drawing_exam_project" || mode=="drawing_exam_unpaired")return drawingExamValidation(path,mode);
