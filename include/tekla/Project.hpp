@@ -3,6 +3,7 @@
 #include <tekla/db1/Catalogs.hpp>
 #include <tekla/Drawing.hpp>
 #include <tekla/DrawingMetadata.hpp>
+#include <tekla/AnalysisSettings.hpp>
 #include <tekla/Numbering.hpp>
 #include <tekla/Environment.hpp>
 #include <tekla/GuidMappings.hpp>
@@ -10,7 +11,7 @@
 
 namespace tekla
 {
-enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping, DrawingMetadata, Analysis };
+enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping, DrawingMetadata, Analysis, AnalysisSettings };
 enum class ReadLevel { Discovered, Raw, Semantic, Failed, External, PartialSemantic };
 struct ProjectFile
 {
@@ -46,6 +47,7 @@ struct ProjectOptions
     bool trustLegacyNumberingBasenames = false;
     bool readGuidMappings = true;
     bool readDrawingMetadata = true;
+    bool readAnalysisSettings = true;
 };
 struct DrawingModelAssociation
 {
@@ -125,6 +127,7 @@ struct Project
     // and subject type. Conflicting/missing fields are diagnosed, not guessed.
     // No DrawingGuid equality or "latest version" selection is inferred.
     std::vector<DrawingMetadataAssociation> drawingMetadataAssociations;
+    std::map<std::filesystem::path,AnalysisModelSettings> analysisSettings;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

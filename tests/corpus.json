@@ -4793,6 +4793,20 @@
       "member": "Defining drawing views steel/Defining drawing views steel.db1",
       "size": 184181,
       "sha256": "e4c84217cfb5f18a75112f288fd8e9c4feec94754728c852a97942806cbf9195"
+    },
+    {
+      "path": "analysis-settings/attributes/Click here to see A_D wire frame.admodel",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/attributes/Click here to see A_D wire frame.admodel",
+      "size": 2960,
+      "sha256": "4cc755c564b997cef434c08194a1f881cf87e494e03449c562376e39ebcb5496"
+    },
+    {
+      "path": "analysis-settings/API_Developer_Exam_01.db1",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/API_Developer_Exam_01.db1",
+      "size": 7781363,
+      "sha256": "6f2121f0bb031fa03cc6860997f1a62b76daa0c453315ee505ad7d595f776d2c"
     }
   ],
   "cases": [
@@ -16366,6 +16380,41 @@
       "mode": "analysis_project_strict",
       "exit": 0,
       "stdout": "analysis_files=1 raw=1 failed=0 discovered=0 rows=79 associations=0"
+    },
+    {
+      "name": "analysis_settings",
+      "path": "analysis-settings/attributes/Click here to see A_D wire frame.admodel",
+      "mode": "analysis_settings",
+      "exit": 0,
+      "stdout": "codepage=1252 fields=125 designs=3 raw_bytes=2960 fingerprint=901a1a13797027d6"
+    },
+    {
+      "name": "analysis_settings_project",
+      "path": "analysis-settings",
+      "mode": "analysis_settings_project",
+      "exit": 0,
+      "stdout": "files=1 parsed=1 failed=0 discovered=0 fields=125 designs=3 associations=0"
+    },
+    {
+      "name": "analysis_settings_project_disabled",
+      "path": "analysis-settings",
+      "mode": "analysis_settings_project_disabled",
+      "exit": 0,
+      "stdout": "files=1 parsed=0 failed=0 discovered=1 fields=0 designs=0 associations=0"
+    },
+    {
+      "name": "analysis_settings_project_strict",
+      "path": "analysis-settings",
+      "mode": "analysis_settings_project_strict",
+      "exit": 0,
+      "stdout": "files=1 parsed=1 failed=0 discovered=0 fields=125 designs=3 associations=0"
+    },
+    {
+      "name": "analysis_settings_project_raw_disabled",
+      "path": "analysis-settings",
+      "mode": "analysis_settings_project_raw_disabled",
+      "exit": 0,
+      "stdout": "files=1 parsed=1 failed=0 discovered=0 fields=125 designs=3 associations=0"
     }
   ]
 }

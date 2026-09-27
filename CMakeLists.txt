@@ -20,6 +20,7 @@ add_library(tekla_db1
     src/ShapeXml.cpp
     src/MetadataXml.cpp
     src/DrawingMetadata.cpp
+    src/AnalysisSettings.cpp
     src/GuidMappings.cpp
     src/TinyXmlPrivate.cpp
     src/Parser.cpp
@@ -90,6 +91,11 @@ endif()
 
 if(TEKLADB1_BUILD_TESTS)
     enable_testing()
+    add_executable(tekladb1_analysis_settings_test tests/analysis_settings.cpp)
+    target_link_libraries(tekladb1_analysis_settings_test PRIVATE TeklaFormats::core)
+    foreach(case analysis_settings_fields analysis_settings_numbers analysis_settings_quotes analysis_settings_encoding analysis_settings_design analysis_settings_header analysis_settings_limits)
+        add_test(NAME related.${case} COMMAND tekladb1_analysis_settings_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     add_executable(tekladb1_analysis_raw_test tests/analysis_raw.cpp)
     target_link_libraries(tekladb1_analysis_raw_test PRIVATE TeklaFormats::core)
     foreach(case analysis_raw_roundtrip analysis_raw_prefix analysis_raw_header analysis_raw_tables analysis_raw_truncated analysis_raw_limits)

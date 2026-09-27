@@ -35,6 +35,7 @@ FileRole roleFor(const std::filesystem::path& path)
     if (ext == ".db1") return FileRole::Model;
     if (ext == ".db2") return FileRole::Numbering;
     if (ext == ".db6") return FileRole::Analysis;
+    if (ext == ".admodel") return FileRole::AnalysisSettings;
     if (ext == ".dg") return FileRole::Drawing;
     if (ext == ".metadata" && lower(db1::detail::pathUtf8(path.stem().extension()))==".dg") return FileRole::DrawingMetadata;
     if (name == "environment.db") return FileRole::Environment;
@@ -90,10 +91,16 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
         // Directory spelling is case-insensitive, including on Linux. Keep
         // paths as separate inventories; no basename-based DB1 association.
         for (const auto& entry : std::filesystem::directory_iterator(root))
-            if (entry.is_directory() && lower(db1::detail::pathUtf8(entry.path().filename()))=="analysis")
-                for (const auto& file : std::filesystem::directory_iterator(entry.path()))
-                    if (file.is_regular_file() && roleFor(file.path())==FileRole::Analysis)
-                        mark(file.path(),ReadLevel::Discovered,"analysis semantics and DB1 object associations are unverified");
+            if (entry.is_directory())
+            {
+                const auto directoryName=lower(db1::detail::pathUtf8(entry.path().filename()));
+                if(directoryName=="analysis" || directoryName=="attributes")
+                    for (const auto& file : std::filesystem::directory_iterator(entry.path()))
+                        if(file.is_regular_file() &&
+                            ((directoryName=="analysis" && roleFor(file.path())==FileRole::Analysis) ||
+                             (directoryName=="attributes" && roleFor(file.path())==FileRole::AnalysisSettings)))
+                            mark(file.path(),ReadLevel::Discovered,"analysis data and presets are not automatically associated with model objects");
+            }
         const auto modelLevel = [](const db1::Model& model) {
             return model.storageVersion == "7.82" || model.storageVersion == "9.08" ? ReadLevel::PartialSemantic : ReadLevel::Semantic;
         };
@@ -179,6 +186,16 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             if (!entry.second.guid.empty()) modelIdsByGuid[lower(entry.second.guid)].push_back(entry.first);
         for (const auto& file:companions)
         {
+            if(file.role==FileRole::AnalysisSettings && options.readAnalysisSettings)
+            {
+                AnalysisModelSettings settings;std::string diagnostic;
+                if(!parseAnalysisModelSettings(file.path,settings,diagnostic,
+                    (std::min)(std::size_t{4*1024*1024},options.rawOptions.maxDecodedBytes)))
+                {failure(file.path,diagnostic);continue;}
+                for(const auto& item:settings.diagnostics)result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
+                mark(file.path,ReadLevel::PartialSemantic,"named analysis preset values decoded; no effective-value or DB6 association inferred");
+                result.analysisSettings.emplace(file.path,std::move(settings));
+            }
             if(file.role==FileRole::DrawingMetadata && options.readDrawingMetadata)
             {
                 DrawingVersionMetadata metadata;std::string diagnostic;

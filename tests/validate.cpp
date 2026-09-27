@@ -27,6 +27,7 @@ struct Fingerprint
 };
 #include "OwnershipValidation.hpp"
 #include "AnalysisValidation.hpp"
+#include "AnalysisSettingsValidation.hpp"
 #include "PositionValidation.hpp"
 #include "SurfaceValidation.hpp"
 #include "ObjectNumberingValidation.hpp"
@@ -107,6 +108,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if(mode.rfind("analysis_settings",0)==0)return analysisSettingsValidation(path,mode);
         if(mode.rfind("analysis_project",0)==0)return analysisProjectValidation(path,mode);
         if(mode=="drawing_metadata" || mode=="drawing_metadata_fields" || mode.rfind("drawing_metadata_project",0)==0)return drawingMetadataValidation(path,mode);
         if (mode == "schema908_evidence") return schema908Validation(path);
