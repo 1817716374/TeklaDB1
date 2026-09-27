@@ -142,7 +142,11 @@ if(TEKLADB1_BUILD_TESTS)
             drawing782_collapsed drawing782_nonfinite drawing782_conflict drawing782_truncated)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
-    foreach(case profile844_valid profile844_library profile844_boundary profile844_library_boundary
+    foreach(case bolt844_valid bolt844_library bolt844_multi bolt844_library_multi bolt844_empty bolt844_null
+            bolt844_missing_definition bolt844_missing_point bolt844_missing_frame bolt844_missing_array bolt844_missing_identity
+            bolt844_duplicate_group bolt844_duplicate_definition bolt844_origin_nan bolt844_position_nan bolt844_diameter_nan
+            bolt844_count bolt844_sequence bolt844_group_fields bolt844_definition_fields
+            profile844_contour profile844_valid profile844_library profile844_boundary profile844_library_boundary
             profile844_missing profile844_next profile844_cycle profile844_library_cycle
             valid_model short_trailer unknown_version wrong_fields broken_reference
             unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
@@ -208,6 +212,7 @@ if(TEKLADB1_BUILD_TESTS)
         add_test(NAME db1.geometry_polybeam_miters COMMAND tekladb1_geometry_test miter)
         add_test(NAME db1.geometry_cambering COMMAND tekladb1_geometry_test camber)
         add_test(NAME db1.geometry_ellipses COMMAND tekladb1_geometry_test ellipse)
+        add_test(NAME db1.geometry_bolt844_deferred COMMAND tekladb1_geometry_test bolt844)
         add_executable(tekladb1_ifc_geometry tests/ifc_geometry.cpp)
         target_link_libraries(tekladb1_ifc_geometry PRIVATE TeklaDB1::occt)
         add_test(NAME db1.ifc_volume_evidence COMMAND tekladb1_ifc_geometry ifc_volume_evidence)

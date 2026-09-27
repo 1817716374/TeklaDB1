@@ -288,6 +288,11 @@ struct BoltDefinition
     float length = 0.0f;
     float extraLength = 0.0f;
     uint32_t boltType = 0;
+    // Present only for 8.44: the original payload[252,308) parameter block.
+    // Count, diameter, tolerance and length are decoded; extraLength and
+    // boltType remain unavailable (zero defaults). Hole/bolt generation flags
+    // and connected layers still need independent interpretation.
+    std::optional<std::array<uint8_t, 56>> legacy844Parameters;
 };
 
 struct BoltLayer

@@ -15705,6 +15705,13 @@
       "path": "auvent844-ifc",
       "exit": 0,
       "stdout": "version=8.44 identities=58 names=58 profiles=19 origins=58"
+    },
+    {
+      "name": "8.44 independent IFC bolt parameters and positions",
+      "mode": "bolt844_evidence",
+      "path": "auvent844-ifc",
+      "exit": 0,
+      "stdout": "version=8.44 groups=79 positions=201 diameters=79 lengths=79 standards=79 origins=79 tolerance_pairs=1"
     }
   ]
 }

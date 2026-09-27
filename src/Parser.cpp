@@ -1049,10 +1049,10 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const std::size_t stringPropertyOrdinal = olderSchema ? (library ? 90 : 116) : (library ? 304 : 340);
     const std::size_t partOrdinal = older782 ? (library ? 163 : 193) : older844 ? (library ? 241 : 273) : (library ? 242 : 274);
     const std::size_t contourLinkOrdinal = older782 ? noTable : older844 ? (library ? 237 : 269) : (library ? 238 : 270);
-    const std::size_t boltDefinitionOrdinal = (older782 || older844) ? noTable :
+    const std::size_t boltDefinitionOrdinal = older782 ? noTable : older844 ? (library ? 222 : 252) :
                                                        (older895 ? (library ? 223 : 253) : (library ? 314 : 351));
     const std::size_t boltLayerOrdinal = olderSchema ? noTable : (library ? 296 : 332);
-    const std::size_t boltGroupOrdinal = (older782 || older844) ? noTable : (library ? 274 : 310);
+    const std::size_t boltGroupOrdinal = older782 ? noTable : older844 ? (library ? 221 : 251) : (library ? 274 : 310);
     const std::size_t weldDefinitionOrdinal = older782 ? (library ? 196 : 226) : older844 ? (library ? 197 : 227) : (library ? 198 : 228);
     const std::size_t relationOrdinal = (older782 || older844) ? noTable : (library ? 261 : 294);
     const std::size_t assemblyOrdinal = (older782 || older844) ? (library ? 151 : 181) : (library ? 265 : 300);
@@ -1068,9 +1068,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         {weldDefinitionOrdinal, older782 ? 60U : older844 ? 100U : 104U},
         {assemblyOrdinal, (older782 || older844) ? 88U : 92U}};
     if (contourLinkOrdinal != noTable) required.emplace_back(contourLinkOrdinal, 24U);
-    if (boltDefinitionOrdinal != noTable) required.emplace_back(boltDefinitionOrdinal, older895 ? 308U : 316U);
+    if (boltDefinitionOrdinal != noTable) required.emplace_back(boltDefinitionOrdinal, (older844 || older895) ? 308U : 316U);
     if (boltLayerOrdinal != noTable) required.emplace_back(boltLayerOrdinal, 48U);
-    if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, 24U);
+    if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, older844 ? 64U : 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
     if (older895) required.emplace_back(identityClassOrdinal, 28U);
     if (older782)
@@ -1098,6 +1098,11 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     }
     for (const auto& spec : required)
         requireTable(all, spec.first, spec.second);
+    if (older844)
+    {
+        requireFields(data, all, boltDefinitionOrdinal, 28, {0,1});
+        requireFields(data, all, boltGroupOrdinal, 12, {0,1,2,3,4,5,6,7});
+    }
     if (older895) requireFields(data, all, identityClassOrdinal, 8, {0,1,6,7});
     if (verifiedPartOwnership) requireFields(data, all, partAuxiliaryOrdinal, 14, {0,1});
     if (verifiedReinforcement)
@@ -1580,31 +1585,30 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             continue;
         ContourBlock contour;
         contour.sequence = read<uint32_t>(value, 5);
-        // The 332-byte Xsteel 8.x block omits the first local origin from its
-        // coordinate arrays.  It is implicit only in sequence zero; following
-        // chunks contain ten ordinary continuation points.
-        if (olderSchema && !older782 && contour.sequence == 0)
+        // Preserve the existing 8.95 interpretation pending its own export
+        // evidence. 8.44 has ten complete points, including a nonzero first.
+        if (older895 && contour.sequence == 0)
             contour.points.push_back(ContourPoint{});
         for (int pointIndex = 0; pointIndex < 10; ++pointIndex)
         {
-            const auto typeOffset = older782 ? 213 : olderSchema ? 217 : 337;
+            const auto typeOffset = (older782 || older844) ? 213 : olderSchema ? 217 : 337;
             const auto type = read<uint32_t>(value, typeOffset + pointIndex * 4);
             if (type == 0x7fffffff)
                 break;
             ContourPoint point;
             if (olderSchema)
-                point.value = {read<float>(value, (older782 ? 13 : 17) + pointIndex * 4),
-                               read<float>(value, (older782 ? 53 : 57) + pointIndex * 4),
-                               read<float>(value, (older782 ? 93 : 97) + pointIndex * 4)};
+                point.value = {read<float>(value, ((older782 || older844) ? 13 : 17) + pointIndex * 4),
+                               read<float>(value, ((older782 || older844) ? 53 : 57) + pointIndex * 4),
+                               read<float>(value, ((older782 || older844) ? 93 : 97) + pointIndex * 4)};
             else
                 point.value = {read<double>(value, 17 + pointIndex * 8),
                                read<double>(value, 97 + pointIndex * 8),
                                read<double>(value, 177 + pointIndex * 8)};
-            point.chamferX = read<float>(value, (older782 ? 133 : olderSchema ? 137 : 257) + pointIndex * 4);
-            point.chamferY = read<float>(value, (older782 ? 173 : olderSchema ? 177 : 297) + pointIndex * 4);
+            point.chamferX = read<float>(value, ((older782 || older844) ? 133 : olderSchema ? 137 : 257) + pointIndex * 4);
+            point.chamferY = read<float>(value, ((older782 || older844) ? 173 : olderSchema ? 177 : 297) + pointIndex * 4);
             point.chamferType = type;
-            point.chamferDz1 = read<float>(value, (older782 ? 253 : olderSchema ? 257 : 377) + pointIndex * 4);
-            point.chamferDz2 = read<float>(value, (older782 ? 293 : olderSchema ? 297 : 417) + pointIndex * 4);
+            point.chamferDz1 = read<float>(value, ((older782 || older844) ? 253 : olderSchema ? 257 : 377) + pointIndex * 4);
+            point.chamferDz2 = read<float>(value, ((older782 || older844) ? 293 : olderSchema ? 297 : 417) + pointIndex * 4);
             contour.points.push_back(point);
         }
         contourChunks[read<uint32_t>(value, 1)].push_back(std::move(contour));
@@ -2059,12 +2063,21 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         definition.classNumber = fixedString(value, 29, 20);
         definition.name = fixedString(value, 51, 42);
         definition.standard = fixedString(value, 157, 94);
-        definition.diameter = read<float>(value, 253);
-        definition.tolerance = read<float>(value, 257);
-        definition.length = read<float>(value, 265);
-        definition.extraLength = read<float>(value, 269);
-        definition.boltType = read<uint32_t>(value, 273);
-        model.boltDefinitions[definition.id] = definition;
+        definition.diameter = read<float>(value, older844 ? 261 : 253);
+        definition.tolerance = read<float>(value, older844 ? 273 : 257);
+        definition.length = read<float>(value, older844 ? 297 : 265);
+        if (older844)
+        {
+            definition.legacy844Parameters.emplace();
+            std::copy(value + 253, value + 309, definition.legacy844Parameters->begin());
+            insertUnique(model.boltDefinitions, definition.id, definition, "8.44 bolt definition");
+        }
+        else
+        {
+            definition.extraLength = read<float>(value, 269);
+            definition.boltType = read<uint32_t>(value, 273);
+            model.boltDefinitions[definition.id] = definition;
+        }
     }
     std::unordered_map<uint32_t, std::vector<BoltLayer>> boltLayers;
     if (boltLayerOrdinal != noTable)
@@ -2080,6 +2093,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             layer.values[item] = read<double>(value, 17 + item * 8);
         boltLayers[groupId].push_back(layer);
     }
+    std::unordered_set<uint32_t> legacy844BoltIds;
     if (boltGroupOrdinal != noTable)
     for (std::size_t index = 0; index < all[boltGroupOrdinal].rowCount; ++index)
     {
@@ -2096,23 +2110,56 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             throw std::runtime_error("broken DB1 bolt-group join");
         group.first = model.points.at(firstId).value;
         group.second = model.points.at(secondId).value;
-        const auto placement = placements.find(group.id);
-        if (placement == placements.end() || !model.frames.count(placement->second.frameId))
-            throw std::runtime_error("broken DB1 bolt-group placement");
-        const auto& frame = model.frames.at(placement->second.frameId);
-        group.origin = placement->second.origin;
+        uint32_t frameId = 0;
+        if (older844)
+        {
+            if (!legacy844BoltIds.insert(group.id).second || !model.identities.count(group.id))
+                throw std::runtime_error("duplicate or missing 8.44 bolt identity");
+            frameId = read<uint32_t>(value, 25);
+            for (std::size_t i=0;i<3;++i) group.origin[i] = read<double>(value, 33+i*8);
+            group.placementLength = read<double>(value, 57);
+        }
+        else
+        {
+            const auto placement = placements.find(group.id);
+            if (placement == placements.end()) throw std::runtime_error("broken DB1 bolt-group placement");
+            frameId = placement->second.frameId;
+            group.origin = placement->second.origin;
+            group.placementLength = placement->second.length;
+        }
+        if (!model.frames.count(frameId)) throw std::runtime_error("broken DB1 bolt-group frame");
+        const auto& frame = model.frames.at(frameId);
         group.axis = frame.axis;
         group.secondary = frame.secondary;
         group.normal = frame.normal;
-        group.placementLength = placement->second.length;
         if (pointArrayId)
             for (const auto& point : contours.at(pointArrayId).points)
                 group.positions.push_back(point.value);
         if (group.positions.empty())
             model.diagnostics.emplace_back("bolt group has no stored positions; geometry remains unavailable: " + std::to_string(group.id));
+        if (older844)
+        {
+            const auto finite = [](const Vec3& v) { return std::all_of(v.begin(),v.end(),[](double x){return std::isfinite(x);}); };
+            const auto& definition = model.boltDefinitions.at(group.definitionId);
+            if (pointArrayId)
+            {
+                const auto& chunks = contourChunks.at(pointArrayId);
+                for (std::size_t i=0;i<chunks.size();++i)
+                    if (chunks[i].sequence!=i) throw std::runtime_error("ambiguous 8.44 bolt position chunks");
+            }
+            if (!finite(group.origin) || !std::isfinite(group.placementLength) ||
+                !std::isfinite(definition.diameter) || !std::isfinite(definition.tolerance) || !std::isfinite(definition.length) ||
+                !std::all_of(group.positions.begin(),group.positions.end(),finite))
+                throw std::runtime_error("non-finite 8.44 bolt parameters or positions");
+            // Preserve the stored reference and positions independently. A
+            // missing array must not be replaced by an invented origin bolt.
+            if (pointArrayId && group.positions.size()!=definition.count)
+                throw std::runtime_error("8.44 bolt count does not match stored positions");
+            model.diagnostics.emplace_back("8.44 bolt flags, extra length, layers and connections remain unverified: " + std::to_string(group.id));
+        }
         group.layers = boltLayers[group.id];
         std::sort(group.layers.begin(), group.layers.end(), [](const auto& one, const auto& two) { return one.sequence < two.sequence; });
-        for (const auto associationIndex : bySource[group.id])
+        if (!older844) for (const auto associationIndex : bySource[group.id])
         {
             const auto& association = associations[associationIndex];
             if (association.table == associationTwoOrdinal && association.type == 10 && model.parts.count(association.target))

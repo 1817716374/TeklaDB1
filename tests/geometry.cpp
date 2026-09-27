@@ -138,6 +138,13 @@ int camberingGeometry()
 
 int main(int argc,char** argv)
 {
+    if(argc==2 && std::string(argv[1])=="bolt844")
+    {
+        using namespace tekla::db1;Model model;BoltDefinition d;d.id=1;d.diameter=12;d.length=30;d.legacy844Parameters.emplace();model.boltDefinitions[1]=d;
+        BoltGroup g;g.id=2;g.definitionId=1;g.positions.push_back({0,0,0});g.axis={1,0,0};g.secondary={0,1,0};g.normal={0,0,1};model.boltGroups.push_back(g);
+        OcctGeometryModel result;std::string error;if(!buildOcctGeometry(model,result,error))return 1;
+        return result.boltShapes.empty() && result.unbuiltBoltGroupIds==std::vector<std::uint32_t>{2} && std::any_of(result.diagnostics.begin(),result.diagnostics.end(),[](const auto& s){return s.find("8.44 hole/bolt")!=std::string::npos;}) ? 0 : 2;
+    }
     if(argc==2 && std::string(argv[1])=="nominal")return nominalSections();
     if(argc==2 && std::string(argv[1])=="miter")return polybeamMiters();
     if(argc==2 && std::string(argv[1])=="camber")return camberingGeometry();
