@@ -35,6 +35,7 @@ struct Fingerprint
 #include "InlineNumbering730Validation.hpp"
 #include "Drawing730Validation.hpp"
 #include "Ifc730Validation.hpp"
+#include "Profile844Validation.hpp"
 #include "ReinforcementValidation.hpp"
 #include "OptionSettingsValidation.hpp"
 #include "DrawingDimensionValidation.hpp"
@@ -98,6 +99,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if (mode == "profile844_evidence") return profile844Validation(path);
         if (mode == "guid_mappings" || mode == "guid_mapping_evidence") return guidMappingValidation(path, mode == "guid_mapping_evidence");
         if (mode == "model_metadata")
         {

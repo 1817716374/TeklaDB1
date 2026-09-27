@@ -142,7 +142,9 @@ if(TEKLADB1_BUILD_TESTS)
             drawing782_collapsed drawing782_nonfinite drawing782_conflict drawing782_truncated)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
-    foreach(case valid_model short_trailer unknown_version wrong_fields broken_reference
+    foreach(case profile844_valid profile844_library profile844_boundary profile844_library_boundary
+            profile844_missing profile844_next profile844_cycle profile844_library_cycle
+            valid_model short_trailer unknown_version wrong_fields broken_reference
             unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
             gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path
             ambiguity raw_retention project strict_companions catalog_error model_limit

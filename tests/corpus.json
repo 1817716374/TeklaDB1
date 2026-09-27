@@ -4540,6 +4540,18 @@
       "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/AUVENT_CCF_BE_AMCR1_2019.db1.bak",
       "size": 705220,
       "sha256": "b26121648101c027754d6a6ac9b6edba4cf4130b218e09ccac236635317e39db"
+    },
+    {
+      "path": "auvent844-ifc/Philippe_Boineau_CCF_BE_AMCR_2019.db1.bak",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/Philippe_Boineau_CCF_BE_AMCR_2019.db1.bak",
+      "size": 481392,
+      "sha256": "ab98ae5b550965936c706db0f4912866a1958f655a48c2b8e9de0ebd31ace869"
+    },
+    {
+      "path": "auvent844-ifc/PB_AUVENT.ifc",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/IFC/PB_AUVENT.ifc",
+      "size": 204806,
+      "sha256": "492b45ff3ef68134b7ea936a1abaf0522c30c2c0bde3ae68ddbbfa1183eee41c"
     }
   ],
   "cases": [
@@ -15686,6 +15698,13 @@
       "path": "guid-mapping-auvent",
       "exit": 0,
       "stdout": "batches=6 source_identities=811 target_identities=811 pairs=811 changed_ids=811 fixed_pair=1"
+    },
+    {
+      "name": "8.44 independent IFC profiles and placements",
+      "mode": "profile844_evidence",
+      "path": "auvent844-ifc",
+      "exit": 0,
+      "stdout": "version=8.44 identities=58 names=58 profiles=19 origins=58"
     }
   ]
 }

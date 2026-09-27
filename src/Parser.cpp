@@ -1553,15 +1553,18 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         definition.id = read<uint32_t>(value, 1);
         definition.classNumber = fixedString(value, older782 ? 81 : 33, 22);
         definition.subtype = read<uint32_t>(value, 9);
-        const auto nameLength = (older782 || older895) ? std::size_t(22) : std::size_t(62);
+        const auto nameLength = olderSchema ? std::size_t(22) : std::size_t(62);
         definition.name = fixedString(value, older782 ? 103 : 55, nameLength);
-        const auto family = fixedString(value, older782 ? 125 : olderSchema ? 145 : 117, older782 ? 64 : olderSchema ? 22 : 60);
+        // 8.44 stores the profile family before the dimension reference. The
+        // string after it is a numbering prefix, not the 8.95 profile field.
+        const auto family = fixedString(value, older782 ? 125 : older844 ? 77 : older895 ? 145 : 117,
+                                        (older782 || older844) ? 64 : older895 ? 22 : 60);
         const auto dimensionId = read<uint32_t>(value, older782 ? 189 : olderSchema ? 141 : 181);
         if (older782 && dimensionId && !stringChunks.count(dimensionId))
             throw std::runtime_error("broken DB1 profile string reference for definition " + std::to_string(definition.id));
-        definition.profile = family + strings[dimensionId];
+        definition.profile = family + (older844 ? resolveString(dimensionId, true) : strings[dimensionId]);
         definition.secondaryName = fixedString(value, older782 ? 215 : olderSchema ? 167 : 207, 62);
-        definition.material = fixedString(value, older782 ? 277 : olderSchema ? 229 : 269, older782 ? 32 : older844 ? 85 : 95);
+        definition.material = fixedString(value, older782 ? 277 : olderSchema ? 229 : 269, (older782 || older844) ? 32 : 95);
         if (older782) definitionTypes[definition.id] = read<uint32_t>(value, 5);
         insertUnique(model.definitions, definition.id, definition, "definition");
         if (older782)
