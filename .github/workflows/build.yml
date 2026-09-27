@@ -31,6 +31,9 @@ jobs:
       - name: Independent model metadata XML evidence
         if: matrix.standard == 17
         run: python -B tools/test_metadata_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate
+      - name: Independent GUID mapping history evidence
+        if: matrix.standard == 17
+        run: python -B tools/test_guid_mapping_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-guid-mapping-tests"
       - name: Full pinned public corpus
         if: matrix.standard == 17
         run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json

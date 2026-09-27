@@ -4,11 +4,12 @@
 #include <tekla/Drawing.hpp>
 #include <tekla/Numbering.hpp>
 #include <tekla/Environment.hpp>
+#include <tekla/GuidMappings.hpp>
 #include <optional>
 
 namespace tekla
 {
-enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other };
+enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping };
 enum class ReadLevel { Discovered, Raw, Semantic, Failed, External, PartialSemantic };
 struct ProjectFile
 {
@@ -42,6 +43,7 @@ struct ProjectOptions
     // Caller explicitly trusts same-directory, same-basename 7.30/7.82 DB1/DB2 files
     // when both lack GUIDs. Never bypasses a GUID or storage-version conflict.
     bool trustLegacyNumberingBasenames = false;
+    bool readGuidMappings = true;
 };
 struct DrawingModelAssociation
 {
@@ -105,6 +107,8 @@ struct Project
     std::vector<ObjectNumberingSeriesAssociation> objectNumberingSeriesAssociations;
     std::optional<OptionSettingsFile> optionSettings;
     std::vector<OptionSettingAssociation> optionSettingAssociations;
+    std::optional<GuidMappingFile> guidMappings;
+    std::vector<GuidMappingTarget> guidMappingTargets;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

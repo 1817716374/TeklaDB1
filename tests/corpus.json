@@ -4522,6 +4522,24 @@
       "size": 878357,
       "sha256": "6bc0e634d711f7eaac3a39baf9f4e98188b0e933e70a3f043f232526783e700c",
       "path": "legacy-drawing-output-evidence/ensemble passerelle.dwg"
+    },
+    {
+      "path": "guid-mapping-auvent/guid.mapper",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/guid.mapper",
+      "size": 1348374,
+      "sha256": "4f861a455b0a9e1bebf8a9f5106b8babf9d548c4b7e632961e45339143699bb0"
+    },
+    {
+      "path": "guid-mapping-auvent/AUVENT_CCF_BE_AMCR1_2019_final.db1",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/AUVENT_CCF_BE_AMCR1_2019_final.db1",
+      "size": 1015087,
+      "sha256": "cc77ee35597f847531aadb5c7dad336bb41a7058ed61dbe46009c139309a4ec4"
+    },
+    {
+      "path": "guid-mapping-auvent/AUVENT_CCF_BE_AMCR1_2019.db1.bak",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/AUVENT_CCF_BE_AMCR1_2019.db1.bak",
+      "size": 705220,
+      "sha256": "b26121648101c027754d6a6ac9b6edba4cf4130b218e09ccac236635317e39db"
     }
   ],
   "cases": [
@@ -15654,6 +15672,20 @@
       "path": "btscm-pechelire/TeklaStructuresModel.xml",
       "exit": 0,
       "stdout": "fields=13 raw_bytes=761 fingerprint=7f7b00235374445c"
+    },
+    {
+      "name": "GUID mapper ordered batch evidence",
+      "mode": "guid_mappings",
+      "path": "guid-mapping-auvent/guid.mapper",
+      "exit": 0,
+      "stdout": "batches=6 mappings=41712 fingerprint=3873877d36787ca8"
+    },
+    {
+      "name": "GUID mapper paired historical identities",
+      "mode": "guid_mapping_evidence",
+      "path": "guid-mapping-auvent",
+      "exit": 0,
+      "stdout": "batches=6 source_identities=811 target_identities=811 pairs=811 changed_ids=811 fixed_pair=1"
     }
   ]
 }

@@ -601,6 +601,35 @@ int main(int argc, char** argv)
             auto b=encode(onePart()); save(path,b); tekla::db1::RawDatabaseOptions options; options.retainDecompressedFileImage=true;
             check(tekla::db1::parseRawDatabase(path,raw,error,options),error.c_str()); check(raw.decompressedFileImage==b,"raw bytes changed"); check(error.empty(),"raw stale error");
         }
+        else if (name.rfind("mapper_project", 0) == 0)
+        {
+            auto schema = onePart(); put<std::uint32_t>(schema[355].rows[0], 13, 1);
+            save(path, encode(schema));
+            tekla::db1::Model model; check(tekla::db1::parseModelFile(path, model, error), "mapper main fixture");
+            const auto text = "!Guid mapping for ../never-open.db1\nID01234567-0000-0000-0000-000000000001 " + model.identities.at(5).guid + "\n";
+            const bool invalid = name == "mapper_project_invalid" || name == "mapper_project_strict";
+            auto bytes = invalid ? Bytes{1,2,3} : Bytes(text.begin(),text.end());
+            if (name == "mapper_project_gzip") bytes = gzip(bytes);
+            save(root / "GUID.MAPPER", bytes);
+            tekla::Project project; tekla::ProjectOptions options;
+            options.readGuidMappings = name != "mapper_project_off";
+            options.readRawCompanions = name != "mapper_project_no_raw";
+            options.strictCompanions = name == "mapper_project_strict";
+            const bool ok = tekla::readProject(root, project, error, options);
+            if (options.strictCompanions)
+                check(!ok && project.files.empty() && !project.guidMappings && project.guidMappingTargets.empty(), "strict mapper failure retained state");
+            else
+            {
+                check(ok, error.c_str());
+                const auto file = std::find_if(project.files.begin(), project.files.end(), [](const auto& f) { return f.path.filename() == "GUID.MAPPER"; });
+                check(file != project.files.end() && file->role == tekla::FileRole::IdentityMapping, "mapper inventory");
+                if (invalid) check(!project.guidMappings && file->level == tekla::ReadLevel::Failed, "bad mapper accepted");
+                else if (!options.readGuidMappings) check(!project.guidMappings && file->level == tekla::ReadLevel::Discovered, "mapper switch ignored");
+                else check(project.guidMappings && project.guidMappings->rawText == text && project.guidMappingTargets.size() == 1 &&
+                    project.guidMappingTargets[0].modelObjectId == 5 && file->level == tekla::ReadLevel::PartialSemantic &&
+                    project.associations.size() == 1, "mapper project link");
+            }
+        }
         else if(name=="settings_project" || name=="settings_project_no_raw" || name=="settings_project_off" ||
                 name=="settings_project_invalid" || name=="settings_project_strict")
         {

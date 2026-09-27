@@ -37,6 +37,7 @@ FileRole roleFor(const std::filesystem::path& path)
     if (name == "environment.db") return FileRole::Environment;
     if (name == "options_model.db" || name == "options_drawings.db" || name == "options.ini") return FileRole::Options;
     if (name == "history.db") return FileRole::History;
+    if (name == "guid.mapper") return FileRole::IdentityMapping;
     if (name == "profdb.bin" || name == "pgdb.bin" || name == "matdb.bin" || name == "screwdb.db" ||
         name == "assdb.db" || name == "profitab.inp") return FileRole::Catalog;
     return FileRole::Other;
@@ -130,6 +131,30 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
 
         const auto companions=result.files;
         if(options.readOptions)(void)findFile(root,"options.ini"); // reject ambiguous case variants
+        if (options.readGuidMappings)
+        {
+            const auto mapperPath = findFile(root, "guid.mapper");
+            if (!mapperPath.empty())
+            {
+                GuidMappingFile mappings; std::string diagnostic;
+                if (!parseGuidMappingFile(mapperPath, mappings, diagnostic,
+                    (std::min)(std::size_t{64 * 1024 * 1024}, options.rawOptions.maxDecodedBytes)))
+                {
+                    failure(mapperPath, diagnostic);
+                }
+                else
+                {
+                    result.guidMappingTargets = matchGuidMappingTargets(mappings, result.model);
+                    for (const auto& message : mappings.diagnostics) result.diagnostics.push_back(message);
+                    result.guidMappings = std::move(mappings);
+                    mark(mapperPath, ReadLevel::PartialSemantic,
+                         "ordered GUID remapping batches; no automatic historical identity replacement");
+                    if (!result.guidMappingTargets.empty())
+                        result.associations.push_back({mapperPath, result.model.databasePath,
+                            "exact unique target GUID matches in main model"});
+                }
+            }
+        }
         std::map<std::string,std::vector<std::uint32_t>> modelIdsByGuid;
         for (const auto& entry:result.model.identities)
             if (!entry.second.guid.empty()) modelIdsByGuid[lower(entry.second.guid)].push_back(entry.first);

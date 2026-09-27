@@ -18,6 +18,7 @@ find_package(ZLIB REQUIRED)
 add_library(tekla_db1
     src/Catalogs.cpp
     src/MetadataXml.cpp
+    src/GuidMappings.cpp
     src/TinyXmlPrivate.cpp
     src/Parser.cpp
     src/Project.cpp
@@ -87,6 +88,11 @@ endif()
 
 if(TEKLADB1_BUILD_TESTS)
     enable_testing()
+    add_executable(tekladb1_guid_mapping_test tests/guid_mappings.cpp)
+    target_link_libraries(tekladb1_guid_mapping_test PRIVATE TeklaFormats::core)
+    foreach(case mapper_text mapper_duplicates mapper_failure mapper_targets)
+        add_test(NAME related.${case} COMMAND tekladb1_guid_mapping_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     add_executable(tekladb1_metadata_test tests/metadata.cpp)
     target_link_libraries(tekladb1_metadata_test PRIVATE TeklaFormats::core)
     foreach(case metadata_scope metadata_entities metadata_boolean metadata_structure metadata_declarations metadata_encoding metadata_limits)
@@ -141,6 +147,7 @@ if(TEKLADB1_BUILD_TESTS)
             gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path
             ambiguity raw_retention project strict_companions catalog_error model_limit
             settings_project settings_project_no_raw settings_project_off settings_project_invalid settings_project_strict
+            mapper_project mapper_project_gzip mapper_project_no_raw mapper_project_off mapper_project_invalid mapper_project_strict
             dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid
             782_model 782_library 782_library_fields 782_fields 782_width 782_part_join 782_contour_join
             782_string_cycle 782_missing_string 782_bolt_join 782_numeric_nan 782_numeric_overflow 782_assembly_missing

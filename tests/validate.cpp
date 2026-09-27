@@ -38,6 +38,7 @@ struct Fingerprint
 #include "ReinforcementValidation.hpp"
 #include "OptionSettingsValidation.hpp"
 #include "DrawingDimensionValidation.hpp"
+#include "GuidMappingValidation.hpp"
 #include "Drawing730DimensionValidation.hpp"
 
 void summary(const tekla::db1::Model& model)
@@ -97,6 +98,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if (mode == "guid_mappings" || mode == "guid_mapping_evidence") return guidMappingValidation(path, mode == "guid_mapping_evidence");
         if (mode == "model_metadata")
         {
             tekla::db1::ModelMetadata metadata;
