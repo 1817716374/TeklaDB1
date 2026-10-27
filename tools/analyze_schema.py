@@ -82,6 +82,15 @@ def section_offsets(data: bytes) -> list[int]:
             return result
         result.append(offset)
         start = offset + len(SECTION_MAGIC)
+        if offset + 12 <= len(data):
+            payload, fields = struct.unpack_from("<II", data, offset + 4)
+            if fields <= (len(data) - offset - 12) // 4:
+                start = offset + 12 + fields * 4
+                stride = payload + 9
+                while start < len(data) and data[start] in (4, 12):
+                    if stride > len(data) - start:
+                        break
+                    start += stride
 
 
 def parse_database(path: Path) -> Database:
@@ -104,11 +113,16 @@ def parse_database(path: Path) -> Database:
             tables.append(Table(ordinal, payload_size, (), 0, False))
             continue
         fields = struct.unpack_from(f"<{field_count}I", data, offset + 12) if field_count else ()
-        trailer_size = 5 if ordinal + 1 == len(offsets) else 9
-        body_size = next_offset - offset - header_size - trailer_size
         stride = payload_size + 9
-        valid = body_size >= 0 and stride > 0 and body_size % stride == 0
-        row_count = body_size // stride if valid else 0
+        row_count, valid = 0, False
+        for trailer_size in ((5,) if ordinal + 1 == len(offsets) else (9, 1)):
+            body_size = next_offset - offset - header_size - trailer_size
+            if body_size < 0 or body_size % stride or data[next_offset - trailer_size] != 0:
+                continue
+            if any(data[cursor] not in (4, 12) for cursor in range(offset + header_size, next_offset - trailer_size, stride)):
+                continue
+            row_count, valid = body_size // stride, True
+            break
         tables.append(Table(ordinal, payload_size, tuple(fields), row_count, valid))
     return Database(path, storage_version(data), tuple(tables))
 
