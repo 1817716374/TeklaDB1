@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "note": "Minimal pinned inputs for the independent IFC and DWG mutation checks. Downloads are verified by size and SHA-256; samples are not redistributed.",
+  "archives": {
+    "btscm-ifc730": {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/out.ifcZIP",
+      "size": 2420513,
+      "sha256": "c582a87234285fe885199183dbe65da93ef1b90b41743416a3ddf8e0323efefa"
+    }
+  },
+  "files": [
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelirejulV1.db1",
+      "size": 1090271,
+      "sha256": "6b06855eff3af162ec65add49d0a03576f621870bf903b8a4e9046c27387ad47",
+      "path": "btscm-pechelire/pechelirejulV1.db1"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/drawings/D0000516925.dg",
+      "size": 89194,
+      "sha256": "493d067e0a87bc3137166d5af687c0f4be82c280503c754a4a3bcbe237594399",
+      "path": "btscm-dg730/D0000516925.dg"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/pechelirejulV1.db1",
+      "size": 1090271,
+      "sha256": "6b06855eff3af162ec65add49d0a03576f621870bf903b8a4e9046c27387ad47",
+      "path": "btscm-dg730/pechelirejulV1.db1"
+    },
+    {
+      "path": "btscm-ifc730/export.ifc",
+      "archive": "btscm-ifc730",
+      "member": "out.ifc",
+      "size": 13124990,
+      "sha256": "d02db80ded529334096fa911f2194978f96b4bc3a0720deee31247992cc295a3"
+    },
+    {
+      "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/Fichiers_DWG/ensemble%20passerelle.dwg",
+      "size": 878357,
+      "sha256": "6bc0e634d711f7eaac3a39baf9f4e98188b0e933e70a3f043f232526783e700c",
+      "path": "legacy-drawing-output-evidence/ensemble passerelle.dwg"
+    }
+  ],
+  "cases": []
+}

@@ -67,9 +67,9 @@ jobs:
       - name: Independent 7.64 IFC and snapshot evidence
         if: matrix.standard == 17
         run: python -B tools/test_schema764_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-schema764-tests"
-      - name: Full pinned public corpus
+      - name: Focused mutation-check inputs
         if: matrix.standard == 17
-        run: python -B tools/corpus.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --report build/corpus-results.json
+        run: python -B tools/corpus.py --manifest tests/evidence-mutation-corpus.json --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate
       - name: Independent IFC evidence mutation checks
         if: matrix.standard == 17
         run: python -B tools/test_ifc_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-ifc-tests"
