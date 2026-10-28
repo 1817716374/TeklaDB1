@@ -475,7 +475,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 result.diagnostics.push_back("object numbering DB1/DB2 storage version differs: " + db1::detail::pathUtf8(model.databasePath));
                 return;
             }
-            const bool legacyPair = options.trustLegacyNumberingBasenames && (model.storageVersion=="7.30" || model.storageVersion=="7.82") && model.databaseGuid.empty() && database.raw.databaseGuid.empty();
+            const bool legacyPair = options.trustLegacyNumberingBasenames && (model.storageVersion=="7.30" || model.storageVersion=="7.64" || model.storageVersion=="7.82") && model.databaseGuid.empty() && database.raw.databaseGuid.empty();
             if (!legacyPair && (model.databaseGuid.empty() || database.raw.databaseGuid.empty() || lower(model.databaseGuid)!=lower(database.raw.databaseGuid)))
             {
                 result.diagnostics.push_back("object numbering DB1/DB2 GUID scope is unverified: " + db1::detail::pathUtf8(model.databasePath));

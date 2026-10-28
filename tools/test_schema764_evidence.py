@@ -19,7 +19,7 @@ def main():
     parser.add_argument('--download', action='store_true')
     args = parser.parse_args()
     manifest = json.loads((Path(__file__).resolve().parents[1] / 'tests/corpus.json').read_text(encoding='utf-8'))
-    specs = [s for s in manifest['files'] if s['path'].startswith('u52-764/')]
+    specs = [s for s in manifest['files'] if s['path'].startswith('u52-764/') and Path(s['path']).suffix in ('.db1', '.ifc', '.bak') and '.db2' not in s['path']]
     assert len(specs) == 6
     for spec in specs:
         dest = corpus.safe_path(args.data, spec['path'])
