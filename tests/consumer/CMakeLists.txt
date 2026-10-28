@@ -63,3 +63,7 @@ endif()
 foreach(case 764_model 764_library 764_fields 764_part_join)
     add_test(NAME installed-${case}-consumer COMMAND bolt844_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
 endforeach()
+
+foreach(case numbering764_valid numbering764_empty numbering764_header)
+    add_test(NAME installed-${case}-consumer COMMAND drawing_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+endforeach()
