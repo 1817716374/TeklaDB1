@@ -34,14 +34,17 @@ inline std::size_t relatedHeader(const Bytes& data, RawDatabase& raw, bool drawi
     if (drawing && (!(data[8]>='0' && data[8]<='9') || data[9]!='.' ||
         !(data[10]>='0' && data[10]<='9') || !(data[11]>='0' && data[11]<='9')))
         throw std::runtime_error("unsupported drawing version field");
-    std::size_t end=(legacyNumbering || drawing) ? 12 : 8;
-    while (!drawing && !legacyNumbering && end<data.size() && end<24 && ((data[end]>='0' && data[end]<='9') || data[end]=='.')) ++end;
+    // The observed 7.64 DB2 has a fixed 12-byte header without a database GUID.
+    // A following binary table ID may start with an ASCII digit, dot or space.
+    const bool fixedNumbering=legacyNumbering || (!drawing && std::memcmp(data.data(),"Xsteel\x80 7.64",12)==0);
+    std::size_t end=(fixedNumbering || drawing) ? 12 : 8;
+    while (!drawing && !fixedNumbering && end<data.size() && end<24 && ((data[end]>='0' && data[end]<='9') || data[end]=='.')) ++end;
     raw.storageVersion.assign(data.begin()+8,data.begin()+static_cast<std::ptrdiff_t>(end));
     const auto dot=raw.storageVersion.find('.');
     if (dot==std::string::npos || dot==0 || dot+1==raw.storageVersion.size() || raw.storageVersion.find('.',dot+1)!=std::string::npos)
         throw std::runtime_error("invalid related database storage version");
     if (legacyNumbering && raw.storageVersion!="7.30") throw std::runtime_error("unsupported legacy numbering version");
-    if (!drawing && !legacyNumbering && end<data.size() && data[end]==' ')
+    if (!drawing && !fixedNumbering && end<data.size() && data[end]==' ')
     {
         ++end;
         if (data.size()-end<36) throw std::runtime_error("truncated numbering database GUID");

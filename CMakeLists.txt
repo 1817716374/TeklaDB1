@@ -156,6 +156,7 @@ if(TEKLADB1_BUILD_TESTS)
             drawing908_reference_duplicate drawing908_guid drawing908_property drawing908_version drawing908_truncated
             numbering908_valid numbering908_empty numbering908_width numbering908_guid numbering908_duplicate
             numbering908_key numbering908_tail numbering908_truncated numbering908_unknown_table
+            numbering764_valid numbering764_empty numbering764_truncated numbering764_header numbering764_width numbering764_invalid
             numbering730_valid numbering730_empty numbering730_truncated numbering730_header numbering730_width numbering730_invalid
             drawing_valid drawing_cycle
             drawing_missing_chunk drawing_duplicate drawing_missing_property drawing_signature

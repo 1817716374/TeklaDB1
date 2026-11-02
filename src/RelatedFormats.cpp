@@ -98,9 +98,11 @@ bool parseNumberingDatabase(const std::filesystem::path& path,NumberingDatabase&
         auto data=db1::detail::readPayload(path,options.maxDecodedBytes);
         db1::detail::numberingContainer(data,result.raw);
         const auto& version=result.raw.storageVersion;
-        const bool legacy = version=="7.30" || version=="7.82";
+        const bool legacy = version=="7.30" || version=="7.64" || version=="7.82";
         if (version=="7.30" && (result.raw.preamble.size()!=12 || result.raw.preamble[6]!=' '))
             throw std::runtime_error("unsupported 7.30 numbering preamble");
+        if (version=="7.64" && (result.raw.preamble.size()!=12 || result.raw.preamble[6]!=0x80 || !result.raw.databaseGuid.empty()))
+            throw std::runtime_error("unsupported 7.64 numbering preamble");
         if (!legacy && version!="8.95" && version!="9.08" && version!="9.52" && version!="9.60")
             throw std::runtime_error("unsupported numbering semantic version "+version);
         if (!legacy && result.raw.databaseGuid.empty()) throw std::runtime_error("numbering database GUID missing");

@@ -4866,6 +4866,34 @@
       "member": "U52_2007V4.ifc",
       "size": 1700274,
       "sha256": "e44f7841d4e5680ddb2c485a454ee65d194efb8caac81aef3058b253ab55df42"
+    },
+    {
+      "path": "u52-764/u52_2007vierge.db2",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/u52_2007vierge.db2",
+      "size": 136,
+      "sha256": "59370e2876a0b43f011293ed3a01f42e8318bc9d73aeed2129c8edd1b5363428"
+    },
+    {
+      "path": "u52-764/xslib.db2",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/xslib.db2",
+      "size": 32,
+      "sha256": "a171b1a65bd092aa94a0a25ef69b8515025daa44f0801c57698d08d73d8f0ec5"
+    },
+    {
+      "path": "u52-764/u52_2007v4.db2.bak",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/u52_2007v4.db2.bak",
+      "size": 135,
+      "sha256": "d3ff70c8b166dcd376aa43e8bc6d060c69553418ce47dbc0b0dd4187650e328f"
+    },
+    {
+      "path": "u52-764/numbering.history",
+      "archive": "btscm-u52",
+      "member": "u52_2007vierge/numbering.history",
+      "size": 10102,
+      "sha256": "22db3128ec1f8e4a7adb3c6f0904c6321a3e8a47b38632882ba98a7717593ba8"
     }
   ],
   "cases": [
@@ -16551,6 +16579,69 @@
       "path": "u52-764",
       "exit": 0,
       "stdout": "7.64: 67 snapshot parts, 66 IFC parts, 20 IFC bolt placements, 44 exact IFC profiles; GUID migration and remaining geometry unverified"
+    },
+    {
+      "name": "u52-764 numbering u52_2007vierge.db2",
+      "mode": "numbering",
+      "path": "u52-764/u52_2007vierge.db2",
+      "exit": 0,
+      "stdout": "version=7.64 tables=9 series=4 guid= fingerprint=a5fa226cc3edd464"
+    },
+    {
+      "name": "u52-764 numbering xslib.db2",
+      "mode": "numbering",
+      "path": "u52-764/xslib.db2",
+      "exit": 0,
+      "stdout": "version=7.64 tables=0 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "u52-764 numbering u52_2007v4.db2.bak",
+      "mode": "numbering",
+      "path": "u52-764/u52_2007v4.db2.bak",
+      "exit": 0,
+      "stdout": "version=7.30 tables=9 series=4 guid= fingerprint=d5c697fcd4e02248"
+    },
+    {
+      "name": "u52-764 raw u52_2007vierge.db2",
+      "mode": "raw",
+      "path": "u52-764/u52_2007vierge.db2",
+      "exit": 0,
+      "stdout": "version=7.64 tables=9 records=4 opaque=0 bytes=464 fingerprint=a7460efdda2e7787"
+    },
+    {
+      "name": "u52-764 raw xslib.db2",
+      "mode": "raw",
+      "path": "u52-764/xslib.db2",
+      "exit": 0,
+      "stdout": "version=7.64 tables=0 records=0 opaque=0 bytes=12 fingerprint=be9877d3a7a61edd"
+    },
+    {
+      "name": "u52-764 numbering764_fields u52_2007vierge.db2",
+      "mode": "numbering764_fields",
+      "path": "u52-764/u52_2007vierge.db2",
+      "exit": 0,
+      "stdout": "A/1\t1\t0\t20\t0\t0\t0\t0\nP/1\t1\t0\t3\t0\t0\t0\t0\nF/1\t1\t3\t0\t0\t0\t0\t1\n/1\t1\t41\t0\t0\t0\t0\t1"
+    },
+    {
+      "name": "u52-764 numbering764_fields xslib.db2",
+      "mode": "numbering764_fields",
+      "path": "u52-764/xslib.db2",
+      "exit": 0,
+      "stdout": ""
+    },
+    {
+      "name": "u52-764 numbering764_evidence project",
+      "mode": "numbering764_evidence",
+      "path": "u52-764",
+      "exit": 0,
+      "stdout": "series=4 history_counters=8 history_parts=65 history_assemblies=38 missing_history_objects=2 explicit_series_links=105 unassigned_positions=2 component_links=0"
+    },
+    {
+      "name": "u52-764 numbering764_raw_off project",
+      "mode": "numbering764_raw_off",
+      "path": "u52-764",
+      "exit": 0,
+      "stdout": "series=4 history_counters=8 history_parts=65 history_assemblies=38 missing_history_objects=2 explicit_series_links=105 unassigned_positions=2 component_links=0"
     }
   ]
 }

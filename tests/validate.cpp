@@ -34,6 +34,7 @@ struct Fingerprint
 #include "ReinforcementNumberingValidation.hpp"
 #include "LegacyNumberingValidation.hpp"
 #include "Numbering730Validation.hpp"
+#include "Numbering764Validation.hpp"
 #include "InlineNumbering730Validation.hpp"
 #include "Drawing730Validation.hpp"
 #include "Ifc730Validation.hpp"
@@ -112,6 +113,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
         if(mode.rfind("analysis_settings",0)==0)return analysisSettingsValidation(path,mode);
         if(mode.rfind("analysis_project",0)==0)return analysisProjectValidation(path,mode);
         if(mode=="drawing_metadata" || mode=="drawing_metadata_fields" || mode.rfind("drawing_metadata_project",0)==0)return drawingMetadataValidation(path,mode);
+        if (mode.rfind("numbering764_",0)==0) return numbering764Validation(path,mode);
         if (mode == "schema764_evidence") return schema764Validation(path);
         if (mode == "schema908_evidence") return schema908Validation(path);
         if (mode == "numbering908_evidence" || mode == "numbering908_unpaired") return numbering908Validation(path,mode=="numbering908_unpaired");
