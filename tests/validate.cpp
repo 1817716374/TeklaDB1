@@ -715,8 +715,24 @@ int run(const std::string& mode, const std::filesystem::path& path)
             const auto root=std::filesystem::absolute(path).lexically_normal();
             const auto main=root/"Abri-Moto-VCCF25.db1";
             const auto db2=root/"Abri-Moto-VCCF25.db2";
-            const auto secondaryDb1=root/"Nouveau modèle.db1";
-            const auto legacyDb2=root/"Nouveau modèle.db2";
+            std::filesystem::path secondaryDb1;
+            for(const auto& entry:std::filesystem::directory_iterator(root))
+                if(entry.is_regular_file() && entry.path().extension()==".db1" && entry.path()!=main)
+                {
+                    auto candidateDb2=entry.path();
+                    candidateDb2.replace_extension(".db2");
+                    const auto candidate=project.numbering.find(candidateDb2);
+                    if(candidate!=project.numbering.end() && candidate->second.raw.storageVersion=="8.44")
+                    {
+                        if(!secondaryDb1.empty())
+                            throw std::runtime_error("ambiguous legacy 8.44 DB1/DB2 evidence pair");
+                        secondaryDb1=entry.path();
+                    }
+                }
+            if(secondaryDb1.empty())
+                throw std::runtime_error("missing legacy 8.44 DB1/DB2 evidence pair");
+            auto legacyDb2=secondaryDb1;
+            legacyDb2.replace_extension(".db2");
             const auto pairing=std::any_of(project.associations.begin(),project.associations.end(),[&](const auto& a) {
                 return a.source==main && a.target==db2 && a.reason=="matching DB1/DB2 basename and no conflicting database GUID";
             });
@@ -821,7 +837,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
             if(project.model.databasePath!=main || project.model.storageVersion!="9.50" ||
                project.model.parts.size()!=177 || !project.model.actualPartIds.empty() ||
                project.model.unhandledPartIds.size()!=177 || project.model.assemblies.size()!=106 ||
-               project.model.boltGroups.size()!=109 || project.model.components.size()!=22 ||
+               project.model.boltGroups.size()!=109 || project.model.welds.size()!=155 || project.model.components.size()!=22 ||
                project.model.profiles.size()!=6006 || project.model.properties.size()!=715 ||
                project.numbering.size()!=3 || !project.numbering.count(legacyDb2) ||
                project.numbering.at(legacyDb2).raw.storageVersion!="8.44" ||
@@ -838,10 +854,60 @@ int run(const std::string& mode, const std::filesystem::path& path)
                metadata!=6 || project.drawingMetadata.size()!=6 || failed!=0 ||
                !sawLegacy1252Name || !project.environment || project.optionsDatabases.size()!=2 ||
                project.profileCatalogAssociations.size()!=42)
-                throw std::runtime_error("public Tekla 2023 SP4 project associations or partial read statuses changed");
+                throw std::runtime_error("public Tekla 2023 SP4 project inventory changed: parts="+
+                    std::to_string(project.model.parts.size())+" unhandled_parts="+
+                    std::to_string(project.model.unhandledPartIds.size())+" assemblies="+
+                    std::to_string(project.model.assemblies.size())+" bolts="+
+                    std::to_string(project.model.boltGroups.size())+" welds="+
+                    std::to_string(project.model.welds.size())+" components="+
+                    std::to_string(project.model.components.size())+" subject_links="+
+                    std::to_string(project.drawingSubjectAssociations.size())+" metadata_links="+
+                    std::to_string(project.drawingMetadataAssociations.size())+" failed_files="+
+                    std::to_string(failed)+" main_path_match="+std::to_string(project.model.databasePath==main)+
+                    " version="+project.model.storageVersion+" actual_parts="+
+                    std::to_string(project.model.actualPartIds.size())+" profiles="+
+                    std::to_string(project.model.profiles.size())+" properties="+
+                    std::to_string(project.model.properties.size())+" numbering="+
+                    std::to_string(project.numbering.size())+" db2_series="+
+                    std::to_string(project.numbering.count(db2)?project.numbering.at(db2).series.size():0)+
+                    " drawings="+std::to_string(drawings)+" parsed_drawings="+
+                    std::to_string(parsedDrawings)+" raw_drawings="+std::to_string(rawDrawings)+
+                    " metadata_files="+std::to_string(metadata)+" metadata_records="+
+                    std::to_string(project.drawingMetadata.size())+" metadata_sheet_matches="+
+                    std::to_string(metadataSheetMatches)+" subjects="+std::to_string(subjects)+
+                    " subject_identity_matches="+std::to_string(subjectIdentityMatches)+
+                    " subject_types="+std::to_string(subjectTypes[1])+","+
+                    std::to_string(subjectTypes[2])+","+std::to_string(subjectTypes[7])+" profiles_linked="+
+                    std::to_string(project.profileCatalogAssociations.size())+" environment="+
+                    std::to_string(bool(project.environment))+" options="+
+                    std::to_string(project.optionsDatabases.size())+" secondary_pair="+
+                    std::to_string(secondaryPairing)+" primary_pair="+std::to_string(pairing)+
+                    " drawing_project_guid_matches="+std::to_string(drawingProjectGuidMatches)+
+                    " strings="+std::to_string(strings)+" drawing_properties="+
+                    std::to_string(properties)+" property_links="+std::to_string(links)+
+                    " sheets="+std::to_string(sheets)+" metadata_conflicts="+
+                    std::to_string(subjectMetadataGuidConflicts)+" saw_1252="+
+                    std::to_string(sawLegacy1252Name)+" numbering_844="+
+                    std::to_string(project.numbering.count(legacyDb2)?
+                        project.numbering.at(legacyDb2).raw.storageVersion=="8.44":false));
+            std::set<std::uint32_t> weldIds;
+            for(const auto& weld:project.model.welds)
+            {
+                if(!weld.id || !weldIds.insert(weld.id).second || weld.guid.empty() ||
+                   !project.model.identities.count(weld.id) || project.model.identities.at(weld.id).type!=13 ||
+                   !project.model.weldDefinitions.count(weld.definitionId) || weld.connectedPartIds.size()!=2 ||
+                   (weld.secondaryDefinitionId && !project.model.weldDefinitions.count(weld.secondaryDefinitionId)) ||
+                   std::any_of(weld.connectedPartIds.begin(),weld.connectedPartIds.end(),[&](auto id) {
+                       return !project.model.parts.count(id);
+                   }))
+                    throw std::runtime_error("9.50 weld identity/definition/part associations changed");
+            }
+            if(weldIds.size()!=155)
+                throw std::runtime_error("9.50 weld record coverage changed");
             std::cout<<"version="<<project.model.storageVersion<<" actual_parts="<<project.model.actualPartIds.size()
                      <<" part_records="<<project.model.parts.size()<<" assemblies="<<project.model.assemblies.size()
-                     <<" bolts="<<project.model.boltGroups.size()<<" components="<<project.model.components.size()
+                     <<" bolts="<<project.model.boltGroups.size()<<" welds="<<project.model.welds.size()
+                     <<" components="<<project.model.components.size()
                      <<" db2="<<project.numbering.size()<<" empty_844=1 secondary_pair=1 raw="<<project.rawCompanions.size()
                      <<" drawings="<<drawings<<" parsed_drawings="<<parsedDrawings<<" raw_drawings="<<rawDrawings<<" metadata="<<metadata
                      <<" subjects="<<subjects<<" subject_identity_db1_matches="<<subjectIdentityMatches

@@ -255,6 +255,7 @@ def verify_abri(root: Path) -> str:
                 for row in range(table.row_count)}
 
     bolts = ids_in_table(310)
+    welds = ids_in_table(190)
     if (len(identities), len(parts), len(assemblies), len(bolts)) != (1715, 177, 106, 109):
         raise ValueError("Abri-Moto 9.50 identity/object table inventory changed")
     guid_to_identity = {guid: (object_id, words) for object_id, (words, guid) in identities.items()}
@@ -288,7 +289,7 @@ def verify_abri(root: Path) -> str:
         entity_to_model[entity_id] = object_id
         entity_type = entity_types[entity_id]
         table = ("part" if object_id in parts else "assembly" if object_id in assemblies
-                 else "bolt" if object_id in bolts else "other")
+                 else "bolt" if object_id in bolts else "weld" if object_id in welds else "other")
         categories[(entity_type, table)] += 1
         if entity_type in {"IFCBEAM", "IFCCOLUMN", "IFCPLATE", "IFCMEMBER"} and table != "part":
             raise ValueError(f"IFC {entity_type} identity is absent from DB1 part table")
@@ -300,9 +301,60 @@ def verify_abri(root: Path) -> str:
     expected = Counter({("IFCBEAM", "part"): 56, ("IFCCOLUMN", "part"): 35,
         ("IFCPLATE", "part"): 55, ("IFCMEMBER", "part"): 12,
         ("IFCELEMENTASSEMBLY", "assembly"): 99,
-        ("IFCMECHANICALFASTENER", "bolt"): 108, ("IFCFASTENER", "other"): 55})
+        ("IFCMECHANICALFASTENER", "bolt"): 108, ("IFCFASTENER", "weld"): 55})
     if categories != expected:
         raise ValueError(f"Abri-Moto IFC/DB1 identity classification changed: {categories}")
+    if len(welds) != 155 or not welds.issubset(identities):
+        raise ValueError("Abri-Moto 9.50 weld records do not resolve to unique identity rows")
+    type13_links: dict[int, set[int]] = defaultdict(set)
+    type13_rows = 0
+    for ordinal in (191, 192):
+        table = database.tables[ordinal]
+        table_offset = offsets[ordinal]
+        field_count = struct.unpack_from("<I", data, table_offset + 8)[0]
+        first = table_offset + 12 + field_count * 4
+        stride = table.payload_size + 9
+        for index in range(table.row_count):
+            payload = data[first + index * stride + 1:first + index * stride + 1 + table.payload_size]
+            _, association_type, source, target = struct.unpack_from("<4I", payload)
+            if association_type != 13:
+                continue
+            type13_rows += 1
+            if ordinal != 192 or source not in welds or target not in parts:
+                raise ValueError("Abri-Moto 9.50 type-13 association escaped the weld-to-part table")
+            type13_links[source].add(target)
+    if (type13_rows != 310 or len(type13_links) != 155 or
+            any(len(type13_links[weld_id]) != 2 for weld_id in welds)):
+        raise ValueError("Abri-Moto 9.50 welds do not have exactly two distinct part links")
+    definition_table = database.tables[228]
+    definition_offset = offsets[228]
+    definition_fields = struct.unpack_from("<I", data, definition_offset + 8)[0]
+    definition_first = definition_offset + 12 + definition_fields * 4
+    definition_stride = definition_table.payload_size + 9
+    weld_definition_ids = {
+        struct.unpack_from("<I", data, definition_first + index * definition_stride + 1)[0]
+        for index in range(definition_table.row_count)
+    }
+    weld_definition_references = [
+        reference
+        for ordinal in (190,)
+        for index in range(database.tables[ordinal].row_count)
+        for record_offset in (offsets[ordinal] + 12 +
+                              struct.unpack_from("<I", data, offsets[ordinal] + 8)[0] * 4 +
+                              index * (database.tables[ordinal].payload_size + 9),)
+        for reference in struct.unpack_from("<II", data, record_offset + 9)
+    ]
+    if (len(weld_definition_references) != 2 * len(welds) or
+            any(reference and reference not in weld_definition_ids for reference in weld_definition_references)):
+        raise ValueError("Abri-Moto 9.50 weld primary/secondary definitions do not resolve")
+    ifc_weld_ids = {
+        guid_to_identity[guid][0]
+        for entity_id, entity_type in entity_types.items()
+        for guid in (entity_guid[entity_id],)
+        if entity_type == "IFCFASTENER" and guid in guid_to_identity
+    }
+    if len(ifc_weld_ids) != 55 or not ifc_weld_ids.issubset(welds):
+        raise ValueError("IFCFASTENER GlobalIds do not independently resolve to DB1 weld rows")
     owner_edges = matching_edges = 0
     for parent, children in relationships:
         parent_id = entity_to_model.get(parent)
@@ -377,8 +429,9 @@ def verify_abri(root: Path) -> str:
     if len(linked_subjects) != 3 or len(set(linked_subjects)) != 3 or Counter(t for t, _, _ in subjects) != Counter({1: 2, 2: 1, 7: 6}):
         raise ValueError("Abri-Moto direct subject identity evidence changed")
     return ("model=Abri-Moto-VCCF25 identities=1715 part_rows=177 assembly_rows=106 bolt_rows=109 "
+            "weld_rows=155 type13_part_links=310 weld_definition_refs=310 ifc_weld_guids=55 "
             "ifc_parts=158/158 ifc_assemblies=99/99 ifc_mechanical_fasteners=108/108 "
-        "ifc_fasteners_unclassified=55 owner_edges=158/266 drawing_subjects=9 "
+        "owner_edges=158/266 drawing_subjects=9 "
         "direct_subject_guid_matches=3 multiple_object_subjects=6")
 
 

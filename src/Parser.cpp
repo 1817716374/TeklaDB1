@@ -1264,7 +1264,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     else if (hybrid908)
         model.diagnostics.emplace_back("Xsteel 9.08 partial semantics: bolt numeric parameters and generation flags, non-plate contour kinds and complete geometry remain unverified");
     else if (schema950)
-        model.diagnostics.emplace_back("Xsteel 9.50 partial semantics: object GUIDs and owner IDs are recovered from table 353; identity class/type, context, reinforcement semantics and unverified links remain unresolved");
+        model.diagnostics.emplace_back("Xsteel 9.50 partial semantics: table-192 type-13 links identify table-190 welds in the verified sample; other identity kinds/classes, context, reinforcement semantics and unverified links remain unresolved");
 
     struct StringChunk { uint32_t next = 0; std::string text; };
     std::unordered_map<uint32_t, StringChunk> stringChunks;
@@ -1567,7 +1567,32 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     for (const auto& entry : distancesByOwner) model.variablesByOwner[entry.first].distanceParameterIds = entry.second;
     for (const auto& entry : formulasByOwner) model.variablesByOwner[entry.first].formulaBindingIds = entry.second;
 
-    if (olderSchema && !hybrid908)
+    if (schema950)
+    {
+        // In the fixed Abri-Moto 9.50 sample, every table-190 weld identity
+        // has two table-192 type-13 links to real part rows. IFC independently
+        // labels the GUIDs for a subset as IFCFASTENER('Weld'). Do not infer
+        // the other 9.50 identity kinds from these associations.
+        std::unordered_set<uint32_t> weldRecordIds;
+        for (std::size_t index = 0; index < all[weldOrdinal].rowCount; ++index)
+        {
+            const auto id = read<uint32_t>(row(data, all, weldOrdinal, index), 1);
+            if (!id || !weldRecordIds.insert(id).second)
+                throw std::runtime_error("duplicate or zero 9.50 weld record ID");
+        }
+        for (const auto& association : associations)
+        {
+            if (association.table != associationTwoOrdinal || association.type != 13) continue;
+            // Type 13 is documented here only by the verified weld rows. Keep
+            // associations for other, still-unknown 9.50 identity classes
+            // unresolved instead of making a model-wide assumption.
+            if (!weldRecordIds.count(association.source)) continue;
+            if (!model.identities.count(association.source))
+                throw std::runtime_error("9.50 weld association does not resolve to a weld identity");
+            model.identities.at(association.source).type = 13;
+        }
+    }
+    else if (olderSchema && !hybrid908)
     {
         const auto assignType = [&](uint32_t id, uint32_t type) {
             if (older764Or782 && !model.identities.count(id))
@@ -2336,6 +2361,9 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         weld.id = id;
         weld.definitionId = read<uint32_t>(value, 9);
         weld.secondaryDefinitionId = read<uint32_t>(value, 13);
+        if (schema950 && (!model.weldDefinitions.count(weld.definitionId) ||
+            (weld.secondaryDefinitionId && !model.weldDefinitions.count(weld.secondaryDefinitionId))))
+            throw std::runtime_error("9.50 weld references a missing definition");
         weld.guid = model.identities.at(id).guid;
         weld.origin = placement->second.origin;
         weld.length = placement->second.length;

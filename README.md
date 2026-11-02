@@ -48,7 +48,7 @@
 | 8.95 | 本轮公开语料回归：27 份主库、27 份组件库；身份类型引用、owner 与构件辅助引用已分开读取，见 [归属证据](docs/OWNERSHIP.zh-CN.md) |
 | 8.74 | 固定307节主库的有限核心投影；身份类别链接已做闭合检查，螺栓、钢筋、编号、型材语义和未映射表仍保留 raw；同版本 xslib 目前 raw-only，见[旧工程证据](docs/RELATED_FORMATS.zh-CN.md#新增公开旧工程-db1-830--874-与早期-dbv-边界) |
 | 9.08 | 官方考试工程的两份历史快照，主库/xslib采用独立混合布局；7月4,237个梁候选与同提交官方代码吻合，49个型材名称由配套目录核对，两份快照各建立1,714条唯一对象→型材目录关联；每份主库的104条 PLATE type-39 记录均归属26个组件实例并单列为 `componentPartIds`；螺栓参数与完整几何保持部分支持，见[9.08证据](docs/DB1_908.zh-CN.md) |
-| 9.50 | BIM4LCA 四份 Tekla 2023 SP8 DB1/IFC4 已恢复 table 353 的对象 ID、16 字节 GUID 及经 IFC 聚合边验证的 owner 字段：25,521 个 IFC GlobalId 直连匹配，5,017/5,017 条可配对聚合边的 owner 相符。Abri-Moto SP4 另核验 177 条 part、106 条 assembly、109 条 bolt group 记录，其中 158 个 part、99 个 assembly、108 个 mechanical fastener 的 IFC 身份命中相应 DB1 表。**部分语义**：part 类型仍未知，身份类别、context 和其他原始字段未解释；不代表完整支持。见 [9.50 证据与边界](docs/DB1_950.zh-CN.md) |
+| 9.50 | BIM4LCA 四份 Tekla 2023 SP8 DB1/IFC4 已恢复 table 353 的对象 ID、16 字节 GUID 及经 IFC 聚合边验证的 owner 字段：25,521 个 IFC GlobalId 直连匹配，5,017/5,017 条可配对聚合边的 owner 相符。Abri-Moto SP4 另核验 177 条 part、106 条 assembly、109 条 bolt group、155 条 weld 记录；155个 weld ID、310条 type-13→part 链接与放置/坐标基/定义均闭合，其中55个 IFCFASTENER(Weld) GUID 命中 weld 表。**部分语义**：仅这些 weld 关系已恢复；part 类型仍未知，身份类别、context 和其他原始字段未解释，不代表完整支持。见 [9.50 证据与边界](docs/DB1_950.zh-CN.md) |
 | 9.52 | 本轮公开语料回归：2 份主库/xslib/DB2 工程；两份组件库各核验14个组件归属的 type-39 CUTPART/PLATE 记录，另有一份 xslib 不含该类对象 |
 | 9.60 | 本轮公开语料回归：1 份非空主库、1 份组件库 |
 | 9.65 / 9.66 | 保留历史布局；使用角色签名检查，本轮未重新取得样本 |
