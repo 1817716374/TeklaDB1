@@ -192,6 +192,119 @@ void parse844Dimensions(Drawing& result)
         result.straightDimensions.emplace(dimension.recordId,std::move(dimension));
     }
 }
+void parse950ViewContextsAndDimensions(Drawing& result)
+{
+    // The Abri-Moto 9.50 signature has the same 1496/144-byte dimension
+    // records as 9.54. Only the ID/context prefix is used for cross-table
+    // validation; the wider 9.50 view body remains opaque.
+    const auto& rawViews=table(result.raw,260).records;
+    std::set<std::uint32_t> viewIds,ambiguousContexts;
+    for (const auto& record:rawViews)
+    {
+        const auto& row=record.payload;
+        if (row.size()!=4740 || u32(row,0)!=260)
+            throw std::runtime_error("invalid 9.50 drawing view record header");
+        DrawingView view;
+        view.recordId=u32(row,4);
+        view.contextId=u32(row,8);
+        if (!view.recordId || !view.contextId || !viewIds.insert(view.recordId).second)
+            throw std::runtime_error("zero or duplicate 9.50 drawing view ID/context");
+        if (result.viewsByContext.count(view.contextId)) ambiguousContexts.insert(view.contextId);
+        else result.viewsByContext.emplace(view.contextId,view);
+        result.viewsByRecordId.emplace(view.recordId,view);
+    }
+    for (const auto context:ambiguousContexts)
+    {
+        result.viewsByContext.erase(context);
+        result.diagnostics.push_back("ambiguous 9.50 drawing view context retained by record ID: "+std::to_string(context));
+    }
+
+    const auto& rawSets=table(result.raw,257).records;
+    const auto& rawDimensions=table(result.raw,256).records;
+    std::map<std::uint32_t,std::size_t> setCounts,dimensionCounts;
+    for (const auto& record:rawSets) ++setCounts[u32(record.payload,4)];
+    for (const auto& record:rawDimensions) ++dimensionCounts[u32(record.payload,4)];
+    for (const auto& record:rawSets)
+    {
+        const auto& row=record.payload;
+        if (row.size()!=144 || u32(row,0)!=257)
+            throw std::runtime_error("invalid 9.50 straight dimension set header");
+        DrawingStraightDimensionSet set;
+        set.recordId=u32(row,4);
+        set.contextId=u32(row,8);
+        if (!set.recordId || !set.contextId)
+            throw std::runtime_error("zero 9.50 straight dimension set ID/context");
+        if (setCounts[set.recordId]>1)
+        {
+            result.unhandledDimensionSetRecordIds.push_back(set.recordId);
+            result.diagnostics.push_back("duplicate 9.50 straight dimension set ID retained raw: "+std::to_string(set.recordId));
+            continue;
+        }
+        if (!result.viewsByContext.count(set.contextId))
+        {
+            result.unhandledDimensionSetRecordIds.push_back(set.recordId);
+            result.diagnostics.push_back("9.50 straight dimension set has no matching view context; retained raw: "+std::to_string(set.recordId));
+            continue;
+        }
+        unique(result.straightDimensionSets,set.recordId,std::move(set));
+    }
+    std::set<std::uint32_t> dimensionIds;
+    for (const auto& record:rawDimensions)
+    {
+        const auto& row=record.payload;
+        if (row.size()!=1496 || u32(row,0)!=256)
+            throw std::runtime_error("invalid 9.50 straight dimension record header");
+        DrawingStraightDimension dimension;
+        dimension.recordId=u32(row,4);
+        dimension.contextId=u32(row,8);
+        dimension.dimensionSetId=u32(row,12);
+        dimension.subtypeCode=u32(row,16);
+        if (!dimension.recordId || !dimension.contextId || !dimension.dimensionSetId)
+            throw std::runtime_error("zero 9.50 straight dimension ID/context/set");
+        if (dimensionCounts[dimension.recordId]>1 || !dimensionIds.insert(dimension.recordId).second)
+        {
+            result.unhandledDimensionRecordIds.push_back(dimension.recordId);
+            result.diagnostics.push_back("duplicate 9.50 straight dimension ID retained raw: "+std::to_string(dimension.recordId));
+            continue;
+        }
+        const auto set=result.straightDimensionSets.find(dimension.dimensionSetId);
+        if (set==result.straightDimensionSets.end())
+            result.diagnostics.push_back("9.50 straight dimension "+std::to_string(dimension.recordId)+
+                " references a missing or ambiguous set ID "+std::to_string(dimension.dimensionSetId));
+        else if (dimension.contextId!=set->second.contextId)
+            result.diagnostics.push_back("9.50 straight dimension "+std::to_string(dimension.recordId)+
+                " context differs from its dimension set");
+        else set->second.dimensionIds.push_back(dimension.recordId);
+        if (!result.viewsByContext.count(dimension.contextId))
+            result.diagnostics.push_back("9.50 straight dimension has no matching view context: "+std::to_string(dimension.recordId));
+        if (dimension.subtypeCode!=1)
+        {
+            result.unhandledDimensionRecordIds.push_back(dimension.recordId);
+            result.diagnostics.push_back("unsupported 9.50 straight dimension subtype retained raw: "+std::to_string(dimension.recordId));
+            continue;
+        }
+        for (std::size_t axis=0;axis<3;++axis)
+        {
+            dimension.startPoint[axis]=real(row,24+axis*8);
+            dimension.endPoint[axis]=real(row,48+axis*8);
+            dimension.upDirection[axis]=real(row,168+axis*8);
+        }
+        dimension.distance=real(row,192);
+        const auto& up=dimension.upDirection;
+        const double norm=std::hypot(up[0],up[1]);
+        if (std::abs(norm-1)<=1e-8 && std::abs(up[2])<=1e-8 &&
+            std::abs(dimension.endPoint[2]-dimension.startPoint[2])<=1e-8)
+        {
+            const double projected=std::abs((dimension.endPoint[0]-dimension.startPoint[0])*up[1]-
+                                             (dimension.endPoint[1]-dimension.startPoint[1])*up[0]);
+            if (!std::isfinite(projected)) throw std::runtime_error("9.50 straight dimension projection overflow");
+            dimension.projectedLength=projected;
+        }
+        else result.diagnostics.push_back("9.50 straight dimension projection requires a unit XY direction and coplanar endpoints: "+
+                                           std::to_string(dimension.recordId));
+        result.straightDimensions.emplace(dimension.recordId,std::move(dimension));
+    }
+}
 #include "DrawingExamSchema.hpp"
 }
 
@@ -444,8 +557,9 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
         {
             // Tekla Structures 2023 SP4 Abri-Moto-VCCF25: nine real drawings
             // share this exact 48-section table signature. Three payload
-            // widths differ from the 9.54 layout, so retain them raw and only
-            // decode the common string/property/sheet tables below.
+            // widths differ from the 9.54 layout. The separately validated
+            // 256/257 dimension prefixes and offsets are decoded below; the
+            // wider view geometry and other version-specific bodies stay raw.
             constexpr std::array<std::uint32_t,48> signatureWidths{{
                 4,128,620,1496,144,664,4740,580,584,52,32,6148,964,240,608,296,496,144,32,45,12,37,12,110,
                 3438,296,876,24,64,28,72,48,32,64,120,24,64,40,56,164,24,180,112,20,60,144,152,60}};
@@ -661,6 +775,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
                     continue;
                 }
                 view.viewCoordinates=coordinates(row,40); view.displayCoordinates=coordinates(row,160);
+                view.geometryDecoded=true;
                 view.restriction=volume(row,112); view.storedAttributeVolume=volume(row,232);
                 result.viewsByRecordId.emplace(view.recordId,view);
                 if (!result.viewsByContext.emplace(view.contextId,std::move(view)).second)
@@ -678,6 +793,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
         }
         if (older950)
         {
+            parse950ViewContextsAndDimensions(result);
             const auto& subjects=table(result.raw,269).records;
             bool subjectDecoded=false;
             if(subjects.size()!=1)
@@ -711,8 +827,8 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
                 }
             }
             result.diagnostics.emplace_back(subjectDecoded?
-                "9.50 drawing subject type and identity fields decoded; views, dimensions, model references and graphics remain raw":
-                "9.50 drawing subject fields retained raw; views, dimensions, model references and graphics remain raw");
+                "9.50 drawing subject, view ID/context prefixes and subtype-1 straight dimension anchors/sets decoded; view geometry, subtype 0, model references and graphics remain raw":
+                "9.50 drawing view ID/context prefixes and subtype-1 straight dimension anchors/sets decoded; subject fields, view geometry, subtype 0, model references and graphics remain raw");
             if (options.retainDecompressedFileImage) result.raw.decompressedFileImage=std::move(data);
             return true;
         }
@@ -770,6 +886,7 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
                 continue;
             }
             view.viewCoordinates=coordinates(row,numericIdentity?40:48); view.displayCoordinates=coordinates(row,numericIdentity?160:168);
+            view.geometryDecoded=true;
             view.restriction=volume(row,numericIdentity?112:120); view.storedAttributeVolume=volume(row,numericIdentity?232:240);
             if (result.raw.storageVersion=="9.54")
             {

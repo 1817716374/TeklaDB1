@@ -140,6 +140,9 @@ struct DrawingView
     std::string propertySetName;
     // Preserves conflicting legacy stored names without choosing precedence.
     std::vector<std::string> storedPropertySetNames;
+    // False for DG 9.50, where only the stable ID/context prefix is decoded.
+    // Appended to preserve positional aggregate initialization of prior fields.
+    bool geometryDecoded = false;
 };
 enum class DrawingSubjectKind { Unknown, SinglePart, Assembly, GeneralArrangement };
 struct DrawingStraightDimensionSet
@@ -240,10 +243,13 @@ struct Drawing
     // DG 9.54 type-281-to-311 stored references; no owner/context is implied.
     std::vector<DrawingType281LineReference> type281LineReferences;
 };
-// Partial DG 7.30/7.82/9.54 semantics: strings (including mark XML), properties, sheet size,
+// Partial DG 7.30/7.82/9.50/9.54 semantics: strings (including mark XML), properties, sheet size,
 // project identity, subject, view coordinate bases/volumes and model references.
 // DG 7.30/7.82/9.54 expose known straight dimension anchors; set ownership is
 // linked only when both legacy IDs and drawing contexts are unambiguous.
+// DG 9.50 exposes view ID/context prefixes and subtype-1 straight dimension
+// anchors/sets; its view geometry, paper rendering, dimension styling, and
+// subtype 0 remain raw.
 // DG 8.44 additionally exposes its observed view coordinate bases/ranges and
 // subtype-1 straight dimensions/sets; subject and model references remain raw.
 // DG 8.95/9.08 additionally expose numeric subjects/references; their view and

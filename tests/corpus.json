@@ -18035,7 +18035,7 @@
       "mode": "drawing",
       "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D32297495-2691-4527-b060-17b0e941b347.dg",
       "exit": 0,
-      "stdout": "version=9.50 tables=48 strings=51 properties=5 links=5 sheets=1 model_refs=0 views=0 subject=1 guid=6eae20aa-d6f7-48df-9229-4c1fa5da8c1a stored=D32297495-2691-4527-b060-17b0e941b347.dg fingerprint=8f8e636f10f006e2"
+      "stdout": "version=9.50 tables=48 strings=51 properties=5 links=5 sheets=1 model_refs=0 views=1 subject=1 guid=6eae20aa-d6f7-48df-9229-4c1fa5da8c1a stored=D32297495-2691-4527-b060-17b0e941b347.dg dimensions=27 dimension_sets=10 unhandled_dimensions=0 fingerprint=8679bf6c35523f87"
     },
     {
       "name": "abri-moto-vccf25:project cross-format inventory",

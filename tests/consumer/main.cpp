@@ -78,6 +78,8 @@ int main(int argc,char** argv)
     tekla::DrawingMetadataAssociation metadataAssociation;
     metadataAssociation.drawingGuidIdentityId=17;
     if(metadataAssociation.drawingGuidIdentityId!=17)return 17;
+    tekla::DrawingView partialView;
+    if(partialView.geometryDecoded)return 18;
     tekla::DrawingStraightDimension dimension; dimension.projectedLength=3;
     drawing.straightDimensions.emplace(67,dimension);
     tekla::DrawingLineSegment line; line.recordId=68; line.startPoint={1.0,2.0}; line.endPoint={3.0,4.0};

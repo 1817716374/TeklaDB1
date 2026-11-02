@@ -1573,6 +1573,9 @@ int run(const std::string& mode, const std::filesystem::path& path)
             const auto readU32=[](const std::vector<std::uint8_t>& bytes,std::size_t offset) {
                 std::uint32_t value=0; std::memcpy(&value,bytes.data()+offset,sizeof(value)); return value;
             };
+            const auto readReal=[](const std::vector<std::uint8_t>& bytes,std::size_t offset) {
+                double value=0; std::memcpy(&value,bytes.data()+offset,sizeof(value)); return value;
+            };
             std::map<std::pair<std::uint32_t,std::uint32_t>,std::vector<std::uint64_t>> expectedIndexTargets;
             for (const auto& targetTable:drawing.raw.tables)
                 if (targetTable.ordinal!=0)
@@ -1611,6 +1614,70 @@ int run(const std::string& mode, const std::filesystem::path& path)
                    line.startPoint!=std::array<double,2>{endpoints[0],endpoints[1]} ||
                    line.endPoint!=std::array<double,2>{endpoints[2],endpoints[3]})
                     throw std::runtime_error("type-311 line segment fields differ from raw row");
+            }
+            if(drawing.raw.storageVersion=="9.50")
+            {
+                const auto viewTable=std::find_if(drawing.raw.tables.begin(),drawing.raw.tables.end(),
+                    [](const auto& item){return item.ordinal==260;});
+                const auto setTable=std::find_if(drawing.raw.tables.begin(),drawing.raw.tables.end(),
+                    [](const auto& item){return item.ordinal==257;});
+                const auto dimensionTable=std::find_if(drawing.raw.tables.begin(),drawing.raw.tables.end(),
+                    [](const auto& item){return item.ordinal==256;});
+                if(viewTable==drawing.raw.tables.end() || setTable==drawing.raw.tables.end() ||
+                   dimensionTable==drawing.raw.tables.end() || drawing.viewsByRecordId.size()!=viewTable->records.size() ||
+                   drawing.straightDimensionSets.size()!=setTable->records.size() ||
+                   drawing.straightDimensions.size()+drawing.unhandledDimensionRecordIds.size()!=dimensionTable->records.size() ||
+                   !drawing.unhandledDimensionSetRecordIds.empty())
+                    throw std::runtime_error("9.50 view/dimension semantic counts differ from the raw records");
+                for(const auto& raw:viewTable->records)
+                {
+                    const auto id=readU32(raw.payload,4),context=readU32(raw.payload,8);
+                    const auto decoded=drawing.viewsByRecordId.find(id);
+                    if(raw.payload.size()!=4740 || readU32(raw.payload,0)!=260 || decoded==drawing.viewsByRecordId.end() ||
+                       decoded->second.contextId!=context || decoded->second.geometryDecoded ||
+                       !drawing.viewsByContext.count(context))
+                        throw std::runtime_error("9.50 view ID/context prefix differs from its raw row or was promoted to geometry");
+                }
+                for(const auto& raw:setTable->records)
+                {
+                    const auto id=readU32(raw.payload,4),context=readU32(raw.payload,8);
+                    const auto decoded=drawing.straightDimensionSets.find(id);
+                    if(raw.payload.size()!=144 || readU32(raw.payload,0)!=257 || decoded==drawing.straightDimensionSets.end() ||
+                       decoded->second.contextId!=context || !drawing.viewsByContext.count(context))
+                        throw std::runtime_error("9.50 dimension set ID/context differs from its raw row");
+                }
+                for(const auto& raw:dimensionTable->records)
+                {
+                    const auto id=readU32(raw.payload,4),context=readU32(raw.payload,8);
+                    const auto setId=readU32(raw.payload,12),subtype=readU32(raw.payload,16);
+                    if(raw.payload.size()!=1496 || readU32(raw.payload,0)!=256 || !drawing.viewsByContext.count(context))
+                        throw std::runtime_error("9.50 dimension header/context differs from its raw row");
+                    const auto set=drawing.straightDimensionSets.find(setId);
+                    if(set==drawing.straightDimensionSets.end() || set->second.contextId!=context ||
+                       std::count(set->second.dimensionIds.begin(),set->second.dimensionIds.end(),id)!=1)
+                        throw std::runtime_error("9.50 dimension/set context association differs from raw rows");
+                    const auto decoded=drawing.straightDimensions.find(id);
+                    if(subtype!=1)
+                    {
+                        if(decoded!=drawing.straightDimensions.end() ||
+                           std::find(drawing.unhandledDimensionRecordIds.begin(),drawing.unhandledDimensionRecordIds.end(),id)==drawing.unhandledDimensionRecordIds.end())
+                            throw std::runtime_error("9.50 non-subtype-1 dimension was decoded");
+                        continue;
+                    }
+                    if(decoded==drawing.straightDimensions.end())
+                        throw std::runtime_error("9.50 subtype-1 dimension is missing from its semantic projection");
+                    const auto& d=decoded->second;
+                    if(d.contextId!=context || d.dimensionSetId!=setId || d.subtypeCode!=subtype)
+                        throw std::runtime_error("9.50 dimension identity/set fields differ from its raw row");
+                    for(std::size_t axis=0;axis<3;++axis)
+                        if(d.startPoint[axis]!=readReal(raw.payload,24+axis*8) ||
+                           d.endPoint[axis]!=readReal(raw.payload,48+axis*8) ||
+                           d.upDirection[axis]!=readReal(raw.payload,168+axis*8))
+                            throw std::runtime_error("9.50 dimension coordinate/direction differs from its raw row");
+                    const double storedDistance=readReal(raw.payload,192);
+                    if(d.distance!=storedDistance)
+                        throw std::runtime_error("9.50 dimension distance differs from its raw row");
+                }
             }
             if(drawing.raw.storageVersion=="9.54")
             {
@@ -1685,6 +1752,24 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 for(auto id:drawing.unhandledDimensionRecordIds)hash.number(id);
                 for(auto id:drawing.unhandledDimensionSetRecordIds)hash.number(id);
             }
+            if (drawing.raw.storageVersion=="9.50")
+            {
+                for(const auto& entry:drawing.straightDimensions)
+                {
+                    const auto& d=entry.second; hash.number(d.recordId); hash.number(d.contextId);
+                    hash.number(d.dimensionSetId); hash.number(d.subtypeCode);
+                    for(auto x:d.startPoint)hash.real(x); for(auto x:d.endPoint)hash.real(x);
+                    for(auto x:d.upDirection)hash.real(x); hash.real(d.distance);
+                    hash.number(d.projectedLength.has_value()); if(d.projectedLength)hash.real(*d.projectedLength);
+                }
+                for(const auto& entry:drawing.straightDimensionSets)
+                {
+                    hash.number(entry.first); hash.number(entry.second.contextId);
+                    for(auto id:entry.second.dimensionIds)hash.number(id);
+                }
+                for(auto id:drawing.unhandledDimensionRecordIds)hash.number(id);
+                for(auto id:drawing.unhandledDimensionSetRecordIds)hash.number(id);
+            }
             std::cout<<"version="<<drawing.raw.storageVersion<<" tables="<<drawing.raw.tables.size()
                      <<" strings="<<drawing.strings.size()<<" properties="<<drawing.properties.size()
                      <<" links="<<drawing.propertyLinks.size()<<" sheets="<<drawing.sheets.size()
@@ -1693,6 +1778,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                      <<" guid="<<drawing.projectGuid<<" stored="<<drawing.storedFileName;
             if (old) std::cout<<" incomplete_text="<<incomplete<<" unhandled_views="<<drawing.unhandledViewRecordIds.size()<<" unique_contexts="<<drawing.viewsByContext.size();
             if (drawing.raw.storageVersion=="7.64") std::cout<<" dimensions="<<drawing.straightDimensions.size()<<" dimension_sets="<<drawing.straightDimensionSets.size()<<" unhandled_dimensions="<<(drawing.unhandledDimensionRecordIds.size()+drawing.unhandledDimensionSetRecordIds.size());
+            if (drawing.raw.storageVersion=="9.50") std::cout<<" dimensions="<<drawing.straightDimensions.size()<<" dimension_sets="<<drawing.straightDimensionSets.size()<<" unhandled_dimensions="<<(drawing.unhandledDimensionRecordIds.size()+drawing.unhandledDimensionSetRecordIds.size());
             std::cout<<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
         }
         else return 2;

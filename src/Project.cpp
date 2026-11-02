@@ -569,7 +569,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 else result.diagnostics.push_back("drawing project GUID is missing or differs from main model: "+db1::detail::pathUtf8(file.path));
                 for (const auto& item:drawing.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
                 const auto drawingDiagnostic=drawing.raw.storageVersion=="9.50"?
-                    "9.50 subject type/GUID, strings, properties and sheet decoded; views, dimensions and graphics remain raw":
+                    "9.50 subject type/GUID, view ID/context prefixes, subtype-1 straight dimension anchors/sets, strings, properties and sheet size decoded; view geometry, subtype 0, other references and graphics remain raw":
                     (drawing.raw.storageVersion=="8.95" || drawing.raw.storageVersion=="9.08")?
                     "drawing numeric subject/references, properties, strings and sheet size decoded; views, dimensions and graphics remain raw":
                     (drawing.raw.storageVersion=="7.30" || drawing.raw.storageVersion=="7.82")?

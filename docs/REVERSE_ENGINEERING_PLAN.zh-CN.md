@@ -758,3 +758,9 @@ Trimble 当前 Model Sharing 文档将 `.db3` 列为 Plan database，并说明�
 Abri-Moto-VCCF25 的 9 张 9.50 DG 中，`grProjectGuid` 与所选 DB1 的工程 GUID 均不匹配；但三张单对象图纸的主体 GUID 分别唯一命中 DB1 身份表中的两条零件记录和一条装配记录，且身份 ID 分别存在于对应对象表。工程入口现仅在这种精确、唯一、类型吻合的 9.50 subject 情形下建立 `DirectSubjectGuidIdentity` 主体关系，不建立整图/工程配对，也不启用其它数字或 GUID 引用。六张多对象主体不产生对象链接；三份 sidecar 的 `MainObjectGuid` 与主体 GUID 不同，因此仍只与 DG 做文件名和图幅关联。验证仍限于一个公开工程；9.50 其它版本的 DG 身份作用域、视图、尺寸、实体和跨工程可复现性待后续取证。
 
 本轮 MinGW C++17 与 MSVC Release 全量 CTest 均为 636/636；固定公开语料 1,787/1,787、MinGW 安装包消费者 97/97 均通过。`model_950` 工程回归和独立 Python 原始表解码共同确认三条 direct subject GUID 关系；另一个独立程序经安装的 CMake 包读取真实工程，确认9张DG、3条主体关系、0条其它模型引用和6条 metadata 文件关系。CI 已增加独立 DB1 9.50 IFC/DG 身份证据步骤。语料报告写入 `E:\CodexData\TeklaDB1-review\reports\corpus-dg950-direct-subject-guid-20261102.json`。
+
+### 2026-11-02：9.50 DG 视图上下文与直线尺寸锚点
+
+固定 Abri-Moto-VCCF25 9.50 工程的九张真实 DG 中，七张含尺寸；独立走读 type-260/256/257 后，136 条 type-256、67 条 type-257 的记录 ID/set/context 均可校验，所有尺寸 context 与 type-260 的唯一视图 context 相符，set ID 与 context 也全部闭合。9.50 的 256/257 payload 宽度分别为1496/144字节，descriptor 数为205/22；解析器只对该固定签名读取type、ID、context、set ID、subtype及已观察的 subtype-1 锚点前缀。七张图纸共119条 subtype-1 锚点和17条 subtype-0 原始记录；119条 up方向均为单位XY方向，其中27条端点共面，才提供诊断性投影长度。type-260 仅公开ID/context，并通过 `DrawingView::geometryDecoded=false` 标记坐标/范围未解析。该工程没有独立打印尺寸/图像真值，故未宣称文字标注、比例换算或渲染正确。
+
+新增 raw-row 对照及五种损坏副本拒绝：非有限坐标、零尺寸ID、零尺寸context、零尺寸集context、重复视图ID。当前全量 CTest 637/637；九张固定 DG 汇总验证19个视图、136条尺寸、67个尺寸集、17条保留subtype0和27条可投影记录；固定公开语料1,787/1,787、独立安装后消费者97/97通过。基线只更新了该9.50 DG用例的语义计数/指纹。该支持只适用于当前9.50签名样本，其他9.50变体及完整绘图语义仍未证明。
