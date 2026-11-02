@@ -96,16 +96,16 @@ def main():
     mutations = 0
     try:
         # These are valid metadata documents with conflicts, not parse failures.
-        for old, new in [(b"<Width>\r\n297", b"<Width>\r\n298"),
-                         (b"<Height>\r\n210", b"<Height>\r\n211"),
-                         (b"<DrawingType>\r\n1", b"<DrawingType>\r\n3"),
-                         (b"02f6a87b-e776-431e-a2db-9f8f1865e98c", b"02f6a87b-e776-431e-a2db-9f8f1865e98d"),
-                         (b"02f6a87b-e776-431e-a2db-9f8f1865e98c", b""),
-                         (b"6b38a239-b7b0-4bb2-ad69-21cebb58a2fa", b"")]:
+        for old, new, pairs in [(b"<Width>\r\n297", b"<Width>\r\n298", 4),
+                                (b"<Height>\r\n210", b"<Height>\r\n211", 4),
+                                (b"<DrawingType>\r\n1", b"<DrawingType>\r\n3", 4),
+                                (b"02f6a87b-e776-431e-a2db-9f8f1865e98c", b"02f6a87b-e776-431e-a2db-9f8f1865e98d", 5),
+                                (b"02f6a87b-e776-431e-a2db-9f8f1865e98c", b"", 5),
+                                (b"6b38a239-b7b0-4bb2-ad69-21cebb58a2fa", b"", 4)]:
             if old not in original:
                 raise ValueError("mutation anchor missing")
             path.write_bytes(original.replace(old, new))
-            project(pairs=4, objects=0)
+            project(pairs=pairs, objects=0)
             mutations += 1
         path.write_bytes(original)
         # Saved status fields cannot manufacture a model link, currentness or version choice.
@@ -141,7 +141,7 @@ def main():
         raise ValueError("DG project GUID mutation anchor changed")
     try:
         dg.write_bytes(gzip.compress(raw.replace(project_guid, b"b09d32dc-547d-4f09-a597-b4bd338e81fa"), mtime=0))
-        project(pairs=4, objects=0)
+        project(pairs=5, objects=0)
         mutations += 1
         # Independently walk record boundaries to mutate the numeric subject ID.
         cursor, sections = 76, []
@@ -166,7 +166,7 @@ def main():
         changed = bytearray(raw)
         struct.pack_into("<I", changed, tables[269][1][0]+16, 1)
         dg.write_bytes(gzip.compress(changed, mtime=0))
-        project(pairs=4, objects=0)
+        project(pairs=5, objects=0)
         mutations += 1
     finally:
         dg.write_bytes(dg_original)

@@ -539,7 +539,7 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 else result.diagnostics.push_back("drawing project GUID is missing or differs from main model: "+db1::detail::pathUtf8(file.path));
                 for (const auto& item:drawing.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
                 const auto drawingDiagnostic=drawing.raw.storageVersion=="9.50"?
-                    "9.50 drawing strings, properties and sheet decoded; subject GUID, views, dimensions and graphics remain raw":
+                    "9.50 subject type/GUID, strings, properties and sheet decoded; views, dimensions and graphics remain raw":
                     (drawing.raw.storageVersion=="8.95" || drawing.raw.storageVersion=="9.08")?
                     "drawing numeric subject/references, properties, strings and sheet size decoded; views, dimensions and graphics remain raw":
                     (drawing.raw.storageVersion=="7.30" || drawing.raw.storageVersion=="7.82")?
@@ -574,33 +574,28 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             {diagnostic("drawing metadata pairing lacks GUID or a unique sheet");continue;}
             if(*metadata.width!=drawing.sheets[0].width || *metadata.height!=drawing.sheets[0].height)
             {diagnostic("drawing metadata sheet dimensions conflict with DG");continue;}
-            if(!drawing.subject)
-            {
-                DrawingMetadataAssociation association{entry.first,found->first,{}};
-                association.evidence=DrawingMetadataAssociation::Evidence::FilenameAndSheet;
-                result.drawingMetadataAssociations.push_back(std::move(association));
-                result.associations.push_back({entry.first,found->first,
-                    "DG metadata filename, saved filename and sheet dimensions match; DG subject identity is unavailable"});
-                if(!metadata.mainObjectGuid.empty())
-                    diagnostic("main object GUID retained without a decoded DG subject; no model object link inferred");
-                continue;
-            }
-            if(!metadata.drawingType || *metadata.drawingType!=drawing.subject->typeCode)
+            if(drawing.subject && (!metadata.drawingType || *metadata.drawingType!=drawing.subject->typeCode))
             {diagnostic("drawing metadata type conflicts with DG subject");continue;}
             DrawingMetadataAssociation association{entry.first,found->first,{}};
-            association.evidence=DrawingMetadataAssociation::Evidence::SubjectIdentity;
+            association.evidence=DrawingMetadataAssociation::Evidence::FilenameAndSheet;
             if(!metadata.mainObjectGuid.empty())
             {
                 const auto subject=std::find_if(result.drawingSubjectAssociations.begin(),result.drawingSubjectAssociations.end(),
                     [&](const auto& s){return s.drawing==found->first;});
-                if(subject==result.drawingSubjectAssociations.end() || lower(subject->modelGuid)!=metadata.mainObjectGuid)
-                {diagnostic("drawing metadata main object GUID has no matching scoped DG subject");continue;}
-                association.modelObjectId=subject->modelObjectId;
+                if(subject!=result.drawingSubjectAssociations.end() && lower(subject->modelGuid)==metadata.mainObjectGuid)
+                {
+                    association.modelObjectId=subject->modelObjectId;
+                    association.evidence=DrawingMetadataAssociation::Evidence::SubjectIdentity;
+                }
+                else diagnostic("main object GUID retained without a matching scoped DG subject; file pairing uses filename and sheet only");
             }
-            else if(drawing.subject->modelObjectId || !drawing.subject->modelGuid.empty())
-            {diagnostic("drawing metadata omits the DG main object GUID");continue;}
+            else if(drawing.subject && (drawing.subject->modelObjectId || !drawing.subject->modelGuid.empty()))
+                diagnostic("drawing metadata omits the DG main object GUID; file pairing uses filename and sheet only");
             result.drawingMetadataAssociations.push_back(std::move(association));
-            result.associations.push_back({entry.first,found->first,"DG metadata filename, saved sheet and subject agree; no active-version inference"});
+            result.associations.push_back({entry.first,found->first,
+                result.drawingMetadataAssociations.back().evidence==DrawingMetadataAssociation::Evidence::SubjectIdentity?
+                    "DG metadata filename, saved sheet and scoped subject identity agree; no active-version inference":
+                    "DG metadata filename and saved sheet match; no model-object identity inferred"});
         }
 
         if(result.optionSettings)

@@ -176,6 +176,10 @@ struct Dg950Fixture
     static constexpr std::array<unsigned,48> fields{{2,20,63,205,22,101,652,16,84,11,6,804,162,37,92,48,21,21,6,6,4,5,4,5,50,47,143,7,12,5,10,9,6,9,21,4,10,7,9,24,7,16,17,6,16,20,23,11}};
     bool forwardDirectory=false;
     bool invalidWidth=false;
+    unsigned subjectType=0;
+    bool duplicateSubject=false;
+    bool emptySubjectGuid=false;
+    bool nonzeroSubjectReserved=false;
     Bytes encode() const
     {
         Bytes bytes(76); text(bytes,0,"Xsteel# 9.50"); put<unsigned>(bytes,12,1); put<unsigned>(bytes,16,0xdbcec0bc);
@@ -197,7 +201,18 @@ struct Dg950Fixture
         }
         section(widths[0],fields[0],directory);
         for(std::size_t i=0;i<types.size();++i)
-            section(widths[i+1]+(invalidWidth && i==0?1U:0U),fields[i+1],{});
+        {
+            std::vector<Bytes> rows;
+            if(i==10 && subjectType)
+            {
+                Bytes subject(widths[i+1]); put<unsigned>(subject,0,269); put<unsigned>(subject,4,44);
+                put<unsigned>(subject,8,nonzeroSubjectReserved?9U:0U); put<unsigned>(subject,12,subjectType);
+                if(subjectType!=7 && !emptySubjectGuid) std::fill(subject.begin()+16,subject.begin()+32,0x11);
+                rows.push_back(subject);
+                if(duplicateSubject) rows.push_back(std::move(subject));
+            }
+            section(widths[i+1]+(invalidWidth && i==0?1U:0U),fields[i+1],rows);
+        }
         return bytes;
     }
 };
@@ -537,6 +552,38 @@ int main(int argc,char** argv)
             check(!tekla::parseDrawing(dg,d,error),"changed 9.50 table width accepted");
             check(d.raw.tables.empty() && d.strings.empty() && d.properties.empty() && !error.empty(),
                   "9.50 signature failure leaked partial output");
+        }
+        else if(mode.rfind("drawing950_subject_",0)==0)
+        {
+            Dg950Fixture fixture;
+            if(mode=="drawing950_subject_part")fixture.subjectType=1;
+            else if(mode=="drawing950_subject_assembly")fixture.subjectType=2;
+            else if(mode=="drawing950_subject_multiple")fixture.subjectType=7;
+            else if(mode=="drawing950_subject_unknown")fixture.subjectType=99;
+            else if(mode=="drawing950_subject_duplicate"){fixture.subjectType=1;fixture.duplicateSubject=true;}
+            else if(mode=="drawing950_subject_reserved"){fixture.subjectType=1;fixture.nonzeroSubjectReserved=true;}
+            else if(mode=="drawing950_subject_empty_guid"){fixture.subjectType=1;fixture.emptySubjectGuid=true;}
+            const auto bytes=fixture.encode(); save(dg,bytes);
+            if(mode=="drawing950_subject_empty_guid")
+            {
+                check(!tekla::parseDrawing(dg,d,error),"9.50 single-object subject with empty GUID accepted");
+                check(d.raw.tables.empty() && !error.empty(),"9.50 empty subject GUID leaked partial output");
+            }
+            else
+            {
+                check(tekla::parseDrawing(dg,d,error,{true}),error);
+                if(mode=="drawing950_subject_part" || mode=="drawing950_subject_assembly")
+                    check(d.subject && d.subject->recordId==44 && d.subject->typeCode==fixture.subjectType &&
+                          d.subject->modelGuid=="11111111-1111-1111-1111-111111111111" &&
+                          d.subject->kind==(fixture.subjectType==1?tekla::DrawingSubjectKind::SinglePart:tekla::DrawingSubjectKind::Assembly),
+                          "9.50 GUID subject fields/classification");
+                else if(mode=="drawing950_subject_multiple")
+                    check(d.subject && d.subject->recordId==44 && d.subject->typeCode==7 && d.subject->modelGuid.empty() &&
+                          d.subject->kind==tekla::DrawingSubjectKind::Unknown,"9.50 multiple-object subject boundary");
+                else
+                    check(!d.subject && !d.diagnostics.empty(),"unsupported 9.50 subject fields were not retained raw");
+                check(d.raw.decompressedFileImage==bytes,"9.50 subject raw retention");
+            }
         }
         else
         {

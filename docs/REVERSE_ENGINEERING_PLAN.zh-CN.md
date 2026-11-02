@@ -12,15 +12,21 @@
 
 从 GitHub 远端克隆仓库当前代码，在 E 盘全新构建目录中使用 CMake/Ninja 重新配置并构建；不复用原工作树的构建缓存。克隆构建的完整 CTest 为625/625。相同源码树的固定公开语料为1,787/1,787，独立安装包消费者为93/93。随后将该源码树合并推送至默认 `master`，远端与本地提交一致；测试、报告和临时文件留在 E 盘。此验收确认已提交源码可独立构建，不证明未实现的格式和语义已完成。当前支持矩阵中的静态计数已同步更新。
 
+## 2026-11-02：DG 9.50 type-269 主体 GUID 与 DB1 身份核对
+
+在 Abri-Moto-VCCF25 的九张真实 9.50 DG 中，type-269 表每图均恰有一条记录；payload@0/4/8/12/16 分别表现为表码、主体记录ID、全零保留字、主体类型和16字节身份值。9张类型码为1两条、2一条、7六条；类型1/2的 GUID 直接按存储字节序格式化后，在所选 DB1 identity 表中均唯一命中，类型1对应两条保留为 `unhandledPartIds` 的部件，类型2对应一条已解析装配。六份 metadata 的 `DrawingType` 与对应 DG type-269 类型码一致。现只对这份 9.50 精确 schema 解码主体类型及类型1/2 GUID；类型7保持未分类，未知类型、非零保留字、空GUID和重复记录不创建主体语义。合成回归覆盖已支持类型、未知/重复字段及空GUID拒绝。
+
+精确对象 GUID 命中仍不能越过工程范围：九张 DG 的 `grProjectGuid` 对所选 DB1 为0/9匹配；三份单对象 metadata 的 `MainObjectGuid` 也与 DG 主体 GUID 不同。项目入口因此仅保留经文件名、DG 保存文件名和图幅验证的六条 sidecar→DG 文件级关联，不创建 DG→DB1 或 metadata→DB1 对象链接。现有版本中，仅当已有 scoped subject association 与 `MainObjectGuid` 一致时才填入 `modelObjectId`。本轮本地 CTest 632/632、完整公开语料 1,787/1,787、安装消费者93/93及 metadata 独立对照和16种变异均通过；当前改动推送后的远端 CI 待验收。
+
 ## 2026-11-02：DG 9.50 sidecar 文件级关联与慢案例超时隔离
 
-对 Abri-Moto-VCCF25 的9张 DG 和6份 `.dg.metadata` 独立核对发现：6个 sidecar 的 basename 唯一对应到 DG；DG 内部保存的文件名也逐一与路径一致；每份 sidecar 的图幅尺寸都与唯一 DG sheet 精确相同。`readProject` 现将这6对登记为 `FilenameAndSheet` 文件级 `DrawingMetadataAssociation`。9.50 subject 尚未解码，sidecar 中非空的 `MainObjectGuid` 仅保留并诊断，不填入 `modelObjectId`，也不绕过0/9个 DG 项目 GUID 与 DB1 的不匹配。现有能解码 subject 的版本仍要求图幅、类型及已建立的 scoped subject identity 一致后才关联。
+对 Abri-Moto-VCCF25 的9张 DG 和6份 `.dg.metadata` 独立核对发现：6个 sidecar 的 basename 唯一对应到 DG；DG 内部保存的文件名也逐一与路径一致；每份 sidecar 的图幅尺寸都与唯一 DG sheet 精确相同。`readProject` 现将这6对登记为 `FilenameAndSheet` 文件级 `DrawingMetadataAssociation`。9.50 subject 的 type-269 类型和部分GUID已读取；sidecar 中非空的 `MainObjectGuid` 不等于 DG 主体GUID，仍不填入 `modelObjectId`，也不绕过0/9个 DG 项目 GUID 与 DB1 的不匹配。其他版本只有既有 scoped subject identity 与 metadata GUID 一致时才建立对象链接。
 
 同时，CI 的 Linux C++17 AddressSanitizer/UBSan 全量语料中，单个包含293张 DG 的目录用例超过 `tools/corpus.py` 原120秒上限，但完整性检查并未失败。本机同一用例22秒结束；manifest 现只将此大目录用例的进程上限设为600秒，其余用例仍保持120秒，以避免将慢速仪器误报为解析回归。本轮重建后完整 CTest 625/625、固定语料1,787/1,787、独立安装消费者93/93，以及覆盖9份 metadata 文档与16种变异的独立证据脚本均通过。大目录用例现可在 CI 中按需使用600秒上限。
 
 ## 2026-11-02：DG 9.50 表签名边界复核
 
-逐 section 重读 Abri-Moto-VCCF25 的九张 gzip DG 后，确认每张均为 48 个 section，九张图纸的目录、表宽及字段描述符签名彼此一致；记录数分别为 130、897、681、704、895、543、130、592、1001，共 5,573。此前 DG 9.50 证据页把单张图纸的 897 条记录写成了工程总量，现已更正。对照当前 9.54 语义入口，table 259/260/269 的 9.50 行宽为 664/4740/6148 字节，而 9.54 为 712/4788/6196；现有 9.54 签名尚未固定字段描述符数量，9.50 这三表的描述符数为 101/652/804。其余表宽相同不足以证明偏移或语义相同，因此没有推广 9.54 的 subject/view/dimension 偏移。现为 9.50 增加专属精确签名、正逆目录序规范化，并读取共同布局的 type-293 字符串、type-295/297/298 属性及 type-266 图幅；九张真实样本合计 365 条字符串、35 项属性、36 条属性链接和 9 个图幅，6 份 sidecar 的图幅宽高均匹配。因 `grProjectGuid` 对所选 DB1 的 GUID 为 0/9 匹配，subject 与跨文件对象链接继续保留 raw。综合 CTest 625/625 通过；公开固定语料回归随后复验。
+逐 section 重读 Abri-Moto-VCCF25 的九张 gzip DG 后，确认每张均为 48 个 section，九张图纸的目录、表宽及字段描述符签名彼此一致；记录数分别为 130、897、681、704、895、543、130、592、1001，共 5,573。此前 DG 9.50 证据页把单张图纸的 897 条记录写成了工程总量，现已更正。对照当前 9.54 语义入口，table 259/260/269 的 9.50 行宽为 664/4740/6148 字节，而 9.54 为 712/4788/6196；现有 9.54 签名尚未固定字段描述符数量，9.50 这三表的描述符数为 101/652/804。其余表宽相同不足以证明偏移或语义相同，因此没有推广 9.54 的 subject/view/dimension 偏移。现为 9.50 增加专属精确签名、正逆目录序规范化，并读取共同布局的 type-293 字符串、type-295/297/298 属性、type-266 图幅和已交叉核对的 type-269 主体类型/GUID；九张真实样本合计 365 条字符串、35 项属性、36 条属性链接和 9 个图幅，六份 sidecar 图幅尺寸及类型均匹配。因 `grProjectGuid` 对所选 DB1 的 GUID 为 0/9 匹配，仍不建立 DG→DB1 对象链接。综合 CTest 与公开固定语料回归结果见上方本轮记录。
 
 ## 2026-10-29：Shapes 压缩几何进入工程资源关联回归
 

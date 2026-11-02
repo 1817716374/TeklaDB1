@@ -180,6 +180,9 @@ struct DrawingStraightDimensionOccurrence
 };
 struct DrawingSubject
 {
+    // DG 9.50 decodes only observed type codes 1/2/7; type 7 remains Unknown.
+    // 9.50 GUIDs for types 1/2 are raw 16-byte identity values. Their presence
+    // does not by itself establish project scope or a DB1 object association.
     std::uint32_t recordId = 0;
     std::uint32_t typeCode = 0;
     DrawingSubjectKind kind = DrawingSubjectKind::Unknown;

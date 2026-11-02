@@ -678,7 +678,41 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
         }
         if (older950)
         {
-            result.diagnostics.emplace_back("9.50 strings, properties/links and sheet dimensions decoded; subject, views, dimensions, model references and graphics remain raw");
+            const auto& subjects=table(result.raw,269).records;
+            bool subjectDecoded=false;
+            if(subjects.size()!=1)
+                result.diagnostics.emplace_back("9.50 drawing subject count is ambiguous; type-269 records retained raw");
+            else
+            {
+                const auto& row=subjects.front().payload;
+                if(row.size()!=6148 || u32(row,0)!=269 || !u32(row,4))
+                    throw std::runtime_error("invalid 9.50 drawing subject record header");
+                const auto typeCode=u32(row,12);
+                if(u32(row,8)!=0 || (typeCode!=1 && typeCode!=2 && typeCode!=7))
+                    result.diagnostics.emplace_back("unsupported 9.50 drawing subject fields retained raw");
+                else
+                {
+                    DrawingSubject subject;
+                    subject.recordId=u32(row,4);
+                    subject.typeCode=typeCode;
+                    const bool hasGuid=std::any_of(row.begin()+16,row.begin()+32,[](auto value){return value!=0;});
+                    if(typeCode==1 || typeCode==2)
+                    {
+                        if(!hasGuid) throw std::runtime_error("empty 9.50 drawing subject GUID");
+                        subject.modelGuid=binaryGuid(row,16);
+                        subject.kind=typeCode==1?DrawingSubjectKind::SinglePart:DrawingSubjectKind::Assembly;
+                    }
+                    else if(hasGuid)
+                        result.diagnostics.emplace_back("9.50 multiple-object subject GUID layout is unverified; retained raw");
+                    else
+                        subject.kind=DrawingSubjectKind::Unknown;
+                    result.subject=std::move(subject);
+                    subjectDecoded=true;
+                }
+            }
+            result.diagnostics.emplace_back(subjectDecoded?
+                "9.50 drawing subject type and identity fields decoded; views, dimensions, model references and graphics remain raw":
+                "9.50 drawing subject fields retained raw; views, dimensions, model references and graphics remain raw");
             if (options.retainDecompressedFileImage) result.raw.decompressedFileImage=std::move(data);
             return true;
         }

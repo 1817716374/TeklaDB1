@@ -194,7 +194,8 @@ if(TEKLADB1_BUILD_TESTS)
             numbering_empty_844_empty numbering_empty_844_nonempty
             numbering_empty_874_empty numbering_empty_874_nonempty
             numbering_header_837 numbering_header_874
-            drawing950_schema
+            drawing950_schema drawing950_subject_part drawing950_subject_assembly drawing950_subject_multiple
+            drawing950_subject_unknown drawing950_subject_duplicate drawing950_subject_reserved drawing950_subject_empty_guid
             drawing_valid drawing_mark_malformed drawing_line_valid drawing_line_duplicate_index drawing_line_missing_reference drawing_cycle
             drawing_missing_chunk drawing_duplicate drawing_missing_property drawing_signature
             drawing_nonfinite drawing_truncated drawing_limit numbering_unknown drawing_unknown)

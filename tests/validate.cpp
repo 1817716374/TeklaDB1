@@ -726,7 +726,9 @@ int run(const std::string& mode, const std::filesystem::path& path)
             });
             std::size_t failed=0, drawings=0, metadata=0, rawDrawings=0, parsedDrawings=0;
             std::size_t drawingProjectGuidMatches=0;
-            std::size_t metadataSheetMatches=0, strings=0, properties=0, links=0, sheets=0;
+            std::size_t subjects=0, subjectIdentityMatches=0;
+            std::map<std::uint32_t,std::size_t> subjectTypes;
+            std::size_t metadataSheetMatches=0, subjectMetadataGuidConflicts=0, strings=0, properties=0, links=0, sheets=0;
             bool sawLegacy1252Name=false;
             for (const auto& file:project.files)
             {
@@ -753,7 +755,35 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 strings+=drawing.strings.size(); properties+=drawing.properties.size();
                 links+=drawing.propertyLinks.size(); sheets+=drawing.sheets.size();
                 drawingProjectGuidMatches+=!drawing.projectGuid.empty() && drawing.projectGuid==project.model.databaseGuid;
-                if(drawing.subject)throw std::runtime_error("9.50 drawing subject semantics were not independently verified");
+                if(drawing.subject)
+                {
+                    ++subjects;
+                    ++subjectTypes[drawing.subject->typeCode];
+                    if(!drawing.subject->modelGuid.empty())
+                    {
+                        const auto identity=std::find_if(project.model.identities.begin(),project.model.identities.end(),[&](const auto& item) {
+                            return item.second.guid==drawing.subject->modelGuid;
+                        });
+                        if(identity==project.model.identities.end())
+                            throw std::runtime_error("9.50 drawing subject GUID is absent from paired DB1 identity records");
+                        const auto id=identity->first;
+                        const auto matches=std::count_if(project.model.identities.begin(),project.model.identities.end(),[&](const auto& item) {
+                            return item.second.guid==drawing.subject->modelGuid;
+                        });
+                        if(matches!=1)throw std::runtime_error("9.50 drawing subject GUID is ambiguous in paired DB1");
+                        if(drawing.subject->typeCode==1 &&
+                           (drawing.subject->kind!=tekla::DrawingSubjectKind::SinglePart || !project.model.parts.count(id) ||
+                            std::find(project.model.unhandledPartIds.begin(),project.model.unhandledPartIds.end(),id)==project.model.unhandledPartIds.end()))
+                            throw std::runtime_error("9.50 part subject does not match a retained DB1 part identity");
+                        if(drawing.subject->typeCode==2 &&
+                           (drawing.subject->kind!=tekla::DrawingSubjectKind::Assembly ||
+                            std::none_of(project.model.assemblies.begin(),project.model.assemblies.end(),[&](const auto& a){return a.id==id;})))
+                            throw std::runtime_error("9.50 assembly subject does not match a DB1 assembly identity");
+                        ++subjectIdentityMatches;
+                    }
+                    else if(drawing.subject->typeCode!=7 || drawing.subject->kind!=tekla::DrawingSubjectKind::Unknown)
+                        throw std::runtime_error("9.50 subject without an identity has unsupported classification");
+                }
             }
             for(const auto& entry:project.drawingMetadata)
             {
@@ -764,6 +794,11 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 const auto& dg=drawing->second;
                 if(*entry.second.width==dg.sheets[0].width && *entry.second.height==dg.sheets[0].height)
                     ++metadataSheetMatches;
+                if(dg.subject && (!entry.second.drawingType || *entry.second.drawingType!=dg.subject->typeCode))
+                    throw std::runtime_error("9.50 metadata drawing type differs from decoded DG subject type");
+                if(dg.subject && !dg.subject->modelGuid.empty() && !entry.second.mainObjectGuid.empty() &&
+                   entry.second.mainObjectGuid!=dg.subject->modelGuid)
+                    ++subjectMetadataGuidConflicts;
             }
             if(project.model.databasePath!=main || project.model.storageVersion!="9.50" ||
                project.model.parts.size()!=177 || !project.model.actualPartIds.empty() ||
@@ -775,7 +810,9 @@ int run(const std::string& mode, const std::filesystem::path& path)
                !project.numbering.at(legacyDb2).series.empty() || !pairing || !secondaryPairing ||
                project.numbering.at(db2).series.size()!=9 || drawings!=9 || parsedDrawings!=9 || rawDrawings!=0 ||
                project.drawings.size()!=9 || strings!=365 || properties!=35 || links!=36 || sheets!=9 ||
-               metadataSheetMatches!=6 || !project.drawingSubjectAssociations.empty() ||
+               metadataSheetMatches!=6 || subjectMetadataGuidConflicts!=3 || subjects!=9 || subjectIdentityMatches!=3 || subjectTypes[1]!=2 ||
+               subjectTypes[2]!=1 || subjectTypes[7]!=6 || !project.drawingSubjectAssociations.empty() ||
+               !project.drawingModelAssociations.empty() ||
                project.drawingMetadataAssociations.size()!=6 ||
                std::any_of(project.drawingMetadataAssociations.begin(),project.drawingMetadataAssociations.end(),[](const auto& a) {
                    return a.modelObjectId.has_value() || a.evidence!=tekla::DrawingMetadataAssociation::Evidence::FilenameAndSheet;
@@ -789,6 +826,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
                      <<" bolts="<<project.model.boltGroups.size()<<" components="<<project.model.components.size()
                      <<" db2="<<project.numbering.size()<<" empty_844=1 secondary_pair=1 raw="<<project.rawCompanions.size()
                      <<" drawings="<<drawings<<" parsed_drawings="<<parsedDrawings<<" raw_drawings="<<rawDrawings<<" metadata="<<metadata
+                     <<" subjects="<<subjects<<" subject_identity_db1_matches="<<subjectIdentityMatches
+                     <<" subject_metadata_guid_conflicts="<<subjectMetadataGuidConflicts
                      <<" drawing_strings="<<strings<<" drawing_properties="<<properties<<" property_links="<<links
                      <<" sheets="<<sheets<<" metadata_sheet_matches="<<metadataSheetMatches
                      <<" dg_project_guid_matches="<<drawingProjectGuidMatches
