@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include <optional>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -36,6 +37,10 @@ struct Identity
     std::string guid;
     // 8.95/9.08: reference to IdentityClass, not an owner ID.
     uint32_t classReferenceId = 0;
+    // 9.50 table 353 stores four words before its 16-byte GUID. Only the
+    // object ID (word 0) and owner ID (word 3) are currently verified.
+    std::array<uint32_t, 4> rawIdentityWords{};
+    bool hasRawIdentityWords = false;
 };
 
 struct IdentityClass
@@ -79,6 +84,11 @@ struct ProfileContourPoint
     uint32_t chamferType = 0;
     float chamferX = 0.0f;
     float chamferY = 0.0f;
+    // Appended for source compatibility; Sketch Solver profile contours carry
+    // these saved chamfer dimensions and flags alongside type/X/Y.
+    double chamferDz1 = 0.0;
+    double chamferDz2 = 0.0;
+    uint32_t chamferFlags = 0;
 };
 
 enum class ProfileSource
@@ -499,6 +509,9 @@ struct Model
     std::unordered_map<uint32_t, Point> points;
     std::unordered_map<uint32_t, Frame> frames;
     std::unordered_map<std::string, Profile> profiles;
+    // Names retained in profiles for source compatibility, but whose profdb.bin
+    // definition or ID association is not unique.
+    std::set<std::string> ambiguousProfileNames;
     std::unordered_map<uint32_t, PartDefinition> definitions;
     std::unordered_map<uint32_t, Part> parts;
     std::vector<uint32_t> actualPartIds;
@@ -538,5 +551,14 @@ struct Model
     std::unordered_map<uint32_t, ReinforcementDefinition> reinforcementDefinitions;
     std::unordered_map<uint32_t, Reinforcement> reinforcements;
     std::unordered_map<uint32_t, std::vector<uint32_t>> reinforcementIdsByFather;
+    // Appended for source compatibility. In verified 7.82/9.52 component
+    // libraries and 9.08 main models, type-39 parts remain in `parts` with
+    // geometry/definitions, but are owned by component instances and are not
+    // standalone model parts or operatives.
+    std::vector<uint32_t> componentPartIds;
+    // IDRM namespace GUID byte sequences found in this database's validated
+    // allocation preamble. This establishes namespace-level file scope only;
+    // it does not map static IDs to runtime object IDs.
+    std::vector<std::array<std::uint8_t, 16>> matchedIdRangeMapperNamespaceGuids;
 };
 }

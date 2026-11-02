@@ -22,8 +22,25 @@ int drawing844Validation(const std::filesystem::path& folder)
         if(pair.sourceGuid=="152f6ed8-4daa-4276-b493-0aea86e0bd65" && pair.targetGuid=="2bd3f71c-e5e6-49ee-a2c5-7e870b087658")++matches;
     if(!rawGuid || matches!=1 || drawing.projectGuid!="152F6ED8-4DAA-4276-B493-0AEA86E0BD65" || drawing.storedFileName!="DID54A03D14-3328-47D1-B298-9B37193B88A2.dg")
         throw std::runtime_error("8.44 drawing historical project identity evidence mismatch");
-    if(!drawing.modelReferences.empty() || drawing.subject || !drawing.viewsByContext.empty() || !drawing.straightDimensions.empty() || drawing.unhandledViewRecordIds.size()!=1 || drawing.unhandledDimensionRecordIds.size()!=13 || drawing.diagnostics.empty())
-        throw std::runtime_error("8.44 unknown geometry/identity scope was silently changed");
-    std::cout<<"version=8.44 strings=41 properties=5 links=5 mark_history=1 project_history=1 deferred_views=1 deferred_dimensions=13\n";
+    if(!drawing.modelReferences.empty() || drawing.subject || drawing.viewsByRecordId.size()!=1 || drawing.viewsByContext.size()!=1 ||
+       !drawing.unhandledViewRecordIds.empty() || drawing.straightDimensions.size()!=13 || drawing.straightDimensionSets.size()!=5 ||
+       !drawing.unhandledDimensionRecordIds.empty() || !drawing.unhandledDimensionSetRecordIds.empty() || drawing.diagnostics.empty())
+        throw std::runtime_error("8.44 partial view/dimension geometry or unknown identity scope changed");
+    const auto& view=drawing.viewsByRecordId.begin()->second;
+    const auto norm=[](const tekla::DrawingPoint3& v) { return std::sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]); };
+    if(view.contextId!=11 || std::abs(norm(view.viewCoordinates.axisX)-1)>1e-6 || std::abs(norm(view.viewCoordinates.axisY)-1)>1e-6 ||
+       std::abs(view.viewCoordinates.axisX[0]*view.viewCoordinates.axisY[0]+view.viewCoordinates.axisX[1]*view.viewCoordinates.axisY[1]+view.viewCoordinates.axisX[2]*view.viewCoordinates.axisY[2])>1e-6)
+        throw std::runtime_error("8.44 decoded view basis is not orthonormal");
+    std::size_t links=0;
+    for(const auto& entry:drawing.straightDimensions)
+    {
+        const auto& dimension=entry.second;
+        if(dimension.subtypeCode!=1 || dimension.contextId!=11 ||
+           !drawing.straightDimensionSets.count(dimension.dimensionSetId))
+            throw std::runtime_error("8.44 dimension subtype, geometry or set association mismatch");
+    }
+    for(const auto& entry:drawing.straightDimensionSets)links+=entry.second.dimensionIds.size();
+    if(links!=13)throw std::runtime_error("8.44 dimension-set links are incomplete");
+    std::cout<<"version=8.44 strings=41 properties=5 links=5 mark_history=1 project_history=1 views=1 dimensions=13 sets=5 associations=13\n";
     return 0;
 }

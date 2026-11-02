@@ -7,11 +7,13 @@
 #include <tekla/Numbering.hpp>
 #include <tekla/Environment.hpp>
 #include <tekla/GuidMappings.hpp>
+#include <tekla/IdRangeMapper.hpp>
+#include <tekla/History.hpp>
 #include <optional>
 
 namespace tekla
 {
-enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping, DrawingMetadata, Analysis, AnalysisSettings };
+enum class FileRole { Model, ComponentLibrary, Numbering, Environment, Options, Catalog, Drawing, History, Other, IdentityMapping, DrawingMetadata, Analysis, AnalysisSettings, IdRangeMapper, AnalysisResults, PlanDatabase, ModelMetadata };
 enum class ReadLevel { Discovered, Raw, Semantic, Failed, External, PartialSemantic };
 struct ProjectFile
 {
@@ -45,10 +47,19 @@ struct ProjectOptions
     // Caller explicitly trusts same-directory, same-basename 7.30/7.64/7.82 DB1/DB2 files
     // when both lack GUIDs. Never bypasses a GUID or storage-version conflict.
     bool trustLegacyNumberingBasenames = false;
+    // Caller explicitly scopes all DG files discovered under this readProject
+    // root to its selected legacy DB1. Enables numeric subject/reference links
+    // only when both files lack project GUIDs and storage versions match.
+    bool trustLegacyDrawingObjectIds = false;
     bool readGuidMappings = true;
     bool readDrawingMetadata = true;
     bool readAnalysisSettings = true;
+    bool readProfileLibraries = true;
+    bool readRebarScheduleConfig = true;
+    bool readIdRangeMappers = true;
+    bool readHistory = true;
 };
+enum class DrawingPairEvidence { ProjectGuidAndObjectIdentity, ExplicitLegacyNumericScope };
 struct DrawingModelAssociation
 {
     std::filesystem::path drawing;
@@ -57,6 +68,7 @@ struct DrawingModelAssociation
     // For numeric DG identities this is the matched DB1 identity's GUID.
     std::string modelGuid;
     std::uint32_t drawingContextId = 0;
+    DrawingPairEvidence pairingEvidence = DrawingPairEvidence::ProjectGuidAndObjectIdentity;
 };
 struct AttributeDefinitionAssociation
 {
@@ -72,6 +84,34 @@ struct SurfaceMaterialAssociation
     std::uint32_t surfaceTreatmentId = 0;
     std::size_t materialIndex = 0;
 };
+struct PartMaterialAssociation
+{
+    std::filesystem::path database;
+    std::uint32_t objectId = 0;
+    std::string materialName;
+    std::size_t materialIndex = 0;
+};
+struct ProfileCatalogAssociation
+{
+    std::filesystem::path database;
+    std::uint32_t objectId = 0;
+    std::string profileName;
+    std::filesystem::path catalog;
+    db1::ProfileSource source = db1::ProfileSource::Unknown;
+};
+struct ProfileRuleSectionAssociation
+{
+    std::filesystem::path profitab;
+    std::size_t ruleIndex = 0;
+    std::filesystem::path clb;
+    std::size_t sectionIndex = 0; // index into Project::clbDocuments.at(clb).sections
+};
+struct ClbIncludeAssociation
+{
+    std::filesystem::path components;
+    std::size_t includeIndex = 0; // index into Project::clbDocuments.at(components).includes
+    std::filesystem::path clb;
+};
 enum class NumberingPairEvidence { DatabaseGuid, ExplicitLegacyBasename };
 struct ObjectNumberingSeriesAssociation
 {
@@ -80,6 +120,18 @@ struct ObjectNumberingSeriesAssociation
     std::uint32_t objectId = 0;
     std::uint32_t numberingRecordId = 0;
     std::size_t seriesIndex = 0; // index into Project::numbering.at(numberingDatabase).series
+    NumberingPairEvidence pairingEvidence = NumberingPairEvidence::DatabaseGuid;
+};
+struct ReinforcementNumberingSeriesAssociation
+{
+    std::filesystem::path database;
+    std::filesystem::path numberingDatabase;
+    std::uint32_t numberingRecordId = 0;
+    std::size_t seriesIndex = 0; // index into Project::numbering.at(numberingDatabase).series
+    // Exact raw equality only: DB1 reinforcement payload @8 and DB2 series
+    // payload @72, scoped by the same exact prefix and start number.
+    std::uint32_t db1RawField = 0;
+    std::uint32_t db2RawField = 0;
     NumberingPairEvidence pairingEvidence = NumberingPairEvidence::DatabaseGuid;
 };
 struct OptionSettingAssociation
@@ -95,6 +147,23 @@ struct DrawingMetadataAssociation
     // with MainObjectGuid. Metadata never supplies missing DG subject identity.
     std::optional<std::uint32_t> modelObjectId;
 };
+struct BoltAssemblyStandardAssociation
+{
+    std::filesystem::path assemblyCatalog;
+    std::size_t assemblyIndex = 0;
+    std::size_t componentIndex = 0; // index into the assembly's seven component slots
+    std::string standard;
+    std::filesystem::path boltCatalog;
+    // All size-specific screwdb entries with the exact stored standard.
+    std::vector<std::size_t> boltEntryIndices;
+};
+struct HistoryObjectAssociation
+{
+    std::filesystem::path historyDatabase;
+    std::int64_t historyItemId = 0;
+    std::uint32_t modelObjectId = 0;
+    std::string modelGuid;
+};
 struct Project
 {
     db1::Model model;
@@ -103,6 +172,11 @@ struct Project
     std::optional<db1::BoltCatalog> bolts;
     std::optional<db1::BoltAssemblyCatalog> boltAssemblies;
     std::optional<db1::ProfitabCatalog> profileRules;
+    std::optional<db1::RebarShapeCatalog> rebarShapeCatalog;
+    std::optional<db1::RebarScheduleConfig> rebarScheduleConfig;
+    std::map<std::filesystem::path, db1::ClbDocument> clbDocuments;
+    std::vector<ClbIncludeAssociation> clbIncludeAssociations;
+    std::vector<ProfileRuleSectionAssociation> profileRuleSectionAssociations;
     db1::ShapeCatalog shapes;
     std::map<std::filesystem::path, db1::RawDatabase> rawCompanions;
     std::vector<ProjectFile> files;
@@ -117,7 +191,11 @@ struct Project
     std::vector<DrawingModelAssociation> drawingSubjectAssociations;
     // Exact unique name matches into materials->materials, scoped by DB1 path.
     std::vector<SurfaceMaterialAssociation> surfaceMaterialAssociations;
+    // Exact profile-name matches to one catalog source. Ambiguous names across
+    // catalogs are left unlinked and diagnosed instead of selecting a source.
+    std::vector<ProfileCatalogAssociation> profileCatalogAssociations;
     std::vector<ObjectNumberingSeriesAssociation> objectNumberingSeriesAssociations;
+    std::vector<ReinforcementNumberingSeriesAssociation> reinforcementNumberingSeriesAssociations;
     std::optional<OptionSettingsFile> optionSettings;
     std::vector<OptionSettingAssociation> optionSettingAssociations;
     std::optional<GuidMappingFile> guidMappings;
@@ -128,6 +206,14 @@ struct Project
     // No DrawingGuid equality or "latest version" selection is inferred.
     std::vector<DrawingMetadataAssociation> drawingMetadataAssociations;
     std::map<std::filesystem::path,AnalysisModelSettings> analysisSettings;
+    std::map<std::filesystem::path, IdRangeMapperFile> idRangeMappers;
+    // Exact unique part-material name matches into materials->materials.
+    // Missing or duplicate catalog names remain unlinked.
+    std::vector<PartMaterialAssociation> partMaterialAssociations;
+    // Exact assdb component-standard matches into every screwdb entry with that standard.
+    std::vector<BoltAssemblyStandardAssociation> boltAssemblyStandardAssociations;
+    std::map<std::filesystem::path, HistoryDatabase> historyDatabases;
+    std::vector<HistoryObjectAssociation> historyObjectAssociations;
 };
 // True means the main model was read. Check file levels and diagnostics for
 // partial companions. PartialSemantic is intentionally distinct from Semantic.

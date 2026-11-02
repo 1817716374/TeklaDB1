@@ -5,8 +5,10 @@
 #include "BinaryIO.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <cctype>
 #include <cerrno>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -70,13 +72,21 @@ std::vector<std::string> split(const std::string& value, char delimiter)
     return result;
 }
 
-int optionalInteger(const std::string& value)
+bool optionalInteger(const std::string& value, int& result)
 {
     if (value.empty())
-        return 0;
-    char* end = nullptr;
-    const auto number = std::strtol(value.c_str(), &end, 10);
-    return end && *end == '\0' ? static_cast<int>(number) : 0;
+    {
+        result = 0;
+        return true;
+    }
+    auto begin = value.data();
+    const auto end = begin + value.size();
+    if (*begin == '+')
+        ++begin;
+    if (begin == end)
+        return false;
+    const auto parsed = std::from_chars(begin, end, result, 10);
+    return parsed.ec == std::errc{} && parsed.ptr == end;
 }
 
 std::string stripLineComment(const std::string& line)
@@ -197,8 +207,10 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
         for (std::size_t index = 0; index < tables[1].count; ++index)
         {
             const auto* value = row(1, index);
-            stringChunks[readNumber<std::uint32_t>(value, 1)] =
-                {fixedString(value, 5, 28), readNumber<std::uint32_t>(value, 33)};
+            const auto id = readNumber<std::uint32_t>(value, 1);
+            if (!id || !stringChunks.emplace(id,
+                    StringChunk{fixedString(value, 5, 28), readNumber<std::uint32_t>(value, 33)}).second)
+                throw std::runtime_error("duplicate or zero pgdb.bin string chunk ID " + std::to_string(id));
         }
         const auto resolveString = [&](std::uint32_t first) {
             std::string value;
@@ -236,7 +248,14 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
             chamfer.dz1 = readNumber<double>(value, 25);
             chamfer.dz2 = readNumber<double>(value, 33);
             chamfer.flags = readNumber<std::uint32_t>(value, 41);
-            result.chamfers[chamfer.id] = chamfer;
+            if (!chamfer.id || !std::isfinite(chamfer.x) || !std::isfinite(chamfer.y) ||
+                !std::isfinite(chamfer.dz1) || !std::isfinite(chamfer.dz2))
+                throw std::runtime_error("invalid pgdb.bin chamfer ID or non-finite geometry");
+            const auto floatLimit = static_cast<double>((std::numeric_limits<float>::max)());
+            if (std::abs(chamfer.x) > floatLimit || std::abs(chamfer.y) > floatLimit)
+                throw std::runtime_error("out-of-range pgdb.bin chamfer coordinate");
+            if (!result.chamfers.emplace(chamfer.id, chamfer).second)
+                throw std::runtime_error("duplicate pgdb.bin chamfer ID " + std::to_string(chamfer.id));
         }
         for (std::size_t index = 0; index < tables[3].count; ++index)
         {
@@ -245,7 +264,10 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
             point.id = readNumber<std::uint32_t>(value, 1);
             point.chamferId = readNumber<std::uint32_t>(value, 5);
             point.value = {readNumber<double>(value, 9), readNumber<double>(value, 17)};
-            result.points[point.id] = point;
+            if (!point.id || !std::isfinite(point.value[0]) || !std::isfinite(point.value[1]))
+                throw std::runtime_error("invalid pgdb.bin point ID or non-finite coordinates");
+            if (!result.points.emplace(point.id, point).second)
+                throw std::runtime_error("duplicate pgdb.bin point ID " + std::to_string(point.id));
         }
 
         struct PointBlock
@@ -260,11 +282,14 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
             const auto* value = row(2, index);
             PointBlock block;
             const auto id = readNumber<std::uint32_t>(value, 1);
+            if (!id)
+                throw std::runtime_error("zero pgdb.bin point block ID");
             block.flags = readNumber<std::uint32_t>(value, 5);
             for (std::size_t pointIndex = 0; pointIndex < block.pointIds.size(); ++pointIndex)
                 block.pointIds[pointIndex] = readNumber<std::uint32_t>(value, 9 + pointIndex * 4);
             block.next = readNumber<std::uint32_t>(value, 49);
-            blocks[id] = block;
+            if (!blocks.emplace(id, block).second)
+                throw std::runtime_error("duplicate pgdb.bin point block ID " + std::to_string(id));
         }
 
         for (std::size_t index = 0; index < tables[0].count; ++index)
@@ -278,6 +303,9 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
             profile.flags = readNumber<std::uint32_t>(value, 21);
             for (std::size_t solved = 0; solved < profile.solvedValues.size(); ++solved)
                 profile.solvedValues[solved] = readNumber<double>(value, 25 + solved * 8);
+            if (!std::all_of(profile.solvedValues.begin(), profile.solvedValues.end(),
+                             [](double number) { return std::isfinite(number); }))
+                throw std::runtime_error("non-finite pgdb.bin solved profile value");
             profile.rawPayload.assign(value + 1, value + 101);
 
             std::unordered_set<std::uint32_t> visited;
@@ -320,15 +348,22 @@ bool parseProfileGeometryCatalog(const std::filesystem::path& path,
                         destination.chamferType = chamfer->second.type;
                         destination.chamferX = static_cast<float>(chamfer->second.x);
                         destination.chamferY = static_cast<float>(chamfer->second.y);
+                        destination.chamferDz1 = chamfer->second.dz1;
+                        destination.chamferDz2 = chamfer->second.dz2;
+                        destination.chamferFlags = chamfer->second.flags;
                     }
+                    else if (source->second.chamferId)
+                        result.diagnostics.push_back("profile " + profile.name +
+                                                     " references missing chamfer " +
+                                                     std::to_string(source->second.chamferId));
                     profile.contour.push_back(destination);
                 }
                 current = block->second.next;
             }
             if (profile.name.empty())
                 result.diagnostics.push_back("pgdb.bin contains an unnamed solved profile");
-            else
-                result.profiles[profile.name] = std::move(profile);
+            else if (!result.profiles.emplace(profile.name, std::move(profile)).second)
+                throw std::runtime_error("duplicate pgdb.bin solved profile name");
         }
         return true;
     }
@@ -453,6 +488,7 @@ bool parseBoltCatalog(const std::filesystem::path& path, BoltCatalog& result, st
             for (std::size_t field = 0; field < bolt.trailingDimensions.size(); ++field)
                 bolt.trailingDimensions[field] = readNumber<float>(row, 89 + field * 4);
             bolt.rawPayload.assign(row + 1, row + 117);
+            bolt.standard = fixedString(row, 53, 28);
             result.bolts.push_back(std::move(bolt));
         }
         return true;
@@ -528,11 +564,27 @@ bool parseProfitabCatalog(const std::filesystem::path& path, ProfitabCatalog& re
             ParametricProfileRule rule;
             rule.prefix = fields[0];
             rule.type = fields[1];
-            rule.sortOrder = fields.size() > 2 ? optionalInteger(fields[2]) : 0;
-            rule.unit = fields.size() > 3 ? optionalInteger(fields[3]) : 0;
-            rule.minimumNumbers = fields.size() > 4 ? optionalInteger(fields[4]) : 0;
-            rule.maximumNumbers = fields.size() > 5 ? optionalInteger(fields[5]) : 0;
+            std::array<int*, 4> numericFields{&rule.sortOrder, &rule.unit,
+                                               &rule.minimumNumbers, &rule.maximumNumbers};
+            bool validNumericFields = true;
+            for (std::size_t field = 0; field < numericFields.size(); ++field)
+                if (!optionalInteger(fields[field + 2], *numericFields[field]))
+                {
+                    result.diagnostics.push_back("line " + std::to_string(lineNumber) +
+                                                 " has an invalid integer in field " +
+                                                 std::to_string(field + 3));
+                    validNumericFields = false;
+                }
+            if (!validNumericFields)
+                continue;
             rule.generator = fields.size() > 6 ? fields[6] : std::string{};
+            const auto separator = rule.generator.find('.');
+            if (separator != std::string::npos && separator != 0 && separator + 1 < rule.generator.size() &&
+                rule.generator.find('.', separator + 1) == std::string::npos)
+            {
+                rule.generatorLibraryId = rule.generator.substr(0, separator);
+                rule.generatorSectionName = rule.generator.substr(separator + 1);
+            }
             rule.namePattern = fields.size() > 7 ? fields[7] : std::string{};
             rule.sourceLine = line;
             result.rules.push_back(std::move(rule));
@@ -612,6 +664,313 @@ bool parseClbDocument(const std::filesystem::path& path, ClbDocument& result, st
         }
         if (stack.size() != 1)
             throw std::runtime_error("CLB document ends inside an open block");
+
+        const auto lower = [](std::string value) {
+            std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
+                return static_cast<char>(std::tolower(c));
+            });
+            return value;
+        };
+        const auto namedValue = [&](const std::vector<ClbStatement>& statements, const std::string& keyword) {
+            std::vector<std::string> values;
+            for (const auto& statement : statements)
+                if (lower(statement.keyword) == keyword && !statement.arguments.empty())
+                    values.push_back(statement.arguments.front());
+            return values;
+        };
+        const auto argumentText = [](const ClbStatement& statement) {
+            std::string value;
+            for (const auto& argument : statement.arguments)
+            {
+                if (!value.empty()) value.push_back(' ');
+                value += argument;
+            }
+            return value;
+        };
+        const auto fieldValue = [&](const std::vector<ClbStatement>& statements, const std::string& keyword,
+                                    std::size_t ownerLine, bool required = false) {
+            std::vector<const ClbStatement*> matches;
+            for (const auto& candidate : statements)
+                if (lower(candidate.keyword) == keyword) matches.push_back(&candidate);
+            if (matches.size() != 1 || matches.front()->arguments.empty())
+            {
+                if (required || !matches.empty())
+                    result.diagnostics.push_back("CLB field '" + keyword + "' at line " + std::to_string(ownerLine) +
+                                                 " is missing or ambiguous");
+                return std::string{};
+            }
+            return argumentText(*matches.front());
+        };
+        const auto parseIndex = [](const std::string& text) -> std::optional<std::uint32_t> {
+            if (text.empty() || !std::all_of(text.begin(), text.end(), [](unsigned char c) { return std::isdigit(c); }))
+                return std::nullopt;
+            char* end = nullptr;
+            errno = 0;
+            const auto value = std::strtoul(text.c_str(), &end, 10);
+            if (errno || end == text.c_str() || *end != '\0' || value > std::numeric_limits<std::uint32_t>::max())
+                return std::nullopt;
+            return static_cast<std::uint32_t>(value);
+        };
+        const auto libraries = namedValue(result.statements, "library_id");
+        if (libraries.size() == 1)
+            result.libraryId = libraries.front();
+        else if (libraries.size() > 1)
+            result.diagnostics.push_back("multiple top-level library_id declarations; library identity is ambiguous");
+
+        for (const auto& statement : result.statements)
+            if (lower(statement.keyword) == "include")
+            {
+                if (statement.arguments.size() == 1)
+                    result.includes.push_back({statement.arguments.front(), statement.line});
+                else
+                    result.diagnostics.push_back("Include at line " + std::to_string(statement.line) +
+                                                 " has missing or ambiguous target");
+            }
+
+        for (const auto& statement : result.statements)
+        {
+            if (lower(statement.keyword) != "section_type") continue;
+            ClbSection section;
+            section.line = statement.line;
+            const auto names = namedValue(statement.children, "name");
+            if (names.size() == 1) section.name = names.front();
+            else result.diagnostics.push_back("Section_type at line " + std::to_string(statement.line) +
+                                               " has missing or ambiguous name");
+            for (const auto& child : statement.children)
+            {
+                const auto keyword = lower(child.keyword);
+                if (keyword == "base_attribute" || keyword == "expression")
+                {
+                    ClbNamedValue value;
+                    value.name = fieldValue(child.children, "name", child.line, true);
+                    value.type = fieldValue(child.children, "type", child.line, true);
+                    value.description = fieldValue(child.children, "description", child.line);
+                    value.defaultValue = fieldValue(child.children, "default", child.line, true);
+                    if (keyword == "expression") value.formula = fieldValue(child.children, "formula", child.line);
+                    value.line = child.line;
+                    if (value.name.empty()) continue;
+                    if (keyword == "base_attribute") section.baseAttributes.push_back(std::move(value));
+                    else section.expressions.push_back(std::move(value));
+                    continue;
+                }
+                if (keyword != "geometry") continue;
+                ClbGeometry geometry;
+                geometry.line = child.line;
+                geometry.name = fieldValue(child.children, "name", child.line, true);
+                for (const auto& faceStatement : child.children)
+                {
+                    if (lower(faceStatement.keyword) != "face") continue;
+                    ClbFace face;
+                    face.line = faceStatement.line;
+                    const auto faceIndex = fieldValue(faceStatement.children, "index", faceStatement.line, true);
+                    face.index = parseIndex(faceIndex);
+                    if (!faceIndex.empty() && !face.index)
+                        result.diagnostics.push_back("CLB face index at line " + std::to_string(faceStatement.line) +
+                                                     " is not an unsigned 32-bit integer");
+                    for (const auto& pointStatement : faceStatement.children)
+                    {
+                        if (lower(pointStatement.keyword) != "point") continue;
+                        ClbPointReference point;
+                        point.line = pointStatement.line;
+                        if (pointStatement.arguments.size() == 3)
+                        {
+                            point.stationIndex = parseIndex(pointStatement.arguments[0]);
+                            point.yReference = pointStatement.arguments[1];
+                            point.zReference = pointStatement.arguments[2];
+                        }
+                        if (!point.stationIndex || point.yReference.empty() || point.zReference.empty())
+                            result.diagnostics.push_back("CLB point at line " + std::to_string(pointStatement.line) +
+                                                         " must contain station, y-reference, and z-reference");
+                        else if (*point.stationIndex > 1)
+                            result.diagnostics.push_back("CLB point station at line " + std::to_string(pointStatement.line) +
+                                                         " is outside the documented start/end indices 0 and 1");
+                        face.points.push_back(std::move(point));
+                    }
+                    geometry.faces.push_back(std::move(face));
+                }
+                section.geometries.push_back(std::move(geometry));
+            }
+            result.sections.push_back(std::move(section));
+        }
+        return true;
+    }
+    catch (const std::exception& exception)
+    {
+        error = exception.what();
+        result = {};
+        return false;
+    }
+}
+
+bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis& result, std::string& error)
+{
+    result = {};
+    error.clear();
+    try
+    {
+        constexpr std::uintmax_t maxBytes = 64u * 1024u * 1024u;
+        std::error_code sizeError;
+        const auto size = std::filesystem::file_size(path, sizeError);
+        if (sizeError || size > maxBytes)
+            throw std::runtime_error("profile .lis file is missing or exceeds 64 MiB");
+        std::ifstream input(path, std::ios::binary);
+        if (!input) throw std::runtime_error("could not open profile .lis file");
+        std::string text((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+        if (!input.eof() && input.fail()) throw std::runtime_error("could not read profile .lis file");
+        if (text.size() != size) throw std::runtime_error("profile .lis file changed while being read");
+        if (text.find('\0') != std::string::npos) throw std::runtime_error("profile .lis contains a NUL byte");
+        result.rawText = text;
+        result.sourcePath = path;
+
+        struct Line { std::string text; std::size_t number; };
+        std::vector<Line> lines;
+        std::istringstream stream(text);
+        std::string line;
+        std::size_t lineNumber = 0;
+        while (std::getline(stream, line)) lines.push_back({line, ++lineNumber});
+        if (lines.empty()) throw std::runtime_error("profile .lis is empty");
+
+        const auto trim = [](std::string value)
+        {
+            const auto first = value.find_first_not_of(" \t\r");
+            if (first == std::string::npos) return std::string{};
+            const auto last = value.find_last_not_of(" \t\r");
+            return value.substr(first, last - first + 1);
+        };
+        std::size_t cursor = 0;
+        while (cursor < lines.size() && trim(lines[cursor].text).empty()) ++cursor;
+        if (cursor == lines.size()) throw std::runtime_error("profile .lis has no version header");
+        auto header = trim(lines[cursor].text);
+        constexpr char bom[] = "\xEF\xBB\xBF";
+        if (header.compare(0, 3, bom) == 0) header.erase(0, 3);
+        constexpr std::string_view prefix = "PROFILE DATABASE EXPORT VERSION";
+        if (header.compare(0, prefix.size(), prefix) != 0)
+            throw std::runtime_error("unsupported profile .lis header at line " + std::to_string(lines[cursor].number));
+        const auto equal = header.find('=', prefix.size());
+        if (equal == std::string::npos || trim(header.substr(prefix.size(), equal - prefix.size())) != "")
+            throw std::runtime_error("malformed profile .lis version header at line " + std::to_string(lines[cursor].number));
+        const auto versionText = trim(header.substr(equal + 1));
+        std::uint32_t version = 0;
+        const auto versionResult = std::from_chars(versionText.data(), versionText.data() + versionText.size(), version);
+        if (versionResult.ec != std::errc{} || versionResult.ptr != versionText.data() + versionText.size() || version != 2)
+            throw std::runtime_error("unsupported profile .lis export version at line " + std::to_string(lines[cursor].number));
+        result.version = version;
+        ++cursor;
+
+        const auto nextNonempty = [&]() -> const Line&
+        {
+            while (cursor < lines.size() && trim(lines[cursor].text).empty()) ++cursor;
+            if (cursor == lines.size()) throw std::runtime_error("unexpected end of profile .lis file");
+            return lines[cursor];
+        };
+        const auto parseUnsigned = [&](const std::string& value, std::size_t at) -> std::uint32_t
+        {
+            const auto token = trim(value);
+            std::uint32_t parsed = 0;
+            const auto converted = std::from_chars(token.data(), token.data() + token.size(), parsed);
+            if (token.empty() || converted.ec != std::errc{} || converted.ptr != token.data() + token.size())
+                throw std::runtime_error("invalid unsigned integer at line " + std::to_string(at));
+            return parsed;
+        };
+        const auto parseNumber = [&](const std::string& value, std::size_t at) -> double
+        {
+            const auto token = trim(value);
+            double parsed = 0.0;
+            const auto converted = std::from_chars(token.data(), token.data() + token.size(), parsed,
+                                                   std::chars_format::general);
+            if (token.empty() || converted.ec != std::errc{} || converted.ptr != token.data() + token.size() ||
+                !std::isfinite(parsed))
+                throw std::runtime_error("invalid finite number at line " + std::to_string(at));
+            return parsed;
+        };
+        std::unordered_set<std::string> duplicateNames;
+        std::unordered_set<std::string> seenNames;
+        while (cursor < lines.size())
+        {
+            while (cursor < lines.size() && trim(lines[cursor].text).empty()) ++cursor;
+            if (cursor == lines.size()) break;
+            const auto start = cursor;
+            const auto declaration = trim(lines[cursor].text);
+            constexpr std::string_view namePrefix = "PROFILE_NAME";
+            if (declaration.compare(0, namePrefix.size(), namePrefix) != 0)
+                throw std::runtime_error("expected PROFILE_NAME at line " + std::to_string(lines[cursor].number));
+            const auto nameEqual = declaration.find('=', namePrefix.size());
+            if (nameEqual == std::string::npos || !trim(declaration.substr(namePrefix.size(), nameEqual - namePrefix.size())).empty())
+                throw std::runtime_error("malformed PROFILE_NAME at line " + std::to_string(lines[cursor].number));
+            auto quoted = trim(declaration.substr(nameEqual + 1));
+            if (quoted.size() < 2 || quoted.front() != '"')
+                throw std::runtime_error("profile name must be quoted at line " + std::to_string(lines[cursor].number));
+            const auto closingQuote = quoted.find('"', 1);
+            const auto nameTail = closingQuote == std::string::npos ? std::string{} : trim(quoted.substr(closingQuote + 1));
+            if (closingQuote == std::string::npos || (!nameTail.empty() && nameTail != ";"))
+                throw std::runtime_error("malformed quoted profile name at line " + std::to_string(lines[cursor].number));
+            ProfileCatalogLisEntry entry;
+            entry.name = quoted.substr(1, closingQuote - 1);
+            if (entry.name.empty()) throw std::runtime_error("empty profile name at line " + std::to_string(lines[cursor].number));
+            if (!seenNames.emplace(entry.name).second) duplicateNames.emplace(entry.name);
+            ++cursor;
+
+            const auto& outerOpen = nextNonempty();
+            if (trim(outerOpen.text) != "{") throw std::runtime_error("expected profile block at line " + std::to_string(outerOpen.number));
+            ++cursor;
+            const auto& typeLine = nextNonempty();
+            std::unordered_map<std::string, std::string> headerFields;
+            std::istringstream typeStream(typeLine.text);
+            std::string field;
+            while (std::getline(typeStream, field, ';'))
+            {
+                field = trim(field);
+                if (field.empty()) continue;
+                const auto fieldEqual = field.find('=');
+                if (fieldEqual == std::string::npos)
+                    throw std::runtime_error("malformed profile type field at line " + std::to_string(typeLine.number));
+                const auto key = trim(field.substr(0, fieldEqual));
+                const auto value = trim(field.substr(fieldEqual + 1));
+                if ((key != "TYPE" && key != "SUB_TYPE" && key != "COORDINATE") ||
+                    !headerFields.emplace(key, value).second)
+                    throw std::runtime_error("unsupported or duplicate profile type field at line " + std::to_string(typeLine.number));
+            }
+            if (headerFields.size() != 3)
+                throw std::runtime_error("profile type line must contain TYPE, SUB_TYPE, and COORDINATE at line " + std::to_string(typeLine.number));
+            entry.type = parseUnsigned(headerFields.at("TYPE"), typeLine.number);
+            entry.subType = parseUnsigned(headerFields.at("SUB_TYPE"), typeLine.number);
+            entry.storedCoordinate = parseNumber(headerFields.at("COORDINATE"), typeLine.number);
+            ++cursor;
+
+            const auto& propertiesOpen = nextNonempty();
+            if (trim(propertiesOpen.text) != "{")
+                throw std::runtime_error("expected profile properties block at line " + std::to_string(propertiesOpen.number));
+            ++cursor;
+            for (;;)
+            {
+                const auto& propertyLine = nextNonempty();
+                const auto property = trim(propertyLine.text);
+                if (property == "}") { ++cursor; break; }
+                if (property.empty() || property.front() != '"')
+                    throw std::runtime_error("expected quoted numeric property at line " + std::to_string(propertyLine.number));
+                const auto propertyEnd = property.find('"', 1);
+                if (propertyEnd == std::string::npos)
+                    throw std::runtime_error("unterminated property name at line " + std::to_string(propertyLine.number));
+                const auto key = property.substr(1, propertyEnd - 1);
+                if (key.empty() || entry.properties.find(key) != entry.properties.end())
+                    throw std::runtime_error("empty or duplicate property name at line " + std::to_string(propertyLine.number));
+                const auto rawValue = trim(property.substr(propertyEnd + 1));
+                entry.properties.emplace(key, parseNumber(rawValue, propertyLine.number));
+                ++cursor;
+            }
+            const auto& outerClose = nextNonempty();
+            if (trim(outerClose.text) != "}")
+                throw std::runtime_error("expected end of profile block at line " + std::to_string(outerClose.number));
+            ++cursor;
+            for (std::size_t index = start; index < cursor; ++index)
+            {
+                entry.rawRecord += lines[index].text;
+                if (index + 1 < cursor) entry.rawRecord.push_back('\n');
+            }
+            result.entries.push_back(std::move(entry));
+        }
+        result.ambiguousProfileNames.assign(duplicateNames.begin(), duplicateNames.end());
+        std::sort(result.ambiguousProfileNames.begin(), result.ambiguousProfileNames.end());
         return true;
     }
     catch (const std::exception& exception)

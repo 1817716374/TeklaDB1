@@ -2,6 +2,7 @@
 #include <tekla/db1/Database.hpp>
 #include <algorithm>
 #include <cstring>
+#include <limits>
 #include <set>
 #include <stdexcept>
 
@@ -102,14 +103,22 @@ inline void sectionedDrawingContainer(const Bytes& data, RawDatabase& raw)
 {
     // 7.82 has fixed record tails; 8.44 adds 16 bytes per additional
     // reference descriptor. Walk lengths, never scan payloads for magic.
+    const bool legacy764=data.size()>=12 && std::memcmp(data.data(),"Xsteel! 7.64",12)==0;
     const bool older844=data.size()>=12 && std::memcmp(data.data(),"Xsteel# 8.44",12)==0;
     const bool exam908=data.size()>=12 && std::memcmp(data.data(),"Xsteel# 9.08",12)==0;
-    if (data.size()<76 || (!older844 && !exam908 && std::memcmp(data.data(),"Xsteel! 7.82",12)!=0) ||
+    const bool modern950=data.size()>=12 && std::memcmp(data.data(),"Xsteel# 9.50",12)==0;
+    if (data.size()<76 || (!legacy764 && !older844 && !exam908 && !modern950 && std::memcmp(data.data(),"Xsteel! 7.82",12)!=0) ||
         u32(data,12)!=1 || u32(data,16)!=0xdbcec0bc)
         throw std::runtime_error("unsupported legacy drawing preamble");
-    raw.kind=DatabaseKind::Drawing; raw.layout=DatabaseLayout::ModernSections; raw.storageVersion=exam908?"9.08":older844?"8.44":"7.82";
+    raw.kind=DatabaseKind::Drawing; raw.layout=DatabaseLayout::ModernSections;
+    raw.storageVersion=legacy764?"7.64":exam908?"9.08":modern950?"9.50":older844?"8.44":"7.82";
     raw.preamble.assign(data.begin(),data.begin()+76);
-    std::size_t pos=76;
+    const std::uint64_t legacy764Header=legacy764?40ULL+std::uint64_t(u32(data,32))*28ULL:76ULL;
+    if (legacy764Header>data.size() || legacy764Header>(std::numeric_limits<std::size_t>::max)())
+        throw std::runtime_error("invalid 7.64 drawing directory length");
+    std::size_t pos=static_cast<std::size_t>(legacy764Header);
+    if (pos>data.size()) throw std::runtime_error("truncated 7.64 drawing preamble");
+    raw.preamble.assign(data.begin(),data.begin()+static_cast<std::ptrdiff_t>(pos));
     while (pos<data.size())
     {
         if (data.size()-pos<12 || u32(data,pos)!=0xdbcec066) throw std::runtime_error("invalid legacy drawing section header");
@@ -118,13 +127,14 @@ inline void sectionedDrawingContainer(const Bytes& data, RawDatabase& raw)
         if (fields>(data.size()-pos)/4) throw std::runtime_error("truncated legacy drawing field descriptors");
         for (std::uint32_t i=0;i<fields;++i) { t.fieldDescriptors.push_back(u32(data,pos)); pos+=4; }
         std::uint64_t metadataSize=40;
-        if (older844 || exam908)
+        if (older844 || exam908 || modern950)
         {
             if (t.fieldDescriptors.empty() || t.fieldDescriptors.front()!=1 ||
                 std::any_of(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),[](auto f){return f>1;}))
                 throw std::runtime_error("unsupported 8.44 drawing reference descriptors");
             metadataSize=24+16*std::uint64_t(std::count(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),1U));
         }
+        if (legacy764) metadataSize=8;
         const auto stride=std::uint64_t(t.payloadSize)+1+metadataSize;
         while (pos<data.size() && (data[pos]==4 || data[pos]==12))
         {
@@ -136,7 +146,11 @@ inline void sectionedDrawingContainer(const Bytes& data, RawDatabase& raw)
             t.records.push_back(std::move(r)); pos+=static_cast<std::size_t>(stride);
         }
         if (pos==data.size() || data[pos]!=0) throw std::runtime_error("missing legacy drawing table terminator");
-        t.trailer={data[pos++]}; raw.tables.push_back(std::move(t));
+        t.trailer={data[pos++]};
+        // 7.64 may align adjacent sections with one additional zero byte;
+        // retain it with the preceding table for lossless reconstruction.
+        if (legacy764 && pos<data.size() && data[pos]==0) t.trailer.push_back(data[pos++]);
+        raw.tables.push_back(std::move(t));
     }
     if (raw.tables.empty() || raw.tables.front().payloadSize!=4 || raw.tables.front().records.empty())
         throw std::runtime_error("invalid legacy drawing directory");
@@ -150,7 +164,13 @@ inline void sectionedDrawingContainer(const Bytes& data, RawDatabase& raw)
     // Repeated directory entries are retained, not interpreted as duplicate
     // tables. First occurrences list the physical table roles in reverse order.
     if (types.size()+1!=raw.tables.size()) throw std::runtime_error("legacy drawing directory/table count mismatch");
-    for (std::size_t i=0;i<types.size();++i) raw.tables[i+1].ordinal=types[types.size()-1-i];
+    // 9.50 drawings in the pinned 2023 SP4 project use both forward and
+    // reverse directory order; physical section order remains ascending by
+    // table type. Other observed sectioned layouts retain the historical
+    // reverse-directory rule.
+    const bool modern950Forward=modern950 && types.front()<types.back();
+    for (std::size_t i=0;i<types.size();++i)
+        raw.tables[i+1].ordinal=modern950Forward?types[i]:types[types.size()-1-i];
 }
 inline void drawingContainer(const Bytes& data, RawDatabase& raw)
 {

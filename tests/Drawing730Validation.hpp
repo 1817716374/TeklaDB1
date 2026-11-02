@@ -62,5 +62,17 @@ void validateDrawing730Evidence(const std::filesystem::path& directory)
     }
     if(views!=91 || sheets!=35 || properties!=104 || general!=33 || parts!=2 || subjects.size()!=1 || axes.size()!=2 || partial!=35)
         throw std::runtime_error("7.30 drawing evidence counts changed");
-    std::cout<<"drawings=35 views=91 catalog_files=13 unique_subjects=1 unique_part_axes=2 automatic_subject_links=0\n";
+    options.trustLegacyDrawingObjectIds=true;
+    if(!tekla::readProject(directory,project,error,options))throw std::runtime_error(error);
+    if(project.drawingSubjectAssociations.size()!=2 || project.drawingModelAssociations.size()!=82)
+        throw std::runtime_error("explicit 7.30 numeric drawing scope did not resolve verified subjects and type-309 part references");
+    for(const auto& association:project.drawingSubjectAssociations)
+        if(association.modelObjectId!=311724 || association.modelGuid!=project.model.identities.at(311724).guid ||
+           association.pairingEvidence!=tekla::DrawingPairEvidence::ExplicitLegacyNumericScope)
+            throw std::runtime_error("explicit 7.30 subject association lost identity or evidence");
+    for(const auto& association:project.drawingModelAssociations)
+        if(!project.model.parts.count(association.modelObjectId) || association.modelGuid!=project.model.identities.at(association.modelObjectId).guid ||
+           association.pairingEvidence!=tekla::DrawingPairEvidence::ExplicitLegacyNumericScope)
+            throw std::runtime_error("explicit 7.30 type-309 association lost part identity or scope evidence");
+    std::cout<<"drawings=35 views=91 catalog_files=13 unique_subjects=1 explicit_subject_links=2 explicit_type309_part_references=82 automatic_subject_links=0\n";
 }

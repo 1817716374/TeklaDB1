@@ -145,6 +145,22 @@ def main():
     control()
     definition = originals["shape_definition"]
     geometry = originals["shape_geometry"]
+    geometry_path = paths["shape_geometry"]
+    compressed_path = geometry_path.with_suffix(".tez")
+    # Tekla documents that compressed geometry is stored as TEZ. This is a
+    # synthetic gzip transform of the pinned public XML, not a vendor TEZ
+    # sample; use it to exercise the real DB1/XML resource join end to end.
+    compressed_path.write_bytes(gzip.compress(geometry, mtime=0))
+    geometry_path.unlink()
+    try:
+        run("shape_geometry", compressed_path, expected(geometry, "shape_geometry", compressed_path.stem))
+        run("shape_pair_evidence", args.work.resolve() / "shapes-auvent",
+            "definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0")
+        run("shape_project_evidence", project_root,
+            "definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0 project_links=1")
+    finally:
+        compressed_path.unlink(missing_ok=True)
+        geometry_path.write_bytes(geometry)
     variants = [
         ("shape_definition", definition.replace(b"<Info>", b"<Info><!-- <Name>wrong</Name> --><Extension><Name>nested</Name></Extension>")),
         ("shape_definition", definition.replace(b"IFC BREP", b"IFC &amp;lt;&#x4e2d;")),
@@ -196,7 +212,7 @@ def main():
         for mode, path in paths.items():
             path.write_bytes(originals[mode])
     control()
-    print("2/2 independent shape XML comparisons, paired bounds, real project association, 3 structure/entity variants, 3 invalid mutations, 3 association mutations and gzip equivalence passed")
+    print("2/2 independent shape XML comparisons, paired bounds, real project association, gzip-TEZ resource association, 3 structure/entity variants, 3 invalid mutations and 3 association mutations passed")
 
 
 if __name__ == "__main__":

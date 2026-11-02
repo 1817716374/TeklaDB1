@@ -7,12 +7,14 @@ from pathlib import Path
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 
 import corpus
+import analyze_schema
 
 
-def independent_layout(data):
+def independent_layout(data, model_ids):
     """Length-driven Python walk, independently checked against native counts."""
     def words(offset, count):
         return struct.unpack_from('<' + 'I' * count, data, offset)
@@ -24,6 +26,7 @@ def independent_layout(data):
         pos += 24
     shift, count = words(pos, 2)
     assert shift == 5
+    direct_id_matches = sum(value in model_ids for value in words(pos + 8, count * 2))
     pos += 8 + count * 8
     assert words(pos, 1)[0] == contexts
     pos += 20
@@ -36,6 +39,10 @@ def independent_layout(data):
         pos += 12 + 4 * count
         while data[pos] != 0:
             assert data[pos] == 4
+            payload = pos + 1
+            for field_offset in range(0, width - 3, 4):
+                if words(payload + field_offset, 1)[0] in model_ids:
+                    direct_id_matches += 1
             pos += 1 + width + 8
             rows += 1
         pos += 1
@@ -45,7 +52,30 @@ def independent_layout(data):
     fingerprint = 14695981039346656037
     for value in data:
         fingerprint = ((fingerprint ^ value) * 1099511628211) & ((1 << 64) - 1)
-    return first, f'version=DB6-10014 tables={tables} records={rows} opaque=0 bytes={len(data)} fingerprint={fingerprint:x}'
+    return (first,
+            f'version=DB6-10014 tables={tables} records={rows} opaque=0 bytes={len(data)} fingerprint={fingerprint:x}',
+            direct_id_matches)
+
+
+def model_identity_ids(path):
+    """Read the paired 9.52 DB1 identity keys without using the C++ parser."""
+    database = analyze_schema.parse_database(path)
+    if database.storage_version != '9.52' or len(database.tables) != 356:
+        raise ValueError(f'unexpected paired DB1 schema: {path}')
+    data = analyze_schema.read_payload(path)
+    offsets = analyze_schema.section_offsets(data)
+    table = database.tables[355]
+    if table.payload_size != 72 or table.row_count != 277:
+        raise ValueError(f'unexpected paired DB1 identity table: {path}')
+    offset = offsets[355]
+    field_count = struct.unpack_from('<I', data, offset + 8)[0]
+    first = offset + 12 + field_count * 4
+    stride = table.payload_size + 9
+    ids = {struct.unpack_from('<I', data, first + row * stride + 1)[0]
+           for row in range(table.row_count)}
+    if len(ids) != 277:
+        raise ValueError(f'unexpected duplicate DB1 identity IDs: {path}')
+    return ids
 
 
 def main():
@@ -78,10 +108,12 @@ def main():
         project = Path(temp)
         for spec in specs:
             shutil.copyfile(corpus.safe_path(args.data, spec['path']), project / Path(spec['path']).name)
+        model_ids = model_identity_ids(project / 'Defining drawing views steel.db1')
         path = project / 'AnalysisPartDefaults.db6'
         compressed = path.read_bytes()
         data = gzip.decompress(compressed)
-        first, expected = independent_layout(data)
+        first, expected, direct_id_matches = independent_layout(data, model_ids)
+        assert direct_id_matches == 0, f'unexpected direct DB6/DB1 ID matches: {direct_id_matches}'
         run('raw', path, expected)
         path.write_bytes(data)
         run('raw', path, expected)
@@ -118,7 +150,7 @@ def main():
         run('analysis_project_strict', project, fail=True)
         path.write_bytes(compressed)
         run('analysis_project', project, baseline)
-    print(f'DB6 independent layout/reconstruction and {checks} parser/project checks passed; semantics remain unverified')
+    print(f'DB6 independent layout/reconstruction, 0 aligned allocation/payload-u32 matches against {len(model_ids)} paired DB1 IDs, and {checks} parser/project checks passed; semantics remain unverified')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-"""Verify that the fixed DWG geometry oracle rejects changed DG fields."""
+"""Verify fixed DG/DB1 associations and DWG geometry mutation rejection."""
 import argparse
 import gzip
 import json
@@ -23,6 +23,12 @@ def main():
     for name in names:
         if not corpus.verify(args.data / name, specs[name]):
             raise ValueError(f"unexpected evidence input: {name}; download the pinned corpus first")
+    project = subprocess.run([str(args.exe.resolve()), "drawing730_evidence",
+                              str(args.data / "btscm-dg730")],
+                             capture_output=True, encoding="utf8", errors="replace", timeout=120)
+    if project.returncode != 0 or "explicit_subject_links=2" not in project.stdout:
+        raise ValueError(f"7.30 explicit drawing scope failed: {project.stdout} {project.stderr}")
+    print("PASS 7.30 same-version opt-in associates both verified subjects; default remains unpaired")
     original = gzip.decompress((args.data / names[0]).read_bytes())
     assert original[:12] == b"Xsteel  7.30"
     count, width = struct.unpack_from("<II", original, 12)

@@ -54,6 +54,10 @@ def main():
 
     strings = {"DrawingGuid", "MainObjectGuid", "Author", "Mark", "Name", "Title1", "Title2", "Title3"}
 
+    known = {"DrawingGuid", "MainObjectGuid", "Author", "Mark", "Name", "Title1", "Title2", "Title3",
+             "Width", "Height", "DrawingType", "IssueDate", "NextDate", "IssueId", "Flag", "Revision",
+             "PlotDate", "ModifyDate", "CreateDate", "PartsNo", "UpToDate", "Lock", "AlwaysNecessary"}
+
     def fields(target):
         element = ET.fromstring(target.read_bytes())
         if element.tag != "DrawingVersionMetadata":
@@ -62,9 +66,11 @@ def main():
         actual = run("drawing_metadata_fields", target)
         if bytes.fromhex(actual.pop("raw")) != target.read_bytes():
             raise ValueError("raw drawing XML was changed")
-        if set(actual) != set(expected):
+        if set(actual) != set(expected) & known:
             raise ValueError("drawing metadata field presence changed")
         for key, value in expected.items():
+            if key not in known:
+                continue  # Retained byte-for-byte; no semantics inferred.
             if key in strings:
                 value = value.lower() if key.endswith("Guid") else value
                 equal = bytes.fromhex(actual[key]).decode("utf8") == value
@@ -75,9 +81,10 @@ def main():
             if not equal:
                 raise ValueError(f"metadata differs from independent XML: {key}")
 
-    def project(pairs=5, objects=1, metadata=5, failed=0, discovered=0, drawings=5, mode="drawing_metadata_project"):
+    def project(pairs=5, objects=1, metadata=5, failed=0, discovered=0, drawings=5,
+                mode="drawing_metadata_project", target=root):
         expected = dict(pairs=pairs, objects=objects, metadata=metadata, failed=failed, discovered=discovered, drawings=drawings)
-        actual = {k: int(v) for k, v in run(mode).items()}
+        actual = {k: int(v) for k, v in run(mode, target=target).items()}
         if actual != expected:
             raise ValueError(f"project metadata mismatch: {actual}, expected {expected}")
 
@@ -101,7 +108,7 @@ def main():
             project(pairs=4, objects=0)
             mutations += 1
         path.write_bytes(original)
-        # Flags cannot manufacture a new model link, currentness or version choice.
+        # Saved status fields cannot manufacture a model link, currentness or version choice.
         for tag in ("UpToDate", "Lock", "Revision"):
             element = ET.fromstring(original)
             element.find(tag).text = "57"
@@ -196,7 +203,51 @@ def main():
     project()
     for target in paths:
         fields(target)
-    print(f"5 metadata documents / 22 fields independently checked; project controls and {mutations} mutations passed")
+
+    # A second public engineering project contains 7 DG files, four matching
+    # metadata sidecars with an additional stored integer, and its own model DB1.
+    steel_prefix = "steel-fundamentals/Steel Fundamentals Modeling Assignment/"
+    steel_specs = [s for s in manifest["files"] if s["path"].startswith(steel_prefix) and
+                   (s["path"] == steel_prefix + "Steel Fundamentals Modeling Assignment.db1" or
+                    ("/drawings/" in s["path"] and s["path"].endswith((".dg", ".dg.metadata"))))]
+    if len(steel_specs) != 12:
+        raise ValueError(f"unexpected second-project metadata evidence coverage: {len(steel_specs)} files")
+    for spec in steel_specs:
+        source = safe_path(args.data.resolve(), spec["path"])
+        if args.download:
+            materialize(spec, source, manifest.get("archives", {}), args.data.resolve())
+        if not verify(source, spec):
+            raise ValueError(f"missing or changed second-project evidence: {source}")
+        destination = safe_path(args.work.resolve(), spec["path"])
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    steel_root = args.work/steel_prefix
+    steel_paths = sorted((steel_root/"drawings").glob("*.dg.metadata"))
+    if len(steel_paths) != 4:
+        raise ValueError("unexpected second-project metadata count")
+    for target in steel_paths:
+        element = ET.fromstring(target.read_bytes())
+        if (element.findtext("AlwaysNecessary") or "").strip() != "0":
+            raise ValueError("the AlwaysNecessary sample changed")
+        fields(target)
+    project(pairs=4, objects=4, metadata=4, drawings=7,
+            mode="drawing_metadata_project_steel", target=steel_root)
+    sample = steel_paths[0]
+    sample_original = sample.read_bytes()
+    try:
+        changed = ET.fromstring(sample_original)
+        changed.find("AlwaysNecessary").text = "57"
+        sample.write_bytes(ET.tostring(changed, encoding="utf-8"))
+        fields(sample)
+        project(pairs=4, objects=4, metadata=4, drawings=7,
+                mode="drawing_metadata_project_steel", target=steel_root)
+        mutations += 1
+    finally:
+        sample.write_bytes(sample_original)
+    for target in steel_paths:
+        fields(target)
+    print(f"9 metadata documents / up to 23 fields independently checked; AlwaysNecessary retained as an uninterpreted integer; "
+          f"both project association suites and {mutations} mutations passed")
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <tuple>
 
 namespace tekla
 {
@@ -52,8 +53,11 @@ void header(const db1::RawDatabase& raw,bool environment)
         raw.containerName!="EnvModelOptions" && raw.containerName!="EnvDrawingOptions"))
         throw std::runtime_error("wrong DBV container name");
     const auto offset=raw.containerName.empty() ? 0 : 8+raw.containerName.size();
+    const auto legacyVersion = raw.storageVersion == "DBV-legacy-v2" ? 2U : 1U;
+    if (legacyVersion == 2 && !environment)
+        throw std::runtime_error("legacy DBV v2 options layout is not verified");
     const std::vector<std::uint32_t> expected=raw.containerName.empty()
-        ? std::vector<std::uint32_t>{1,0,0,0,1,0xdbcec0bc}
+        ? std::vector<std::uint32_t>{legacyVersion,0,0,0,1,0xdbcec0bc}
         : std::vector<std::uint32_t>{1,environment ? 3U : 2U,0,0,0,1};
     if (raw.preamble.size()<offset+24) throw std::runtime_error("unsupported DBV preamble length");
     for (std::size_t i=0;i<expected.size();++i)
@@ -116,7 +120,8 @@ bool parseEnvironmentDatabase(const std::filesystem::path& path,EnvironmentDatab
             }
         }
         std::set<std::uint32_t> linkIds,choiceIds;
-        std::set<std::pair<std::uint32_t,std::uint32_t>> links,indices;
+        std::set<std::pair<std::uint32_t,std::uint32_t>> links;
+        std::set<std::tuple<std::uint32_t,std::uint32_t,std::uint8_t>> choiceIndices;
         for (const auto& record:tables[1].records)
         {
             const auto& row=record.payload; const auto id=u32(row,0),classId=u32(row,4),attributeId=u32(row,8);
@@ -137,7 +142,9 @@ bool parseEnvironmentDatabase(const std::filesystem::path& path,EnvironmentDatab
             {
                 const auto& row=record.payload; const auto attributeId=u32(row,4);
                 AttributeChoice value{u32(row,0),u32(row,8),integer(row,12),fixed(row,16,t==6 ? 31 : 61)};
-                if (!value.id || !choiceIds.insert(value.id).second || !indices.emplace(attributeId,value.index).second)
+                value.allocationTag=record.allocationTag;
+                if (!value.id || !choiceIds.insert(value.id).second ||
+                    !choiceIndices.emplace(attributeId,value.index,value.allocationTag).second)
                     throw std::runtime_error("duplicate DBV attribute choice");
                 const auto found=result.attributes.find(attributeId);
                 if (found==result.attributes.end() || found->second.storageKind!=StoredValueKind::Integer)
@@ -146,8 +153,12 @@ bool parseEnvironmentDatabase(const std::filesystem::path& path,EnvironmentDatab
             }
         }
         for (auto& entry:result.attributes)
-            std::sort(entry.second.choices.begin(),entry.second.choices.end(),[](const auto& a,const auto& b){ return a.index<b.index; });
+            std::sort(entry.second.choices.begin(),entry.second.choices.end(),[](const auto& a,const auto& b){
+                return std::tie(a.index,a.allocationTag,a.id)<std::tie(b.index,b.allocationTag,b.id);
+            });
         result.diagnostics.emplace_back("partial DBV environment semantics: metadata flags, string definition values and additional numeric fields remain uninterpreted");
+        if (result.raw.storageVersion == "DBV-legacy-v2")
+            result.diagnostics.emplace_back("legacy DBV v2 allocation tags 5 and 6 and repeated choices are preserved without lifecycle interpretation");
         return true;
     }
     catch (const std::exception& e) { result={}; error=e.what(); return false; }

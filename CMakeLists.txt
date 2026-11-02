@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(TeklaDB1 VERSION 0.3.0 LANGUAGES CXX)
+project(TeklaDB1 VERSION 0.3.0 LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -16,18 +16,22 @@ set(TEKLADB1_OCCT_LIBRARIES "" CACHE STRING
 find_package(ZLIB REQUIRED)
 
 add_library(tekla_db1
+    third_party/sqlite/sqlite3.c
     src/Catalogs.cpp
     src/ShapeXml.cpp
+    src/RebarScheduleConfig.cpp
     src/MetadataXml.cpp
     src/DrawingMetadata.cpp
     src/AnalysisSettings.cpp
     src/GuidMappings.cpp
+    src/IdRangeMapper.cpp
     src/TinyXmlPrivate.cpp
     src/Parser.cpp
     src/Project.cpp
     src/RelatedFormats.cpp
     src/Environment.cpp
     src/OptionSettings.cpp
+    src/History.cpp
 )
 add_library(TeklaDB1::tekla_db1 ALIAS tekla_db1)
 add_library(TeklaDB1::core ALIAS tekla_db1)
@@ -43,6 +47,8 @@ target_include_directories(tekla_db1
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_link_libraries(tekla_db1 PRIVATE ZLIB::ZLIB)
+target_include_directories(tekla_db1 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite)
+target_compile_definitions(tekla_db1 PRIVATE SQLITE_OMIT_LOAD_EXTENSION SQLITE_THREADSAFE=0)
 
 set(_tekladb1_occt_uses_package OFF)
 if(TEKLADB1_WITH_OCCT)
@@ -96,6 +102,10 @@ if(TEKLADB1_BUILD_TESTS)
     foreach(case analysis_settings_fields analysis_settings_numbers analysis_settings_quotes analysis_settings_encoding analysis_settings_design analysis_settings_header analysis_settings_limits)
         add_test(NAME related.${case} COMMAND tekladb1_analysis_settings_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
+    add_executable(tekladb1_history_test tests/history.cpp)
+    target_include_directories(tekladb1_history_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite)
+    target_link_libraries(tekladb1_history_test PRIVATE TeklaFormats::core)
+    add_test(NAME related.history_sqlite COMMAND tekladb1_history_test "${CMAKE_CURRENT_BINARY_DIR}/test-data/history")
     add_executable(tekladb1_analysis_raw_test tests/analysis_raw.cpp)
     target_link_libraries(tekladb1_analysis_raw_test PRIVATE TeklaFormats::core)
     foreach(case analysis_raw_roundtrip analysis_raw_prefix analysis_raw_header analysis_raw_tables analysis_raw_truncated analysis_raw_limits)
@@ -111,10 +121,23 @@ if(TEKLADB1_BUILD_TESTS)
     foreach(case mapper_text mapper_duplicates mapper_failure mapper_targets)
         add_test(NAME related.${case} COMMAND tekladb1_guid_mapping_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
+    add_executable(tekladb1_idrm_test tests/idrm.cpp)
+    target_link_libraries(tekladb1_idrm_test PRIVATE TeklaFormats::core)
+    foreach(case idrm_valid idrm_two_records idrm_truncated idrm_bad_signature idrm_bad_marker idrm_count_overflow idrm_trailing idrm_limit)
+        add_test(NAME related.${case} COMMAND tekladb1_idrm_test "${CMAKE_CURRENT_BINARY_DIR}/test-data/${case}" ${case})
+    endforeach()
     add_executable(tekladb1_shapes_test tests/shapes.cpp)
     target_link_libraries(tekladb1_shapes_test PRIVATE TeklaFormats::core ZLIB::ZLIB)
-    foreach(case shapes_scope shapes_geometry shapes_numbers shapes_structure shapes_entities shapes_limits shapes_gzip shapes_catalog)
+    foreach(case shapes_scope shapes_geometry shapes_numbers shapes_structure shapes_entities shapes_limits shapes_gzip shapes_catalog rebar_catalog rebar_schedule_config)
         add_test(NAME related.${case} COMMAND tekladb1_shapes_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
+    add_executable(tekladb1_pgdb_test tests/pgdb.cpp)
+    target_link_libraries(tekladb1_pgdb_test PRIVATE TeklaDB1::core)
+    foreach(case pgdb_valid pgdb_cycle pgdb_missing_chamfer pgdb_truncated pgdb_trailing
+            pgdb_duplicate_string pgdb_duplicate_profile pgdb_duplicate_block pgdb_duplicate_point
+            pgdb_duplicate_chamfer pgdb_solved_nan pgdb_point_nan pgdb_chamfer_nan
+            pgdb_zero_string pgdb_zero_block pgdb_zero_point pgdb_zero_chamfer pgdb_chamfer_range)
+        add_test(NAME catalog.${case} COMMAND tekladb1_pgdb_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     add_executable(tekladb1_metadata_test tests/metadata.cpp)
     target_link_libraries(tekladb1_metadata_test PRIVATE TeklaFormats::core)
@@ -125,6 +148,14 @@ if(TEKLADB1_BUILD_TESTS)
     target_link_libraries(tekladb1_inspect PRIVATE TeklaDB1::tekla_db1)
     add_executable(tekladb1_catalog_inspect tests/catalog_inspect.cpp)
     target_link_libraries(tekladb1_catalog_inspect PRIVATE TeklaDB1::tekla_db1)
+    add_executable(tekladb1_catalog_test tests/catalogs.cpp)
+    target_link_libraries(tekladb1_catalog_test PRIVATE TeklaDB1::tekla_db1 ZLIB::ZLIB)
+    foreach(case profile_v9 profile_v10 profile_duplicate profile_bad_version profile_bad_width profile_bad_tag
+                 profile_lis_valid profile_lis_bad_version profile_lis_bad_structure profile_lis_duplicate_property
+                 bolt_standard bolt_truncated bolt_schema assembly_components assembly_truncated
+                 profitab_valid profitab_invalid_integer)
+        add_test(NAME catalog.${case} COMMAND tekladb1_catalog_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
+    endforeach()
     add_executable(tekladb1_validate tests/validate.cpp)
     target_link_libraries(tekladb1_validate PRIVATE TeklaDB1::core)
     if(MINGW)
@@ -158,23 +189,33 @@ if(TEKLADB1_BUILD_TESTS)
             numbering908_key numbering908_tail numbering908_truncated numbering908_unknown_table
             numbering764_valid numbering764_empty numbering764_truncated numbering764_header numbering764_width numbering764_invalid
             numbering730_valid numbering730_empty numbering730_truncated numbering730_header numbering730_width numbering730_invalid
-            drawing_valid drawing_cycle
+            numbering837_empty numbering837_nonempty
+            numbering_empty_830_empty numbering_empty_830_nonempty
+            numbering_empty_844_empty numbering_empty_844_nonempty
+            numbering_empty_874_empty numbering_empty_874_nonempty
+            numbering_header_837 numbering_header_874
+            drawing950_schema
+            drawing_valid drawing_mark_malformed drawing_line_valid drawing_line_duplicate_index drawing_line_missing_reference drawing_cycle
             drawing_missing_chunk drawing_duplicate drawing_missing_property drawing_signature
             drawing_nonfinite drawing_truncated drawing_limit numbering_unknown drawing_unknown)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     foreach(case dimensions_valid dimensions_angled dimensions_deferred dimensions_nonplanar dimensions_unknown dimensions_invalid dimensions_legacy
-        dimensions730_valid dimensions730_angled dimensions730_deferred dimensions730_nonplanar dimensions730_unknown dimensions730_invalid dimensions730_ambiguous dimensions730_collapsed
+        dimensions730_valid dimensions730_angled dimensions730_deferred dimensions730_nonplanar dimensions730_subtype1 dimensions730_unknown dimensions730_invalid dimensions730_ambiguous dimensions730_collapsed
             drawing730_valid drawing730_signature drawing730_cycle drawing730_missing drawing730_property
             drawing730_nonfinite drawing730_volume drawing730_duplicate drawing730_context drawing730_collapsed
             drawing730_subject_unknown drawing730_general drawing730_truncated drawing730_limit
-            drawing_view_valid drawing_view_duplicate drawing_view_basis drawing_view_nonfinite
+            drawing_view_valid drawing_view_duplicate drawing_view_basis drawing_view_nonfinite drawing_view_paper_nonfinite
             drawing_view_volume drawing_view_depth drawing_view_subject drawing_view_unknown
             drawing844_valid drawing844_signature drawing844_reference drawing844_missing drawing844_cycle
             drawing844_guid drawing844_conflict drawing844_property drawing844_nonfinite drawing844_header
+            drawing844_bad_view_basis drawing844_bad_view_range drawing844_bad_dimension drawing844_unknown_dimension
+            drawing844_missing_dimension_set drawing844_dimension_context
             drawing844_descriptor drawing844_zero_descriptor drawing844_truncated drawing844_limit
             drawing782_valid drawing782_missing drawing782_cycle drawing782_fields drawing782_context
-            drawing782_collapsed drawing782_nonfinite drawing782_conflict drawing782_truncated)
+            drawing782_collapsed drawing782_nonfinite drawing782_conflict drawing782_truncated
+            drawing782_orphan_dimension drawing782_unknown_subtype drawing782_duplicate_dimension
+            drawing782_duplicate_dimension_set drawing782_conflicting_dimension_set)
         add_test(NAME related.${case} COMMAND tekla_related_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     foreach(case 764_model 764_library 764_library_fields 764_fields 764_width
@@ -197,12 +238,14 @@ if(TEKLADB1_BUILD_TESTS)
             valid_model short_trailer unknown_version wrong_fields broken_reference
             unhandled_part unverified_contour embedded_magic plain_limit gzip_limit
             gzip_concat gzip_corrupt gzip_truncated gzip_garbage truncations unicode_path
-            ambiguity raw_retention project strict_companions catalog_error model_limit
+            ambiguity raw_retention project strict_companions project_xslib_raw_fallback project_xslib_raw_disabled catalog_error model_limit
             settings_project settings_project_no_raw settings_project_off settings_project_invalid settings_project_strict
             mapper_project mapper_project_gzip mapper_project_no_raw mapper_project_off mapper_project_invalid mapper_project_strict
-            dbv_name project_precedence partial_project gzip_large duplicate_id nonfinite project_guid
+            dbv_name project_db5_discovery project_db5_discovery_nested project_model_metadata project_db3_discovery project_db3_discovery_nested project_precedence project_rebar_catalog project_rebar_schedule_config project_rebar_schedule_precedence project_rebar_schedule_off project_clb project_clb_ambiguous project_clb_invalid_geometry project_clb_invalid_profitab project_clb_missing_field project_clb_include_missing project_clb_include_escape partial_project gzip_large duplicate_id nonfinite project_guid
             project_shapes_pair project_shapes_sibling project_shapes_internal project_shapes_precedence
             project_shapes_lower_conflict project_shapes_missing project_shapes_split project_shapes_malformed project_shapes_strict
+            db1_core_830_valid db1_core_830_part_width db1_core_874_valid db1_core_874_part_width
+            db1_core_874_identity_class_fields db1_core_874_class_relation db1_core_874_class_relation_mismatch
             schema908_valid schema908_library schema908_bolt schema908_library_bolt schema908_unknown_kind
             schema908_bad_class schema908_library_bad_class schema908_bad_owner schema908_bad_signature
             schema908_bad_bolt_signature schema908_bad_contour_signature schema908_missing_string schema908_string_cycle
@@ -294,6 +337,8 @@ endif()
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES third_party/tinyxml2/LICENSE.txt
     DESTINATION ${CMAKE_INSTALL_DATADIR}/TeklaDB1/licenses/tinyxml2)
+install(FILES third_party/sqlite/README.md
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/TeklaDB1/licenses/sqlite)
 install(EXPORT TeklaDB1Targets
     FILE TeklaDB1Targets.cmake
     NAMESPACE TeklaDB1::

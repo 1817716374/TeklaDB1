@@ -57,15 +57,18 @@ void drawingDimensionRegression(std::string mode,const std::filesystem::path& pa
     if(mode=="dimensions_nonplanar")put<double>(f.rows[2][0],64,4);
     if(mode=="dimensions_unknown")
     {
-        put<unsigned>(f.rows[2][0],16,older730?1:77);
+        put<unsigned>(f.rows[2][0],16,77);
         put<double>(f.rows[2][0],24,std::numeric_limits<double>::quiet_NaN());
     }
+    if(mode=="dimensions_subtype1" && older730)put<unsigned>(f.rows[2][0],16,1);
     if(mode=="dimensions_legacy")
     {
         Dg782Fixture old; old.rows[2]=f.rows[2]; old.rows[3]=f.rows[3];
         old.rows[2][0].resize(1400);old.rows[3][0].resize(136);
         save(path,old.encode());check(tekla::parseDrawing(path,drawing,error),error);
-        check(drawing.straightDimensions.empty() && drawing.straightDimensionSets.empty() && !drawing.raw.tables.empty(),"legacy dimensions guessed");return;
+        check(drawing.straightDimensions.size()==1 && drawing.straightDimensionSets.size()==1 &&
+              drawing.straightDimensions.at(67).subtypeCode==1 && !drawing.raw.tables.empty(),
+              "known legacy dimension subtype was not decoded");return;
     }
     save(path,encode(f));error="stale";check(tekla::parseDrawing(path,drawing,error),error);
     check(error.empty() && drawing.straightDimensionSets.at(66).dimensionIds==std::vector<std::uint32_t>{67},"dimension ownership");
@@ -74,7 +77,7 @@ void drawingDimensionRegression(std::string mode,const std::filesystem::path& pa
         check(drawing.straightDimensions.empty() && drawing.unhandledDimensionRecordIds==std::vector<std::uint32_t>{67},"unknown subtype guessed");return;
     }
     const auto& d=drawing.straightDimensions.at(67);
-    check(d.subtypeCode==(older730?0U:1U),"dimension subtype rewritten");
+    check(d.subtypeCode==(older730?(mode=="dimensions_subtype1"?1U:0U):1U),"dimension subtype rewritten");
     if(mode=="dimensions_ambiguous" || mode=="dimensions_collapsed")
         check(drawing.viewsByContext.empty() && !drawing.diagnostics.empty(),"legacy dimension invented a unique view");
     check(d.contextId==45 && d.dimensionSetId==66 && d.distance==-2,"dimension fields or signed offset");

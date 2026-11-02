@@ -50,8 +50,23 @@ struct Dg844Fixture : Dg782Fixture
         widths[45]=144; fields[45]=23; references[45]={0,3};
         widths[46]=60; fields[46]=11; references[46]={0};
         rows[5][0].resize(widths[5]); rows[10][0].resize(widths[10]);
+        auto& view=rows[5][0]; put<unsigned>(view,0,260); put<unsigned>(view,4,44); put<unsigned>(view,8,11);
+        for (const auto offset:{40U,160U})
+        {
+            put<double>(view,offset,0); put<double>(view,offset+8,0); put<double>(view,offset+16,0);
+            put<double>(view,offset+24,1); put<double>(view,offset+32,0); put<double>(view,offset+40,0);
+            put<double>(view,offset+48,0); put<double>(view,offset+56,1); put<double>(view,offset+64,0);
+        }
+        for (const auto offset:{112U,232U})
+        {
+            put<double>(view,offset,-1); put<double>(view,offset+8,1); put<double>(view,offset+16,-2);
+            put<double>(view,offset+24,2); put<double>(view,offset+32,-3); put<double>(view,offset+40,3);
+        }
         auto& p=rows[22][0]; std::fill(p.begin()+29,p.end(),0); text(p,29,"ID01234567-89ab-cdef-0123-456789abcdef");
-        Bytes dimension(1400); put<unsigned>(dimension,0,256);put<unsigned>(dimension,4,100); rows[2]={dimension};
+        Bytes set(136);put<unsigned>(set,0,257);put<unsigned>(set,4,200);put<unsigned>(set,8,11);rows[3]={set};
+        Bytes dimension(1400); put<unsigned>(dimension,0,256);put<unsigned>(dimension,4,100);put<unsigned>(dimension,8,11);
+        put<unsigned>(dimension,12,200);put<unsigned>(dimension,16,1);
+        put<double>(dimension,48,10);put<double>(dimension,176,1);put<double>(dimension,192,2);rows[2]={dimension};
     }
     Bytes encode()
     {
@@ -85,6 +100,12 @@ void drawing844Regression(const std::string& mode,const std::filesystem::path& p
     if(mode=="drawing844_conflict") { auto p=f.rows[22][0];put<unsigned>(p,0,99);p[31]='f';f.rows[22].push_back(p); }
     if(mode=="drawing844_property")put<unsigned>(f.rows[21][0],4,999);
     if(mode=="drawing844_nonfinite")put<double>(f.rows[8][0],16,std::numeric_limits<double>::infinity());
+    if(mode=="drawing844_bad_view_basis")put<double>(f.rows[5][0],64,2);
+    if(mode=="drawing844_bad_view_range")put<double>(f.rows[5][0],120,-2);
+    if(mode=="drawing844_bad_dimension")put<double>(f.rows[2][0],24,std::numeric_limits<double>::infinity());
+    if(mode=="drawing844_unknown_dimension")put<unsigned>(f.rows[2][0],16,99);
+    if(mode=="drawing844_missing_dimension_set")put<unsigned>(f.rows[2][0],12,999);
+    if(mode=="drawing844_dimension_context")put<unsigned>(f.rows[2][0],8,12);
     auto bytes=f.encode();
     if(mode=="drawing844_header")bytes[11]='5';
     if(mode=="drawing844_descriptor")put<unsigned>(bytes,88,2);
@@ -108,7 +129,13 @@ void drawing844Regression(const std::string& mode,const std::filesystem::path& p
     }
     if(mode=="drawing844_header" || mode=="drawing844_descriptor" || mode=="drawing844_zero_descriptor")
         check(!tekla::db1::parseRawDatabase(path,raw,error),"unknown 8.44 framing accepted");
-    const bool valid=mode=="drawing844_valid";
+    if(mode=="drawing844_bad_view_basis" || mode=="drawing844_bad_view_range" || mode=="drawing844_bad_dimension")
+    {
+        check(!tekla::parseDrawing(path,drawing,error),"invalid 8.44 view accepted");
+        check(drawing.raw.tables.empty() && drawing.viewsByRecordId.empty() && !error.empty(),"failed 8.44 view result not cleared");return;
+    }
+    const bool valid=mode=="drawing844_valid" || mode=="drawing844_unknown_dimension" ||
+                     mode=="drawing844_missing_dimension_set" || mode=="drawing844_dimension_context";
     if(!valid)
     {
         check(!tekla::parseDrawing(path,drawing,error),"invalid 8.44 drawing accepted");
@@ -120,8 +147,37 @@ void drawing844Regression(const std::string& mode,const std::filesystem::path& p
     check(drawing.strings.at(1).text=="<Mark><UserText>HELLO WORLD</UserText></Mark>","8.44 chain lost");
     check(drawing.projectGuid=="01234567-89ab-cdef-0123-456789abcdef" && drawing.properties.at(3).stringValue=="ID01234567-89ab-cdef-0123-456789abcdef","normalized/raw GUID lost");
     check(drawing.sheets.size()==1 && drawing.sheets[0].width==594 && drawing.sheets[0].height==420,"8.44 sheet");
-    check(drawing.modelReferences.empty() && !drawing.subject && drawing.viewsByContext.empty() && drawing.straightDimensions.empty(),"unverified 8.44 geometry decoded");
-    check(drawing.unhandledViewRecordIds==std::vector<std::uint32_t>{44} && drawing.unhandledDimensionRecordIds==std::vector<std::uint32_t>{100} && !drawing.diagnostics.empty(),"deferred records not reported");
+    check(drawing.modelReferences.empty() && !drawing.subject && drawing.viewsByContext.size()==1,"8.44 view geometry missing or unverified geometry decoded");
+    const auto& decodedView=drawing.viewsByRecordId.at(44);
+    check(decodedView.contextId==11 && decodedView.viewCoordinates.axisX[0]==1 && decodedView.viewCoordinates.axisY[1]==1 &&
+          decodedView.restriction.minX==-1 && decodedView.restriction.maxY==2 && decodedView.storedAttributeVolume.depthPositive==3,
+          "8.44 view coordinate or range fields mismatch");
+    if(mode=="drawing844_unknown_dimension")
+        check(drawing.straightDimensions.empty() && drawing.unhandledDimensionRecordIds==std::vector<std::uint32_t>{100} &&
+              drawing.straightDimensionSets.at(200).dimensionIds==std::vector<std::uint32_t>{100},"unknown dimension subtype not safely retained");
+    else
+    {
+        check(drawing.straightDimensions.size()==1 && drawing.straightDimensionSets.size()==1 && drawing.unhandledDimensionRecordIds.empty(),"8.44 dimensions/sets missing");
+        const auto& dimension=drawing.straightDimensions.at(100);
+        check(dimension.contextId==(mode=="drawing844_dimension_context"?12U:11U) &&
+              dimension.dimensionSetId==(mode=="drawing844_missing_dimension_set"?999U:200U) && dimension.subtypeCode==1 && dimension.projectedLength &&
+              *dimension.projectedLength==10 && dimension.distance==2 &&
+              drawing.straightDimensionSets.at(200).dimensionIds==
+                  ((mode=="drawing844_missing_dimension_set" || mode=="drawing844_dimension_context")
+                       ?std::vector<std::uint32_t>{}:std::vector<std::uint32_t>{100}),
+              "8.44 dimension fields or set link mismatch");
+        if(mode=="drawing844_missing_dimension_set")
+            check(std::any_of(drawing.diagnostics.begin(),drawing.diagnostics.end(),[](const auto& message)
+                  {return message.find("8.44 straight dimension 100 references missing or ambiguous set ID 999")!=std::string::npos;}) &&
+                  drawing.straightDimensionSets.at(200).dimensionIds.empty(),
+                  "8.44 missing-set diagnostic or unlinked dimension mismatch");
+        if(mode=="drawing844_dimension_context")
+            check(std::any_of(drawing.diagnostics.begin(),drawing.diagnostics.end(),[](const auto& message)
+                  {return message.find("8.44 straight dimension 100 context 12 differs from set 200 context 11")!=std::string::npos;}) &&
+                  drawing.straightDimensionSets.at(200).dimensionIds.empty(),
+                  "8.44 context diagnostic or unlinked dimension mismatch");
+    }
+    check(drawing.unhandledViewRecordIds.empty() && !drawing.diagnostics.empty(),"deferred records not reported");
     check(tekla::db1::parseRawDatabase(path,raw,error,options),error);
     Bytes rebuilt=raw.preamble;
     for(const auto& t:raw.tables)
