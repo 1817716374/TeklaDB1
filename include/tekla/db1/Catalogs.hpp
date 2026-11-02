@@ -69,6 +69,13 @@ struct ProfileCatalogLisCrossSection
     std::string rawRecord;
 };
 
+enum class ProfileCatalogLisFormat
+{
+    Unspecified,
+    TeklaProfileCatalogExport,
+    ThirdPartyProfileDatabaseExportV2
+};
+
 struct ProfileCatalogLis
 {
     std::uint32_t version = 0;
@@ -79,6 +86,9 @@ struct ProfileCatalogLis
     // Documented CROSS_SECTION_NAME / POINT_* records from native exports.
     // SUB_TYPE-to-name resolution and chamfer geometry are not inferred.
     std::vector<ProfileCatalogLisCrossSection> crossSections;
+    // Both accepted .lis dialects share this container for compatibility;
+    // callers can still distinguish them without reparsing rawText.
+    ProfileCatalogLisFormat format = ProfileCatalogLisFormat::Unspecified;
 };
 
 struct SketchProfileChamfer
@@ -412,9 +422,9 @@ struct RebarScheduleConfig
 };
 
 bool parseProfileCatalog(const std::filesystem::path& path, ProfileCatalog& result, std::string& error);
-// Strictly reads the observed PROFILE DATABASE EXPORT VERSION 2 text dialect.
-// This is not the documented PROFILE CATALOG EXPORT .lis format.
-// Numeric property labels are preserved as written; no geometry is inferred.
+// Reads the documented PROFILE CATALOG EXPORT dialect and, for compatibility,
+// the observed third-party PROFILE DATABASE EXPORT VERSION 2 dialect. The
+// result.format field identifies which header was accepted.
 bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis& result, std::string& error);
 // UTF-8 TeklaStructuresModels with one direct Model; decoded size <= 16 MiB.
 // Retains raw XML. Unsupported DTD/entities and ambiguous known fields fail.

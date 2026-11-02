@@ -861,6 +861,8 @@ bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis
             (!teklaCatalogExport && version != 2) || (teklaCatalogExport && version == 0))
             throw std::runtime_error("unsupported profile .lis export version at line " + std::to_string(lines[cursor].number));
         result.version = version;
+        result.format = teklaCatalogExport ? ProfileCatalogLisFormat::TeklaProfileCatalogExport
+                                           : ProfileCatalogLisFormat::ThirdPartyProfileDatabaseExportV2;
         ++cursor;
 
         const auto nextNonempty = [&]() -> const Line&

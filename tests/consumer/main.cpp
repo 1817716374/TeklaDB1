@@ -16,6 +16,9 @@ int main(int argc,char** argv)
     sketchPoint.chamferDz2=2.5;
     sketchPoint.chamferFlags=7;
     if(sketchPoint.chamferDz1!=1.25 || sketchPoint.chamferDz2!=2.5 || sketchPoint.chamferFlags!=7)return 16;
+    tekla::db1::ProfileCatalogLis profileLis;
+    profileLis.format=tekla::db1::ProfileCatalogLisFormat::TeklaProfileCatalogExport;
+    if(profileLis.format!=tekla::db1::ProfileCatalogLisFormat::TeklaProfileCatalogExport)return 26;
     tekla::Project project;
     tekla::db1::RebarShapeCatalog rebarCatalog;
     rebarCatalog.categories.push_back({"Straight", {"1"}});

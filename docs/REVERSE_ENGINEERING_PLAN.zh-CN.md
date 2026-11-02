@@ -2,6 +2,10 @@
 
 本文档是持续更新的工作记录。每发现一个新版本、表布局或语义边界，都要先修改本文档，再扩大实现范围。
 
+## 2026-11-02：profile `.lis` 结果显式区分官方文档方言与第三方夹具
+
+两种 `.lis` 语法此前进入同一个 `ProfileCatalogLis`，调用者只有重新检查 `rawText` 才能区分。现新增 `ProfileCatalogLis::format`，标记 Trimble 文档中的 `PROFILE CATALOG EXPORT VERSION` 与兼容第三方夹具的 `PROFILE DATABASE EXPORT VERSION = 2`。两种格式已有合成回归，安装后消费者编译检查也覆盖新增公共字段。此字段不提升样本证据等级：官方文档和图示支持有限语法读取，真实 Tekla 导出、树规则、profile 类型、CLB/UEL 关系仍未验证。官方示例的 `TYPE=998/SUB_TYPE=253` 与截面示例名 `MY_OWN_PROFILE` 未给出可验证映射，故仍不建立截面关联。
+
 ## 2026-11-02：DG metadata DrawingGuid 到 DB1 identity 的精确匹配
 
 对 Abri-Moto-VCCF25 的六份 `.dg.metadata` 与 9.50 DB1 table 353 逐值比对，六个 `DrawingGuid` 都唯一命中 DB1 identity GUID，identity ID 为 457401、458342、452508、458306、457278、457467；这些 ID 均不在本工程已解读的 part/assembly 表。工程 API 新增 `DrawingMetadataAssociation::drawingGuidIdentityId`，只在 DB1 与 DG 都是已核验的 9.50 且文件名/图幅配对成立时填入。该字段仅表达原 XML GUID 到 DB1 identity ID 的精确对应，不为身份赋予图纸/模型对象类别，不修改 `MainObjectGuid` 的主对象关联规则；未将此规则推广到其他版本。

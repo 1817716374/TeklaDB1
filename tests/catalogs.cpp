@@ -217,12 +217,16 @@ int run(const std::filesystem::path& root, const std::string& mode)
             const bool shouldPass = mode == "profile_lis_valid" || mode == "profile_lis_tekla_valid";
             check(ok == shouldPass, "unexpected profile .lis parse result");
             if (!ok)
-                check(!error.empty() && catalog.entries.empty() && catalog.rawText.empty(),
+                check(!error.empty() && catalog.entries.empty() && catalog.rawText.empty() &&
+                      catalog.format == tekla::db1::ProfileCatalogLisFormat::Unspecified,
                       "invalid profile .lis leaked partial output");
             else
             {
                 const auto expectedVersion = mode == "profile_lis_tekla_valid" ? 17U : 2U;
                 check(error.empty() && catalog.version == expectedVersion && catalog.entries.size() == 2 &&
+                      catalog.format == (mode == "profile_lis_tekla_valid"
+                          ? tekla::db1::ProfileCatalogLisFormat::TeklaProfileCatalogExport
+                          : tekla::db1::ProfileCatalogLisFormat::ThirdPartyProfileDatabaseExportV2) &&
                       catalog.ambiguousProfileNames.empty() && catalog.rawText == source,
                       "profile .lis header, entry count, ambiguity, or raw source changed");
                 const auto& first = catalog.entries[0];
