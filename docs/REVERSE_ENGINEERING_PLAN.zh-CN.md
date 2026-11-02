@@ -2,6 +2,12 @@
 
 本文档是持续更新的工作记录。每发现一个新版本、表布局或语义边界，都要先修改本文档，再扩大实现范围。
 
+## 2026-11-02：DG metadata DrawingGuid 到 DB1 identity 的精确匹配
+
+对 Abri-Moto-VCCF25 的六份 `.dg.metadata` 与 9.50 DB1 table 353 逐值比对，六个 `DrawingGuid` 都唯一命中 DB1 identity GUID，identity ID 为 457401、458342、452508、458306、457278、457467；这些 ID 均不在本工程已解读的 part/assembly 表。工程 API 新增 `DrawingMetadataAssociation::drawingGuidIdentityId`，只在 DB1 与 DG 都是已核验的 9.50 且文件名/图幅配对成立时填入。该字段仅表达原 XML GUID 到 DB1 identity ID 的精确对应，不为身份赋予图纸/模型对象类别，不修改 `MainObjectGuid` 的主对象关联规则；未将此规则推广到其他版本。
+
+本轮 MinGW C++17 全量 CTest 637/637、固定公开语料 1,787/1,787、独立安装消费者 97/97 通过。工程验证器对六个匹配逐一检查 GUID 回指，并确认它们没有被误分类为 part/assembly。固定样本只支持这一项目与 9.50 schema，identity 生命周期和对象角色仍未知。
+
 ## 2026-11-02：9.50 weld 实体与 IFC 身份关联
 
 Abri-Moto-VCCF25 的固定 9.50 DB1/IFC 样本中，表190有155个唯一 weld ID，均命中身份表；表192含310条 type-13 关联，来源均在表190、目标均为实际 part 表行，每个 weld 恰连到两个不同零件。155条均有身份、放置、有效坐标基和定义引用。独立 IFC STEP 检查发现55个 `IFCFASTENER`（名称 `Weld`）GlobalId 唯一命中这些 DB1 weld。解析器现仅在 9.50 表192/type-13 源ID同时存在表190 weld行和身份记录时标记类型13，再走既有 weld 解码/零件连接路径；没有据此给其他 9.50 身份类型分类。该样本与字段证据见 [9.50 身份说明](DB1_950.zh-CN.md)。

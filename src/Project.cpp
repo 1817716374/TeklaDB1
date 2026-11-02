@@ -606,8 +606,18 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             {diagnostic("drawing metadata sheet dimensions conflict with DG");continue;}
             if(drawing.subject && (!metadata.drawingType || *metadata.drawingType!=drawing.subject->typeCode))
             {diagnostic("drawing metadata type conflicts with DG subject");continue;}
-            DrawingMetadataAssociation association{entry.first,found->first,{}};
+            DrawingMetadataAssociation association;
+            association.metadata=entry.first;
+            association.drawing=found->first;
             association.evidence=DrawingMetadataAssociation::Evidence::FilenameAndSheet;
+            if(result.model.storageVersion=="9.50" && drawing.raw.storageVersion=="9.50")
+            {
+                const auto identity=modelIdsByGuid.find(metadata.drawingGuid);
+                if(identity!=modelIdsByGuid.end() && identity->second.size()==1)
+                    association.drawingGuidIdentityId=identity->second.front();
+                else if(identity!=modelIdsByGuid.end())
+                    diagnostic("DrawingGuid matches multiple selected DB1 identities; GUID identity link omitted");
+            }
             if(!metadata.mainObjectGuid.empty())
             {
                 const auto subject=std::find_if(result.drawingSubjectAssociations.begin(),result.drawingSubjectAssociations.end(),
@@ -625,7 +635,9 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             result.associations.push_back({entry.first,found->first,
                 result.drawingMetadataAssociations.back().evidence==DrawingMetadataAssociation::Evidence::SubjectIdentity?
                     "DG metadata filename, saved sheet and scoped subject identity agree; no active-version inference":
-                    "DG metadata filename and saved sheet match; no model-object identity inferred"});
+                    (result.drawingMetadataAssociations.back().drawingGuidIdentityId?
+                        "DG metadata filename and saved sheet match; DrawingGuid uniquely matches a selected DB1 identity, whose object class is unverified":
+                        "DG metadata filename and saved sheet match; no model-object identity inferred")});
         }
 
         if(result.optionSettings)

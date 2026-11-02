@@ -156,6 +156,10 @@ struct DrawingMetadataAssociation
     // present only when the scoped DG subject agrees with MainObjectGuid.
     std::optional<std::uint32_t> modelObjectId;
     enum class Evidence { FilenameAndSheet, SubjectIdentity } evidence = Evidence::SubjectIdentity;
+    // Exact, unique match of DrawingGuid to a selected DB1 identity record.
+    // This does not classify that identity as a Tekla drawing/model object;
+    // it is populated only for the verified 9.50 sidecar schema.
+    std::optional<std::uint32_t> drawingGuidIdentityId;
 };
 struct BoltAssemblyStandardAssociation
 {

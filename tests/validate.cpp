@@ -744,7 +744,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
             std::size_t drawingProjectGuidMatches=0;
             std::size_t subjects=0, subjectIdentityMatches=0;
             std::map<std::uint32_t,std::size_t> subjectTypes;
-            std::size_t metadataSheetMatches=0, subjectMetadataGuidConflicts=0, strings=0, properties=0, links=0, sheets=0;
+            std::size_t metadataSheetMatches=0, metadataDrawingGuidIdentityMatches=0;
+            std::size_t subjectMetadataGuidConflicts=0, strings=0, properties=0, links=0, sheets=0;
             bool sawLegacy1252Name=false;
             for (const auto& file:project.files)
             {
@@ -816,6 +817,19 @@ int run(const std::string& mode, const std::filesystem::path& path)
                    entry.second.mainObjectGuid!=dg.subject->modelGuid)
                     ++subjectMetadataGuidConflicts;
             }
+            for(const auto& association:project.drawingMetadataAssociations)
+            {
+                if(!association.drawingGuidIdentityId)continue;
+                const auto& metadata=project.drawingMetadata.at(association.metadata);
+                const auto identity=project.model.identities.find(*association.drawingGuidIdentityId);
+                if(identity==project.model.identities.end() || identity->second.guid!=metadata.drawingGuid ||
+                   project.model.parts.count(identity->first) ||
+                   std::any_of(project.model.assemblies.begin(),project.model.assemblies.end(),[&](const auto& a) {
+                       return a.id==identity->first;
+                   }))
+                    throw std::runtime_error("9.50 DrawingGuid identity match was misclassified as a part/assembly or lost its GUID");
+                ++metadataDrawingGuidIdentityMatches;
+            }
             if(project.drawingSubjectAssociations.size()!=3 ||
                std::any_of(project.drawingSubjectAssociations.begin(),project.drawingSubjectAssociations.end(),[&](const auto& link) {
                    const auto drawing=project.drawings.find(link.drawing);
@@ -848,6 +862,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                subjectTypes[2]!=1 || subjectTypes[7]!=6 || project.drawingSubjectAssociations.size()!=3 ||
                !project.drawingModelAssociations.empty() ||
                project.drawingMetadataAssociations.size()!=6 ||
+               metadataDrawingGuidIdentityMatches!=6 ||
                std::any_of(project.drawingMetadataAssociations.begin(),project.drawingMetadataAssociations.end(),[](const auto& a) {
                    return a.modelObjectId.has_value() || a.evidence!=tekla::DrawingMetadataAssociation::Evidence::FilenameAndSheet;
                }) || drawingProjectGuidMatches!=0 ||
@@ -913,6 +928,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                      <<" subjects="<<subjects<<" subject_identity_db1_matches="<<subjectIdentityMatches
                      <<" direct_subject_links="<<project.drawingSubjectAssociations.size()
                      <<" subject_metadata_guid_conflicts="<<subjectMetadataGuidConflicts
+                     <<" metadata_guid_identity_matches="<<metadataDrawingGuidIdentityMatches
                      <<" drawing_strings="<<strings<<" drawing_properties="<<properties<<" property_links="<<links
                      <<" sheets="<<sheets<<" metadata_sheet_matches="<<metadataSheetMatches
                      <<" dg_project_guid_matches="<<drawingProjectGuidMatches

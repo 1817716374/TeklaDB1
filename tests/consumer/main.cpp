@@ -72,6 +72,9 @@ int main(int argc,char** argv)
     model.componentPartIds.push_back(39);
     if(model.componentPartIds.size()!=1 || model.componentPartIds.front()!=39)return 14;
     tekla::Drawing drawing;
+    tekla::DrawingMetadataAssociation metadataAssociation;
+    metadataAssociation.drawingGuidIdentityId=17;
+    if(metadataAssociation.drawingGuidIdentityId!=17)return 17;
     tekla::DrawingStraightDimension dimension; dimension.projectedLength=3;
     drawing.straightDimensions.emplace(67,dimension);
     tekla::DrawingLineSegment line; line.recordId=68; line.startPoint={1.0,2.0}; line.endPoint={3.0,4.0};

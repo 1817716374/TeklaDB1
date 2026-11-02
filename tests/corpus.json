@@ -18042,7 +18042,7 @@
       "mode": "project_abri_vccf25_evidence",
       "path": "abri-moto-vccf25/Abri-Moto-VCCF25",
       "exit": 0,
-      "stdout": "version=9.50 actual_parts=0 part_records=177 assemblies=106 bolts=109 welds=155 components=22 db2=3 empty_844=1 secondary_pair=1 raw=7 drawings=9 parsed_drawings=9 raw_drawings=0 metadata=6 subjects=9 subject_identity_db1_matches=3 direct_subject_links=3 subject_metadata_guid_conflicts=3 drawing_strings=365 drawing_properties=35 property_links=36 sheets=9 metadata_sheet_matches=6 dg_project_guid_matches=0 metadata_links=6 model_guid=cd7fd815-d850-41c8-acd6-f6bb6173b559 parsed_metadata=6 failed=0 profiles=42 environment=1 options=2"
+      "stdout": "version=9.50 actual_parts=0 part_records=177 assemblies=106 bolts=109 welds=155 components=22 db2=3 empty_844=1 secondary_pair=1 raw=7 drawings=9 parsed_drawings=9 raw_drawings=0 metadata=6 subjects=9 subject_identity_db1_matches=3 direct_subject_links=3 subject_metadata_guid_conflicts=3 metadata_guid_identity_matches=6 drawing_strings=365 drawing_properties=35 property_links=36 sheets=9 metadata_sheet_matches=6 dg_project_guid_matches=0 metadata_links=6 model_guid=cd7fd815-d850-41c8-acd6-f6bb6173b559 parsed_metadata=6 failed=0 profiles=42 environment=1 options=2"
     },
     {
       "name": "abri-moto-vccf25:8.44 empty DB2 GUID pair",

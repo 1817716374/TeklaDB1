@@ -35,9 +35,9 @@ if (!tekla::parseDrawingVersionMetadata("drawing.dg.metadata", metadata, error))
 1. 同一目录中，DG 文件名与 `.metadata` 前面的文件名唯一匹配；大小写歧义不挑选第一项。
 2. DG 内保存的文件名与实际 DG 文件名一致。
 3. XML 有图纸 GUID、宽、高、类型，DG 有唯一已解读图幅和主体；宽、高、类型逐项相同。
-4. XML 主对象 GUID 非空时，必须与已通过 DG 工程范围检查的 DB1 主体关联一致。此时记录 `modelObjectId`；XML 主对象 GUID 为空但 DG 主体不为空时，拒绝配对。
+4. XML 主对象 GUID 与已通过 DG 工程范围检查的主体 GUID 一致时才记录 `modelObjectId`。主对象 GUID 为空或不匹配时，文件级配对仍保留，但不创建对象链接并输出诊断。
 
-文件配对不证明 XML 的 DrawingGuid 等于 DG 内某个尚未恢复的 GUID；也不证明两个文件代表当前最新状态。相同 DrawingGuid 的不同文件仍按路径保留，不做版本去重或优先级选择。冲突会阻止这项关联并产生诊断，已读取文档及已有 DG / DB1 结果不会被改写。
+在 Abri-Moto 9.50 样本中，六份 metadata 的 `DrawingGuid` 均与所选 DB1 的一个唯一 identity GUID 精确匹配；`DrawingMetadataAssociation::drawingGuidIdentityId` 暴露对应的 DB1 identity ID。这个身份记录没有被分类为零件或装配，也不据此称为图纸对象。该关系目前只在有真实证据的 9.50 schema 启用；它不证明 GUID 在 DG 文件内部的含义，也不证明两个文件代表当前最新状态。相同 DrawingGuid 的不同文件仍按路径保留，不做版本去重或优先级选择。文件名、sheet 等配对条件冲突会阻止文件级关联；对象 GUID 冲突只阻止对象级关联并产生诊断，已读取文档及已有 DG / DB1 结果不会被改写。
 
 真实样本恢复九组 XML→DG 配对。官方考试工程的五张图中，四张旧工程总布置图没有主对象关联；9.08 单零件图匹配 DB1 对象 `3040545`，GUID 为 `02f6a87b-e776-431e-a2db-9f8f1865e98c`。钢结构练习工程另有四组带主对象 GUID 的图纸，均通过已有的 DG→DB1 范围关联核对。XML 独立保存的 DrawingGuid（例如 `6b38a239-b7b0-4bb2-ad69-21cebb58a2fa`）与文件名不同，不能混淆。
 
