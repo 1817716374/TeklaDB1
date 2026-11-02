@@ -155,7 +155,7 @@ if(TEKLADB1_BUILD_TESTS)
                  profile_lis_tekla_valid profile_lis_tekla_bad_structure profile_lis_tekla_bad_version
                  profile_lis_tekla_bad_cross_section
                  bolt_standard bolt_truncated bolt_schema assembly_components assembly_truncated
-                 profitab_valid profitab_invalid_integer)
+                 profitab_valid profitab_invalid_integer text_oversized)
         add_test(NAME catalog.${case} COMMAND tekladb1_catalog_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
     endforeach()
     add_executable(tekladb1_validate tests/validate.cpp)

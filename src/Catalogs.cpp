@@ -47,9 +47,11 @@ std::string trim(std::string value)
 using detail::readFile;
 using detail::readPayload;
 
+constexpr std::size_t maxTextCatalogBytes = 64ULL * 1024 * 1024;
+
 std::string readText(const std::filesystem::path& path)
 {
-    const auto bytes = readPayload(path);
+    const auto bytes = readPayload(path, maxTextCatalogBytes);
     std::string result(bytes.begin(), bytes.end());
     if (result.size() >= 3 && static_cast<unsigned char>(result[0]) == 0xef &&
         static_cast<unsigned char>(result[1]) == 0xbb && static_cast<unsigned char>(result[2]) == 0xbf)

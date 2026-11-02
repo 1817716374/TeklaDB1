@@ -142,6 +142,27 @@ Bytes assemblyCatalog()
 int run(const std::filesystem::path& root, const std::string& mode)
 {
     std::filesystem::create_directories(root);
+    if (mode == "text_oversized")
+    {
+        const auto path = root / "oversized.txt";
+        { std::ofstream stream(path, std::ios::binary); check(static_cast<bool>(stream), "could not create oversized text fixture"); }
+        std::filesystem::resize_file(path, 64ULL * 1024 * 1024 + 1);
+        std::string error;
+        tekla::db1::ProfitabCatalog profitab;
+        profitab.rules.emplace_back();
+        check(!tekla::db1::parseProfitabCatalog(path, profitab, error) &&
+              error.find("decoded file exceeds byte limit") != std::string::npos &&
+              profitab.rules.empty() && profitab.diagnostics.empty(),
+              "oversized profitab text was accepted or leaked partial output");
+        tekla::db1::ClbDocument clb;
+        clb.sections.emplace_back();
+        error = "stale diagnostic";
+        check(!tekla::db1::parseClbDocument(path, clb, error) &&
+              error.find("decoded file exceeds byte limit") != std::string::npos &&
+              clb.statements.empty() && clb.sections.empty() && clb.diagnostics.empty(),
+              "oversized CLB text was accepted or leaked partial output");
+        return 0;
+    }
     const auto path = root / (mode.find("profile") == 0 ? "profdb.bin" :
                               mode.find("assembly") == 0 ? "assdb.db" : "screwdb.db");
     std::string error;
