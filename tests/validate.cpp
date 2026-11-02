@@ -740,7 +740,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 return a.source==secondaryDb1 && a.target==legacyDb2 &&
                     a.reason=="secondary DB1/DB2 basename and database GUID match";
             });
-            std::size_t failed=0, drawings=0, metadata=0, rawDrawings=0, parsedDrawings=0;
+            std::size_t failed=0, drawings=0, metadata=0, rawDrawings=0, parsedDrawings=0, modelReferences=0;
             std::size_t drawingProjectGuidMatches=0;
             std::size_t subjects=0, subjectIdentityMatches=0;
             std::map<std::uint32_t,std::size_t> subjectTypes;
@@ -771,6 +771,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 const auto& drawing=entry.second;
                 strings+=drawing.strings.size(); properties+=drawing.properties.size();
                 links+=drawing.propertyLinks.size(); sheets+=drawing.sheets.size();
+                modelReferences+=drawing.modelReferences.size();
                 drawingProjectGuidMatches+=!drawing.projectGuid.empty() && drawing.projectGuid==project.model.databaseGuid;
                 if(drawing.subject)
                 {
@@ -848,6 +849,31 @@ int run(const std::string& mode, const std::filesystem::path& path)
                        });
                }))
                 throw std::runtime_error("9.50 direct subject GUID associations are not unique typed identity matches");
+            if(modelReferences!=5 || project.drawingModelAssociations.size()!=5 ||
+               std::any_of(project.drawingModelAssociations.begin(),project.drawingModelAssociations.end(),[&](const auto& link) {
+                   const auto drawing=project.drawings.find(link.drawing);
+                   if(link.pairingEvidence!=tekla::DrawingPairEvidence::DirectModelReferenceGuidIdentity ||
+                      drawing==project.drawings.end() || !drawing->second.viewsByContext.count(link.drawingContextId) ||
+                      project.model.identities.count(link.modelObjectId)==0 ||
+                      project.model.identities.at(link.modelObjectId).guid!=link.modelGuid ||
+                      !project.model.parts.count(link.modelObjectId))
+                       return true;
+                   const auto references=std::count_if(drawing->second.modelReferences.begin(),drawing->second.modelReferences.end(),
+                       [&](const auto& reference) {
+                           return reference.recordId==link.drawingRecordId &&
+                                  reference.drawingContextId==link.drawingContextId &&
+                                  reference.modelGuid==link.modelGuid;
+                       });
+                   const auto matches=std::count_if(project.model.identities.begin(),project.model.identities.end(),
+                       [&](const auto& item){return item.second.guid==link.modelGuid;});
+                   return references!=1 || matches!=1;
+               }))
+                throw std::runtime_error("9.50 type-322 drawing references are not unique context-scoped DB1 part matches");
+            for(const auto& entry:project.drawings)
+                for(const auto& reference:entry.second.modelReferences)
+                    if(std::count_if(project.drawingModelAssociations.begin(),project.drawingModelAssociations.end(),
+                        [&](const auto& link){return link.drawing==entry.first && link.drawingRecordId==reference.recordId;})!=1)
+                        throw std::runtime_error("9.50 type-322 reference did not yield exactly one direct DB1 association");
             if(project.model.databasePath!=main || project.model.storageVersion!="9.50" ||
                project.model.parts.size()!=177 || !project.model.actualPartIds.empty() ||
                project.model.unhandledPartIds.size()!=177 || project.model.assemblies.size()!=106 ||
@@ -860,7 +886,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                project.drawings.size()!=9 || strings!=365 || properties!=35 || links!=36 || sheets!=9 ||
                metadataSheetMatches!=6 || subjectMetadataGuidConflicts!=3 || subjects!=9 || subjectIdentityMatches!=3 || subjectTypes[1]!=2 ||
                subjectTypes[2]!=1 || subjectTypes[7]!=6 || project.drawingSubjectAssociations.size()!=3 ||
-               !project.drawingModelAssociations.empty() ||
+               project.drawingModelAssociations.size()!=5 ||
                project.drawingMetadataAssociations.size()!=6 ||
                metadataDrawingGuidIdentityMatches!=6 ||
                std::any_of(project.drawingMetadataAssociations.begin(),project.drawingMetadataAssociations.end(),[](const auto& a) {
@@ -925,6 +951,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                      <<" components="<<project.model.components.size()
                      <<" db2="<<project.numbering.size()<<" empty_844=1 secondary_pair=1 raw="<<project.rawCompanions.size()
                      <<" drawings="<<drawings<<" parsed_drawings="<<parsedDrawings<<" raw_drawings="<<rawDrawings<<" metadata="<<metadata
+                     <<" model_refs="<<modelReferences<<" direct_model_ref_links="<<project.drawingModelAssociations.size()
                      <<" subjects="<<subjects<<" subject_identity_db1_matches="<<subjectIdentityMatches
                      <<" direct_subject_links="<<project.drawingSubjectAssociations.size()
                      <<" subject_metadata_guid_conflicts="<<subjectMetadataGuidConflicts
@@ -937,6 +964,19 @@ int run(const std::string& mode, const std::filesystem::path& path)
                      <<" parsed_metadata="<<project.drawingMetadata.size()<<" failed="<<failed
                      <<" profiles="<<project.profileCatalogAssociations.size()
                      <<" environment="<<bool(project.environment)<<" options="<<project.optionsDatabases.size()<<'\n';
+            return 0;
+        }
+        else if(mode=="project_drawing_reference_no_link")
+        {
+            tekla::Project project;
+            tekla::ProjectOptions options;
+            options.mainDatabase="Abri-Moto-VCCF25.db1";
+            if(!tekla::readProject(path,project,error,options))throw std::runtime_error(error);
+            std::size_t references=0;
+            for(const auto& entry:project.drawings)references+=entry.second.modelReferences.size();
+            if(project.model.storageVersion!="9.50" || references==0 || !project.drawingModelAssociations.empty())
+                throw std::runtime_error("unresolved 9.50 type-322 reference produced an object link");
+            std::cout<<"version=9.50 model_references="<<references<<" direct_links=0\n";
             return 0;
         }
         else if (mode=="numbering_844_evidence")
@@ -1780,6 +1820,14 @@ int run(const std::string& mode, const std::filesystem::path& path)
             if (drawing.raw.storageVersion=="7.64") std::cout<<" dimensions="<<drawing.straightDimensions.size()<<" dimension_sets="<<drawing.straightDimensionSets.size()<<" unhandled_dimensions="<<(drawing.unhandledDimensionRecordIds.size()+drawing.unhandledDimensionSetRecordIds.size());
             if (drawing.raw.storageVersion=="9.50") std::cout<<" dimensions="<<drawing.straightDimensions.size()<<" dimension_sets="<<drawing.straightDimensionSets.size()<<" unhandled_dimensions="<<(drawing.unhandledDimensionRecordIds.size()+drawing.unhandledDimensionSetRecordIds.size());
             std::cout<<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
+        }
+        else if(mode=="drawing_model_references")
+        {
+            tekla::Drawing drawing;
+            if(!tekla::parseDrawing(path,drawing,error)){std::cerr<<error<<'\n';return 1;}
+            std::cout<<"references="<<drawing.modelReferences.size()<<'\n';
+            for(const auto& reference:drawing.modelReferences)
+                std::cout<<"reference="<<reference.recordId<<':'<<reference.drawingContextId<<':'<<reference.modelGuid<<'\n';
         }
         else return 2;
         return 0;

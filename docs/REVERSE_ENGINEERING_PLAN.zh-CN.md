@@ -764,3 +764,9 @@ Abri-Moto-VCCF25 的 9 张 9.50 DG 中，`grProjectGuid` 与所选 DB1 的工程
 固定 Abri-Moto-VCCF25 9.50 工程的九张真实 DG 中，七张含尺寸；独立走读 type-260/256/257 后，136 条 type-256、67 条 type-257 的记录 ID/set/context 均可校验，所有尺寸 context 与 type-260 的唯一视图 context 相符，set ID 与 context 也全部闭合。9.50 的 256/257 payload 宽度分别为1496/144字节，descriptor 数为205/22；解析器只对该固定签名读取type、ID、context、set ID、subtype及已观察的 subtype-1 锚点前缀。七张图纸共119条 subtype-1 锚点和17条 subtype-0 原始记录；119条 up方向均为单位XY方向，其中27条端点共面，才提供诊断性投影长度。type-260 仅公开ID/context，并通过 `DrawingView::geometryDecoded=false` 标记坐标/范围未解析。该工程没有独立打印尺寸/图像真值，故未宣称文字标注、比例换算或渲染正确。
 
 新增 raw-row 对照及五种损坏副本拒绝：非有限坐标、零尺寸ID、零尺寸context、零尺寸集context、重复视图ID。当前全量 CTest 637/637；九张固定 DG 汇总验证19个视图、136条尺寸、67个尺寸集、17条保留subtype0和27条可投影记录；固定公开语料1,787/1,787、独立安装后消费者97/97通过。基线只更新了该9.50 DG用例的语义计数/指纹。该支持只适用于当前9.50签名样本，其他9.50变体及完整绘图语义仍未证明。
+
+### 2026-11-02：9.50 DG type-322 GUID 引用及 DB1 零件关联
+
+Abri-Moto-VCCF25 九张真实9.50 DG中的三张含 type-322，共5行。固定签名为 payload 144字节、20个字段描述符；只读取记录ID@0、视图context@4和16字节GUID@8，@24以后仍原样保留。独立 Python section walk 与 9.50 DB1 table353身份表比较，5条context全部唯一命中type-260视图，5个GUID全部唯一命中DB1身份；目标ID 397549、414780、453109都位于part表，不在assembly表。`Drawing::modelReferences` 暴露这三项字段；Project仅在context唯一、GUID唯一且目标是已解析part时产生 `DirectModelReferenceGuidIdentity` 关系。与已知 `grProjectGuid` 不匹配时只创建逐引用关系，不把DG与DB1作为整个工程配对。其余type-322字段、其它对象类别及生命周期仍未解释。变异回归证明悬空context、未知GUID和匹配到非part/assembly身份均不会建边；零ID/context、空GUID、重复ID拒绝解析。
+
+新增6项C++合成用例、固定工程项目关联校验、9张DG独立原始行/GUID/身份对照、3类“不建关联”项目变异、4种type-322损坏副本回归，以及一个安装后消费者用例。MinGW C++17全量CTest 643/643、固定公开语料1,787/1,787、安装包消费者98/98均通过。独立报告为 `E:\CodexData\TeklaDB1-review\reports\corpus-dg950-modelrefs-20261102.json`。目前证据仍限于一个公开9.50工程，其他9.50签名和引用对象种类尚未验证。

@@ -76,7 +76,7 @@ jobs:
       - name: Independent DB1 9.50 IFC and DG identity evidence
         if: matrix.standard == 17
         run: python -B tools/test_db1_950_evidence.py --corpus "$RUNNER_TEMP/tekla-corpus"
-      - name: Independent DG 9.50 dimension and context evidence
+      - name: Independent DG 9.50 dimensions, references and context evidence
         if: matrix.standard == 17
         run: python -B tools/test_drawing950_dimension_evidence.py --data "$RUNNER_TEMP/tekla-corpus" --download --exe build/tekladb1_validate --work "$RUNNER_TEMP/tekla-drawing950-dimension-tests"
       - name: Independent IFC evidence mutation checks

@@ -794,6 +794,26 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
         if (older950)
         {
             parse950ViewContextsAndDimensions(result);
+            std::set<std::uint32_t> modelReferenceIds;
+            for(const auto& row:table(result.raw,322).records)
+            {
+                if(row.payload.size()!=144)
+                    throw std::runtime_error("invalid 9.50 drawing model reference width");
+                DrawingModelReference reference;
+                reference.recordId=u32(row.payload,0);
+                reference.drawingContextId=u32(row.payload,4);
+                if(!reference.recordId || !modelReferenceIds.insert(reference.recordId).second || !reference.drawingContextId)
+                    throw std::runtime_error("zero or duplicate 9.50 drawing model reference ID/context");
+                if(std::all_of(row.payload.begin()+8,row.payload.begin()+24,[](auto value){return value==0;}))
+                    throw std::runtime_error("empty 9.50 drawing model reference GUID");
+                reference.modelGuid=binaryGuid(row.payload,8);
+                if(!result.viewsByContext.count(reference.drawingContextId))
+                    result.diagnostics.emplace_back("9.50 drawing model reference has no unique view context: "+
+                        std::to_string(reference.drawingContextId));
+                result.modelReferences.push_back(std::move(reference));
+            }
+            if(!result.modelReferences.empty())
+                result.diagnostics.emplace_back("9.50 type-322 drawing reference ID, view context and model GUID decoded; extended reference fields remain raw");
             const auto& subjects=table(result.raw,269).records;
             bool subjectDecoded=false;
             if(subjects.size()!=1)
@@ -827,8 +847,8 @@ bool parseDrawing(const std::filesystem::path& path,Drawing& result,std::string&
                 }
             }
             result.diagnostics.emplace_back(subjectDecoded?
-                "9.50 drawing subject, view ID/context prefixes and subtype-1 straight dimension anchors/sets decoded; view geometry, subtype 0, model references and graphics remain raw":
-                "9.50 drawing view ID/context prefixes and subtype-1 straight dimension anchors/sets decoded; subject fields, view geometry, subtype 0, model references and graphics remain raw");
+                "9.50 drawing subject, type-322 reference prefixes, view ID/context prefixes and subtype-1 straight dimension anchors/sets decoded; view geometry, subtype 0, extended reference fields and graphics remain raw":
+                "9.50 drawing type-322 reference prefixes, view ID/context prefixes and subtype-1 straight dimension anchors/sets decoded; subject fields, view geometry, subtype 0, extended reference fields and graphics remain raw");
             if (options.retainDecompressedFileImage) result.raw.decompressedFileImage=std::move(data);
             return true;
         }

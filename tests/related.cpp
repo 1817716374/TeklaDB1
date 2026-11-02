@@ -180,6 +180,13 @@ struct Dg950Fixture
     bool duplicateSubject=false;
     bool emptySubjectGuid=false;
     bool nonzeroSubjectReserved=false;
+    bool modelReference=false;
+    bool duplicateModelReference=false;
+    bool zeroModelReferenceId=false;
+    bool zeroModelReferenceContext=false;
+    bool emptyModelReferenceGuid=false;
+    bool orphanModelReferenceContext=false;
+    void addModelReference(){modelReference=true;}
     Bytes encode() const
     {
         Bytes bytes(76); text(bytes,0,"Xsteel# 9.50"); put<unsigned>(bytes,12,1); put<unsigned>(bytes,16,0xdbcec0bc);
@@ -210,6 +217,24 @@ struct Dg950Fixture
                 if(subjectType!=7 && !emptySubjectGuid) std::fill(subject.begin()+16,subject.begin()+32,0x11);
                 rows.push_back(subject);
                 if(duplicateSubject) rows.push_back(std::move(subject));
+            }
+            if(i==5 && modelReference)
+            {
+                Bytes view(widths[i+1]); put<unsigned>(view,0,260); put<unsigned>(view,4,44); put<unsigned>(view,8,45);
+                rows.push_back(std::move(view));
+            }
+            if(i==44 && modelReference)
+            {
+                Bytes reference(widths[i+1]);
+                put<unsigned>(reference,0,zeroModelReferenceId?0U:55U);
+                put<unsigned>(reference,4,zeroModelReferenceContext?0U:orphanModelReferenceContext?999U:45U);
+                if(!emptyModelReferenceGuid)std::fill(reference.begin()+8,reference.begin()+24,0x22);
+                rows.push_back(reference);
+                if(duplicateModelReference)
+                {
+                    put<unsigned>(reference,0,55U);
+                    rows.push_back(std::move(reference));
+                }
             }
             section(widths[i+1]+(invalidWidth && i==0?1U:0U),fields[i+1],rows);
         }
@@ -583,6 +608,37 @@ int main(int argc,char** argv)
                 else
                     check(!d.subject && !d.diagnostics.empty(),"unsupported 9.50 subject fields were not retained raw");
                 check(d.raw.decompressedFileImage==bytes,"9.50 subject raw retention");
+            }
+        }
+        else if(mode.rfind("drawing950_reference_",0)==0)
+        {
+            Dg950Fixture fixture; fixture.addModelReference();
+            if(mode=="drawing950_reference_duplicate")fixture.duplicateModelReference=true;
+            else if(mode=="drawing950_reference_zero_id")fixture.zeroModelReferenceId=true;
+            else if(mode=="drawing950_reference_zero_context")fixture.zeroModelReferenceContext=true;
+            else if(mode=="drawing950_reference_empty_guid")fixture.emptyModelReferenceGuid=true;
+            else if(mode=="drawing950_reference_orphan_context")fixture.orphanModelReferenceContext=true;
+            const auto bytes=fixture.encode(); save(dg,bytes);
+            if(mode=="drawing950_reference_duplicate" || mode=="drawing950_reference_zero_id" ||
+               mode=="drawing950_reference_zero_context" || mode=="drawing950_reference_empty_guid")
+            {
+                check(!tekla::parseDrawing(dg,d,error),"malformed 9.50 model reference accepted: "+mode);
+                check(d.raw.tables.empty() && d.modelReferences.empty() && !error.empty(),
+                      "9.50 model reference failure leaked partial output");
+            }
+            else
+            {
+                check(tekla::parseDrawing(dg,d,error,{true}),error);
+                check(d.modelReferences.size()==1 && d.modelReferences.front().recordId==55 &&
+                      d.modelReferences.front().drawingContextId==(mode=="drawing950_reference_orphan_context"?999U:45U) &&
+                      d.modelReferences.front().modelGuid=="22222222-2222-2222-2222-222222222222" &&
+                      d.raw.decompressedFileImage==bytes,
+                      "9.50 type-322 reference ID/context/GUID fields or raw retention");
+                const bool hasOrphanContextDiagnostic=std::any_of(d.diagnostics.begin(),d.diagnostics.end(),[](const auto& diagnostic) {
+                    return diagnostic.find("9.50 drawing model reference has no unique view context")!=std::string::npos;
+                });
+                check((mode=="drawing950_reference_orphan_context") == hasOrphanContextDiagnostic,
+                      "9.50 unresolved model reference context diagnostic");
             }
         }
         else

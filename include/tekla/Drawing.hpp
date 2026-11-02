@@ -203,7 +203,8 @@ struct Drawing
     std::map<std::uint32_t, DrawingProperty> properties;
     std::vector<DrawingPropertyLink> propertyLinks;
     std::vector<DrawingSheet> sheets;
-    // DG type 322. 9.54 carries GUIDs; 7.82/8.95/9.08 carry numeric IDs.
+    // DG type 322. 9.50/9.54 carry GUIDs; 7.82/8.95/9.08 carry numeric IDs.
+    // 9.50 decodes only record ID/context/GUID and leaves the rest of each row raw.
     // Automatic numeric pairing is currently verified only for scoped 9.08.
     // 7.30 has no type 322; its other model reference layouts remain in raw.
     // Referenced entities are not necessarily ordinary parts.

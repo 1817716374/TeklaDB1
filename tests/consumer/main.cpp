@@ -54,6 +54,8 @@ int main(int argc,char** argv)
     if(drawingAssociation.pairingEvidence!=tekla::DrawingPairEvidence::ProjectGuidAndObjectIdentity)return 12;
     drawingAssociation.pairingEvidence=tekla::DrawingPairEvidence::DirectSubjectGuidIdentity;
     if(drawingAssociation.pairingEvidence!=tekla::DrawingPairEvidence::DirectSubjectGuidIdentity)return 25;
+    drawingAssociation.pairingEvidence=tekla::DrawingPairEvidence::DirectModelReferenceGuidIdentity;
+    if(drawingAssociation.pairingEvidence!=tekla::DrawingPairEvidence::DirectModelReferenceGuidIdentity)return 26;
     tekla::db1::ClbDocument clb;
     clb.libraryId = "consumer";
     tekla::db1::ClbSection section;

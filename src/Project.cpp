@@ -471,6 +471,30 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                 const bool directSubjectGuidCandidate=drawing.raw.storageVersion=="9.50" && drawing.subject &&
                     !drawing.subject->modelGuid.empty() &&
                     (drawing.subject->kind==DrawingSubjectKind::SinglePart || drawing.subject->kind==DrawingSubjectKind::Assembly);
+                const bool direct950GuidCandidate=drawing.raw.storageVersion=="9.50" &&
+                    (directSubjectGuidCandidate || !drawing.modelReferences.empty());
+                const auto link950ModelReference=[&](const DrawingModelReference& reference) {
+                    if(!drawing.viewsByContext.count(reference.drawingContextId))
+                    {
+                        result.diagnostics.push_back("9.50 drawing model reference context is unresolved or ambiguous: "+
+                            std::to_string(reference.drawingContextId));
+                        return;
+                    }
+                    const auto found=modelIdsByGuid.find(lower(reference.modelGuid));
+                    if(found==modelIdsByGuid.end() || found->second.size()!=1)
+                    {
+                        result.diagnostics.push_back("9.50 drawing model reference GUID is unresolved or ambiguous in the selected DB1: "+reference.modelGuid);
+                        return;
+                    }
+                    const auto id=found->second.front();
+                    if(!result.model.parts.count(id))
+                    {
+                        result.diagnostics.push_back("9.50 drawing model reference GUID does not resolve to a verified part row: "+reference.modelGuid);
+                        return;
+                    }
+                    result.drawingModelAssociations.push_back({file.path,reference.recordId,id,reference.modelGuid,
+                        reference.drawingContextId,DrawingPairEvidence::DirectModelReferenceGuidIdentity});
+                };
                 if (drawingGuidMatches || explicitLegacyNumericScope)
                 {
                     result.associations.push_back({result.model.databasePath,file.path,drawingGuidMatches?
@@ -522,6 +546,11 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                     }
                     for (const auto& reference:drawing.modelReferences)
                     {
+                        if(drawing.raw.storageVersion=="9.50")
+                        {
+                            link950ModelReference(reference);
+                            continue;
+                        }
                         const auto found=resolveDrawingIdentity(reference.modelGuid,reference.modelObjectId);
                         if (found)
                             result.drawingModelAssociations.push_back({file.path,reference.recordId,*found,
@@ -539,37 +568,39 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                             result.diagnostics.push_back("legacy drawing type-309 model ID is unresolved or not an actual part: "+std::to_string(id));
                     }
                 }
-                else if (directSubjectGuidCandidate)
+                else if (direct950GuidCandidate)
                 {
-                    // A stored subject GUID can identify one DB1 object even
-                    // when grProjectGuid does not scope the whole drawing.
-                    // Keep this narrow to the observed 9.50 subject layout:
-                    // exact unique GUID, matching subject kind, and matching
-                    // object-table membership. Do not pair the drawing file
-                    // itself or any other model references on this evidence.
-                    const auto& subject=*drawing.subject;
-                    const auto found=modelIdsByGuid.find(lower(subject.modelGuid));
-                    if(found!=modelIdsByGuid.end() && found->second.size()==1)
+                    // Exact unique object GUIDs can identify narrowly scoped
+                    // 9.50 subjects/references even when grProjectGuid differs.
+                    // This never establishes a project-level drawing pairing.
+                    if(directSubjectGuidCandidate)
                     {
-                        const auto id=found->second.front();
-                        const bool objectKindMatches=subject.kind==DrawingSubjectKind::SinglePart ?
-                            result.model.parts.count(id)!=0 :
-                            std::any_of(result.model.assemblies.begin(),result.model.assemblies.end(),
-                                [&](const auto& assembly){return assembly.id==id;});
-                        if(objectKindMatches)
-                            result.drawingSubjectAssociations.push_back({file.path,subject.recordId,id,subject.modelGuid,0,
-                                DrawingPairEvidence::DirectSubjectGuidIdentity});
+                        const auto& subject=*drawing.subject;
+                        const auto found=modelIdsByGuid.find(lower(subject.modelGuid));
+                        if(found!=modelIdsByGuid.end() && found->second.size()==1)
+                        {
+                            const auto id=found->second.front();
+                            const bool objectKindMatches=subject.kind==DrawingSubjectKind::SinglePart ?
+                                result.model.parts.count(id)!=0 :
+                                std::any_of(result.model.assemblies.begin(),result.model.assemblies.end(),
+                                    [&](const auto& assembly){return assembly.id==id;});
+                            if(objectKindMatches)
+                                result.drawingSubjectAssociations.push_back({file.path,subject.recordId,id,subject.modelGuid,0,
+                                    DrawingPairEvidence::DirectSubjectGuidIdentity});
+                            else
+                                result.diagnostics.push_back("9.50 drawing subject GUID matches a DB1 identity but not the corresponding object table: "+subject.modelGuid);
+                        }
                         else
-                            result.diagnostics.push_back("9.50 drawing subject GUID matches a DB1 identity but not the corresponding object table: "+subject.modelGuid);
+                            result.diagnostics.push_back("9.50 drawing subject GUID is unresolved or ambiguous in the selected DB1: "+subject.modelGuid);
                     }
-                    else
-                        result.diagnostics.push_back("9.50 drawing subject GUID is unresolved or ambiguous in the selected DB1: "+subject.modelGuid);
-                    result.diagnostics.push_back("drawing project GUID differs from the selected DB1; only an exact unique 9.50 subject GUID match was considered: "+db1::detail::pathUtf8(file.path));
+                    for(const auto& reference:drawing.modelReferences)
+                        link950ModelReference(reference);
+                    result.diagnostics.push_back("drawing project GUID differs from the selected DB1; only exact unique 9.50 subject/model-reference GUID matches were considered: "+db1::detail::pathUtf8(file.path));
                 }
                 else result.diagnostics.push_back("drawing project GUID is missing or differs from main model: "+db1::detail::pathUtf8(file.path));
                 for (const auto& item:drawing.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);
                 const auto drawingDiagnostic=drawing.raw.storageVersion=="9.50"?
-                    "9.50 subject type/GUID, view ID/context prefixes, subtype-1 straight dimension anchors/sets, strings, properties and sheet size decoded; view geometry, subtype 0, other references and graphics remain raw":
+                    "9.50 subject type/GUID, type-322 reference ID/context/GUID prefixes, view ID/context prefixes, subtype-1 straight dimension anchors/sets, strings, properties and sheet size decoded; view geometry, subtype 0, extended reference fields and graphics remain raw":
                     (drawing.raw.storageVersion=="8.95" || drawing.raw.storageVersion=="9.08")?
                     "drawing numeric subject/references, properties, strings and sheet size decoded; views, dimensions and graphics remain raw":
                     (drawing.raw.storageVersion=="7.30" || drawing.raw.storageVersion=="7.82")?

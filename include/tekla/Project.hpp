@@ -66,7 +66,11 @@ enum class DrawingPairEvidence
     // A DG subject's stored GUID uniquely matched one DB1 identity, but the
     // drawing's project GUID did not match. This links only that subject; it
     // does not scope other numeric/model references in the drawing.
-    DirectSubjectGuidIdentity
+    DirectSubjectGuidIdentity,
+    // A DG 9.50 type-322 GUID uniquely matched a DB1 part identity and the
+    // stored drawing context resolved to one decoded view. This does not pair
+    // the drawing/project or classify references outside the verified sample.
+    DirectModelReferenceGuidIdentity
 };
 struct DrawingModelAssociation
 {
