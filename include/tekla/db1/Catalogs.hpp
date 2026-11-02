@@ -36,7 +36,8 @@ struct ProfileCatalog
 
 // Numeric fixed-profile properties from either the observed third-party
 // PROFILE DATABASE .lis dialect or documented Tekla PROFILE CATALOG exports.
-// Tekla tree/rule sections and any unrecognized content remain in rawText.
+// Tekla cross-section point/chamfer fields are also exposed below; tree/rule
+// sections and unrecognized content remain in rawText.
 // Property names are preserved verbatim; unknown names are not dropped.
 struct ProfileCatalogLisEntry
 {
@@ -48,6 +49,26 @@ struct ProfileCatalogLisEntry
     std::string rawRecord;
 };
 
+struct ProfileCatalogLisCrossSectionPoint
+{
+    std::uint32_t pointNumber = 0;
+    double x = 0.0;
+    double y = 0.0;
+    std::uint32_t chamferType = 0;
+    double chamferX = 0.0;
+    double chamferY = 0.0;
+    bool hasChamferType = false;
+    bool hasChamferX = false;
+    bool hasChamferY = false;
+};
+
+struct ProfileCatalogLisCrossSection
+{
+    std::string name;
+    std::vector<ProfileCatalogLisCrossSectionPoint> points;
+    std::string rawRecord;
+};
+
 struct ProfileCatalogLis
 {
     std::uint32_t version = 0;
@@ -55,6 +76,9 @@ struct ProfileCatalogLis
     std::vector<std::string> ambiguousProfileNames;
     std::filesystem::path sourcePath;
     std::string rawText;
+    // Documented CROSS_SECTION_NAME / POINT_* records from native exports.
+    // SUB_TYPE-to-name resolution and chamfer geometry are not inferred.
+    std::vector<ProfileCatalogLisCrossSection> crossSections;
 };
 
 struct SketchProfileChamfer

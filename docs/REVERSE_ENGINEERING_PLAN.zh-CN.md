@@ -728,3 +728,11 @@ Trimble 当前 Model Sharing 文档将 `.db3` 列为 Plan database，并说明�
 ## 2026-10-29：Tekla 2023 SP4 工程与 DG 9.50 容器
 
 新增公开 Abri-Moto-VCCF25 工程样本，覆盖主 DB1、DB2、xslib、profdb、environment/options、DG 与 `.dg.metadata`。显式选择主 DB1 后，工程聚合读取其 9.50 DB2 九条编号系列、42 项 profile 名称关联、environment 与两个 options 数据库；同工程 9 张 gzip DG 均可保留为 48-section raw 容器，单张记录数各异，现确认合计 5,573 条。确认 gzip 解压后的 `Xsteel# 9.50` 分节 framing 与已有现代容器相容，因此仅开放 raw 回退，未将未知字段投影为图纸语义。六份 metadata 均可读；一份使用 Windows-1252，新增字段转码但保留原字节。同归档的 8.44 DB2 已按精确 10 表空快照签名读取，且其 GUID 与配套 DB1 相同；Project 现只在次级同名 DB1/DB2 的 GUID 精确匹配时登记该对，不把次级模型并入所选主模型；非空 8.44 系列仍未支持。样本主 DB1 的 177 条 part、106 条 assembly、109 条 bolt group 等记录可连接解析，但 177 条 part 类型未知；新增独立 IFC 对照确认 158 个 part、99 个 assembly 和 108 个 mechanical fastener 的 GUID/表类别一致，并核对 266 条候选 aggregation edge 中 158 条 DB1 owner 相符。55 个 IFCFASTENER 仍未分类，存储几何未与 IFC 几何比较。9.50 的完整模型和图纸语义仍是明确缺口。固定语料新增 Abri-Moto 容器/项目/metadata 回归及 8.44 DB2 GUID 配对案例，并固定归档及相关成员的校验和。
+
+## 2026-11-02：官方型材导出中的交叉截面点字段
+
+根据 Trimble 官方 `.lis` 文档示例，`parseProfileCatalogLis` 现在还读取 `CROSS_SECTION_NAME` 与有序 `POINT_NUMBER`、`POINT_X`、`POINT_Y`、`CHAMFER_TYPE`、`CHAMFER_X`、`CHAMFER_Y` 字段。每个倒角字段都有独立的出现标记；字段未出现时保留为未提供，不从结构体的零默认值推断文件值。完整交叉截面及 profile 原文都保留。
+
+重复交叉截面名、重复点号、重复字段、非有限数值以及缺少点坐标会拒绝并清空输出。倒角类型仍是未解释的原始数值；解析器不生成轮廓，不根据 TYPE=998 的 SUB_TYPE 猜测其与截面名称的关联。测试使用官方文档公开的字段示例构造片段；固定公开语料仍没有真实 Tekla `.lis` 导出，因此本项仍是部分语法支持，不代表原生全目录兼容。文档来源：[Tekla 2025 型材目录导入/导出](https://support.tekla.com/doc/tekla-structures/2025/mod_catalogs_exporting_and_importing_profiles)、[Tekla 2022 固定型材示例](https://support.tekla.com/pt-pt/doc/tekla-structures/2022/mod_catalogs_example_export_file)。
+
+验证：MinGW C++17 与 MSVC Release 全量 CTest 均为 636/636；两种工具链各自的全新安装包消费者测试均为 97/97；固定公开语料为 1,787/1,787。构建、临时文件、安装包、语料和报告均位于 E 盘。后续需取得真实 Tekla `.lis` 导出，以验证完整树/目录语法、版本变化、profile 类型及截面依赖关系。

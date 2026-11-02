@@ -153,6 +153,7 @@ if(TEKLADB1_BUILD_TESTS)
     foreach(case profile_v9 profile_v10 profile_duplicate profile_bad_version profile_bad_width profile_bad_tag
                  profile_lis_valid profile_lis_bad_version profile_lis_bad_structure profile_lis_duplicate_property
                  profile_lis_tekla_valid profile_lis_tekla_bad_structure profile_lis_tekla_bad_version
+                 profile_lis_tekla_bad_cross_section
                  bolt_standard bolt_truncated bolt_schema assembly_components assembly_truncated
                  profitab_valid profitab_invalid_integer)
         add_test(NAME catalog.${case} COMMAND tekladb1_catalog_test "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})

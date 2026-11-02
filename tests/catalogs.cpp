@@ -171,8 +171,16 @@ int run(const std::filesystem::path& root, const std::string& mode)
                       "PROFILE_NAME = \"TAN_HK_TEST_2_CS\";\n{\n"
                       "TYPE = 998; SUB_TYPE = 253; COORDINATE = 0.000;\n{\n"
                       "\"EQUIVALENT_TYPE\" 11\n\"ECCENTRICITY_X\" 0\n}\n}\n"
+                      "CROSS_SECTION_NAME = \"MY_OWN_PROFILE\";\n"
+                      "POINT_NUMBER = 1;\nPOINT_X = 200.00;\nPOINT_Y = -200.00;\n"
+                      "CHAMFER_TYPE = 0;\nCHAMFER_X = 0.00;\nCHAMFER_Y = 0.00;\n"
+                      "POINT_NUMBER = 2;\nPOINT_X = 200.00;\nPOINT_Y = 200.00;\n"
                 : mode == "profile_lis_tekla_bad_structure"
                     ? "PROFILE CATALOG EXPORT VERSION = 17\nPROFILE_NAME = \"X\";\n{\nTYPE = 1; SUB_TYPE = nope; COORDINATE = 0;\n{\n}\n}\n"
+                : mode == "profile_lis_tekla_bad_cross_section"
+                    ? "PROFILE CATALOG EXPORT VERSION = 17\nPROFILE_NAME = \"X\";\n{\nTYPE = 1; SUB_TYPE = 1; COORDINATE = 0;\n{\n}\n}\n"
+                      "CROSS_SECTION_NAME = \"CS\";\nPOINT_NUMBER = 1;\nPOINT_X = 0;\nPOINT_Y = 0;\n"
+                      "POINT_NUMBER = 1;\nPOINT_X = 1;\nPOINT_Y = 1;\n"
                 : mode == "profile_lis_tekla_bad_version"
                     ? "PROFILE CATALOG EXPORT VERSION = 0\n"
                 : mode == "profile_lis_duplicate_property"
@@ -199,12 +207,23 @@ int run(const std::filesystem::path& root, const std::string& mode)
                 const auto& first = catalog.entries[0];
                 const auto& second = catalog.entries[1];
                 if (mode == "profile_lis_tekla_valid")
+                {
                     check(first.name == "HEA120" && first.type == 1 && first.subType == 1001 &&
                           first.properties.size() == 6 && first.properties.at("HEIGHT") == 114.0 &&
                           first.properties.at("WIDTH") == 120.0 && second.name == "TAN_HK_TEST_2_CS" &&
                           second.type == 998 && second.subType == 253 && second.properties.at("EQUIVALENT_TYPE") == 11.0 &&
                           first.rawRecord.find("FLANGE_SLOPE_RATIO") != std::string::npos,
-                          "documented Tekla profile fields or type-998 record changed");
+                          "documented Tekla profile fields changed");
+                    check(catalog.crossSections.size() == 1 && catalog.crossSections[0].name == "MY_OWN_PROFILE" &&
+                          catalog.crossSections[0].points.size() == 2,
+                          "documented cross-section boundaries or point count changed");
+                    const auto& point1 = catalog.crossSections[0].points[0];
+                    const auto& point2 = catalog.crossSections[0].points[1];
+                    check(point1.pointNumber == 1 && point1.x == 200.0 && point1.y == -200.0 &&
+                          point1.hasChamferType && point1.hasChamferX && point1.hasChamferY &&
+                          point2.pointNumber == 2 && point2.y == 200.0 && !point2.hasChamferType,
+                          "documented cross-section point coordinates or optional chamfer fields changed");
+                }
                 else
                     check(first.name == "KKR30*3" && first.type == 8 && first.subType == 8002 &&
                           first.storedCoordinate == 0.0 && first.properties.size() == 2 &&

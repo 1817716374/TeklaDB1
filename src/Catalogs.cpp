@@ -896,6 +896,109 @@ bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis
             const auto start = cursor;
             const auto declaration = trim(lines[cursor].text);
             constexpr std::string_view namePrefix = "PROFILE_NAME";
+            constexpr std::string_view crossSectionPrefix = "CROSS_SECTION_NAME";
+            if (teklaCatalogExport && declaration.compare(0, crossSectionPrefix.size(), crossSectionPrefix) == 0)
+            {
+                const auto nameEqual = declaration.find('=', crossSectionPrefix.size());
+                if (nameEqual == std::string::npos ||
+                    !trim(declaration.substr(crossSectionPrefix.size(), nameEqual - crossSectionPrefix.size())).empty())
+                    throw std::runtime_error("malformed CROSS_SECTION_NAME at line " + std::to_string(lines[cursor].number));
+                auto quoted = trim(declaration.substr(nameEqual + 1));
+                if (!quoted.empty() && quoted.back() == ';') quoted = trim(quoted.substr(0, quoted.size() - 1));
+                if (quoted.size() < 2 || quoted.front() != '"' || quoted.back() != '"')
+                    throw std::runtime_error("cross-section name must be quoted at line " + std::to_string(lines[cursor].number));
+                ProfileCatalogLisCrossSection crossSection;
+                crossSection.name = quoted.substr(1, quoted.size() - 2);
+                if (crossSection.name.empty())
+                    throw std::runtime_error("empty cross-section name at line " + std::to_string(lines[cursor].number));
+                if (std::any_of(result.crossSections.begin(), result.crossSections.end(), [&](const auto& existing) {
+                        return existing.name == crossSection.name;
+                    }))
+                    throw std::runtime_error("duplicate cross-section name at line " + std::to_string(lines[cursor].number));
+                ++cursor;
+
+                struct PendingPoint
+                {
+                    ProfileCatalogLisCrossSectionPoint point;
+                    bool hasNumber = false;
+                    bool hasX = false;
+                    bool hasY = false;
+                    bool hasChamferType = false;
+                    bool hasChamferX = false;
+                    bool hasChamferY = false;
+                    bool empty() const { return !hasNumber; }
+                } pending;
+                std::unordered_set<std::uint32_t> pointNumbers;
+                const auto finishPoint = [&]() {
+                    if (pending.empty()) return;
+                    if (!pending.hasX || !pending.hasY)
+                        throw std::runtime_error("cross-section point is missing POINT_X or POINT_Y");
+                    pending.point.hasChamferType = pending.hasChamferType;
+                    pending.point.hasChamferX = pending.hasChamferX;
+                    pending.point.hasChamferY = pending.hasChamferY;
+                    crossSection.points.push_back(pending.point);
+                    pending = {};
+                };
+                while (cursor < lines.size())
+                {
+                    const auto item = trim(lines[cursor].text);
+                    if (item.compare(0, namePrefix.size(), namePrefix) == 0 ||
+                        item.compare(0, crossSectionPrefix.size(), crossSectionPrefix) == 0)
+                        break;
+                    const auto fieldEqual = item.find('=');
+                    if (fieldEqual != std::string::npos)
+                    {
+                        const auto key = trim(item.substr(0, fieldEqual));
+                        auto value = trim(item.substr(fieldEqual + 1));
+                        if (!value.empty() && value.back() == ';') value = trim(value.substr(0, value.size() - 1));
+                        if (key == "POINT_NUMBER")
+                        {
+                            finishPoint();
+                            pending.point.pointNumber = parseUnsigned(value, lines[cursor].number);
+                            pending.hasNumber = true;
+                            if (!pointNumbers.emplace(pending.point.pointNumber).second)
+                                throw std::runtime_error("duplicate cross-section point number at line " + std::to_string(lines[cursor].number));
+                        }
+                        else if (key == "POINT_X" || key == "POINT_Y" || key == "CHAMFER_TYPE" ||
+                                 key == "CHAMFER_X" || key == "CHAMFER_Y")
+                        {
+                            if (pending.empty())
+                                throw std::runtime_error("cross-section coordinate or chamfer precedes POINT_NUMBER at line " +
+                                                         std::to_string(lines[cursor].number));
+                            bool* seen = nullptr;
+                            if (key == "POINT_X") seen = &pending.hasX;
+                            else if (key == "POINT_Y") seen = &pending.hasY;
+                            else if (key == "CHAMFER_TYPE") seen = &pending.hasChamferType;
+                            else if (key == "CHAMFER_X") seen = &pending.hasChamferX;
+                            else seen = &pending.hasChamferY;
+                            if (*seen)
+                                throw std::runtime_error("duplicate cross-section field " + key + " at line " +
+                                                         std::to_string(lines[cursor].number));
+                            *seen = true;
+                            if (key == "CHAMFER_TYPE") pending.point.chamferType = parseUnsigned(value, lines[cursor].number);
+                            else
+                            {
+                                const auto number = parseNumber(value, lines[cursor].number);
+                                if (key == "POINT_X") pending.point.x = number;
+                                else if (key == "POINT_Y") pending.point.y = number;
+                                else if (key == "CHAMFER_X") pending.point.chamferX = number;
+                                else pending.point.chamferY = number;
+                            }
+                        }
+                    }
+                    ++cursor;
+                }
+                finishPoint();
+                if (crossSection.points.empty())
+                    throw std::runtime_error("cross-section has no POINT_NUMBER records");
+                for (std::size_t index = start; index < cursor; ++index)
+                {
+                    crossSection.rawRecord += lines[index].text;
+                    if (index + 1 < cursor) crossSection.rawRecord.push_back('\n');
+                }
+                result.crossSections.push_back(std::move(crossSection));
+                continue;
+            }
             if (declaration.compare(0, namePrefix.size(), namePrefix) != 0)
             {
                 if (!teklaCatalogExport)
