@@ -60,10 +60,14 @@ def main():
                                 capture_output=True, encoding="utf8", timeout=30, check=True)
         if result.stdout.strip() != oracle:
             raise ValueError(f"metadata fields disagree with independent XML reader: {path}")
+        project_result = subprocess.run([str(args.exe.resolve()), "model_metadata_project", str(path.parent)],
+                                        capture_output=True, encoding="utf8", timeout=60, check=True)
+        if project_result.stdout.strip() != "model_metadata=partial fields=13 associated=1":
+            raise ValueError(f"project metadata file was not linked to its selected DB1: {path.parent}")
         count += 1
     if count != len(cases) or count < 32:
         raise ValueError("missing public metadata evidence")
-    print(f"{count}/{count} independent metadata comparisons passed")
+    print(f"{count}/{count} independent metadata and selected-DB1 project association checks passed")
 
 
 if __name__ == "__main__":

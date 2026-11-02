@@ -74,6 +74,14 @@ def main():
                 if classes[identities[word(row)][0]][0] == 2 and word(definitions[word(row+4)]+8) % 10 == 0)
     wrong_class = next(key for key, (kind, _) in classes.items() if kind == 11)
     profile = next(row for row in definitions.values() if decoded[row+76:row+80] == b"IPE\0")
+    component_ids = {word(row) for row in tables[154][1]}
+    component_part_row = next(row for row in tables[274][1]
+                              if classes[identities[word(row)][0]][0] == 39)
+    component_part_id = word(component_part_row)
+    replacement_owner = next(word(row) for row in tables[274][1]
+                             if word(row) != component_part_id and
+                             classes[identities[word(row)][0]][0] == 2 and
+                             word(row) not in component_ids)
     run(directory, True)
     try:
         # A valid class reference to an operative object must change the API count.
@@ -86,6 +94,14 @@ def main():
         modified[profile+76:profile+140] = b"WRONG\0" + bytes(58)
         model.write_bytes(gzip.compress(modified, mtime=0))
         run(directory, False)
+        # A type-39 object whose owner is not a parsed component must remain unhandled.
+        modified = bytearray(decoded)
+        struct.pack_into("<I", modified, identities[component_part_id][1]+8, replacement_owner)
+        model.write_bytes(gzip.compress(modified, mtime=0))
+        result = subprocess.run([str(args.exe.resolve()), "model", str(model)],
+                                capture_output=True, encoding="utf8", timeout=90)
+        if result.returncode != 0 or "unhandled=1 " not in result.stdout:
+            raise ValueError(f"9.08 unmatched component-part owner was misclassified: {result.stdout} {result.stderr}")
         model.write_bytes(original)
         if official.count(b"== 4237") != 1:
             raise ValueError("official July API count changed")
@@ -95,7 +111,7 @@ def main():
         model.write_bytes(original)
         source.write_bytes(official)
     run(directory, True)
-    print("9.08 July/September controls and 3/3 independent-evidence mutations passed")
+    print("9.08 July/September controls, 3/3 independent-evidence mutations, and unmatched-owner preservation passed")
 
 
 if __name__ == "__main__":

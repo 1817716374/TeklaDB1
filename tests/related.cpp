@@ -24,6 +24,27 @@ Bytes numbering(const std::string& key="P/100",bool old=false)
     Bytes row(old?76:80); text(row,0,key); put<std::uint32_t>(row,52,13); put<std::uint32_t>(row,56,2);
     b.insert(b.end(),row.begin(),row.end()); word(b,0x00bc614f); return b;
 }
+Bytes numberingEmptySnapshot(const std::string& version,bool includeRecord)
+{
+    const std::string header="Xsteel\x80 "+version+(version=="8.30"?"":" 4b5855aa-0000-169f-3132-363430383538");
+    Bytes b(header.begin(),header.end());
+    const std::array<std::pair<unsigned,unsigned>,10> signature{{
+        {10000040,184},{10000038,36},{10000043,42},{10000042,40},{21,260},
+        {10000068,64},{10000072,68},{10000077,72},{10000145,76},{22,80}}};
+    for(const auto& table:signature)
+    {
+        word(b,table.first); word(b,includeRecord && table.first==22 ? 1U : 0U); word(b,table.second);
+        if(includeRecord && table.first==22){b.push_back(4);b.resize(b.size()+table.second,0);}
+        word(b,0x00bc614f);
+    }
+    return b;
+}
+Bytes numbering837(bool includeRecord) { return numberingEmptySnapshot("8.37",includeRecord); }
+Bytes numberingEmptyHeader(const std::string& version)
+{
+    const std::string header="Xsteel\x80 "+version+" 4b5855aa-0000-169f-3132-363430383538";
+    return Bytes(header.begin(),header.end());
+}
 struct DgFixture
 {
     std::array<unsigned,47> types{{253,254,256,257,259,260,263,264,266,268,269,273,275,277,278,279,280,281,293,295,296,297,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324}};
@@ -37,6 +58,35 @@ struct DgFixture
         text(property,29,"01234567-89ab-cdef-0123-456789abcdef"); rows[22]={property};
         Bytes link(12); put<unsigned>(link,0,4); put<unsigned>(link,4,3); put<unsigned>(link,8,42); rows[21]={link};
         Bytes sheet(52); put<unsigned>(sheet,0,266); put<unsigned>(sheet,4,42); put<double>(sheet,16,594); put<double>(sheet,24,420); rows[8]={sheet};
+        Bytes association(24); put<unsigned>(association,0,999); put<unsigned>(association,4,321); put<unsigned>(association,8,654);
+        std::fill(association.begin()+12,association.end(),0xA5); rows[26]={association};
+    }
+    void addMarkTemplate()
+    {
+        rows[18].clear();
+        const std::string mark="<Mark><MarkPart><Element name=\"PART_POS\" value=\"1001\" subType=\"23\"/><UserText>HELLO WORLD</UserText></MarkPart></Mark>";
+        for (std::size_t offset=0,index=0;offset<mark.size();offset+=28,++index)
+        {
+            Bytes chunk(45); const auto id=static_cast<unsigned>(index+1);
+            put<unsigned>(chunk,0,id); put<unsigned>(chunk,4,offset+28<mark.size()?id+1:0);
+            text(chunk,16,mark.substr(offset,std::min<std::size_t>(28,mark.size()-offset)));
+            rows[18].push_back(std::move(chunk));
+        }
+    }
+    void addLine(bool duplicate=false,bool unresolvedReference=false)
+    {
+        Bytes line(120); put<unsigned>(line,0,311); put<unsigned>(line,4,811);
+        put<double>(line,24,12.5); put<double>(line,32,-3.25);
+        put<double>(line,40,42.0); put<double>(line,48,19.75);
+        rows[33]={line};
+        if (duplicate)
+        {
+            auto second=line; put<double>(second,24,99.0); rows[33].push_back(std::move(second));
+        }
+        Bytes link(32); put<unsigned>(link,0,812); put<unsigned>(link,4,311); put<unsigned>(link,28,unresolvedReference?999:811);
+        rows[17]={link};
+        Bytes index(24); put<unsigned>(index,0,311); put<unsigned>(index,4,811);
+        rows[26].push_back(std::move(index));
     }
     Bytes encode()
     {
@@ -59,6 +109,7 @@ struct DgFixture
             if (offset==48) { put<double>(view,offset+24,101); put<double>(view,offset+56,201); }
             else { put<double>(view,offset+32,201); put<double>(view,offset+48,99); }
         }
+        put<double>(view,352,12.5); put<double>(view,360,-7.25); put<double>(view,384,0.125);
         for (auto offset:{120U,240U})
         {
             put<double>(view,offset,-10); put<double>(view,offset+8,20); put<double>(view,offset+16,-30);
@@ -81,6 +132,20 @@ struct Dg782Fixture : DgFixture
         auto& v=rows[5][0]; std::memmove(v.data()+40,v.data()+48,240); v.resize(3328);
         rows[10][0].resize(4888); put<unsigned>(rows[10][0],16,1234);
         Bytes reference(112); put<unsigned>(reference,0,9); put<unsigned>(reference,4,45); put<unsigned>(reference,8,1234); rows[44]={reference};
+        Bytes dimensionSet(136); put<unsigned>(dimensionSet,0,257); put<unsigned>(dimensionSet,4,66); put<unsigned>(dimensionSet,8,45);
+        rows[3]={dimensionSet};
+        Bytes legacyModelReference(20); put<unsigned>(legacyModelReference,0,80); put<unsigned>(legacyModelReference,4,77);
+        put<unsigned>(legacyModelReference,8,3); put<unsigned>(legacyModelReference,12,1234); put<unsigned>(legacyModelReference,16,5);
+        rows[31]={legacyModelReference};
+        for (const auto subtype:{0U,1U})
+        {
+            Bytes dimension(1400); put<unsigned>(dimension,0,256); put<unsigned>(dimension,4,70+subtype);
+            put<unsigned>(dimension,8,45); put<unsigned>(dimension,12,66); put<unsigned>(dimension,16,subtype);
+            put<double>(dimension,24,1); put<double>(dimension,32,2); put<double>(dimension,40,3);
+            put<double>(dimension,48,4); put<double>(dimension,56,6); put<double>(dimension,64,3);
+            put<double>(dimension,168,0); put<double>(dimension,176,1); put<double>(dimension,184,0);
+            put<double>(dimension,192,-2); rows[2].push_back(std::move(dimension));
+        }
     }
     Bytes encode()
     {
@@ -102,6 +167,38 @@ struct Dg782Fixture : DgFixture
         table(4,2,directory);
         for (std::size_t i=0;i<types.size();++i) if (i!=6) table(widths[i],fields[i],rows[i]);
         return b;
+    }
+};
+struct Dg950Fixture
+{
+    static constexpr std::array<unsigned,47> types{{253,254,256,257,259,260,263,264,266,268,269,273,275,277,278,279,280,281,293,295,296,297,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324}};
+    static constexpr std::array<unsigned,48> widths{{4,128,620,1496,144,664,4740,580,584,52,32,6148,964,240,608,296,496,144,32,45,12,37,12,110,3438,296,876,24,64,28,72,48,32,64,120,24,64,40,56,164,24,180,112,20,60,144,152,60}};
+    static constexpr std::array<unsigned,48> fields{{2,20,63,205,22,101,652,16,84,11,6,804,162,37,92,48,21,21,6,6,4,5,4,5,50,47,143,7,12,5,10,9,6,9,21,4,10,7,9,24,7,16,17,6,16,20,23,11}};
+    bool forwardDirectory=false;
+    bool invalidWidth=false;
+    Bytes encode() const
+    {
+        Bytes bytes(76); text(bytes,0,"Xsteel# 9.50"); put<unsigned>(bytes,12,1); put<unsigned>(bytes,16,0xdbcec0bc);
+        auto section=[&](unsigned width,unsigned descriptors,const std::vector<Bytes>& rows) {
+            word(bytes,0xdbcec066); word(bytes,width); word(bytes,descriptors);
+            for(unsigned i=0;i<descriptors;++i)word(bytes,i==0?1U:0U);
+            for(const auto& row:rows)
+            {
+                bytes.push_back(4); bytes.insert(bytes.end(),row.begin(),row.end());
+                bytes.resize(bytes.size()+40,0);
+            }
+            bytes.push_back(0);
+        };
+        std::vector<Bytes> directory;
+        for(std::size_t i=0;i<types.size();++i)
+        {
+            const auto index=forwardDirectory?i:types.size()-1-i;
+            Bytes row(4); put<unsigned>(row,0,types[index]); directory.push_back(std::move(row));
+        }
+        section(widths[0],fields[0],directory);
+        for(std::size_t i=0;i<types.size();++i)
+            section(widths[i+1]+(invalidWidth && i==0?1U:0U),fields[i+1],{});
+        return bytes;
     }
 };
 #include "Drawing730Regression.hpp"
@@ -135,6 +232,21 @@ int main(int argc,char** argv)
             if (mode=="drawing782_collapsed")
                 for (auto o:{40U,160U}) for (auto point:{24U,48U}) std::memcpy(f.rows[5][0].data()+o+point,f.rows[5][0].data()+o,24);
             if (mode=="drawing782_nonfinite") put<double>(f.rows[5][0],40,std::numeric_limits<double>::infinity());
+            if (mode=="drawing782_orphan_dimension")
+            {
+                put<unsigned>(f.rows[2][0],8,46);
+                put<unsigned>(f.rows[2][1],12,999);
+            }
+            if (mode=="drawing782_unknown_subtype") put<unsigned>(f.rows[2][1],16,99);
+            if (mode=="drawing782_duplicate_dimension_set") f.rows[3].push_back(f.rows[3][0]);
+            if (mode=="drawing782_conflicting_dimension_set")
+            {
+                auto duplicate=f.rows[3][0];duplicate[20]^=1;f.rows[3].push_back(std::move(duplicate));
+            }
+            if (mode=="drawing782_duplicate_dimension")
+            {
+                auto duplicate=f.rows[2][0];put<double>(duplicate,24,10.0);f.rows[2].push_back(std::move(duplicate));
+            }
             if (mode=="drawing782_conflict")
             {
                 auto p=f.rows[22][1]; put<unsigned>(p,0,16); text(p,29,"other-view"); f.rows[22].push_back(p);
@@ -163,6 +275,80 @@ int main(int argc,char** argv)
                 check(d.raw.decompressedFileImage==b && d.raw.tables[0].records[0].allocatorMetadata.size()==40,"legacy raw metadata lost");
                 check(d.sheets[0].width==594 && d.subject->modelObjectId==1234 && d.subject->modelGuid.empty(),"legacy header fields");
                 check(d.modelReferences[0].modelObjectId==1234 && d.modelReferences[0].modelGuid.empty(),"legacy numeric ID became GUID");
+                check(d.legacyModelReferences.size()==1 && d.legacyModelReferences[0].recordId==80 &&
+                      d.legacyModelReferences[0].modelObjectId==1234 && d.legacyModelReferences[0].rawRecordOffset!=0,
+                      "legacy type-309 model reference fields");
+                if (mode=="drawing782_duplicate_dimension_set")
+                {
+                    const auto& rows=d.duplicateStraightDimensionSetRecords;
+                    check(rows.size()==2 && d.straightDimensionSets.size()==1 &&
+                          d.straightDimensionSets.at(66).recordId==66 && d.straightDimensionSets.at(66).contextId==45 &&
+                          d.straightDimensionSets.at(66).dimensionIds==std::vector<std::uint32_t>({70,71}) &&
+                          rows[0].recordId==66 && rows[1].recordId==66 && rows[0].contextId==45 && rows[1].contextId==45 &&
+                          rows[0].rawRecordOffset!=rows[1].rawRecordOffset &&
+                          d.unhandledDimensionSetRecordIds==std::vector<std::uint32_t>({66,66}),
+                          "byte-identical duplicate dimension sets were not retained and coalesced");
+                    return 0;
+                }
+                if (mode=="drawing782_conflicting_dimension_set")
+                {
+                    const auto& rows=d.duplicateStraightDimensionSetRecords;
+                    check(rows.size()==2 && d.straightDimensionSets.empty() &&
+                          rows[0].recordId==66 && rows[1].recordId==66 &&
+                          rows[0].contextId==45 && rows[1].contextId==45 &&
+                          rows[0].rawRecordOffset!=rows[1].rawRecordOffset &&
+                          d.unhandledDimensionSetRecordIds==std::vector<std::uint32_t>({66,66}),
+                          "conflicting duplicate dimension set was guessed");
+                    return 0;
+                }
+                const bool retainedOne=mode=="drawing782_unknown_subtype";
+                const bool duplicateDimension=mode=="drawing782_duplicate_dimension";
+                check(d.straightDimensionSets.size()==1 &&
+                      d.straightDimensionSets.at(66).dimensionIds.size()==(duplicateDimension?1U:(mode=="drawing782_orphan_dimension"?0U:2U)) &&
+                      d.straightDimensions.size()==(duplicateDimension?1U:(retainedOne?1U:2U)) &&
+                      d.unhandledDimensionRecordIds.size()==(duplicateDimension?2U:(retainedOne?1U:0U)),
+                      "legacy mixed dimension subtypes not decoded: sets="+std::to_string(d.straightDimensionSets.size())+
+                      " dimensions="+std::to_string(d.straightDimensions.size())+
+                      " unhandled="+std::to_string(d.unhandledDimensionRecordIds.size()));
+                if (duplicateDimension)
+                {
+                    const auto& occurrences=d.duplicateStraightDimensionRecords;
+                    check(occurrences.size()==2 && !d.straightDimensions.count(70) &&
+                          occurrences[0].dimension.recordId==70 && occurrences[1].dimension.recordId==70 &&
+                          occurrences[0].dimension.startPoint[0]==1.0 && occurrences[1].dimension.startPoint[0]==10.0 &&
+                          occurrences[0].dimension.projectedLength==3.0 && occurrences[1].dimension.projectedLength==6.0 &&
+                          occurrences[0].rawRecordOffset!=occurrences[1].rawRecordOffset &&
+                          d.straightDimensionSets.at(66).dimensionIds==std::vector<std::uint32_t>{71},
+                          "duplicate legacy dimensions were collapsed or linked by ambiguous ID");
+                    return 0;
+                }
+                for (const auto subtype:{0U,1U})
+                {
+                    if (retainedOne && subtype==1U) continue;
+                    const auto& dimension=d.straightDimensions.at(70+subtype);
+                    check(dimension.subtypeCode==subtype && dimension.contextId==
+                          (mode=="drawing782_orphan_dimension" && subtype==0U?46U:45U) &&
+                          dimension.dimensionSetId==(mode=="drawing782_orphan_dimension" && subtype==1U?999U:66U) &&
+                          dimension.distance==-2 && dimension.projectedLength && *dimension.projectedLength==3,
+                          "legacy dimension anchor fields");
+                }
+                if(mode=="drawing782_orphan_dimension")
+                    check(d.straightDimensions.at(71).dimensionSetId==999 &&
+                          std::find(d.straightDimensionSets.at(66).dimensionIds.begin(),
+                                    d.straightDimensionSets.at(66).dimensionIds.end(),70)==
+                              d.straightDimensionSets.at(66).dimensionIds.end() &&
+                          std::find(d.straightDimensionSets.at(66).dimensionIds.begin(),
+                                    d.straightDimensionSets.at(66).dimensionIds.end(),71)==
+                              d.straightDimensionSets.at(66).dimensionIds.end(),
+                          "orphan or mismatched legacy dimensions were attached to an unrelated set");
+                if(mode=="drawing782_orphan_dimension")
+                    check(std::any_of(d.diagnostics.begin(),d.diagnostics.end(),[](const auto& message)
+                          {return message.find("dimension 71 references missing or ambiguous set ID 999")!=std::string::npos;}),
+                          "orphan legacy dimension diagnostic omitted the referenced set ID");
+                if(mode=="drawing782_orphan_dimension")
+                    check(std::any_of(d.diagnostics.begin(),d.diagnostics.end(),[](const auto& message)
+                          {return message.find("dimension 70 context 46 differs from set 66 context 45")!=std::string::npos;}),
+                          "legacy context-conflict diagnostic omitted both contexts");
                 check(d.strings.at(1).complete==(mode!="drawing782_missing"),"legacy incomplete text flag");
                 if (mode=="drawing782_missing") check(d.strings.at(1).missingContinuationId==999,"missing continuation ID lost");
                 if (mode=="drawing782_context") check(d.viewsByRecordId.size()==2 && d.viewsByContext.empty(),"ambiguous views lost or joined");
@@ -171,6 +357,7 @@ int main(int argc,char** argv)
                 {
                     const auto& v=d.viewsByContext.at(45);
                     check(v.viewCoordinates.origin==tekla::DrawingPoint3{100,200,300} && v.restriction.minX==-10,"legacy view offsets");
+                    check(!v.storedPaperPosition && !v.storedScaleValue,"9.54-only view fields leaked into 7.82");
                     if (mode=="drawing782_conflict") check(v.propertySetName.empty() && v.storedPropertySetNames.size()==2,"ambiguous properties selected silently");
                     else check(v.propertySetName=="saved-view","legacy view property join");
                 }
@@ -241,6 +428,58 @@ int main(int argc,char** argv)
                 }
             }
         }
+        else if (mode.rfind("numbering837_",0)==0)
+        {
+            const bool includeRecord=mode=="numbering837_nonempty";
+            const auto bytes=numbering837(includeRecord); save(db2,bytes);
+            if(includeRecord)
+            {
+                check(!tekla::parseNumberingDatabase(db2,n,error),"nonempty 8.37 numbering table was guessed");
+                check(n.raw.tables.empty() && n.series.empty() && !error.empty(),"failed 8.37 numbering output not cleared");
+            }
+            else
+            {
+                check(tekla::parseNumberingDatabase(db2,n,error),error);
+                check(n.raw.storageVersion=="8.37" && n.raw.databaseGuid=="4b5855aa-0000-169f-3132-363430383538" &&
+                      n.raw.tables.size()==10 && n.raw.tables.back().ordinal==22 && n.raw.tables.back().records.empty() &&
+                      n.series.empty() && !n.diagnostics.empty(),"8.37 empty numbering snapshot");
+                check(tekla::db1::parseRawDatabase(db2,raw,error,{true}),error);
+                check(raw.decompressedFileImage==bytes,"8.37 empty numbering roundtrip");
+            }
+        }
+        else if (mode.rfind("numbering_empty_",0)==0)
+        {
+            const auto prefix=std::string("numbering_empty_").size();
+            const auto separator=mode.find('_',prefix);
+            check(separator!=std::string::npos,"empty numbering fixture mode");
+            auto version=mode.substr(prefix,separator-prefix);
+            check(version.size()==3 && version[0]=='8' && version[1]>='0' && version[1]<='9' &&
+                  version[2]>='0' && version[2]<='9',"empty numbering fixture version");
+            version.insert(1,".");
+            const bool includeRecord=mode.substr(separator+1)=="nonempty";
+            const auto bytes=numberingEmptySnapshot(version,includeRecord); save(db2,bytes);
+            if(includeRecord)
+            {
+                check(!tekla::parseNumberingDatabase(db2,n,error),"nonempty empty-layout numbering snapshot accepted");
+                check(n.raw.tables.empty() && n.series.empty() && !error.empty(),"failed empty-layout output not cleared");
+            }
+            else
+            {
+                check(tekla::parseNumberingDatabase(db2,n,error),error);
+                check(n.raw.storageVersion==version && n.raw.tables.size()==10 && n.series.empty() &&
+                      n.diagnostics.size()==1 && n.diagnostics.front().find("empty numbering snapshot accepted")!=std::string::npos,
+                      "empty-layout numbering snapshot semantics");
+            }
+        }
+        else if (mode.rfind("numbering_header_",0)==0)
+        {
+            const auto version=mode=="numbering_header_874"?std::string("8.74"):std::string("8.37");
+            const auto bytes=numberingEmptyHeader(version); save(db2,bytes);
+            check(tekla::parseNumberingDatabase(db2,n,error),error);
+            check(n.raw.storageVersion==version && n.raw.tables.empty() && n.series.empty() &&
+                  n.raw.databaseGuid=="4b5855aa-0000-169f-3132-363430383538" && n.diagnostics.size()==1,
+                  "header-only component numbering snapshot");
+        }
         else if (mode=="numbering_valid")
         {
             for (bool old:{false,true})
@@ -280,19 +519,43 @@ int main(int argc,char** argv)
             check(tekla::db1::parseRawDatabase(db2,raw,error),error);
             check(raw.storageVersion=="9.61" && raw.tables.size()==2,"unknown numbering raw preservation");
         }
+        else if(mode=="drawing950_schema")
+        {
+            for(const bool forward:{false,true})
+            {
+                Dg950Fixture fixture; fixture.forwardDirectory=forward;
+                const auto bytes=fixture.encode(); save(dg,bytes);
+                check(tekla::parseDrawing(dg,d,error,{true}),error);
+                check(d.raw.storageVersion=="9.50" && d.raw.tables.size()==48 &&
+                      d.raw.tables[1].ordinal==253 && d.raw.tables[1].payloadSize==128 &&
+                      d.raw.tables[47].ordinal==324 && d.raw.tables[47].payloadSize==60 &&
+                      d.strings.empty() && d.properties.empty() && d.sheets.empty() && !d.subject &&
+                      d.raw.decompressedFileImage==bytes,
+                      "9.50 directory order normalization or common partial semantics");
+            }
+            Dg950Fixture invalid; invalid.invalidWidth=true; const auto bytes=invalid.encode(); save(dg,bytes);
+            check(!tekla::parseDrawing(dg,d,error),"changed 9.50 table width accepted");
+            check(d.raw.tables.empty() && d.strings.empty() && d.properties.empty() && !error.empty(),
+                  "9.50 signature failure leaked partial output");
+        }
         else
         {
             DgFixture fixture;
+            if (mode=="drawing_valid" || mode=="drawing_mark_malformed") fixture.addMarkTemplate();
+            if (mode=="drawing_line_valid" || mode=="drawing_line_duplicate_index" || mode=="drawing_line_missing_reference")
+                fixture.addLine(mode=="drawing_line_duplicate_index",mode=="drawing_line_missing_reference");
             const auto viewCase=mode.find("drawing_view_")==0;
             if (viewCase) fixture.addView();
             if (mode=="drawing_view_duplicate") { fixture.rows[5].push_back(fixture.rows[5][0]); put<unsigned>(fixture.rows[5][1],4,46); }
             if (mode=="drawing_view_basis") put<double>(fixture.rows[5][0],72,100);
             if (mode=="drawing_view_nonfinite") put<double>(fixture.rows[5][0],168,std::numeric_limits<double>::infinity());
+            if (mode=="drawing_view_paper_nonfinite") put<double>(fixture.rows[5][0],384,std::numeric_limits<double>::quiet_NaN());
             if (mode=="drawing_view_volume") put<double>(fixture.rows[5][0],120,50);
             if (mode=="drawing_view_depth") put<double>(fixture.rows[5][0],272,std::numeric_limits<double>::quiet_NaN());
             if (mode=="drawing_view_subject") fixture.rows[10].push_back(fixture.rows[10][0]);
             if (mode=="drawing_view_unknown") put<unsigned>(fixture.rows[10][0],12,777);
             if (mode=="drawing_cycle") put<unsigned>(fixture.rows[18][1],4,1);
+            if (mode=="drawing_mark_malformed") fixture.rows[18][0][21]='!';
             if (mode=="drawing_missing_chunk") put<unsigned>(fixture.rows[18][0],4,999);
             if (mode=="drawing_duplicate") fixture.rows[18].push_back(fixture.rows[18][0]);
             if (mode=="drawing_missing_property") put<unsigned>(fixture.rows[21][0],4,999);
@@ -307,6 +570,8 @@ int main(int argc,char** argv)
                 check(view.viewCoordinates.origin==tekla::DrawingPoint3{100,200,300} && view.viewCoordinates.axisX==tekla::DrawingPoint3{1,0,0},"axis endpoint conversion");
                 check(view.displayCoordinates.axisX==tekla::DrawingPoint3{0,1,0} && view.displayCoordinates.axisZ==tekla::DrawingPoint3{0,0,1},"display coordinate basis");
                 check(view.restriction.minX==-10 && view.storedAttributeVolume.depthPositive==7,"view volume");
+                check(view.storedPaperPosition && *view.storedPaperPosition==std::array<double,2>{12.5,-7.25} &&
+                      view.storedScaleValue && *view.storedScaleValue==0.125,"9.54 stored paper fields");
                 check(d.subject && d.subject->modelGuid=="11111111-1111-1111-1111-111111111111","subject GUID");
                 check(d.subject->kind==(mode=="drawing_view_unknown" ? tekla::DrawingSubjectKind::Unknown : tekla::DrawingSubjectKind::SinglePart),"subject classification");
                 check(d.raw.decompressedFileImage==b,"view raw retention");
@@ -314,12 +579,61 @@ int main(int argc,char** argv)
             else if (mode=="drawing_valid")
             {
                 check(tekla::parseDrawing(dg,d,error,{true}),error); check(error.empty(),"stale drawing error");
-                check(d.strings.size()==1 && d.strings.at(1).text=="<Mark><UserText>HELLO WORLD</UserText></Mark>","drawing XML chain incorrect");
+                check(d.strings.size()==1 && d.strings.at(1).text=="<Mark><MarkPart><Element name=\"PART_POS\" value=\"1001\" subType=\"23\"/><UserText>HELLO WORLD</UserText></MarkPart></Mark>","drawing XML chain incorrect");
+                const auto& mark=*d.strings.at(1).markTemplate;
+                check(mark.children.size()==1 && mark.children[0].name=="MarkPart" && mark.children[0].children.size()==2,"drawing mark structure");
+                check(mark.children[0].children[0].attributes.at("name")=="PART_POS" && mark.children[0].children[0].attributes.at("value")=="1001" &&
+                      mark.children[0].children[1].text=="HELLO WORLD","drawing mark fields");
                 check(d.projectGuid=="01234567-89ab-cdef-0123-456789abcdef","GUID must come from stored property");
                 check(d.sheets.size()==1 && d.sheets[0].width==594 && d.sheets[0].height==420,"sheet dimensions");
                 check(d.propertyLinks.size()==1 && d.propertyLinks[0].ownerId==42,"property link");
+                check(d.recordAssociationIndex.size()==1 && d.recordAssociationIndex[0].recordTypeCode==999 &&
+                      d.recordAssociationIndex[0].recordId==321 && d.recordAssociationIndex[0].relatedId==654 &&
+                      d.recordAssociationIndex[0].unclassifiedBytes.front()==0xA5 &&
+                      d.recordAssociationIndex[0].unclassifiedBytes.back()==0xA5,"drawing record-association index");
                 check(d.raw.decompressedFileImage==b,"drawing raw retention");
                 check(tekla::db1::parseRawDatabase(dg,raw,error),error); check(raw.tables.size()==48 && raw.kind==tekla::db1::DatabaseKind::Drawing,"raw DG classification");
+            }
+            else if (mode=="drawing_line_valid" || mode=="drawing_line_duplicate_index" || mode=="drawing_line_missing_reference")
+            {
+                check(tekla::parseDrawing(dg,d,error,{true}),error);
+                const auto lineTable=std::find_if(d.raw.tables.begin(),d.raw.tables.end(),[](const auto& t){return t.ordinal==311;});
+                const auto linkTable=std::find_if(d.raw.tables.begin(),d.raw.tables.end(),[](const auto& t){return t.ordinal==281;});
+                const auto expectedLines=mode=="drawing_line_duplicate_index" ? 2U : 1U;
+                const auto expectedLinkCandidates=mode=="drawing_line_missing_reference" ? 0U : expectedLines;
+                check(d.lineSegments.size()==expectedLines && d.lineSegments[0].recordId==811 &&
+                      d.lineSegments[0].startPoint==std::array<double,2>{12.5,-3.25} &&
+                      d.lineSegments[0].endPoint==std::array<double,2>{42.0,19.75} &&
+                      d.lineSegments[0].rawRecordOffset!=0 && lineTable!=d.raw.tables.end() &&
+                      lineTable->records.size()==expectedLines && lineTable->records[0].payload.size()==120,
+                      "type-311 line endpoints or raw offset");
+                check(d.recordAssociationIndex.size()==2 && d.recordAssociationIndex[0].candidateTargetRecordOffsets.empty() &&
+                      d.recordAssociationIndex[1].recordTypeCode==311 && d.recordAssociationIndex[1].recordId==811 &&
+                      d.recordAssociationIndex[1].candidateTargetRecordOffsets.size()==expectedLines &&
+                      d.recordAssociationIndex[1].candidateTargetRecordOffsets[0]==lineTable->records[0].fileOffset &&
+                      (expectedLines==1 || d.recordAssociationIndex[1].candidateTargetRecordOffsets[1]==lineTable->records[1].fileOffset),
+                      "type-304 target row matching or duplicate-ID candidates");
+                check(linkTable!=d.raw.tables.end() && linkTable->records.size()==1 &&
+                      linkTable->records[0].payload.size()==32 &&
+                      linkTable->records[0].payload[4]==0x37 && linkTable->records[0].payload[5]==0x01,
+                      "type-281 fixture relation");
+                check(d.type281LineReferences.size()==1 &&
+                      d.type281LineReferences[0].referenceRecordId==812 &&
+                      d.type281LineReferences[0].lineRecordId==(mode=="drawing_line_missing_reference"?999U:811U) &&
+                      d.type281LineReferences[0].rawRecordOffset==linkTable->records[0].fileOffset &&
+                      d.type281LineReferences[0].unclassifiedWords==std::array<std::uint32_t,5>{0,0,0,0,0} &&
+                      d.type281LineReferences[0].candidateLineRecordOffsets.size()==expectedLinkCandidates &&
+                      (expectedLinkCandidates==0 || d.type281LineReferences[0].candidateLineRecordOffsets[0]==lineTable->records[0].fileOffset) &&
+                      (expectedLinkCandidates<2 || d.type281LineReferences[0].candidateLineRecordOffsets[1]==lineTable->records[1].fileOffset),
+                      "type-281 line target fields or unknown words");
+            }
+            else if (mode=="drawing_mark_malformed")
+            {
+                check(tekla::parseDrawing(dg,d,error,{true}),error);
+                check(d.strings.size()==1,"malformed mark string count");
+                check(!d.strings.at(1).markTemplate,"malformed mark was decoded");
+                check(d.strings.at(1).text.find("<Mark")!=std::string::npos,"malformed mark text was not preserved");
+                check(std::any_of(d.diagnostics.begin(),d.diagnostics.end(),[](const auto& s){return s.find("drawing mark XML")!=std::string::npos;}),"malformed mark diagnostic missing");
             }
             else if (mode=="drawing_truncated")
             {
@@ -341,7 +655,9 @@ int main(int argc,char** argv)
                 check(!tekla::parseDrawing(dg,d,error),"unknown drawing semantic version accepted");
             }
             else check(!tekla::parseDrawing(dg,d,error),"invalid drawing accepted: "+mode);
-            if (mode!="drawing_valid" && mode!="drawing_view_valid" && mode!="drawing_view_unknown")
+            if (mode!="drawing_valid" && mode!="drawing_mark_malformed" && mode!="drawing_line_valid" &&
+                mode!="drawing_line_duplicate_index" && mode!="drawing_line_missing_reference" &&
+                mode!="drawing_view_valid" && mode!="drawing_view_unknown")
                 check(d.raw.tables.empty() && d.strings.empty() && d.viewsByContext.empty() && !d.subject && !error.empty(),"DG failed output not cleared");
         }
         std::cout<<"PASS "<<mode<<'\n'; return 0;

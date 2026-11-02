@@ -172,7 +172,8 @@ std::vector<uint8_t> inflateGzip(const std::filesystem::path& path)
     return detail::readPayload(path);
 }
 
-std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data, bool variableDatabase = false)
+std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data, bool variableDatabase = false,
+                                        bool legacyVariableDatabaseV2 = false)
 {
     std::vector<std::size_t> result;
     if (data.size() < kSectionMagic.size())
@@ -194,7 +195,9 @@ std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data, bool v
                 {
                     cursor = offset + 12 + static_cast<std::size_t>(fields) * 4;
                     const auto stride = static_cast<std::size_t>(payload) + 9;
-                    while (cursor < data.size() && (data[cursor] == 4 || data[cursor] == 12 || (variableDatabase && data[cursor] == 1)))
+                    while (cursor < data.size() && (data[cursor] == 4 || data[cursor] == 12 ||
+                           (variableDatabase && data[cursor] == 1) ||
+                           (legacyVariableDatabaseV2 && (data[cursor] == 5 || data[cursor] == 6))))
                     {
                         if (stride > data.size() - cursor)
                             break;
@@ -208,7 +211,8 @@ std::vector<std::size_t> sectionOffsets(const std::vector<uint8_t>& data, bool v
     return result;
 }
 
-std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<std::size_t>& offsets, bool variableDatabase = false)
+std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<std::size_t>& offsets,
+                          bool variableDatabase = false, bool legacyVariableDatabaseV2 = false)
 {
     std::vector<Table> result;
     result.reserve(offsets.size());
@@ -243,7 +247,10 @@ std::vector<Table> tables(const std::vector<uint8_t>& data, const std::vector<st
                 continue;
             bool tagsValid = true;
             for (std::size_t cursor = table.offset + table.headerSize; cursor < next - trailer; cursor += table.rowStride)
-                if (data[cursor] != 4 && data[cursor] != 12 && !(variableDatabase && data[cursor] == 1)) { tagsValid = false; break; }
+                if (data[cursor] != 4 && data[cursor] != 12 &&
+                    !(variableDatabase && data[cursor] == 1) &&
+                    !(legacyVariableDatabaseV2 && (data[cursor] == 5 || data[cursor] == 6)))
+                { tagsValid = false; break; }
             if (!tagsValid)
                 continue;
             table.trailerSize = trailer;
@@ -341,6 +348,12 @@ void parseProfileDatabase(const std::filesystem::path& path, Model& model)
     const auto data = inflateGzip(path);
     if (data.size() < 4)
         throw std::runtime_error("profdb.bin is truncated");
+    const auto version = read<uint32_t>(data.data(), 0);
+    std::array<uint32_t, 10> expectedPayloads{872, 152, 16, 24, 16, 52, 560, 296, 45, 1572};
+    if (version == 10)
+        expectedPayloads[0] = 1068;
+    else if (version != 9)
+        throw std::runtime_error("unsupported profdb.bin version " + std::to_string(version));
     struct ProfTable { uint32_t count = 0; uint32_t payload = 0; std::size_t begin = 0; };
     std::vector<ProfTable> all;
     std::size_t position = 4;
@@ -349,18 +362,29 @@ void parseProfileDatabase(const std::filesystem::path& path, Model& model)
         if (position + 8 > data.size())
             throw std::runtime_error("profdb.bin has a truncated table header");
         ProfTable table{read<uint32_t>(data.data(), position), read<uint32_t>(data.data(), position + 4), position + 8};
-        position = table.begin + static_cast<std::size_t>(table.count) * (table.payload + 1);
-        if (position > data.size())
+        const auto rowBytes = static_cast<std::uint64_t>(table.count) *
+                              (static_cast<std::uint64_t>(table.payload) + 1U);
+        if (rowBytes > data.size() - table.begin)
             throw std::runtime_error("profdb.bin table exceeds the file");
+        position = table.begin + static_cast<std::size_t>(rowBytes);
         all.push_back(table);
     }
-    if (all.size() != 10 || position != data.size())
+    if (all.size() != expectedPayloads.size() || position != data.size())
         throw std::runtime_error("unsupported profdb.bin schema");
+    for (std::size_t index = 0; index < all.size(); ++index)
+    {
+        if (all[index].payload != expectedPayloads[index])
+            throw std::runtime_error("unsupported profdb.bin payload at table " + std::to_string(index));
+        for (std::size_t row = 0; row < all[index].count; ++row)
+            if (data[all[index].begin + row * (static_cast<std::size_t>(all[index].payload) + 1U)] != 4)
+                throw std::runtime_error("unsupported profdb.bin row tag at table " + std::to_string(index));
+    }
     const auto profRow = [&](std::size_t table, std::size_t index) {
         return data.data() + all.at(table).begin + index * (all.at(table).payload + 1);
     };
 
     std::unordered_map<std::string, Profile> byName;
+    std::unordered_map<std::string, std::size_t> definitionCounts;
     for (std::size_t index = 0; index < all[1].count; ++index)
     {
         const auto* value = profRow(1, index);
@@ -369,8 +393,14 @@ void parseProfileDatabase(const std::filesystem::path& path, Model& model)
         profile.type = read<uint32_t>(value, 65);
         profile.shapeId = read<uint32_t>(value, 69);
         profile.source = ProfileSource::Catalog;
+        ++definitionCounts[profile.name];
         byName[profile.name] = std::move(profile);
     }
+    for (const auto& entry : definitionCounts)
+        if (entry.second > 1)
+            model.ambiguousProfileNames.insert(entry.first);
+    if (!model.ambiguousProfileNames.empty())
+        model.diagnostics.emplace_back("profdb.bin has duplicate profile definition names; legacy map entries are retained but name associations are ambiguous");
     std::unordered_map<std::string, uint32_t> profileIds;
     for (std::size_t index = 0; index < all[8].count; ++index)
     {
@@ -998,14 +1028,29 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         parseLegacyDatabase(data, model);
         return;
     }
+    if (!options.idRangeMapperNamespaceGuids.empty())
+    {
+        const auto preambleEnd = data.begin() + static_cast<std::ptrdiff_t>(offsets.front());
+        for (const auto& guid : options.idRangeMapperNamespaceGuids)
+            if (std::search(data.begin(), preambleEnd, guid.begin(), guid.end()) != preambleEnd &&
+                std::find(model.matchedIdRangeMapperNamespaceGuids.begin(),
+                          model.matchedIdRangeMapperNamespaceGuids.end(), guid) ==
+                    model.matchedIdRangeMapperNamespaceGuids.end())
+                model.matchedIdRangeMapperNamespaceGuids.push_back(guid);
+    }
     const auto all = tables(data, offsets);
     const bool schema764 = !componentLibrary && model.storageVersion == "7.64" && offsets.size() == 217;
     const bool library764 = componentLibrary && model.storageVersion == "7.64" && offsets.size() == 187;
     const bool schema782 = !componentLibrary && model.storageVersion == "7.82" && offsets.size() == 228;
     const bool library782 = componentLibrary && model.storageVersion == "7.82" && offsets.size() == 198;
+    const bool schema830 = !componentLibrary && model.storageVersion == "8.30" && offsets.size() == 275;
+    const bool schema837 = !componentLibrary && model.storageVersion == "8.37" && offsets.size() == 279;
+    const bool library837 = componentLibrary && model.storageVersion == "8.37" && offsets.size() == 247;
     const bool schema844 = !componentLibrary && model.storageVersion == "8.44" && offsets.size() == 286;
+    const bool schema874 = !componentLibrary && model.storageVersion == "8.74" && offsets.size() == 307;
     const bool schema895 = !componentLibrary && model.storageVersion == "8.95" && offsets.size() == 326;
     const bool schema908 = !componentLibrary && model.storageVersion == "9.08" && offsets.size() == 339;
+    const bool schema950 = !componentLibrary && model.storageVersion == "9.50" && offsets.size() == 355;
     const bool modernVersion = model.storageVersion == "9.52" || model.storageVersion == "9.60" ||
                                model.storageVersion == "9.65" || model.storageVersion == "9.66";
     const bool schema952OrNewer = !componentLibrary && modernVersion && offsets.size() >= 356;
@@ -1013,29 +1058,29 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const bool library895 = componentLibrary && model.storageVersion == "8.95" && offsets.size() == 290;
     const bool library908 = componentLibrary && model.storageVersion == "9.08" && offsets.size() == 303;
     const bool library952OrNewer = componentLibrary && modernVersion && offsets.size() >= 319;
-    if (!schema764 && !library764 && !schema782 && !schema844 && !schema895 && !schema908 && !schema952OrNewer &&
-        !library782 && !library844 && !library895 && !library908 && !library952OrNewer)
+    if (!schema764 && !library764 && !schema782 && !schema830 && !schema837 && !schema844 && !schema874 && !schema895 && !schema908 && !schema950 && !schema952OrNewer &&
+        !library782 && !library837 && !library844 && !library895 && !library908 && !library952OrNewer)
         throw std::runtime_error("unsupported DB1 semantic schema " + model.storageVersion + " with " +
                                  std::to_string(offsets.size()) + " sections; use parseRawDatabase for lossless access");
 
     const std::size_t noTable = (std::numeric_limits<std::size_t>::max)();
     const bool older764Or782 = schema764 || library764 || schema782 || library782;
     const bool legacyLibrary = library764 || library782;
-    const bool older844 = schema844 || library844;
-    const bool older895 = schema895 || library895;
+    const bool older844 = schema830 || schema837 || library837 || schema844 || library844;
+    const bool older895 = schema874 || schema895 || library895;
     const bool hybrid908 = schema908 || library908;
     const bool classIdentity = older895 || hybrid908;
     const bool floatContours = older764Or782 || older844 || older895;
     const bool olderSchema = floatContours || hybrid908;
     const bool library = componentLibrary;
     const bool componentVariables = library && !older844;
-    const bool verifiedPartOwnership = !older764Or782 && !older844;
-    const bool verifiedReinforcement = !older764Or782 && !older844;
+    const bool verifiedPartOwnership = !schema874 && !older764Or782 && !older844;
+    const bool verifiedReinforcement = !schema874 && !schema950 && !older764Or782 && !older844;
     const std::size_t reinforcementDefinitionOrdinal = library ? 153 : 183;
     const std::size_t reinforcementOrdinal = library ? 154 : 184;
     const std::size_t doubleArrayOrdinal = library ? 175 : 205;
     const std::size_t integerArrayOrdinal = library ? 176 : 206;
-    const std::size_t identityClassOrdinal = hybrid908 ? (library ? 293 : 329) : (library ? 279 : 315);
+    const std::size_t identityClassOrdinal = schema874 ? 114 : hybrid908 ? (library ? 293 : 329) : (library ? 279 : 315);
     const std::size_t partAuxiliaryOrdinal = library ? 215 : 245;
     const std::size_t surfaceOrdinal = library ? 117 : 145;
     const std::size_t surfaceDefinitionOrdinal = library ? 118 : 146;
@@ -1050,18 +1095,18 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     const std::size_t weldOrdinal = library ? 160 : 190;
     const std::size_t associationOneOrdinal = library ? 161 : 191;
     const std::size_t associationTwoOrdinal = library ? 162 : 192;
-    const std::size_t identityOrdinal = (older764Or782 || older844) ? (library ? 179 : 209) :
+    const std::size_t identityOrdinal = schema950 ? 353 : (older764Or782 || older844) ? (library ? 179 : 209) :
                                                 (classIdentity ? (library ? 260 : 293) : (library ? 318 : 355));
     const std::size_t partDefinitionOrdinal = older764Or782 ? (library ? 177 : 207) : older844 ? (library ? 215 : 245) :
                                                       (classIdentity ? (library ? 264 : 299) : (library ? 305 : 341));
     const std::size_t contourBlockOrdinal = floatContours ? (library ? 94 : 121) : (library ? 292 : 328);
     const std::size_t stringPropertyOrdinal = olderSchema ? (library ? 90 : 116) : (library ? 304 : 340);
-    const std::size_t partOrdinal = older764Or782 ? (library ? 163 : 193) : older844 ? (library ? 241 : 273) : (library ? 242 : 274);
-    const std::size_t contourLinkOrdinal = older764Or782 ? noTable : older844 ? (library ? 237 : 269) : (library ? 238 : 270);
-    const std::size_t boltDefinitionOrdinal = older764Or782 ? noTable : older844 ? (library ? 222 : 252) :
+    const std::size_t partOrdinal = schema830 ? 272 : older764Or782 ? (library ? 163 : 193) : older844 ? (library ? 241 : 273) : (library ? 242 : 274);
+    const std::size_t contourLinkOrdinal = older764Or782 ? noTable : schema830 ? 268 : older844 ? (library ? 237 : 269) : (library ? 238 : 270);
+    const std::size_t boltDefinitionOrdinal = (older764Or782 || schema830 || schema837 || library837 || schema874) ? noTable : older844 ? (library ? 222 : 252) :
                                                        older895 ? (library ? 223 : 253) : hybrid908 ? (library ? 291 : 327) : (library ? 314 : 351);
     const std::size_t boltLayerOrdinal = floatContours ? noTable : (library ? 296 : 332);
-    const std::size_t boltGroupOrdinal = older764Or782 ? noTable : older844 ? (library ? 221 : 251) : (library ? 274 : 310);
+    const std::size_t boltGroupOrdinal = (older764Or782 || schema830 || schema837 || library837 || schema874) ? noTable : older844 ? (library ? 221 : 251) : (library ? 274 : 310);
     const std::size_t weldDefinitionOrdinal = (schema764 || library764) ? (library ? 158 : 188) : older764Or782 ? (library ? 196 : 226) : older844 ? (library ? 197 : 227) : (library ? 198 : 228);
     const std::size_t relationOrdinal = (older764Or782 || older844) ? noTable : (library ? 261 : 294);
     const std::size_t assemblyOrdinal = (older764Or782 || older844) ? (library ? 151 : 181) : (library ? 265 : 300);
@@ -1070,7 +1115,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         {pointOrdinal, 32}, {placementOrdinal, 40}, {frameOrdinal, 52}, {profileStringOrdinal, 45},
         {numericPropertyOrdinal, 44}, {componentOrdinal, 104}, {propertyLinkOneOrdinal, 24},
         {propertyLinkTwoOrdinal, 24}, {weldOrdinal, 24}, {associationOneOrdinal, 60},
-        {associationTwoOrdinal, 60}, {identityOrdinal, (older764Or782 || older844) ? 63U : (classIdentity ? 55U : 72U)},
+        {associationTwoOrdinal, 60}, {identityOrdinal, schema950 ? 32U : (older764Or782 || older844) ? 63U : (classIdentity ? 55U : 72U)},
         {partDefinitionOrdinal, older764Or782 ? 380U : older844 ? 322U : (classIdentity ? 332U : 372U)},
         {contourBlockOrdinal, floatContours ? 332U : 456U},
         {stringPropertyOrdinal, olderSchema ? 116U : 120U}, {partOrdinal, older764Or782 ? 56U : 64U},
@@ -1081,7 +1126,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     if (boltLayerOrdinal != noTable) required.emplace_back(boltLayerOrdinal, 48U);
     if (boltGroupOrdinal != noTable) required.emplace_back(boltGroupOrdinal, older844 ? 64U : 24U);
     if (relationOrdinal != noTable) required.emplace_back(relationOrdinal, 20U);
-    if (classIdentity) required.emplace_back(identityClassOrdinal, hybrid908 ? 44U : 28U);
+    if (classIdentity) required.emplace_back(identityClassOrdinal, schema874 ? 32U : hybrid908 ? 44U : 28U);
     if (older764Or782)
     {
         required.emplace_back(surfaceOrdinal, 78U);
@@ -1109,10 +1154,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         requireTable(all, spec.first, spec.second);
     if (older844)
     {
-        requireFields(data, all, boltDefinitionOrdinal, 28, {0,1});
-        requireFields(data, all, boltGroupOrdinal, 12, {0,1,2,3,4,5,6,7});
+        if (!schema830 && !schema837 && !library837)
+        {
+            requireFields(data, all, boltDefinitionOrdinal, 28, {0,1});
+            requireFields(data, all, boltGroupOrdinal, 12, {0,1,2,3,4,5,6,7});
+        }
     }
-    if (older895) requireFields(data, all, identityClassOrdinal, 8, {0,1,6,7});
+    if (schema874) requireFields(data, all, identityClassOrdinal, 9, {0,1,7,8});
+    if (older895 && !schema874) requireFields(data, all, identityClassOrdinal, 8, {0,1,6,7});
     if (hybrid908) requireFields(data, all, identityClassOrdinal, 9, {0,1,7,8});
     if (verifiedPartOwnership) requireFields(data, all, partAuxiliaryOrdinal, 14, {0,1});
     if (verifiedReinforcement)
@@ -1151,7 +1200,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     }
     else if (!older844)
     {
-        // Exact field signatures from the pinned 8.95, 9.52 and 9.60 corpus.
+        // Common core field signatures checked in the pinned 8.74/8.95, 9.52 and 9.60 corpus.
         // 9.65/9.66 retain these roles; appended tables do not change ordinals.
         requireFields(data, all, pointOrdinal, 6, {0,1});
         requireFields(data, all, placementOrdinal, 7, {0,1,2});
@@ -1161,11 +1210,12 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         requireFields(data, all, componentOrdinal, 22, {0,1,4,5,6,21});
         for (auto ordinal : {propertyLinkOneOrdinal, propertyLinkTwoOrdinal})
             requireFields(data, all, ordinal, 7, {0,1,2,3,4});
-        for (auto ordinal : {weldOrdinal, boltGroupOrdinal})
-            requireFields(data, all, ordinal, 7, {0,1,2,3,4,5,6});
+        requireFields(data, all, weldOrdinal, 7, {0,1,2,3,4,5,6});
+        if (boltGroupOrdinal != noTable)
+            requireFields(data, all, boltGroupOrdinal, 7, {0,1,2,3,4,5,6});
         for (auto ordinal : {associationOneOrdinal, associationTwoOrdinal})
             requireFields(data, all, ordinal, 7, {0,1,3,4});
-        if (classIdentity) requireFields(data, all, identityOrdinal, 6, {0,1,2,3,4});
+        if (schema950 || classIdentity) requireFields(data, all, identityOrdinal, 6, {0,1,2,3,4});
         else requireFields(data, all, identityOrdinal, 13, {0,1,2,3,11,12});
         requireFields(data, all, partDefinitionOrdinal, 19, {0,1,12});
         requireFields(data, all, contourBlockOrdinal, 84, {0,1});
@@ -1175,9 +1225,12 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         requireFields(data, all, contourLinkOrdinal, 7, {0,1,2,5,6});
         requireFields(data, all, weldDefinitionOrdinal, 18, {0,1,2});
         requireFields(data, all, assemblyOrdinal, 9, {0,1,4,5});
-        if (older895) requireFields(data, all, boltDefinitionOrdinal, 28, {0,1});
-        else if (hybrid908) requireFields(data, all, boltDefinitionOrdinal, 29, {0,1});
-        else requireFields(data, all, boltDefinitionOrdinal, 30, {0,1,25,26,27,28,29});
+        if (boltDefinitionOrdinal != noTable)
+        {
+            if (older895) requireFields(data, all, boltDefinitionOrdinal, 28, {0,1});
+            else if (hybrid908) requireFields(data, all, boltDefinitionOrdinal, 29, {0,1});
+            else requireFields(data, all, boltDefinitionOrdinal, 30, {0,1,25,26,27,28,29});
+        }
         if (!floatContours) requireFields(data, all, boltLayerOrdinal, 9, {0,1,3});
         requireFields(data, all, relationOrdinal, 6, {0,1,2,4,5});
     }
@@ -1187,16 +1240,31 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             for (std::size_t field = 0; field < all[spec.first].fieldCount; ++field)
                 if (read<uint32_t>(data.data(), all[spec.first].offset + 12 + field * 4) > 1)
                     throw std::runtime_error("unsupported DB1 field descriptor at ordinal " + std::to_string(spec.first));
-        model.diagnostics.emplace_back("8.44 semantic tables have structural checks only; complete field signatures need independent corpus validation");
+        model.diagnostics.emplace_back((schema837 || library837) ?
+            "8.37 semantic projection follows the tested common legacy layout; field roles and nonempty numbering/bolt semantics remain unverified" :
+            schema830 ?
+            "8.30 semantic projection follows the structurally checked common legacy tables; object classification, ownership, numbering, bolts and unmapped table roles remain unverified" :
+            "8.44 semantic tables have structural checks only; complete field signatures need independent corpus validation");
     }
-    if (older844)
+    if (schema830)
+        model.diagnostics.emplace_back(
+            "Xsteel 8.30 partial semantics: common parts, assemblies, components, welds and properties are projected; bolt data, numbering and unmapped records remain raw");
+    else if (schema837 || library837)
+        model.diagnostics.emplace_back(
+            "Xsteel 8.37 bolt definition/group tables and unverified table roles are omitted from semantic parsing; use parseRawDatabase for lossless access");
+    else if (older844)
         model.diagnostics.emplace_back(
             "Xsteel 8.44 tables without proven semantic roles remain available through parseRawDatabase");
+    else if (schema874)
+        model.diagnostics.emplace_back(
+            "Xsteel 8.74 partial semantics: verified common model objects and identity-class links are decoded; bolt data, reinforcement, object numbering and unmapped records remain raw");
     else if (older895)
         model.diagnostics.emplace_back(
             "Xsteel 8.95 bolt-layer records are preserved by parseRawDatabase but their field semantics remain unnamed");
     else if (hybrid908)
         model.diagnostics.emplace_back("Xsteel 9.08 partial semantics: bolt numeric parameters and generation flags, non-plate contour kinds and complete geometry remain unverified");
+    else if (schema950)
+        model.diagnostics.emplace_back("Xsteel 9.50 partial semantics: object GUIDs and owner IDs are recovered from table 353; identity class/type, context, reinforcement semantics and unverified links remain unresolved");
 
     struct StringChunk { uint32_t next = 0; std::string text; };
     std::unordered_map<uint32_t, StringChunk> stringChunks;
@@ -1273,8 +1341,14 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         Identity identity;
         identity.rowTag = value[0];
         identity.id = read<uint32_t>(value, 1);
-        identity.ownerId = read<uint32_t>(value, older764Or782 ? 17 : classIdentity ? 9 : 5);
-        identity.contextId = read<uint32_t>(value, 9);
+        identity.ownerId = read<uint32_t>(value, schema950 ? 13 : older764Or782 ? 17 : classIdentity ? 9 : 5);
+        identity.contextId = schema950 ? 0 : read<uint32_t>(value, 9);
+        if (schema950)
+        {
+            for (std::size_t word = 0; word < identity.rawIdentityWords.size(); ++word)
+                identity.rawIdentityWords[word] = read<uint32_t>(value, 1 + word * 4);
+            identity.hasRawIdentityWords = true;
+        }
         if (classIdentity)
         {
             identity.classReferenceId = read<uint32_t>(value, 5);
@@ -1285,6 +1359,8 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         if (older764Or782) identity.flags = read<uint32_t>(value, 21); // legacy assembly reference
         if (older764Or782 || older844)
             identity.guid = fixedString(value, 25, 39);
+        else if (schema950)
+            identity.guid = guid(value + 17);
         else if (classIdentity)
             identity.guid = fixedString(value, 17, 36);
         else
@@ -1296,9 +1372,18 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         insertUnique(model.identities, identity.id, identity, "identity");
     }
     if (classIdentity)
+    {
         for (const auto& entry : model.identities)
             if (entry.second.ownerId && !model.identities.count(entry.second.ownerId))
                 throw std::runtime_error("missing identity owner " + std::to_string(entry.second.ownerId));
+    }
+    else if (schema950)
+    {
+        for (const auto& entry : model.identities)
+            if (entry.second.ownerId && !model.identities.count(entry.second.ownerId))
+                model.diagnostics.push_back("9.50 identity " + std::to_string(entry.first) +
+                    " retains unresolved owner ID " + std::to_string(entry.second.ownerId));
+    }
 
     if (library && all.size() > 68 && all[68].valid && all[68].payloadSize == 76)
     {
@@ -1358,6 +1443,24 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             associations.push_back(std::move(association));
             bySource[associations.back().source].push_back(associationIndex);
             byTarget[associations.back().target].push_back(associationIndex);
+        }
+
+    if (schema874)
+        for (const auto& association : associations)
+        {
+            uint32_t typedIdentityId = 0;
+            if (association.type == 9 || association.type == 11 || association.type == 12 || association.type == 38)
+                typedIdentityId = association.target;
+            else if (association.type == 4 || association.type == 13)
+                typedIdentityId = association.source;
+            const auto identity = model.identities.find(typedIdentityId);
+            if (!typedIdentityId || identity == model.identities.end()) continue;
+            const auto identityClass = model.identityClasses.find(identity->second.classReferenceId);
+            if (identityClass == model.identityClasses.end())
+                throw std::runtime_error("missing identity class " + std::to_string(identity->second.classReferenceId));
+            if (identityClass->second.recordKind != association.type)
+                throw std::runtime_error("8.74 identity-class kind conflicts with association type for object " +
+                                         std::to_string(typedIdentityId));
         }
 
     std::unordered_map<uint32_t, std::vector<uint32_t>> distancesByOwner, formulasByOwner;
@@ -1538,7 +1641,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             if (!model.identities.count(reference.objectId)) throw std::runtime_error("missing object numbering identity");
             if (reference.numberingRecordId && !model.objectNumberingRecords.count(reference.numberingRecordId))
                 throw std::runtime_error("missing object numbering record " + std::to_string(reference.numberingRecordId));
-            if (reference.numberingRecordId && model.objectNumberingRecords.at(reference.numberingRecordId).kind==ObjectNumberingKind::Reinforcement)
+            if (!schema950 && reference.numberingRecordId && model.objectNumberingRecords.at(reference.numberingRecordId).kind==ObjectNumberingKind::Reinforcement)
             {
                 const auto& identity = model.identities.at(reference.objectId);
                 const auto sourceKind = classIdentity ? model.identityClasses.at(identity.classReferenceId).recordKind : identity.type;
@@ -1752,6 +1855,10 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
             bolt.connectedPartIds.erase(std::unique(bolt.connectedPartIds.begin(), bolt.connectedPartIds.end()), bolt.connectedPartIds.end());
             model.individualBolts.push_back(std::move(bolt));
         }
+        else if (part.internalType == 39 &&
+                 ((library && (model.storageVersion == "7.82" || model.storageVersion == "9.52")) ||
+                  (!library && model.storageVersion == "9.08")))
+            model.componentPartIds.push_back(part.id);
         else
         {
             model.unhandledPartIds.push_back(part.id);
@@ -2335,6 +2442,23 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
         model.components.push_back(std::move(component));
     }
 
+    std::vector<std::uint32_t> verifiedComponentParts;
+    verifiedComponentParts.reserve(model.componentPartIds.size());
+    for (const auto id : model.componentPartIds)
+    {
+        const auto part = model.parts.find(id);
+        if (part == model.parts.end() || part->second.internalType != 39 ||
+            std::none_of(model.components.begin(), model.components.end(), [&](const auto& component) {
+                return component.id == part->second.ownerId;
+            }))
+        {
+            model.unhandledPartIds.push_back(id);
+            model.diagnostics.push_back("type-39 component part has no parsed component owner: " + std::to_string(id));
+        }
+        else verifiedComponentParts.push_back(id);
+    }
+    model.componentPartIds = std::move(verifiedComponentParts);
+
     if (!older844)
     {
         for (const auto& association : associations)
@@ -2395,7 +2519,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
     }
 
     // Preserve the historical 8.44 path pending independent layout evidence.
-    if (older844)
+    if (older844 && !schema837 && !schema830)
     for (const auto& identity : model.identities)
     {
         if (identity.second.type != 4)
@@ -2414,6 +2538,7 @@ void parseDatabase(const std::vector<uint8_t>& data, Model& model, bool componen
 
     std::sort(model.actualPartIds.begin(), model.actualPartIds.end());
     std::sort(model.operativePartIds.begin(), model.operativePartIds.end());
+    std::sort(model.componentPartIds.begin(), model.componentPartIds.end());
     std::sort(model.unhandledPartIds.begin(), model.unhandledPartIds.end());
 
 }
@@ -2553,10 +2678,18 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
         }
         const bool xsteel = data.size() >= 6 && std::memcmp(data.data(), "Xsteel", 6) == 0;
         const bool namedVariableDatabase = data.size() >= 8 && std::memcmp(data.data(), "DBV@", 4) == 0;
-        const bool legacyVariableDatabase = data.size() >= 24 && read<uint32_t>(data.data(),0) == 1 &&
+        const bool legacyVariableDatabaseV1 = data.size() >= 24 && read<uint32_t>(data.data(),0) == 1 &&
             read<uint32_t>(data.data(),4) == 0 && read<uint32_t>(data.data(),8) == 0 &&
             read<uint32_t>(data.data(),12) == 0 && read<uint32_t>(data.data(),16) == 1 &&
             read<uint32_t>(data.data(),20) == 0xdbcec0bc;
+        // Older environment databases use the same section framing as DBV v1,
+        // but store 2 in the first header word. Do not treat that word as the
+        // Tekla product version; the remaining signature must still match.
+        const bool legacyVariableDatabaseV2 = data.size() >= 24 && read<uint32_t>(data.data(),0) == 2 &&
+            read<uint32_t>(data.data(),4) == 0 && read<uint32_t>(data.data(),8) == 0 &&
+            read<uint32_t>(data.data(),12) == 0 && read<uint32_t>(data.data(),16) == 1 &&
+            read<uint32_t>(data.data(),20) == 0xdbcec0bc;
+        const bool legacyVariableDatabase = legacyVariableDatabaseV1 || legacyVariableDatabaseV2;
         const bool variableDatabase = namedVariableDatabase || legacyVariableDatabase;
         if (!xsteel && !variableDatabase)
             throw std::runtime_error("file is neither an Xsteel nor a DBV database");
@@ -2587,8 +2720,10 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
             database.containerName.assign(reinterpret_cast<const char*>(data.data()+8),length);
             database.storageVersion = "DBV";
         }
-        else if (legacyVariableDatabase)
+        else if (legacyVariableDatabaseV1)
             database.storageVersion = "DBV-legacy";
+        else if (legacyVariableDatabaseV2)
+            database.storageVersion = "DBV-legacy-v2";
         const auto versionAt = xsteel ? header.find_first_of("0123456789", 6) : std::string::npos;
         if (xsteel && versionAt != std::string::npos)
         {
@@ -2605,11 +2740,11 @@ bool parseRawDatabase(const std::filesystem::path& path, RawDatabase& database,
                 database.databaseGuid = header.substr(guidAt, 36);
         }
 
-        const auto offsets = sectionOffsets(data, variableDatabase);
+        const auto offsets = sectionOffsets(data, variableDatabase, legacyVariableDatabaseV2);
         if (!offsets.empty())
         {
             database.layout = DatabaseLayout::ModernSections;
-            const auto all = tables(data, offsets, variableDatabase);
+            const auto all = tables(data, offsets, variableDatabase, legacyVariableDatabaseV2);
             if (all.size() != offsets.size())
                 throw std::runtime_error("DB1 section enumeration is inconsistent");
             database.preamble.assign(data.begin(), data.begin() + static_cast<std::ptrdiff_t>(offsets.front()));
@@ -2714,6 +2849,7 @@ bool parseProfileCatalog(const std::filesystem::path& path, ProfileCatalog& resu
 {
     try
     {
+        error.clear();
         result = {};
         const auto data = inflateGzip(path);
         if (data.size() < 4)
@@ -2722,6 +2858,7 @@ bool parseProfileCatalog(const std::filesystem::path& path, ProfileCatalog& resu
         Model model;
         parseProfileDatabase(path, model);
         result.profiles = std::move(model.profiles);
+        result.ambiguousProfileNames.assign(model.ambiguousProfileNames.begin(), model.ambiguousProfileNames.end());
         return true;
     }
     catch (const std::exception& exception)

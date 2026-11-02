@@ -15,6 +15,9 @@ struct AttributeChoice
     std::uint32_t index = 0;
     std::int32_t integerValue = 0;
     std::string label;
+    // Preserve the allocator row tag. Repeated attribute/index pairs with
+    // different tags remain distinct; the tag's lifecycle meaning is unknown.
+    std::uint8_t allocationTag = 0;
 };
 struct AttributeMetadata
 {

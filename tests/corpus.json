@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, unknown type-39 parts and non-plate contours remain explicit gaps. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; numeric model IDs are unscoped, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 reference matches are cross-file evidence, not independent geometry truth; 35 references remain unresolved. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed. Ownership corrections separate 8.95 identity class references from owner contexts and modern part auxiliary references from owners. Sixty model/library ownership checks cover raw references, component lists and all variable scopes; three pinned AUTRA dialogs independently check 15 parameter owner/name matches. Modern xslib distance/formula graphs are enabled with exact signatures. Kind-60 variable owners remain distinct, not fabricated components. Type-4 custom-component associations now preserve point and non-point targets in customComponentReferences; these records no longer fabricate ControlLine objects. Legacy geometry baselines remain unchanged. Modern partPositions expose verified axial offsets and depth/plane settings, keeping six uninterpreted words. Position records are not applied again to stored geometry. Two pinned AUTRA C# files corroborate 30 beam and 36 centered column/footing settings; two additional stored-geometry checks are consistency evidence, not independent geometry truth. 7.82 surface treatments: seven objects/six definitions, 32 local contour points, seven father links, 132 distance-variable links and 34 formula targets. Six definition material names match the paired catalog; seven project material links use exact unique names and DB1 path scope. TS1/type3 corroborated by official surface-treatment documentation; PL thickness is derived from profile text. Unknown flags, clipping, tiling, final geometry and lifecycle remain unresolved. Modern corresponding tables are empty in public corpus and nonempty semantics are not enabled.",
+  "note": "Pinned public samples; downloaded separately, not redistributed. Counts and fingerprints are parser regression baselines, not independent geometric truth. 7.82 DB1 main/library cases now cover partial object semantics and two project aggregations; individual bolts retain stored parameters, EXCEL 7.82 and two 9.52 xslib samples expose type-39 records only when their component owner resolves; the two 9.08 main snapshots additionally expose 104 owner-verified PLATE type-39 component parts each; 7.82 non-plate contours remain an explicit gap. Row-tag 12 records are retained; counts are stored records, not claims about live Tekla objects. DB2 raw baselines corrected to include all sequential tables; DG/DB2 partial semantics added. related_evidence compares counters with Tekla numberinghistory.txt and DG references with DB1 GUIDs. DBV tag-1 records and single-byte final trailers recovered; environment/options partial semantics add 90 cases. Environment OBJECT_LOCKED labels are checked against an official example; DB1/property definition joins are name/type matches only. DG view/subject fields added; a pinned VI file independently checks six stored view volume fields and model plate axis checks the view X basis. DG 7.82 adds 293 full section/metadata round trips and partial semantic reads; known straight-dimension subtypes decode 22782 unique anchors, 31 repeated dimension IDs retain all 62 physical rows, and 111 unique unlinked anchors reference 96 dimension-set IDs absent from their respective drawings; numeric model IDs are unscoped by default, incomplete text and ambiguous/collapsed views remain explicit. 59 subject ID/type checks and 1361 part-reference matches plus 35 assembly-reference matches are cross-file identity evidence, not independent drawing geometry truth. Legacy xslib definitions add 40 records with 660 owned parameters and 2726 stored child identities. Pinned catalog and four dialogs corroborate 28 named records and 67 parameter references; two dialog references remain unresolved. Duplicate/anonymous definitions are retained without lifecycle selection. Legacy xslib distance/formula records now recover the two remaining D1/D5 dialog references, so all 69 match. The graph includes 6838 distances, 10450 formula bindings, 13676 bound-object links and 24442 formula references; 360 references cross owners. Stored values/flags are preserved, formulas are not executed. Ownership corrections separate 8.95 identity class references from owner contexts and modern part auxiliary references from owners. Sixty model/library ownership checks cover raw references, component lists and all variable scopes; three pinned AUTRA dialogs independently check 15 parameter owner/name matches. Modern xslib distance/formula graphs are enabled with exact signatures. Kind-60 variable owners remain distinct, not fabricated components. Type-4 custom-component associations now preserve point and non-point targets in customComponentReferences; these records no longer fabricate ControlLine objects. Legacy geometry baselines remain unchanged. Modern partPositions expose verified axial offsets and depth/plane settings, keeping six uninterpreted words. Position records are not applied again. Two pinned AUTRA C# files corroborate 30 beam and 36 centered column/footing settings; two additional stored-geometry checks are consistency evidence, not independent geometry truth. 7.82 surface treatments: seven objects/six definitions, 32 local contour points, seven father links, 132 distance-variable links and 34 formula targets. Six definition material names match the paired catalog; seven project material links use exact unique names and DB1 path scope. TS1/type3 corroborated by official surface-treatment documentation; PL thickness is derived from profile text. Unknown flags, clipping, tiling, final geometry and lifecycle remain unresolved. Modern corresponding tables are empty in public corpus and nonempty semantics are not enabled. Added a second independently published Tekla 9.52 project snapshot (Project2_Steel_Detailing) with main/xslib DB1 and DB2; regression checks the 2,014-part main model, xslib component graph, 14 component-owned type-39 parts (12 CUTPART, 2 PLATE), and exact three DB1/DB2/library file-pair associations. Its DB2 series are empty. IDRM static-ID ranges, namespace GUID/start/count fields and header boundaries are checked against four independently walked W3 7.82 and AUVENT 8.44 files; static-to-runtime ID conversion and DB1 object links remain unverified. A public Tekla 2023 SP8 housing-concrete sample now verifies one real PEIKKO DELTA_EXT CLB section: nine dimensions, 18 retained expressions, one 14-point face, and selected exact formula/point references; the full source archive is pinned by URL, size, and SHA-256 and extracted on demand rather than redistributed. This is CLB syntax/field evidence only; the sample profitab.inp does not declare the custom PEIKKO rule, so no catalog cross-link is asserted. Four public Tekla Structures 2023 SP8 BIM4LCA DB1 samples and matching IFC4 exports are pinned. 9.50 table 353 is partially decoded: DB1 object IDs and 16-byte IFC GlobalIds map directly for 25,521 IFC entities, and its fourth raw word matches the DB1 owner ID across all 5,017 IFC aggregation edges whose endpoint identities resolve. Identity class/type/context and several raw words remain unverified; parts stay unknown-type and no full-version support is claimed. tools/test_db1_950_evidence.py independently rechecks all four DB1/IFC pairs. A public BTSCM RABAS project now pins ten 7.64 DG drawings with DB1/DB2 project companions; project discovery parses all 10 7.64 DGs to partial semantic level without inferred object links. Variable preamble, 8-byte record metadata and full-file reconstruction are verified; ten drawings also regress text, properties, sheets, subjects, views, numeric references and subtype-1 dimension anchors/sets; independent plotted dimensions and geometry remain unverified. Two public older project folders at devsachinborse/tekla-structures-projects are now pinned to commit ba2b921eba863163897d1389286ed4163bdd4412. Their real DB1/DB2 files expose distinct semantic coverage: 8.30 and 8.74 main DB1 now have pinned partial core-model projections for their 275- and 307-section layouts; the 8.74 xslib remains raw-only. The paired 8.74 options DBV files are semantically read; its DBV v2 environment.db is now semantically read with allocation tags retained; tags 5/6 and their lifecycle remain uninterpreted. The source repository has no declared license; files are not redistributed, and the optional corpus fetch is explicit.",
   "archives": {
     "steel-fundamentals": {
       "url": "https://raw.githubusercontent.com/letstekla/Tekla-Structures-Drawing-Automation-Through-Grasshopper-in-Rhinoceros-3D/efb24b30a722de4afc9052331e2e24b69abba6cf/Steel%20Fundamentals%20Modeling%20Assignment.zip",
@@ -54,6 +54,50 @@
       "member": "3150b841-e590-42bc-b6d4-777a86f04053/files/Models/U52_2007V4.ifcZIP",
       "size": 314195,
       "sha256": "31af1d4807b39815f79e790d55f993096bfa0ac1b60c27fc74dd10c8f474de78"
+    },
+    "bim4lca-structural": {
+      "url": "https://cdn2.gopublic.dk/socialboligstyrelsennordic/Media/638615141390369983/STRUCTURAL.zip",
+      "size": 45202774,
+      "sha256": "a13eae2a9b284ce5ef4a7b3e3d7308d1175a8b5a807cdca0fd4fd01b4a0f9f93"
+    },
+    "bim4lca-housing-concrete-tekla": {
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/TEKLA-STRUCTURES/STRUC_NordicLCA_Housing_Concrete_BuildingPermit.zip",
+      "size": 4768601,
+      "sha256": "cc71c77afbd0c32a3d4ffb556bfdfaa1715f3d4fb21b4691a340dd7329b236b0"
+    },
+    "bim4lca-housing-timber": {
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/TEKLA-STRUCTURES/STRUC_NordicLCA_Housing_Timber_BuildingPermit.zip",
+      "size": 3523239,
+      "sha256": "9da317dc7906777ca1b23ef2e65166f42cd60d0f847ead4a086b38f62cb364b4"
+    },
+    "bim4lca-office-concrete": {
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/TEKLA-STRUCTURES/STRUC_NordicLCA_Office_Concrete_BuildingPermit.zip",
+      "size": 10248301,
+      "sha256": "bfd705498beed656186b938d813cac449f0ce139412feaa6dfb6bae933914453"
+    },
+    "bim4lca-office-timber": {
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/TEKLA-STRUCTURES/STRUC_NordicLCA_Office_Timber_BuildingPermit.zip",
+      "size": 7741605,
+      "sha256": "af1e2320296ce3f090d4fa6bc6330886ec3065f57a56887d5938570ac19c0e22"
+    },
+    "tekla-official-drawing-exercise": {
+      "url": "https://developer.tekla.com/sites/default/files/files/inline-files/Exercise-drawings-model.zip",
+      "size": 859496,
+      "sha256": "4e26dd7949320a299aeacf3ef9c45c758b497e06116f5ba4c7c36395e8d36d0a"
+    },
+    "btscm-rabas": {
+      "url": "https://btscm.fr/dicocm/R/realisations/JPR/A%201120%20RABAS.zip",
+      "size": 3136269,
+      "sha256": "0aa6069ccb882e4bd4401191f85a6ebcc526d1966b0519658296280c82bf405b"
+    },
+    "abri-moto-vccf25": {
+      "url": "https://btscm.fr/dicocm/T/TEKLA_fichiers/Abri-Moto-VCCF25.zip",
+      "size": 13434719,
+      "sha256": "5f65ce301b200c75db233c2dc081baa10901b9d06dd31bb93c6b765d241a5b83"
     }
   },
   "files": [
@@ -1667,6 +1711,13 @@
       "sha256": "5e29249f0c48f2611ba0dc4193c70b19619dcf1eb3d4b7a59fb9c0563db3ec39"
     },
     {
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D0af4f427-b208-4018-b750-6bb0549b6dda.dg.metadata",
+      "archive": "steel-fundamentals",
+      "member": "Steel Fundamentals Modeling Assignment/drawings/D0af4f427-b208-4018-b750-6bb0549b6dda.dg.metadata",
+      "size": 830,
+      "sha256": "47775988202e62408278a45ecdfb6675a8021802d7f06ed0769d0af58732b812"
+    },
+    {
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg",
       "archive": "steel-fundamentals",
       "member": "Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg",
@@ -1674,11 +1725,25 @@
       "sha256": "8236b0fef0dd2bb6d8400ed6acf9acdceed6f9af9c42b1e2a9b8ef091be706b7"
     },
     {
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg.metadata",
+      "archive": "steel-fundamentals",
+      "member": "Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg.metadata",
+      "size": 832,
+      "sha256": "48852f888f954f0041f9573e8fafe2ed9b84ccd708e2b0e73558881b447654ee"
+    },
+    {
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg",
       "archive": "steel-fundamentals",
       "member": "Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg",
       "size": 14841,
       "sha256": "37b8fdc70dae4c829abc37ddc086294221908675fa640b8220011ddd2b94218e"
+    },
+    {
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg.metadata",
+      "archive": "steel-fundamentals",
+      "member": "Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg.metadata",
+      "size": 819,
+      "sha256": "1184a32e8ded2a1c90e0afbf79bd85536937de4ee3c86967a0333caf50e9c743"
     },
     {
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Db2ae07cb-3c9e-4c0b-af76-7b96284a737b.dg",
@@ -1707,6 +1772,13 @@
       "member": "Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg",
       "size": 14864,
       "sha256": "33a5d0954543a94c19e056930edf034044a046846acc2cee4294e1ea516a1adb"
+    },
+    {
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg.metadata",
+      "archive": "steel-fundamentals",
+      "member": "Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg.metadata",
+      "size": 819,
+      "sha256": "e5a090f9857728db44d931927c7f2128a489c490765ac992acd15d253d757c1a"
     },
     {
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/ekryz_ComponentCatalogUIModelSettings.xml",
@@ -3702,6 +3774,18 @@
       "sha256": "b33dc9546363483f0b48cf1e6880996b6883e6ac4b95df41171fa29e54718367"
     },
     {
+      "path": "auvent-idrm/db.idrm",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/db.idrm",
+      "size": 85,
+      "sha256": "9964fbfa9fffa191647ac4cbe86ae38fbc3f8fe11bd910808095098a4251f945"
+    },
+    {
+      "path": "auvent-idrm/xslib.idrm",
+      "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/xslib.idrm",
+      "size": 80,
+      "sha256": "c271975e2e28a4b274caa31b6994aa0309781ad61f534379ba7d66030a7e996b"
+    },
+    {
       "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/TeklaStructuresModel.xml",
       "size": 761,
       "sha256": "a4584173cc458000025f4eda4161ed091c1aee16fc38f72dd4582693b80a303f",
@@ -4544,12 +4628,6 @@
       "member": "Steel Fundamentals Modeling Assignment/options.ini"
     },
     {
-      "path": "drawing-output-evidence/Krozanovski_Edgar.pdf",
-      "url": "https://www.theseus.fi/server/api/core/bitstreams/780a2817-5167-4713-8ddc-b7774e74f740/content",
-      "size": 11102676,
-      "sha256": "b39df60ffb61d5c456ff4e6b60bf508d9e554a73143817c0a2b703c871d8cc5b"
-    },
-    {
       "url": "https://btscm.fr/dicocm/R/realisations/Lapechelire/Modele%20TEKLA/pechelirejulV1/pechelirejulV1/Fichiers_DWG/ensemble%20passerelle.dwg",
       "size": 878357,
       "sha256": "6bc0e634d711f7eaac3a39baf9f4e98188b0e933e70a3f043f232526783e700c",
@@ -4608,6 +4686,19 @@
       "url": "https://btscm.fr/dicocm/C/CCF/CCF_BE_2019/AUVENT_CCF_BE_AMCR1_2019_final/ShapeGeometries/a1d452b2-d351-4a0a-9376-d4e4cfad751e.xml",
       "size": 25157,
       "sha256": "a5853f60331dac68770738edf515e31ebbb8d551b1bd1dbc12944968847bfedb"
+    },
+    {
+      "path": "profile-lis/sample_profiles.lis",
+      "url": "https://raw.githubusercontent.com/sbabadag/model-maker/43a6b7934696d80d23e5f1915210c8248559b1c6/tests/data/sample_profiles.lis",
+      "size": 1810,
+      "sha256": "d7c6472cce44800c99612b0d867ff9741c8345ca6e5b4ad874d98999745a79ba"
+    },
+    {
+      "path": "api-exam908-july/attributes/RebarShapeCatalog.rscx",
+      "archive": "api-exam908-july",
+      "member": "API_Developer_Exam_01/attributes/RebarShapeCatalog.rscx",
+      "size": 736,
+      "sha256": "b835b0dbf3884f5e049f9b3089075832ca06172180bcab36eb41053e50aae39f"
     },
     {
       "path": "api-exam908-july/API_Developer_Exam_01.db1",
@@ -4812,6 +4903,34 @@
       "sha256": "e4c84217cfb5f18a75112f288fd8e9c4feec94754728c852a97942806cbf9195"
     },
     {
+      "path": "construsoft-drawing-views/Defining drawing views steel/Defining drawing views steel.db1",
+      "archive": "construsoft-drawing-views",
+      "member": "Defining drawing views steel/Defining drawing views steel.db1",
+      "size": 184181,
+      "sha256": "e4c84217cfb5f18a75112f288fd8e9c4feec94754728c852a97942806cbf9195"
+    },
+    {
+      "path": "construsoft-drawing-views/Defining drawing views steel/Defining drawing views steel.db2",
+      "archive": "construsoft-drawing-views",
+      "member": "Defining drawing views steel/Defining drawing views steel.db2",
+      "size": 258,
+      "sha256": "5e493fb9ec6dbcc6e7bcfc153a33a78a1a375bfde8a05530a6f92ed929f4f04a"
+    },
+    {
+      "path": "construsoft-drawing-views/Defining drawing views steel/xslib.db1",
+      "archive": "construsoft-drawing-views",
+      "member": "Defining drawing views steel/xslib.db1",
+      "size": 100282,
+      "sha256": "3f92a8a782483fc2108761cc21a6eee1b2e0b22a9fbac4d2ca023877711b698c"
+    },
+    {
+      "path": "construsoft-drawing-views/Defining drawing views steel/xslib.db2",
+      "archive": "construsoft-drawing-views",
+      "member": "Defining drawing views steel/xslib.db2",
+      "size": 69,
+      "sha256": "14c28bfa35a4c6f00e1ef16038eb074a7b27b15d37e767be530f4886a273aca3"
+    },
+    {
       "path": "analysis-settings/attributes/Click here to see A_D wire frame.admodel",
       "archive": "api-exam908-july",
       "member": "API_Developer_Exam_01/attributes/Click here to see A_D wire frame.admodel",
@@ -4894,6 +5013,531 @@
       "member": "u52_2007vierge/numbering.history",
       "size": 10102,
       "sha256": "22db3128ec1f8e4a7adb3c6f0904c6321a3e8a47b38632882ba98a7717593ba8"
+    },
+    {
+      "path": "project2-steel-detailing/New model 8.db1",
+      "url": "https://raw.githubusercontent.com/MoamenShehta/Project2_Steel_Detailing/5bf5b4e5dff67b867c6150fae06526c491a75789/New%20model%208.db1",
+      "size": 3075289,
+      "sha256": "8b457f9119e98dba56d18354bd541d40ff4f01d3fd9b5d0704ea6e0236151fd1"
+    },
+    {
+      "path": "project2-steel-detailing/New model 8.db2",
+      "url": "https://raw.githubusercontent.com/MoamenShehta/Project2_Steel_Detailing/5bf5b4e5dff67b867c6150fae06526c491a75789/New%20model%208.db2",
+      "size": 141,
+      "sha256": "9e81c2b5b625d8de2ca92eb5bd281c0aa52999419e37ccd56e4d68ccfbcfccde"
+    },
+    {
+      "path": "project2-steel-detailing/xslib.db1",
+      "url": "https://raw.githubusercontent.com/MoamenShehta/Project2_Steel_Detailing/5bf5b4e5dff67b867c6150fae06526c491a75789/xslib.db1",
+      "size": 2074106,
+      "sha256": "149f4e38059a9c354910df677e04d1d416d8390cf690c08a9f92f11debd281c9"
+    },
+    {
+      "path": "project2-steel-detailing/xslib.db2",
+      "url": "https://raw.githubusercontent.com/MoamenShehta/Project2_Steel_Detailing/5bf5b4e5dff67b867c6150fae06526c491a75789/xslib.db2",
+      "size": 69,
+      "sha256": "431bfb96aa2056188d0be0888528f2d9b131fdecc9e27a008db3750743bb23eb"
+    },
+    {
+      "path": "BIM4LCA/housing-concrete/ParametricProfiles/PEIKKO.DELTA_EXT.clb",
+      "archive": "bim4lca-housing-concrete-tekla",
+      "member": "STRUC_NordicLCA_Housing_Concrete_BuildingPermit/ParametricProfiles/PEIKKO.DELTA_EXT.clb",
+      "size": 2799,
+      "sha256": "f5078e4d1930610848e88782e7ec0971eaf9f25d46121a9cd0128ce62bbe08a9"
+    },
+    {
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/STRUC_NordicLCA_Housing_Concrete_BuildingPermit.db1",
+      "archive": "bim4lca-housing-concrete-tekla",
+      "member": "STRUC_NordicLCA_Housing_Concrete_BuildingPermit/STRUC_NordicLCA_Housing_Concrete_BuildingPermit.db1",
+      "size": 5528407,
+      "sha256": "3e1a6c25fa62c5051b8f5d7c9d2932e4b316abbd960e97be207e55ce63371532"
+    },
+    {
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/profitab.inp",
+      "archive": "bim4lca-housing-concrete-tekla",
+      "member": "STRUC_NordicLCA_Housing_Concrete_BuildingPermit/profitab.inp",
+      "size": 20574,
+      "sha256": "a1ccd0ad863367370859a815d13ff6fc4f98a6f5b48e455cf62b9f38d2fef28c"
+    },
+    {
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/profdb.bin",
+      "archive": "bim4lca-housing-concrete-tekla",
+      "member": "STRUC_NordicLCA_Housing_Concrete_BuildingPermit/profdb.bin",
+      "size": 313828,
+      "sha256": "9fe6101f02e6dce399c5ace2ac6f6e2740303586b3753af77208b312b5967382"
+    },
+    {
+      "path": "BIM4LCA/Housing_Timber_BuildingPermit/STRUC_NordicLCA_Housing_Timber_BuildingPermit.db1",
+      "archive": "bim4lca-housing-timber",
+      "member": "STRUC_NordicLCA_Housing_Timber_BuildingPermit/STRUC_NordicLCA_Housing_Timber_BuildingPermit.db1",
+      "size": 3660410,
+      "sha256": "47f875962284f331d6b0ac9fa7113a35719e1cbc06f9fe6801fdce7299e78d23"
+    },
+    {
+      "path": "BIM4LCA/Housing_Timber_BuildingPermit/profdb.bin",
+      "archive": "bim4lca-housing-timber",
+      "member": "STRUC_NordicLCA_Housing_Timber_BuildingPermit/profdb.bin",
+      "size": 313536,
+      "sha256": "f0b2d7a344e943c38cb2fcf5bd8e39353d4a595ab8f6f38dc16f64a525557c70"
+    },
+    {
+      "path": "BIM4LCA/Office_Concrete_BuildingPermit/STRUC_NordicLCA_Office_Concrete_BuildingPermit.db1",
+      "archive": "bim4lca-office-concrete",
+      "member": "STRUC_NordicLCA_Office_Concrete_BuildingPermit/STRUC_NordicLCA_Office_Concrete_BuildingPermit.db1",
+      "size": 12068303,
+      "sha256": "36342e02a8e6930b1539981cb00b802ec52a0ef96ad80bf9a8c1e609bcc10bb4"
+    },
+    {
+      "path": "BIM4LCA/Office_Concrete_BuildingPermit/profdb.bin",
+      "archive": "bim4lca-office-concrete",
+      "member": "STRUC_NordicLCA_Office_Concrete_BuildingPermit/profdb.bin",
+      "size": 315846,
+      "sha256": "5003291757da953a4903f432a42722cab94d1bb9b2c426c5ec8976f654ccd779"
+    },
+    {
+      "path": "BIM4LCA/Office_Timber_BuildingPermit/STRUC_NordicLCA_Office_Timber_BuildingPermit.db1",
+      "archive": "bim4lca-office-timber",
+      "member": "STRUC_NordicLCA_Office_Timber_BuildingPermit/STRUC_NordicLCA_Office_Timber_BuildingPermit.db1",
+      "size": 9021097,
+      "sha256": "85f8b4337f6a0d93a4ce68b99fd8a9cf364173925d4b53c81617f6a587e18888"
+    },
+    {
+      "path": "BIM4LCA/Office_Timber_BuildingPermit/profdb.bin",
+      "archive": "bim4lca-office-timber",
+      "member": "STRUC_NordicLCA_Office_Timber_BuildingPermit/profdb.bin",
+      "size": 315952,
+      "sha256": "99748138da4c9b357d9b4705139de2b2212ec5fa25835458e55dc2dfc7065083"
+    },
+    {
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/STRUC_NordicLCA_Housing_Concrete_BuildingPermit.ifc",
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/IFC/STRUC_NordicLCA_Housing_Concrete_BuildingPermit.ifc",
+      "size": 8899668,
+      "sha256": "586f2d47751bcddb06286072736cdd138bb3de7eebd8513ddc648f5f8a48ab0f"
+    },
+    {
+      "path": "BIM4LCA/Housing_Timber_BuildingPermit/STRUC_NordicLCA_Housing_Timber_BuildingPermit.ifc",
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/IFC/STRUC_NordicLCA_Housing_Timber_BuildingPermit.ifc",
+      "size": 1926780,
+      "sha256": "26aad2086dc1b7328f2dfde9f088f35d4db743aef5346a7d8e921e5e2d37904f"
+    },
+    {
+      "path": "BIM4LCA/Office_Concrete_BuildingPermit/STRUC_NordicLCA_Office_Concrete_BuildingPermit.ifc",
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/IFC/STRUC_NordicLCA_Office_Concrete_BuildingPermit.ifc",
+      "size": 3244855,
+      "sha256": "c36f33de483c6c0aa9917d281dbbdff0727ca051c586922463277e59fd59801b"
+    },
+    {
+      "path": "BIM4LCA/Office_Timber_BuildingPermit/STRUC_NordicLCA_Office_Timber_BuildingPermit.ifc",
+      "archive": "bim4lca-structural",
+      "member": "STRUCTURAL/IFC/STRUC_NordicLCA_Office_Timber_BuildingPermit.ifc",
+      "size": 2459650,
+      "sha256": "3beff5c872c55184e0747e5c5faf17bbb5cd6877d8a26a653c4be98a3bf7c25d"
+    },
+    {
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/drawings/DID4E7042BA-0000-0001-3133-313539373939.dg",
+      "archive": "tekla-official-drawing-exercise",
+      "member": "Exercise-drawings/drawings/DID4E7042BA-0000-0001-3133-313539373939.dg",
+      "size": 75911,
+      "sha256": "3eedba0a099a327590a686ed62f8278897cdd28ff52d822086ba9767fe563853"
+    },
+    {
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/drawings/DID4E7042BA-0000-0002-3133-313539373939.dg",
+      "archive": "tekla-official-drawing-exercise",
+      "member": "Exercise-drawings/drawings/DID4E7042BA-0000-0002-3133-313539373939.dg",
+      "size": 75533,
+      "sha256": "8fbbafceea77538ce2c9ea53a9430eab04a4b1e472372686be979bb8b17d6780"
+    },
+    {
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/Exercise-drawings.db2",
+      "archive": "tekla-official-drawing-exercise",
+      "member": "Exercise-drawings/Exercise-drawings.db2",
+      "size": 140,
+      "sha256": "c89a007118f9988a879b3f4a9b025167de23c84fdad573d8a256098ad90e4109"
+    },
+    {
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/xslib.db2",
+      "archive": "tekla-official-drawing-exercise",
+      "member": "Exercise-drawings/xslib.db2",
+      "size": 67,
+      "sha256": "d7fc2c04282a1743d28fd31769a6b645d27e670ddb2f035114fc4eca0266c2b7"
+    },
+    {
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/Exercise-drawings.db1",
+      "archive": "tekla-official-drawing-exercise",
+      "member": "Exercise-drawings/Exercise-drawings.db1",
+      "size": 102841,
+      "sha256": "d43406cef6259650431dc8694666a2b893a86f60cc98257075bca13bf4130371"
+    },
+    {
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/xslib.db1",
+      "archive": "tekla-official-drawing-exercise",
+      "member": "Exercise-drawings/xslib.db1",
+      "size": 166239,
+      "sha256": "c41d448047a2962b72c0a60b7645485028a901130488e24274d3da9db168c5d0"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00AD-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00AD-3134-343835353636.dg",
+      "size": 10750,
+      "sha256": "34c40e54a49cb4a2bb7db27c0d6164a94455588bb6ca4d1e4f1fb984027a34f0"
+    },
+    {
+      "path": "btscm-rabas/project/A 1120 RABAS.db1",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/A 1120 RABAS.db1",
+      "size": 266513,
+      "sha256": "390e31f77da281a7f1e6077b95db623e9015ef47fda53ad25fab131c5e5e7083"
+    },
+    {
+      "path": "btscm-rabas/project/A 1120 RABAS.db2",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/A 1120 RABAS.db2",
+      "size": 226,
+      "sha256": "8a2d0bfbebc2a2f7d488f63f7290a5957ce72fbe7330da133fb9d5c9b9971049"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00B2-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00B2-3134-343835353636.dg",
+      "size": 11375,
+      "sha256": "781a8f1119df837de39648248a1765531b7e9b7d19ba9bf5e82d5ac8068e20b5"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00B7-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00B7-3134-343835353636.dg",
+      "size": 8020,
+      "sha256": "d2550dff8885662f2a84b7ee56cf65491bd4110476305ac0dc0aa532efbfb277"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00BC-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00BC-3134-343835353636.dg",
+      "size": 14205,
+      "sha256": "62cc6f79403158a4dbad3c98352ec55a79d3ffd46be5f4f8206f5f89d329f30b"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00C1-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00C1-3134-343835353636.dg",
+      "size": 8737,
+      "sha256": "98fe7bc84a74c68d17d92bde6fcd1e9b8063f5f94ad1127d7a0857fe9c379a8b"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00C6-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00C6-3134-343835353636.dg",
+      "size": 14193,
+      "sha256": "322c2e234cd8eb02ffeac5254829e603fc88c306e0f90a7b510e0e1c7d888fa1"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00CB-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00CB-3134-343835353636.dg",
+      "size": 8574,
+      "sha256": "f733e4871300e9ea804bd95c56a676385d80de135c6c7cdbfa423a6a76a33aff"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00D0-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00D0-3134-343835353636.dg",
+      "size": 9534,
+      "sha256": "ae59089195ac4866ad84e578d74834346689e18166fa45064892c495ce79134b"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00D5-3134-343835353636.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00D5-3134-343835353636.dg",
+      "size": 16109,
+      "sha256": "88171105d386975714ec6b415f3fd09a830bd9837aa0febeff0ccf5bf6dc55b3"
+    },
+    {
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00D8-3134-343835353638.dg",
+      "archive": "btscm-rabas",
+      "member": "A 1120 RABAS/drawings/DID56573781-0000-00D8-3134-343835353638.dg",
+      "size": 9050,
+      "sha256": "d0f9613125f9f91f8140c5930c049de5b263391012af12b2dc5549d802fe1494"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/Cattel Shed uk/Cattel Shed uk.db1",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/Cattel%20Shed%20uk/Cattel%20Shed%20uk.db1",
+      "size": 1552457,
+      "sha256": "7c9169b52be71f936316d92b4e2beebc8d843afdb574f4227e899a20971975eb"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/Cattel Shed uk/Cattel Shed uk.db2",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/Cattel%20Shed%20uk/Cattel%20Shed%20uk.db2",
+      "size": 104,
+      "sha256": "112e254b92b726a1c226c3dac237f2d89ea6359da4f23fd25d704bf29dc82d7e"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db1",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/weirwelding.16.db1",
+      "size": 3495063,
+      "sha256": "27007fffe54b63e96d4c9ceb8c166541a910f877c04b59e5b3279682a89254e6"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db1.bak",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/weirwelding.16.db1.bak",
+      "size": 5170228,
+      "sha256": "f6434f512b833549a3b0c6ca70e418bb69c878652c7ca81eb307125ab010b3c0"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db2",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/weirwelding.16.db2",
+      "size": 135,
+      "sha256": "f9cfafb37f25d9fa20d7f9798b92b517613006009ffa419f432cb1245c2a8272"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/xslib.db1",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/xslib.db1",
+      "size": 4832,
+      "sha256": "e995d3923175280967f58a299db94d207b97f9bb1bf606ac01511711c2656cd3"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/xslib.db2",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/xslib.db2",
+      "size": 62,
+      "sha256": "7a04638103443082cbc7dd78221a5e2314742d65e1290bf6bac76a2b15ea72d8"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/options_model.db",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/options_model.db",
+      "size": 28320,
+      "sha256": "964c78e81bd1b534c1c4bda7b2a1083797d51ef5330a7095c7600b7547195aa1"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/options_drawings.db",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/options_drawings.db",
+      "size": 15924,
+      "sha256": "c774cdecbb92e7bd364e2d19ca8e516a94b9fc4fa60d066df74f02f0fa5af094"
+    },
+    {
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/environment.db",
+      "url": "https://raw.githubusercontent.com/devsachinborse/tekla-structures-projects/ba2b921eba863163897d1389286ed4163bdd4412/weirwelding.16/environment.db",
+      "size": 67406,
+      "sha256": "b8e75e15e40d0726813098d95b938c82a57e6955234bf60e53dd52258a288595"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/Abri-Moto-VCCF25.db1",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/Abri-Moto-VCCF25.db1",
+      "size": 1071885,
+      "sha256": "d2d6253a681763358e1710b6f602aa0eb110d39c050c0f71f820e263ef3841bc"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/Abri-Moto-VCCF25.db2",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/Abri-Moto-VCCF25.db2",
+      "size": 265,
+      "sha256": "7702e0b118dee6040ad4822050683d601f2c39502b804c4d68bc106f806fb6da"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/db.idrm",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/db.idrm",
+      "size": 108,
+      "sha256": "a317ce5315d70bb1c55119e3221e4f751bb109697bde833ad5fa2294a0029535"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D01e5cf17-ea3c-4830-8748-b4b68e638ebf.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D01e5cf17-ea3c-4830-8748-b4b68e638ebf.dg",
+      "size": 3631,
+      "sha256": "b38802945107759edd818db06681f98ecb151939ed9581594b46fe2aed07fe07"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D32297495-2691-4527-b060-17b0e941b347.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D32297495-2691-4527-b060-17b0e941b347.dg",
+      "size": 20461,
+      "sha256": "5c1dd267b75ef3c0eadb35629a1933bd83a74482f210e62a1ce5d6ddccce3f4c"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D32297495-2691-4527-b060-17b0e941b347.dg.metadata",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D32297495-2691-4527-b060-17b0e941b347.dg.metadata",
+      "size": 798,
+      "sha256": "fada27746017fa99286f17cd1b45142196d683a8418ceb4f186593f92eb7adaa"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D52240da6-c85b-4960-8542-b536491e532c.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D52240da6-c85b-4960-8542-b536491e532c.dg",
+      "size": 18019,
+      "sha256": "c78bec07c8bad044ee45b36669b0f015b36f69ff06f2ef87894065ee39c58cd1"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D52240da6-c85b-4960-8542-b536491e532c.dg.metadata",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D52240da6-c85b-4960-8542-b536491e532c.dg.metadata",
+      "size": 760,
+      "sha256": "87a408b85dd5e2da12e8c4b61fa39d2d7090e84c2973796fe7fcafd3d8bc600b"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D69ad69f9-107e-45f0-ba73-b3c24f8a36a1.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D69ad69f9-107e-45f0-ba73-b3c24f8a36a1.dg",
+      "size": 18461,
+      "sha256": "4882a8341513eab6b0e751749c8187d67c040e1cf3b71da81149e9e161fe3ca7"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D69ad69f9-107e-45f0-ba73-b3c24f8a36a1.dg.metadata",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D69ad69f9-107e-45f0-ba73-b3c24f8a36a1.dg.metadata",
+      "size": 771,
+      "sha256": "f5b01ae24e0c680434406896b11f4c2e0776fd37b598799cdd593dffd9c1b625"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D9e6301c4-425c-402f-a918-a0e5e231a0d5.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D9e6301c4-425c-402f-a918-a0e5e231a0d5.dg",
+      "size": 23228,
+      "sha256": "e948746304a2af4a19795f854d7d768f7ad966886f8384ff0ec0f47bdc84cf7c"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D9e6301c4-425c-402f-a918-a0e5e231a0d5.dg.metadata",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/D9e6301c4-425c-402f-a918-a0e5e231a0d5.dg.metadata",
+      "size": 805,
+      "sha256": "994835898b38bc875d0b29c54c71e5e9812e77e555f2fd735cd38320ab99d5c4"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/Dbdb12a2b-2ae6-407e-9b41-28677da82a99.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/Dbdb12a2b-2ae6-407e-9b41-28677da82a99.dg",
+      "size": 13904,
+      "sha256": "417afc1348d7f23c2e536e9bf7e72fe751c83e37f1b420792d95376c05d80209"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/Dbdb12a2b-2ae6-407e-9b41-28677da82a99.dg.metadata",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/Dbdb12a2b-2ae6-407e-9b41-28677da82a99.dg.metadata",
+      "size": 760,
+      "sha256": "5313006e5874af05f8a3e0e00b29e0edaac0ef6487a53af911d41ee5e5cc1667"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/Dd2114923-f32a-4f3c-ae14-4289ae165f49.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/Dd2114923-f32a-4f3c-ae14-4289ae165f49.dg",
+      "size": 3649,
+      "sha256": "84c6877bee70e37c58c6b2fa968cbbef816157efe2c03248d190790b530973ba"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/De9d35acd-69db-423b-acfa-27cfd49c137f.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/De9d35acd-69db-423b-acfa-27cfd49c137f.dg",
+      "size": 14227,
+      "sha256": "f8ff6e85ece6d224067d9b2c37305854ff56e23a4b186368c1bb542c68a84bd5"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/De9d35acd-69db-423b-acfa-27cfd49c137f.dg.metadata",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/De9d35acd-69db-423b-acfa-27cfd49c137f.dg.metadata",
+      "size": 797,
+      "sha256": "e7c4d10ee449a6cd42366a08efa7d21014bade2255964942b5bf80357a4facce"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/Debf6f628-4b64-4bc6-82dc-82677ce18eec.dg",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/drawings/Debf6f628-4b64-4bc6-82dc-82677ce18eec.dg",
+      "size": 24523,
+      "sha256": "24967b2f465b06745416ad13cd19fb6ebffd12af69ace419eff79d512f1b3d11"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/environment.db",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/environment.db",
+      "size": 52640,
+      "sha256": "d243a2b67bbd074d8a1a920d42c8388d5eaca6dbe97dc73bcf855dfbd9ab5ca9"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/guid.mapper",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/guid.mapper",
+      "size": 1425548,
+      "sha256": "2e9119ff9f4a62a3cc2e45cb95d77fe9b8252b907475a089d90939b4fef06bbb"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/history.db",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/history.db",
+      "size": 192512,
+      "sha256": "6f5df9a11a64709525024c78d96a6069bdb05bf8ab9fefaa0ada78d81f486cab"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/Nouveau modèle.db1",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/Nouveau modèle.db1",
+      "size": 11456,
+      "sha256": "35de5e96e5397f840ad2220c9dd4bfdd42d137982483ecfc9792e5ed531ad2a3"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/Nouveau modèle.db2",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/Nouveau modèle.db2",
+      "size": 141,
+      "sha256": "87b5e2b7d76260bcbd0028c1af96f2ea25dab9f6f0a82452ff0e1da24bc6035a"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/numberinghistory.txt",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/numberinghistory.txt",
+      "size": 94331,
+      "sha256": "6ce61e2cfa45da6c25c79944c79429e0d3e47cfd91883c2152c89e8781594d99"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/options_drawings.db",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/options_drawings.db",
+      "size": 15422,
+      "sha256": "3165cc6d8965d13f2db007948a24b6f18e0295e7cf0d1d05ce433954c30f8d49"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/options_model.db",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/options_model.db",
+      "size": 28868,
+      "sha256": "e8ca42625cf07c275b7f04fcf3aa2fdfe88421ef1693a6463f1bf1a33522b5ef"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/profdb.bin",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/profdb.bin",
+      "size": 1545283,
+      "sha256": "2407d07eb559e8fcdaa90402834a5a771033cd7ee15217c1c0a81f0deb4dafa1"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/TeklaStructuresModel.xml",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/TeklaStructuresModel.xml",
+      "size": 935,
+      "sha256": "7ab311f395f4a5c60c8bd4ce5b493b7ece50e8a16e827b00cf34de3b9538fc17"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/xslib.db1",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/xslib.db1",
+      "size": 210260,
+      "sha256": "11f39f35d9b56804830439a84f58c5cc6b1c69c7e8ffa778e1f657554030789a"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/xslib.db2",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/xslib.db2",
+      "size": 89,
+      "sha256": "b60fba3e30a5ee52187c9e4dcdd155619a174f90515a1e846401cf4d7f6cf3ce"
+    },
+    {
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/IFC/Abri-moto-VCCF25.ifc",
+      "archive": "abri-moto-vccf25",
+      "member": "Abri-Moto-VCCF25/IFC/Abri-moto-VCCF25.ifc",
+      "size": 619425,
+      "sha256": "519f67bfa6678376e7c09bed72a91c22ca5009450db21556006c5eedb533a939"
     }
   ],
   "cases": [
@@ -4916,7 +5560,7 @@
       "mode": "project",
       "path": "renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM",
       "exit": 0,
-      "stdout": "version=8.95 parts=178 operative=0 profiles=3277 bolts=67 welds=269 assemblies=83 components=39 properties=462 parameters=0 custom=0 unhandled=0 fingerprint=9bf382fff30891f7\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=178 operative=0 profiles=3277 bolts=67 welds=269 assemblies=83 components=39 properties=462 parameters=0 custom=0 unhandled=0 fingerprint=9bf382fff30891f7\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/Estrutura_metalica/Modelo_estruturas_metalicas_BIM/Modelo_estruturas_metalicas_BIM.db2",
@@ -4986,7 +5630,7 @@
       "mode": "project",
       "path": "renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico",
       "exit": 0,
-      "stdout": "version=8.95 parts=0 operative=0 profiles=3277 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=0 operative=0 profiles=3277 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:renatogcruz__BIM-Modeling/tekla/modelagem_e_detalhamento_estrutura_em_aço/Projero_metalico/Projero_metalico.db2",
@@ -5091,7 +5735,7 @@
       "mode": "library",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
       "exit": 0,
-      "stdout": "version=7.82 parts=545 operative=134 profiles=4265 bolts=0 welds=373 assemblies=267 components=124 properties=7275 parameters=5345 custom=40 unhandled=18 individual_bolts=146 fingerprint=839d79fdde1b7de4"
+      "stdout": "version=7.82 parts=545 operative=134 profiles=4265 bolts=0 welds=373 assemblies=267 components=124 properties=7275 parameters=5345 custom=40 unhandled=0 individual_bolts=146 fingerprint=839d79fdde1b7de4"
     },
     {
       "name": "raw:PSDBIM__EXCEL-1246A-BLDG-B/xslib.db2",
@@ -5182,7 +5826,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291",
       "exit": 0,
-      "stdout": "version=8.95 parts=294 operative=102 profiles=0 bolts=151 welds=181 assemblies=143 components=91 properties=884 parameters=0 custom=0 unhandled=0 fingerprint=71d1740e20f4b6c8\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=294 operative=102 profiles=0 bolts=151 welds=181 assemblies=143 components=91 properties=884 parameters=0 custom=0 unhandled=0 fingerprint=71d1740e20f4b6c8\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db2",
@@ -5252,7 +5896,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472",
       "exit": 0,
-      "stdout": "version=8.95 parts=270 operative=106 profiles=0 bolts=138 welds=166 assemblies=132 components=82 properties=822 parameters=0 custom=0 unhandled=0 fingerprint=42f6a0573c8ae868\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=270 operative=106 profiles=0 bolts=138 welds=166 assemblies=132 components=82 properties=822 parameters=0 custom=0 unhandled=0 fingerprint=42f6a0573c8ae868\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA03_472/AUTRA03_472.db2",
@@ -5322,7 +5966,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=88 profiles=0 bolts=118 welds=142 assemblies=113 components=70 properties=701 parameters=0 custom=0 unhandled=0 fingerprint=25f0651ee68bda62\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=88 profiles=0 bolts=118 welds=142 assemblies=113 components=70 properties=701 parameters=0 custom=0 unhandled=0 fingerprint=25f0651ee68bda62\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA_324/AUTRA_324.db2",
@@ -5392,7 +6036,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35",
       "exit": 0,
-      "stdout": "version=8.95 parts=234 operative=82 profiles=3375 bolts=120 welds=144 assemblies=114 components=72 properties=705 parameters=0 custom=0 unhandled=0 fingerprint=7ec7b50213d15e9c\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=234 operative=82 profiles=3375 bolts=120 welds=144 assemblies=114 components=72 properties=705 parameters=0 custom=0 unhandled=0 fingerprint=7ec7b50213d15e9c\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/ITIFinal02_35/ITIFinal02_35.db2",
@@ -5462,7 +6106,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104",
       "exit": 0,
-      "stdout": "version=8.95 parts=66 operative=32 profiles=0 bolts=32 welds=40 assemblies=34 components=16 properties=204 parameters=0 custom=0 unhandled=0 fingerprint=bcdb6bf1befc5780\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=66 operative=32 profiles=0 bolts=32 welds=40 assemblies=34 components=16 properties=204 parameters=0 custom=0 unhandled=0 fingerprint=bcdb6bf1befc5780\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_104/Path_104.db2",
@@ -5532,7 +6176,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279",
       "exit": 0,
-      "stdout": "version=8.95 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/Path_279/Path_279.db2",
@@ -5602,7 +6246,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67",
       "exit": 0,
-      "stdout": "version=8.95 parts=318 operative=100 profiles=0 bolts=164 welds=196 assemblies=154 components=100 properties=948 parameters=0 custom=0 unhandled=0 fingerprint=16d11c7637ad9f\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=318 operative=100 profiles=0 bolts=164 welds=196 assemblies=154 components=100 properties=948 parameters=0 custom=0 unhandled=0 fingerprint=16d11c7637ad9f\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/bhg_67/bhg_67.db2",
@@ -5679,7 +6323,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b59d886a73e379bf\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b59d886a73e379bf\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_158/fgdg_158.db2",
@@ -5749,7 +6393,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=31bb2d8dd292e6b0\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=31bb2d8dd292e6b0\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_219/fgdg_219.db2",
@@ -5819,7 +6463,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=86c37407798fb8c1\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=86c37407798fb8c1\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_246/fgdg_246.db2",
@@ -5889,7 +6533,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=93fbf509962c4573\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=93fbf509962c4573\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_25/fgdg_25.db2",
@@ -5959,7 +6603,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=9430c812aa1d32b3\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=9430c812aa1d32b3\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_279/fgdg_279.db2",
@@ -6029,7 +6673,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=46c52df263cc7cb7\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=46c52df263cc7cb7\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_29/fgdg_29.db2",
@@ -6099,7 +6743,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=4c866a42e9d3ece9\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=4c866a42e9d3ece9\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_342/fgdg_342.db2",
@@ -6169,7 +6813,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=d070294075484b55\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=d070294075484b55\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_406/fgdg_406.db2",
@@ -6239,7 +6883,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=e318598901f08067\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=697 parameters=0 custom=0 unhandled=0 fingerprint=e318598901f08067\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_428/fgdg_428.db2",
@@ -6309,7 +6953,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=c9414f0c6474fedd\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=c9414f0c6474fedd\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_582/fgdg_582.db2",
@@ -6379,7 +7023,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=b0fc2b1ad004922d\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=698 parameters=0 custom=0 unhandled=0 fingerprint=b0fc2b1ad004922d\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_625/fgdg_625.db2",
@@ -6449,7 +7093,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b852afea0e3e0218\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=b852afea0e3e0218\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_648/fgdg_648.db2",
@@ -6519,7 +7163,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=becdfa5c27a7e2a9\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=700 parameters=0 custom=0 unhandled=0 fingerprint=becdfa5c27a7e2a9\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_661/fgdg_661.db2",
@@ -6589,7 +7233,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=551d3737eea4864b\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=551d3737eea4864b\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_787/fgdg_787.db2",
@@ -6659,7 +7303,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789",
       "exit": 0,
-      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=1cef2c594e2b7e48\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=231 operative=92 profiles=3375 bolts=118 welds=142 assemblies=113 components=70 properties=703 parameters=0 custom=0 unhandled=0 fingerprint=1cef2c594e2b7e48\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/fgdg_789/fgdg_789.db2",
@@ -6729,7 +7373,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764",
       "exit": 0,
-      "stdout": "version=8.95 parts=0 operative=0 profiles=3375 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=0 operative=0 profiles=3375 bolts=0 welds=0 assemblies=0 components=0 properties=2 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/itiiti_764/itiiti_764.db2",
@@ -6813,7 +7457,7 @@
       "mode": "project",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143",
       "exit": 0,
-      "stdout": "version=8.95 parts=423 operative=162 profiles=0 bolts=222 welds=262 assemblies=201 components=142 properties=1305 parameters=0 custom=0 unhandled=0 fingerprint=aa4e35d2479afa79\nfiles=8 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=423 operative=162 profiles=0 bolts=222 welds=262 assemblies=201 components=142 properties=1305 parameters=0 custom=0 unhandled=0 fingerprint=aa4e35d2479afa79\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/trial_143/trial_143.db2",
@@ -6869,7 +7513,7 @@
       "mode": "project",
       "path": "steel-detailing",
       "exit": 0,
-      "stdout": "version=9.52 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=3 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=9 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=9.52 parts=0 operative=0 profiles=0 bolts=0 welds=0 assemblies=0 components=0 properties=3 parameters=0 custom=0 unhandled=0 fingerprint=cbf29ce484222325\nfiles=10 associations=8 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:steel-detailing/New model 3.db2",
@@ -6904,7 +7548,7 @@
       "mode": "library",
       "path": "steel-detailing/xslib.db1",
       "exit": 0,
-      "stdout": "version=9.52 parts=498 operative=46 profiles=0 bolts=47 welds=37 assemblies=376 components=33 properties=6058 parameters=3627 custom=325 unhandled=14 fingerprint=55c9c3b888f8f6fd"
+      "stdout": "version=9.52 parts=498 operative=46 profiles=0 bolts=47 welds=37 assemblies=376 components=33 properties=6058 parameters=3627 custom=325 unhandled=0 fingerprint=55c9c3b888f8f6fd"
     },
     {
       "name": "raw:steel-detailing/xslib.db2",
@@ -6953,7 +7597,7 @@
       "mode": "project",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
       "exit": 0,
-      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=16 associations=14 raw=5 failed=0 drawings=7"
+      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=21 associations=19 raw=5 failed=0 drawings=7"
     },
     {
       "name": "raw:steel-fundamentals/Steel Fundamentals Modeling Assignment/Steel Fundamentals Modeling Assignment.db2",
@@ -7506,7 +8150,7 @@
       "mode": "related_evidence",
       "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
       "exit": 0,
-      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=16 associations=14 raw=5 failed=0 drawings=7\ndocumented_attribute_choices=3 model_attribute_definition_links=118\nindependent_numbering_counters=10 drawing_model_guid_links=28\ndrawing_views=19 subject_links=4 independent_vi_volume_fields=6 model_plate_axis_checks=1"
+      "stdout": "version=9.60 parts=187 operative=39 profiles=0 bolts=71 welds=229 assemblies=43 components=65 properties=519 parameters=0 custom=0 unhandled=0 fingerprint=696c0ba355ea7600\nfiles=21 associations=19 raw=5 failed=0 drawings=7\ndocumented_attribute_choices=3 model_attribute_definition_links=118\nindependent_numbering_counters=10 drawing_model_guid_links=28\ndrawing_views=19 subject_links=4 independent_vi_volume_fields=6 model_plate_axis_checks=1"
     },
     {
       "name": "dbv-semantic-1",
@@ -8143,14 +8787,14 @@
       "mode": "project",
       "path": "PSDBIM__EXCEL-1246A-BLDG-B",
       "exit": 0,
-      "stdout": "version=7.82 parts=2602 operative=546 profiles=4265 bolts=0 welds=1004 assemblies=1666 components=56 properties=5764 parameters=0 custom=0 unhandled=0 individual_bolts=718 fingerprint=4c48bedefa151906\nfiles=12 associations=11 raw=5 failed=0 drawings=0"
+      "stdout": "version=7.82 parts=2602 operative=546 profiles=4265 bolts=0 welds=1004 assemblies=1666 components=56 properties=5764 parameters=0 custom=0 unhandled=0 individual_bolts=718 fingerprint=4c48bedefa151906\nfiles=13 associations=13 raw=5 failed=0 drawings=0"
     },
     {
       "name": "project:mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN",
       "mode": "project",
       "path": "mohsen-azimi__publications/J6_SHM_using_Extremely_compressed_Data/Figures/MOHSEN",
       "exit": 0,
-      "stdout": "version=7.82 parts=393 operative=0 profiles=0 bolts=0 welds=268 assemblies=125 components=0 properties=782 parameters=0 custom=0 unhandled=0 individual_bolts=250 fingerprint=6703a5fe89d8e73e\nfiles=9 associations=8 raw=5 failed=0 drawings=0"
+      "stdout": "version=7.82 parts=393 operative=0 profiles=0 bolts=0 welds=268 assemblies=125 components=0 properties=782 parameters=0 custom=0 unhandled=0 individual_bolts=250 fingerprint=6703a5fe89d8e73e\nfiles=10 associations=9 raw=5 failed=0 drawings=0"
     },
     {
       "name": "raw:legacy-dg782/DID66AA1927-0000-342A-3137-323234323431.dg",
@@ -12259,7 +12903,7 @@
       "mode": "legacy_drawing_evidence",
       "path": "legacy-dg782",
       "exit": 0,
-      "stdout": "files=293 subject_id_type_matches=59 numeric_reference_matches=1361 unresolved_numeric_references=35"
+      "stdout": "files=293 subject_id_type_matches=59 part_reference_matches=1361 nonpart_identity_reference_matches=35 unmatched_identity_references=0 types=15:35 explicit_subject_links=59 explicit_reference_links=2155 explicit_file_links=293"
     },
     {
       "name": "legacy_component_evidence:PSDBIM",
@@ -13599,6 +14243,20 @@
       "stdout": "drawing_objects=4 parts=2 assemblies=2 explicit_series_links=5192"
     },
     {
+      "name": "drawing_dimensions730_directory:btscm-dg730",
+      "mode": "drawing_dimensions730_directory",
+      "path": "btscm-dg730",
+      "exit": 0,
+      "stdout": "files=35 sets=187 dimensions=341 subtype0=313 subtype1=28 unhandled=0 linked=341 projected=321 fingerprint=9b3daa0b4000c9fa"
+    },
+    {
+      "name": "drawing_dimensions_directory:legacy-dg782",
+      "mode": "drawing_dimensions_directory",
+      "path": "legacy-dg782",
+      "exit": 0,
+      "stdout": "files=293 sets=11568 duplicate_set_ids=14 duplicate_set_records=28 unhandled_sets=28 dimensions=22782 subtype0=20724 subtype1=2058 duplicate_ids=31 duplicate_records=62 unhandled=62 linked=22671 unlinked=111 missing_set=111 context_mismatch=0 missing_member=0 missing_set_no_row=111 missing_set_context_match=0 missing_set_context_mismatch=0 orphan_set_ids=96 projected=22472 fingerprint=7dd917bda12f537a"
+    },
+    {
       "name": "reinforcement_model:MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
       "mode": "reinforcement_model",
       "path": "MohamedHasan94__AUTRA/AUTRA/wwwroot/Outputs/Tekla/AUTRA01_291/AUTRA01_291.db1",
@@ -14163,7 +14821,91 @@
       "mode": "project",
       "path": "construsoft-wapening/oefening W3",
       "exit": 0,
-      "stdout": "version=8.95 parts=21 operative=8 profiles=0 bolts=2 welds=0 assemblies=19 components=5 properties=73 parameters=0 custom=0 unhandled=0 fingerprint=161bd1bb7c3629a8\nfiles=9 associations=7 raw=5 failed=0 drawings=0"
+      "stdout": "version=8.95 parts=21 operative=8 profiles=0 bolts=2 welds=0 assemblies=19 components=5 properties=73 parameters=0 custom=0 unhandled=0 fingerprint=161bd1bb7c3629a8\nfiles=12 associations=10 raw=5 failed=0 drawings=0"
+    },
+    {
+      "name": "raw:construsoft-drawing-views/Defining drawing views steel.db1",
+      "mode": "raw",
+      "path": "construsoft-drawing-views/Defining drawing views steel/Defining drawing views steel.db1",
+      "exit": 0,
+      "stdout": "version=9.52 tables=356 records=11927 opaque=1 bytes=767176 fingerprint=b6dfa0501653f8b2"
+    },
+    {
+      "name": "model:construsoft-drawing-views/Defining drawing views steel.db1",
+      "mode": "model",
+      "path": "construsoft-drawing-views/Defining drawing views steel/Defining drawing views steel.db1",
+      "exit": 0,
+      "stdout": "version=9.52 parts=22 operative=0 profiles=0 bolts=10 welds=84 assemblies=2 components=7 properties=77 parameters=0 custom=0 unhandled=0 fingerprint=568ff6e7acc6c18f"
+    },
+    {
+      "name": "object_number_model:construsoft-drawing-views/Defining drawing views steel.db1",
+      "mode": "object_number_model",
+      "path": "construsoft-drawing-views/Defining drawing views steel/Defining drawing views steel.db1",
+      "exit": 0,
+      "stdout": "version=9.52 records=47 derived=25 references=277 linked=24 unverified=0 null=253 fingerprint=7820decf6058ae20"
+    },
+    {
+      "name": "raw:construsoft-drawing-views/xslib.db1",
+      "mode": "raw",
+      "path": "construsoft-drawing-views/Defining drawing views steel/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 tables=319 records=4861 opaque=1 bytes=316043 fingerprint=f72b8c82ff84bc18"
+    },
+    {
+      "name": "library:construsoft-drawing-views/xslib.db1",
+      "mode": "library",
+      "path": "construsoft-drawing-views/Defining drawing views steel/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 parts=8 operative=26 profiles=0 bolts=4 welds=0 assemblies=8 components=1 properties=229 parameters=92 custom=4 unhandled=0 fingerprint=6765c4670bbb3c0b"
+    },
+    {
+      "name": "object_number_library:construsoft-drawing-views/xslib.db1",
+      "mode": "object_number_library",
+      "path": "construsoft-drawing-views/Defining drawing views steel/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 records=11 derived=0 references=620 linked=42 unverified=0 null=578 fingerprint=42aa285d69b7fb64"
+    },
+    {
+      "name": "raw:construsoft-drawing-views/Defining drawing views steel.db2",
+      "mode": "raw",
+      "path": "construsoft-drawing-views/Defining drawing views steel/Defining drawing views steel.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=10 records=13 opaque=0 bytes=1262 fingerprint=f7868b1d5377b75e"
+    },
+    {
+      "name": "numbering:construsoft-drawing-views/Defining drawing views steel.db2",
+      "mode": "numbering",
+      "path": "construsoft-drawing-views/Defining drawing views steel/Defining drawing views steel.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=10 series=13 guid=c490f53c-1e66-4ddc-a46f-d4b8914f6d28 fingerprint=32679d80eef1ab70"
+    },
+    {
+      "name": "raw:construsoft-drawing-views/xslib.db2",
+      "mode": "raw",
+      "path": "construsoft-drawing-views/Defining drawing views steel/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=0 records=0 opaque=0 bytes=49 fingerprint=21ff0cc760784d5d"
+    },
+    {
+      "name": "numbering:construsoft-drawing-views/xslib.db2",
+      "mode": "numbering",
+      "path": "construsoft-drawing-views/Defining drawing views steel/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=0 series=0 guid=c490f53c-1e66-4ddc-a46f-d4b8914f6d28 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "project:construsoft-drawing-views/Defining drawing views steel",
+      "mode": "project",
+      "path": "construsoft-drawing-views/Defining drawing views steel",
+      "exit": 0,
+      "stdout": "version=9.52 parts=22 operative=0 profiles=0 bolts=10 welds=84 assemblies=2 components=7 properties=77 parameters=0 custom=0 unhandled=0 fingerprint=568ff6e7acc6c18f\nfiles=4 associations=3 raw=2 failed=0 drawings=0"
+    },
+    {
+      "name": "construsoft952_numbering_evidence:Defining drawing views steel",
+      "mode": "construsoft952_evidence",
+      "path": "construsoft-drawing-views/Defining drawing views steel",
+      "exit": 0,
+      "stdout": "main_references=277 library_references=620 main_series=13 file_associations=3 object_series_links=24 component_parts=0 names=CUTPART:0,PLATE:0"
     },
     {
       "name": "empty_bolt_evidence:construsoft-wapening/oefening W3",
@@ -14233,7 +14975,7 @@
       "mode": "project",
       "path": "btscm-pechelire",
       "exit": 0,
-      "stdout": "version=7.30 parts=1240 operative=235 profiles=0 bolts=301 welds=52 assemblies=1132 components=35 properties=3094 parameters=0 custom=0 unhandled=0 fingerprint=998aa58616f63e34\nfiles=4 associations=3 raw=2 failed=0 drawings=0"
+      "stdout": "version=7.30 parts=1240 operative=235 profiles=0 bolts=301 welds=52 assemblies=1132 components=35 properties=3094 parameters=0 custom=0 unhandled=0 fingerprint=998aa58616f63e34\nfiles=5 associations=4 raw=2 failed=0 drawings=0"
     },
     {
       "name": "btscm-pechelire:numbering730_evidence",
@@ -14744,7 +15486,7 @@
       "mode": "drawing730_evidence",
       "path": "btscm-dg730",
       "exit": 0,
-      "stdout": "drawings=35 views=91 catalog_files=13 unique_subjects=1 unique_part_axes=2 automatic_subject_links=0"
+      "stdout": "drawings=35 views=91 catalog_files=13 unique_subjects=1 explicit_subject_links=2 explicit_type309_part_references=82 automatic_subject_links=0"
     },
     {
       "name": "btscm-ifc730-independent-evidence",
@@ -15547,16 +16289,16 @@
     {
       "name": "drawing_dimension_evidence:thesis",
       "mode": "drawing_dimension_evidence",
-      "path": "drawing-output-evidence",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
       "exit": 0,
-      "stdout": "independent_dimension_values=13 drawings=2 plate_chains=4"
+      "stdout": "independent_dimension_values=19 drawings=2 plate_chains=4"
     },
     {
       "name": "drawing_dimensions:btscm-dg730/D0000299600.dg",
       "mode": "drawing_dimensions",
       "path": "btscm-dg730/D0000299600.dg",
       "exit": 0,
-      "stdout": "dimension_sets=12 dimensions=8 unhandled=11 fingerprint=7a947f8fddb10e1"
+      "stdout": "dimension_sets=12 dimensions=19 unhandled=0 fingerprint=7b3a9f8a262c94c3"
     },
     {
       "name": "drawing_dimensions:btscm-dg730/D0000302002.dg",
@@ -15570,7 +16312,7 @@
       "mode": "drawing_dimensions",
       "path": "btscm-dg730/D0000312352.dg",
       "exit": 0,
-      "stdout": "dimension_sets=4 dimensions=3 unhandled=3 fingerprint=60688f1fcf5328f4"
+      "stdout": "dimension_sets=4 dimensions=6 unhandled=0 fingerprint=a873074de43df4e3"
     },
     {
       "name": "drawing_dimensions:btscm-dg730/D0000496033.dg",
@@ -15710,7 +16452,7 @@
       "mode": "drawing_dimensions",
       "path": "btscm-dg730/DID566F0A5C-0000-000A-3134-353031313737.dg",
       "exit": 0,
-      "stdout": "dimension_sets=12 dimensions=8 unhandled=11 fingerprint=7a947f8fddb10e1"
+      "stdout": "dimension_sets=12 dimensions=19 unhandled=0 fingerprint=7b3a9f8a262c94c3"
     },
     {
       "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-000B-3134-353031313737.dg",
@@ -15759,7 +16501,7 @@
       "mode": "drawing_dimensions",
       "path": "btscm-dg730/DID566F0A5C-0000-0004-3134-353031313737.dg",
       "exit": 0,
-      "stdout": "dimension_sets=4 dimensions=3 unhandled=3 fingerprint=60688f1fcf5328f4"
+      "stdout": "dimension_sets=4 dimensions=6 unhandled=0 fingerprint=a873074de43df4e3"
     },
     {
       "name": "drawing_dimensions:btscm-dg730/DID566F0A5C-0000-0005-3134-353031313737.dg",
@@ -16067,14 +16809,14 @@
       "mode": "drawing",
       "path": "auvent844-drawing/DID54A03D14-3328-47D1-B298-9B37193B88A2.dg",
       "exit": 0,
-      "stdout": "version=8.44 tables=47 strings=41 properties=5 links=5 sheets=1 model_refs=0 views=0 subject=0 guid=152F6ED8-4DAA-4276-B493-0AEA86E0BD65 stored=DID54A03D14-3328-47D1-B298-9B37193B88A2.dg fingerprint=701b9a1e78bc86ff"
+      "stdout": "version=8.44 tables=47 strings=41 properties=5 links=5 sheets=1 model_refs=0 views=1 subject=0 guid=152F6ED8-4DAA-4276-B493-0AEA86E0BD65 stored=DID54A03D14-3328-47D1-B298-9B37193B88A2.dg fingerprint=4e8c8208b9f5746d"
     },
     {
       "name": "DG 8.44 independent mark and project history",
       "mode": "drawing844_evidence",
       "path": "auvent844-drawing",
       "exit": 0,
-      "stdout": "version=8.44 strings=41 properties=5 links=5 mark_history=1 project_history=1 deferred_views=1 deferred_dimensions=13"
+      "stdout": "version=8.44 strings=41 properties=5 links=5 mark_history=1 project_history=1 views=1 dimensions=13 sets=5 associations=13"
     },
     {
       "name": "AUVENT shape_definition",
@@ -16098,11 +16840,25 @@
       "stdout": "definitions=1 geometries=1 linked=1 points=60 faces=58 edges=117 bounds=6 solid=0"
     },
     {
+      "name": "api-exam908-july reinforcement shape catalog",
+      "mode": "rebar_shape_catalog",
+      "path": "api-exam908-july/attributes/RebarShapeCatalog.rscx",
+      "exit": 0,
+      "stdout": "categories=5 categorized_shapes=14 uncategorized_shapes=2 raw_bytes=736 fingerprint=c210e22e9509a941"
+    },
+    {
+      "name": "api-exam908-july project reinforcement shape catalog",
+      "mode": "rebar_project_evidence",
+      "path": "api-exam908-july",
+      "exit": 0,
+      "stdout": "version=9.08 rebar_categories=5 categorized_shapes=14 uncategorized_shapes=2 resource=semantic model_file_association=1 db1_shape_links=unverified"
+    },
+    {
       "name": "api-exam908-july model API_Developer_Exam_01.db1",
       "mode": "model",
       "path": "api-exam908-july/API_Developer_Exam_01.db1",
       "exit": 0,
-      "stdout": "version=9.08 parts=5360 operative=1683 profiles=3050 bolts=1850 welds=6500 assemblies=1901 components=1378 properties=27559 parameters=0 custom=0 unhandled=104 fingerprint=7daa31da4554a444"
+      "stdout": "version=9.08 parts=5360 operative=1683 profiles=3050 bolts=1850 welds=6500 assemblies=1901 components=1378 properties=27559 parameters=0 custom=0 unhandled=0 fingerprint=7daa31da4554a444"
     },
     {
       "name": "api-exam908-july library xslib.db1",
@@ -16137,14 +16893,14 @@
       "mode": "schema908_evidence",
       "path": "api-exam908-july",
       "exit": 0,
-      "stdout": "version=9.08 classes=139 identities=47664 retained_bolt_parameters=316 catalog_profiles=49 beam_candidates=4237 official_api_count=checked"
+      "stdout": "version=9.08 classes=139 identities=47664 retained_bolt_parameters=316 catalog_profiles=49 catalog_profile_object_links=1714 beam_candidates=4237 component_parts=104 official_api_count=checked"
     },
     {
       "name": "api-exam908-september model API_Developer_Exam_01.db1",
       "mode": "model",
       "path": "api-exam908-september/API_Developer_Exam_01.db1",
       "exit": 0,
-      "stdout": "version=9.08 parts=5381 operative=1683 profiles=3050 bolts=1850 welds=6529 assemblies=1901 components=1378 properties=27580 parameters=0 custom=0 unhandled=104 fingerprint=640d4ab3b89dbf91"
+      "stdout": "version=9.08 parts=5381 operative=1683 profiles=3050 bolts=1850 welds=6529 assemblies=1901 components=1378 properties=27580 parameters=0 custom=0 unhandled=0 fingerprint=640d4ab3b89dbf91"
     },
     {
       "name": "api-exam908-september library xslib.db1",
@@ -16179,7 +16935,7 @@
       "mode": "schema908_evidence",
       "path": "api-exam908-september",
       "exit": 0,
-      "stdout": "version=9.08 classes=140 identities=47756 retained_bolt_parameters=316 catalog_profiles=49 beam_candidates=4254 official_api_count=not_applicable"
+      "stdout": "version=9.08 classes=140 identities=47756 retained_bolt_parameters=316 catalog_profiles=49 catalog_profile_object_links=1714 beam_candidates=4254 component_parts=104 official_api_count=not_applicable"
     },
     {
       "name": "api-exam908-july raw API_Developer_Exam_01.db2",
@@ -16434,6 +17190,41 @@
       "stdout": "metadata=5 pairs=5 objects=1 failed=0 discovered=0 drawings=5"
     },
     {
+      "name": "steel-fundamentals metadata D0af4f427 with retained extension",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D0af4f427-b208-4018-b750-6bb0549b6dda.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=12 raw_bytes=830 fingerprint=5215d790761a4cdf"
+    },
+    {
+      "name": "steel-fundamentals metadata D2ba7aa95 with retained extension",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D2ba7aa95-d28a-4e9b-8f59-03f48f1ce3f2.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=12 raw_bytes=832 fingerprint=4753e3c47ba2aa5c"
+    },
+    {
+      "name": "steel-fundamentals metadata D452e81e4 with retained extension",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/D452e81e4-479e-4abb-bbd7-bbb9b388fde8.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=12 raw_bytes=819 fingerprint=a0f383332a53b5f"
+    },
+    {
+      "name": "steel-fundamentals metadata Deec1f07c with retained extension",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment/drawings/Deec1f07c-d8ba-44ac-aa15-ff69340010cf.dg.metadata",
+      "mode": "drawing_metadata",
+      "exit": 0,
+      "stdout": "stored_integers=12 raw_bytes=819 fingerprint=a822e10c8686e48e"
+    },
+    {
+      "name": "steel-fundamentals drawing metadata project associations",
+      "path": "steel-fundamentals/Steel Fundamentals Modeling Assignment",
+      "mode": "drawing_metadata_project_steel",
+      "exit": 0,
+      "stdout": "metadata=4 pairs=4 objects=4 failed=0 discovered=0 drawings=7"
+    },
+    {
       "name": "db6-raw",
       "path": "analysis-defaults/AnalysisPartDefaults.db6",
       "mode": "raw",
@@ -16642,6 +17433,622 @@
       "path": "u52-764",
       "exit": 0,
       "stdout": "series=4 history_counters=8 history_parts=65 history_assemblies=38 missing_history_objects=2 explicit_series_links=105 unassigned_positions=2 component_links=0"
+    },
+    {
+      "name": "project2-952 raw main db1",
+      "mode": "raw",
+      "path": "project2-steel-detailing/New model 8.db1",
+      "exit": 0,
+      "stdout": "version=9.52 tables=356 records=208059 opaque=1 bytes=10640333 fingerprint=408fc1d890aee7b8"
+    },
+    {
+      "name": "project2-952 model main db1",
+      "mode": "model",
+      "path": "project2-steel-detailing/New model 8.db1",
+      "exit": 0,
+      "stdout": "version=9.52 parts=2014 operative=394 profiles=0 bolts=743 welds=3055 assemblies=348 components=372 properties=4884 parameters=0 custom=0 unhandled=0 fingerprint=8eca58a1f2c72b32"
+    },
+    {
+      "name": "project2-952 raw main db2",
+      "mode": "raw",
+      "path": "project2-steel-detailing/New model 8.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=10 records=0 opaque=0 bytes=209 fingerprint=992b0a932ea09dee"
+    },
+    {
+      "name": "project2-952 numbering main db2",
+      "mode": "numbering",
+      "path": "project2-steel-detailing/New model 8.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=10 series=0 guid=11c3a61a-e458-4aa6-af07-79a699578404 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "project2-952 raw xslib db1",
+      "mode": "raw",
+      "path": "project2-steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 tables=319 records=118621 opaque=1 bytes=6464524 fingerprint=ff62996cc309847f"
+    },
+    {
+      "name": "project2-952 library xslib db1",
+      "mode": "library",
+      "path": "project2-steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "version=9.52 parts=498 operative=46 profiles=0 bolts=47 welds=37 assemblies=376 components=33 properties=6058 parameters=3627 custom=325 unhandled=0 fingerprint=fe57c60aa922d8c9"
+    },
+    {
+      "name": "project2-952 raw xslib db2",
+      "mode": "raw",
+      "path": "project2-steel-detailing/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=0 records=0 opaque=0 bytes=49 fingerprint=d86ea8fa98b9940c"
+    },
+    {
+      "name": "project2-952 numbering xslib db2",
+      "mode": "numbering",
+      "path": "project2-steel-detailing/xslib.db2",
+      "exit": 0,
+      "stdout": "version=9.52 tables=0 series=0 guid=11c3a61a-e458-4aa6-af07-79a699578404 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "project2-952 project association evidence",
+      "mode": "project2_952_evidence",
+      "path": "project2-steel-detailing/.",
+      "exit": 0,
+      "stdout": "main_parts=2014 library_parts=498 library_component_parts=14 component_part_names=CUTPART:12,PLATE:2 library_parameters=3627 library_custom=325 db2_series=0 associations=3 library_unhandled_parts=0"
+    },
+    {
+      "name": "auvent IDRM db typed ranges and boundary",
+      "mode": "idrm_fields",
+      "path": "auvent-idrm/db.idrm",
+      "exit": 0,
+      "stdout": "ranges=2 static_boundary=509708643 contiguous=1 runtime_conversion=unimplemented"
+    },
+    {
+      "name": "auvent IDRM xslib typed ranges and boundary",
+      "mode": "idrm_fields",
+      "path": "auvent-idrm/xslib.idrm",
+      "exit": 0,
+      "stdout": "ranges=2 static_boundary=5155779 contiguous=1 runtime_conversion=unimplemented"
+    },
+    {
+      "name": "W3 IDRM db typed range and boundary",
+      "mode": "idrm_fields",
+      "path": "construsoft-wapening/oefening W3/db.idrm",
+      "exit": 0,
+      "stdout": "ranges=1 static_boundary=45172 contiguous=1 runtime_conversion=unimplemented"
+    },
+    {
+      "name": "W3 IDRM xslib typed range and boundary",
+      "mode": "idrm_fields",
+      "path": "construsoft-wapening/oefening W3/xslib.idrm",
+      "exit": 0,
+      "stdout": "ranges=1 static_boundary=3127 contiguous=1 runtime_conversion=unimplemented"
+    },
+    {
+      "name": "EXCEL 7.82 xslib component part ownership",
+      "mode": "component_parts_782",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B/xslib.db1",
+      "exit": 0,
+      "stdout": "component_parts=18 owners=8 names=CUTPART:12,PLATE:6 unhandled=0"
+    },
+    {
+      "name": "steel-detailing 9.52 component part ownership",
+      "mode": "component_parts_952",
+      "path": "steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "component_parts=14 names=CUTPART:12,PLATE:2 unhandled=0"
+    },
+    {
+      "name": "Project2 9.52 component part ownership",
+      "mode": "component_parts_952",
+      "path": "project2-steel-detailing/xslib.db1",
+      "exit": 0,
+      "stdout": "component_parts=14 names=CUTPART:12,PLATE:2 unhandled=0"
+    },
+    {
+      "name": "W3 IDRM project discovery without inferred links",
+      "mode": "idrm_project",
+      "path": "construsoft-wapening/oefening W3",
+      "exit": 0,
+      "stdout": "idrm_files=2 namespace_links=2 runtime_conversion=unimplemented"
+    },
+    {
+      "name": "W3 8.95 full project companion semantic reads",
+      "mode": "w3_project_evidence",
+      "path": "construsoft-wapening/oefening W3",
+      "exit": 0,
+      "stdout": "version=8.95 main_parts=21 xslib_parts=38 db2_pairs=2 dbv=2 idrm=2 failed=0"
+    },
+    {
+      "name": "AUVENT IDRM namespace is scoped to the current DB1 preamble",
+      "mode": "idrm_snapshot_evidence",
+      "path": "guid-mapping-auvent",
+      "exit": 0,
+      "stdout": "idrm_ranges=2 current_preamble_matches=2 backup_preamble_matches=0 runtime_conversion=unimplemented"
+    },
+    {
+      "name": "BIM4LCA public PEIKKO DELTA_EXT parametric profile",
+      "mode": "clb_public_evidence",
+      "path": "BIM4LCA/housing-concrete/ParametricProfiles/PEIKKO.DELTA_EXT.clb",
+      "exit": 0,
+      "stdout": "library=PEIKKO sections=1 base=9 expressions=18 geometry=1 faces=1 points=14 diagnostics=0"
+    },
+    {
+      "name": "BIM4LCA 2023 Housing Concrete profile catalog version 10",
+      "mode": "profile_catalog",
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/profdb.bin",
+      "exit": 0,
+      "stdout": "version=10 profiles=3760"
+    },
+    {
+      "name": "BIM4LCA 2023 Housing Timber profile catalog version 10",
+      "mode": "profile_catalog",
+      "path": "BIM4LCA/Housing_Timber_BuildingPermit/profdb.bin",
+      "exit": 0,
+      "stdout": "version=10 profiles=3763"
+    },
+    {
+      "name": "BIM4LCA 2023 Office Concrete profile catalog version 10",
+      "mode": "profile_catalog",
+      "path": "BIM4LCA/Office_Concrete_BuildingPermit/profdb.bin",
+      "exit": 0,
+      "stdout": "version=10 profiles=3760"
+    },
+    {
+      "name": "BIM4LCA 2023 Office Timber profile catalog version 10",
+      "mode": "profile_catalog",
+      "path": "BIM4LCA/Office_Timber_BuildingPermit/profdb.bin",
+      "exit": 0,
+      "stdout": "version=10 profiles=3761"
+    },
+    {
+      "name": "Public Tekla PROFILE DATABASE export VERSION 2",
+      "mode": "profile_lis_evidence",
+      "path": "profile-lis/sample_profiles.lis",
+      "exit": 0,
+      "stdout": "version=2 profiles=2 properties=26 raw_bytes=1810 ambiguous=0"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 raw container Housing_Concrete_BuildingPermit",
+      "mode": "raw",
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/STRUC_NordicLCA_Housing_Concrete_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 tables=355 records=413708 opaque=1 bytes=17062183 fingerprint=b2c0cb445138345b"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 raw container Housing_Timber_BuildingPermit",
+      "mode": "raw",
+      "path": "BIM4LCA/Housing_Timber_BuildingPermit/STRUC_NordicLCA_Housing_Timber_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 tables=355 records=240289 opaque=1 bytes=15807710 fingerprint=1e76c78c537f2f23"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 raw container Office_Concrete_BuildingPermit",
+      "mode": "raw",
+      "path": "BIM4LCA/Office_Concrete_BuildingPermit/STRUC_NordicLCA_Office_Concrete_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 tables=355 records=830555 opaque=1 bytes=45915841 fingerprint=76e6e1c822c43459"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 raw container Office_Timber_BuildingPermit",
+      "mode": "raw",
+      "path": "BIM4LCA/Office_Timber_BuildingPermit/STRUC_NordicLCA_Office_Timber_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 tables=355 records=618675 opaque=1 bytes=34898462 fingerprint=3fcd4ad9122638c2"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 partial semantics Housing_Concrete_BuildingPermit",
+      "mode": "model_950",
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/STRUC_NordicLCA_Housing_Concrete_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 identities=65943 parts=17412 guid_parts=17412 owner_parts=17412 unknown_types=17412 assemblies=659 unresolved_owners=0 partial=1"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 partial semantics Housing_Timber_BuildingPermit",
+      "mode": "model_950",
+      "path": "BIM4LCA/Housing_Timber_BuildingPermit/STRUC_NordicLCA_Housing_Timber_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 identities=25088 parts=1815 guid_parts=1815 owner_parts=1815 unknown_types=1815 assemblies=534 unresolved_owners=1 partial=1"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 partial semantics Office_Concrete_BuildingPermit",
+      "mode": "model_950",
+      "path": "BIM4LCA/Office_Concrete_BuildingPermit/STRUC_NordicLCA_Office_Concrete_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 identities=125552 parts=2240 guid_parts=2240 owner_parts=2240 unknown_types=2240 assemblies=1806 unresolved_owners=0 partial=1"
+    },
+    {
+      "name": "BIM4LCA Tekla 9.50 partial semantics Office_Timber_BuildingPermit",
+      "mode": "model_950",
+      "path": "BIM4LCA/Office_Timber_BuildingPermit/STRUC_NordicLCA_Office_Timber_BuildingPermit.db1",
+      "exit": 0,
+      "stdout": "version=9.50 identities=97522 parts=1525 guid_parts=1525 owner_parts=1525 unknown_types=1525 assemblies=1142 unresolved_owners=0 partial=1"
+    },
+    {
+      "name": "dg-713:DID4E7042BA-0000-0001-3133-313539373939.dg",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/drawings/DID4E7042BA-0000-0001-3133-313539373939.dg",
+      "mode": "drawing",
+      "exit": 0,
+      "stdout": "version=7.13 tables=34 strings=40 properties=4 links=4 sheets=1 model_refs=0 views=0 subject=0 guid= stored= fingerprint=4a47cd6ddedbf760"
+    },
+    {
+      "name": "dg-713:DID4E7042BA-0000-0002-3133-313539373939.dg",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/drawings/DID4E7042BA-0000-0002-3133-313539373939.dg",
+      "mode": "drawing",
+      "exit": 0,
+      "stdout": "version=7.13 tables=34 strings=41 properties=5 links=4 sheets=1 model_refs=0 views=0 subject=0 guid= stored= fingerprint=ec9c081e5040e1ff"
+    },
+    {
+      "name": "numbering-837:main",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/Exercise-drawings.db2",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=8.37 tables=10 series=0 guid=4b5855aa-0000-169f-3132-363430383538 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "numbering-837:xslib",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/xslib.db2",
+      "mode": "numbering",
+      "exit": 0,
+      "stdout": "version=8.37 tables=0 series=0 guid=4b5855aa-0000-169f-3132-363430383538 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "db1-837:Exercise-drawings.db1",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/Exercise-drawings.db1",
+      "mode": "model_837_evidence",
+      "exit": 0,
+      "stdout": "version=8.37 parts=234 welds=270 assemblies=108 components=18 properties=668 bolts=raw partial=1 fingerprint=6b3718e0780563f0"
+    },
+    {
+      "name": "db1-837:xslib.db1",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/xslib.db1",
+      "mode": "library_837_evidence",
+      "exit": 0,
+      "stdout": "version=8.37 parts=58 operative=5 welds=29 assemblies=15 components=22 properties=836 parameters=292 bolts=raw partial=1 fingerprint=a038fad40f8cab15"
+    },
+    {
+      "name": "project-837:main-xslib pairing",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings",
+      "mode": "project_837_evidence",
+      "exit": 0,
+      "stdout": "main_version=8.37 library_version=8.37 library_parts=58 pairing=model-local component library library_level=partial_semantic object_links=not_inferred"
+    },
+    {
+      "name": "profile-resource:PSDBIM main/xslib to profdb",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B",
+      "mode": "profile_resource_evidence",
+      "exit": 0,
+      "stdout": "profile_catalog=profdb.bin main_links=1558 xslib_links=322 links=1880 unmatched_names=247 all_exact_name_matches_linked=1"
+    },
+    {
+      "name": "material-resource:PSDBIM main/xslib to matdb",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B",
+      "mode": "part_material_resource_evidence",
+      "exit": 0,
+      "stdout": "material_catalog=matdb.bin main_links=3148 xslib_links=640 links=3788 unresolved_names=12 all_unique_exact_name_matches_linked=1"
+    },
+    {
+      "name": "bolt-resource:PSDBIM direct catalog name boundary",
+      "path": "PSDBIM__EXCEL-1246A-BLDG-B",
+      "mode": "bolt_catalog_boundary_evidence",
+      "exit": 0,
+      "stdout": "individual_bolts=718 unique_stored_profiles=11 screw_catalog=2208 assemblies=36 exact_profile_to_screw=0 exact_component_to_screw=0 standard_links=215 matched_standards=33 unmatched_standards=26"
+    },
+    {
+      "name": "btscm-rabas/DID56573781-0000-00AD-3134-343835353636.dg:raw-764",
+      "mode": "raw",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00AD-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 records=522 opaque=0 bytes=65021 fingerprint=68881c5702c05acc"
+    },
+    {
+      "name": "btscm-rabas:project-raw-764-drawings",
+      "mode": "project",
+      "path": "btscm-rabas/project",
+      "exit": 0,
+      "stdout": "version=7.30 parts=630 operative=3 profiles=0 bolts=517 welds=337 assemblies=318 components=0 properties=1489 parameters=0 custom=0 unhandled=0 fingerprint=b9130cc2a9e4061d\nfiles=12 associations=1 raw=1 failed=0 drawings=10"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00C6-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00C6-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=28 properties=3 links=4 sheets=1 model_refs=1 views=2 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=2 dimensions=26 dimension_sets=14 unhandled_dimensions=0 fingerprint=e7796bed7aa27bff"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00B7-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00B7-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=22 properties=3 links=3 sheets=1 model_refs=1 views=1 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=1 dimensions=5 dimension_sets=3 unhandled_dimensions=0 fingerprint=5b600cd98a3a26e0"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00CB-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00CB-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=22 properties=3 links=3 sheets=1 model_refs=1 views=1 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=1 dimensions=6 dimension_sets=3 unhandled_dimensions=0 fingerprint=9ff380e45d438afb"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00B2-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00B2-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=29 properties=3 links=4 sheets=1 model_refs=2 views=2 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=2 dimensions=13 dimension_sets=8 unhandled_dimensions=0 fingerprint=77aa9d5a0a383fe1"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00AD-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00AD-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=29 properties=3 links=4 sheets=1 model_refs=2 views=2 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=2 dimensions=11 dimension_sets=7 unhandled_dimensions=0 fingerprint=c67b18610da2a2d2"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00D0-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00D0-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=23 properties=3 links=3 sheets=1 model_refs=1 views=1 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=1 dimensions=7 dimension_sets=3 unhandled_dimensions=0 fingerprint=dde6b58ef8d16058"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00D8-3134-343835353638.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00D8-3134-343835353638.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=22 properties=3 links=3 sheets=1 model_refs=1 views=1 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=1 dimensions=6 dimension_sets=3 unhandled_dimensions=0 fingerprint=aeca5f36914fcbb4"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00D5-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00D5-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=31 properties=3 links=4 sheets=1 model_refs=1 views=2 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=2 dimensions=31 dimension_sets=13 unhandled_dimensions=0 fingerprint=9f5d22f00a78fb5f"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00BC-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00BC-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=28 properties=3 links=4 sheets=1 model_refs=1 views=2 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=2 dimensions=26 dimension_sets=14 unhandled_dimensions=0 fingerprint=37f95f45763de971"
+    },
+    {
+      "name": "btscm-rabas:DID56573781-0000-00C1-3134-343835353636.dg:drawing-764",
+      "mode": "drawing",
+      "path": "btscm-rabas/project/drawings/DID56573781-0000-00C1-3134-343835353636.dg",
+      "exit": 0,
+      "stdout": "version=7.64 tables=47 strings=22 properties=3 links=3 sheets=1 model_refs=1 views=1 subject=1 guid= stored= incomplete_text=0 unhandled_views=0 unique_contexts=1 dimensions=6 dimension_sets=3 unhandled_dimensions=0 fingerprint=bf9df8943f2000db"
+    },
+    {
+      "name": "BIM4LCA real profitab catalog fields",
+      "mode": "profitab_evidence",
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/profitab.inp",
+      "exit": 0,
+      "stdout": "rules=224 diagnostics=0 WQS=1Gen.WQS unit=0 numbers=6..9 name_pattern=verified"
+    },
+    {
+      "name": "BIM4LCA project profitab and CLB resource integration",
+      "mode": "profitab_clb_project_evidence",
+      "path": "BIM4LCA/Housing_Concrete_BuildingPermit/profitab.inp",
+      "exit": 0,
+      "stdout": "project_profitab_rules=224 clb_documents=1 clb_section=PEIKKO.DELTA_EXT exact_rule_links=0"
+    },
+    {
+      "name": "Construsoft W3 DB1 and DB2 reinforcement numbering raw equality",
+      "mode": "rebar_numbering_link_w3",
+      "path": "construsoft-wapening/oefening W3/oefening W3.db1",
+      "exit": 0,
+      "stdout": "reinforcement_series_raw_equalities=2 values=4,47 meaning=uninterpreted"
+    },
+    {
+      "name": "Tekla API 9.08 July DB1 and DB2 reinforcement numbering raw equality",
+      "mode": "rebar_numbering_link_908",
+      "path": "api-exam908-july/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "reinforcement_series_raw_equalities=1 values=0 meaning=uninterpreted"
+    },
+    {
+      "name": "Tekla API 9.08 September DB1 and DB2 reinforcement numbering raw equality",
+      "mode": "rebar_numbering_link_908",
+      "path": "api-exam908-september/API_Developer_Exam_01.db1",
+      "exit": 0,
+      "stdout": "reinforcement_series_raw_equalities=1 values=0 meaning=uninterpreted"
+    },
+    {
+      "name": "legacy-project:Cattel Shed uk/Cattel Shed uk.db1:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/Cattel Shed uk/Cattel Shed uk.db1",
+      "exit": 0,
+      "stdout": "version=8.30 tables=275 records=119998 opaque=1 bytes=6575742 fingerprint=8d8c5a5066914f7b"
+    },
+    {
+      "name": "legacy-project:Cattel Shed uk/Cattel Shed uk.db1:model",
+      "mode": "model",
+      "path": "devsachinborse__tekla-structures-projects/Cattel Shed uk/Cattel Shed uk.db1",
+      "exit": 0,
+      "stdout": "version=8.30 parts=1772 operative=86 profiles=0 bolts=0 welds=1309 assemblies=1115 components=339 properties=3881 parameters=0 custom=0 unhandled=0 fingerprint=6a67021cf018d7b3"
+    },
+    {
+      "name": "legacy-project:Cattel Shed uk/Cattel Shed uk.db2:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/Cattel Shed uk/Cattel Shed uk.db2",
+      "exit": 0,
+      "stdout": "version=8.30 tables=10 records=0 opaque=0 bytes=172 fingerprint=4520bd70900fc99d"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/weirwelding.16.db1:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db1",
+      "exit": 0,
+      "stdout": "version=8.74 tables=307 records=295988 opaque=1 bytes=14266695 fingerprint=6aca79f381050810"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/weirwelding.16.db1:model",
+      "mode": "model",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db1",
+      "exit": 0,
+      "stdout": "version=8.74 parts=6046 operative=2908 profiles=0 bolts=0 welds=612 assemblies=2306 components=1075 properties=13779 parameters=0 custom=0 unhandled=0 fingerprint=7cac22518c8f1696"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/weirwelding.16.db1.bak:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db1.bak",
+      "exit": 0,
+      "stdout": "version=8.30 tables=275 records=500837 opaque=1 bytes=21654168 fingerprint=5c8fdd2167d059bf"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/weirwelding.16.db1.bak:model",
+      "mode": "model",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db1.bak",
+      "exit": 0,
+      "stdout": "version=8.30 parts=6046 operative=2908 profiles=0 bolts=0 welds=612 assemblies=2306 components=1075 properties=13779 parameters=0 custom=0 unhandled=0 fingerprint=82833441f5977171"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/weirwelding.16.db2:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db2",
+      "exit": 0,
+      "stdout": "version=8.74 tables=10 records=0 opaque=0 bytes=209 fingerprint=20a8b43bb51cdeba"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/xslib.db1:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/xslib.db1",
+      "exit": 0,
+      "stdout": "version=8.74 tables=271 records=1 opaque=1 bytes=26606 fingerprint=35a9a5ae8004e9a9"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/xslib.db1:library",
+      "mode": "library",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/xslib.db1",
+      "exit": 1,
+      "error_contains": "unsupported DB1 semantic schema 8.74 with 271 sections"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/xslib.db1:project-raw-fallback",
+      "mode": "xslib_874_project_raw_evidence",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16",
+      "exit": 0,
+      "stdout": "main_version=8.74 xslib_level=raw tables=271 records=1 opaque_sections=1 component_semantics=unavailable object_links=not_inferred"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/xslib.db2:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/xslib.db2",
+      "exit": 0,
+      "stdout": "version=8.74 tables=0 records=0 opaque=0 bytes=49 fingerprint=d3b0da3bfaf0a090"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/options_model.db:options",
+      "mode": "options",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/options_model.db",
+      "exit": 0,
+      "stdout": "options=1004 bool=231 int=128 real=498 string=147 differing=246 fingerprint=f1dd327ae37c318d"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/options_drawings.db:options",
+      "mode": "options",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/options_drawings.db",
+      "exit": 0,
+      "stdout": "options=449 bool=177 int=75 real=64 string=133 differing=123 fingerprint=4bba4ca5472726aa"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/environment.db:raw",
+      "mode": "raw",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/environment.db",
+      "exit": 0,
+      "stdout": "version=DBV-legacy-v2 tables=15 records=6402 opaque=0 bytes=304169 fingerprint=b13e30851151453a"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/environment.db:environment",
+      "mode": "environment",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/environment.db",
+      "exit": 0,
+      "stdout": "classes=42 attributes=830 metadata=39 links=4633 choices=858 fingerprint=e35d693dc9d1cc49"
+    },
+    {
+      "name": "legacy-project:Cattel Shed uk/Cattel Shed uk.db2:empty-numbering",
+      "mode": "numbering",
+      "path": "devsachinborse__tekla-structures-projects/Cattel Shed uk/Cattel Shed uk.db2",
+      "exit": 0,
+      "stdout": "version=8.30 tables=10 series=0 guid= fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/weirwelding.16.db2:empty-numbering",
+      "mode": "numbering",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/weirwelding.16.db2",
+      "exit": 0,
+      "stdout": "version=8.74 tables=10 series=0 guid=5fab718f-0000-0001-3136-303530373132 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "empty-component-numbering:Trimble exercise 8.37 xslib.db2",
+      "mode": "numbering",
+      "path": "Trimble__TSOpenAPISelfLearningExercises/Exercise-drawings/xslib.db2",
+      "exit": 0,
+      "stdout": "version=8.37 tables=0 series=0 guid=4b5855aa-0000-169f-3132-363430383538 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "legacy-project:weirwelding.16/xslib.db2:empty-numbering",
+      "mode": "numbering",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16/xslib.db2",
+      "exit": 0,
+      "stdout": "version=8.74 tables=0 series=0 guid=5fab718f-0000-0001-3136-303530373132 fingerprint=cbf29ce484222325"
+    },
+    {
+      "name": "legacy-project:Cattel Shed uk:empty DB2 project association",
+      "mode": "project_empty_numbering",
+      "path": "devsachinborse__tekla-structures-projects/Cattel Shed uk",
+      "exit": 0,
+      "stdout": "version=8.30 numbering_files=1 semantic_empty=1 main_pairs=1 series=0"
+    },
+    {
+      "name": "legacy-project:weirwelding.16:empty DB2 project association",
+      "mode": "project_empty_numbering",
+      "path": "devsachinborse__tekla-structures-projects/weirwelding.16",
+      "exit": 0,
+      "stdout": "version=8.74 numbering_files=2 semantic_empty=2 main_pairs=1 series=0"
+    },
+    {
+      "name": "abri-moto-vccf25:Windows-1252 drawing metadata",
+      "mode": "drawing_metadata",
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D69ad69f9-107e-45f0-ba73-b3c24f8a36a1.dg.metadata",
+      "exit": 0,
+      "stdout": "stored_integers=12 raw_bytes=771 fingerprint=9bfb41ef078aa789"
+    },
+    {
+      "name": "abri-moto-vccf25:main DB2 9.50",
+      "mode": "numbering",
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/Abri-Moto-VCCF25.db2",
+      "exit": 0,
+      "stdout": "version=9.50 tables=10 series=9 guid=cd7fd815-d850-41c8-acd6-f6bb6173b559 fingerprint=830ca6bf2ae446cd"
+    },
+    {
+      "name": "abri-moto-vccf25:DG 9.50 gzip raw container",
+      "mode": "raw",
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D32297495-2691-4527-b060-17b0e941b347.dg",
+      "exit": 0,
+      "stdout": "version=9.50 tables=48 records=897 opaque=0 bytes=152563 fingerprint=ad3aee6301512574"
+    },
+    {
+      "name": "abri-moto-vccf25:DG 9.50 partial strings/properties/sheet",
+      "mode": "drawing",
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/drawings/D32297495-2691-4527-b060-17b0e941b347.dg",
+      "exit": 0,
+      "stdout": "version=9.50 tables=48 strings=51 properties=5 links=5 sheets=1 model_refs=0 views=0 subject=0 guid=6eae20aa-d6f7-48df-9229-4c1fa5da8c1a stored=D32297495-2691-4527-b060-17b0e941b347.dg fingerprint=e914d8c148da769"
+    },
+    {
+      "name": "abri-moto-vccf25:project cross-format inventory",
+      "mode": "project_abri_vccf25_evidence",
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25",
+      "exit": 0,
+      "stdout": "version=9.50 actual_parts=0 part_records=177 assemblies=106 bolts=109 components=22 db2=3 empty_844=1 secondary_pair=1 raw=7 drawings=9 parsed_drawings=9 raw_drawings=0 metadata=6 drawing_strings=365 drawing_properties=35 property_links=36 sheets=9 metadata_sheet_matches=6 dg_project_guid_matches=0 metadata_links=0 model_guid=cd7fd815-d850-41c8-acd6-f6bb6173b559 parsed_metadata=6 failed=0 profiles=42 environment=1 options=2"
+    },
+    {
+      "name": "abri-moto-vccf25:8.44 empty DB2 GUID pair",
+      "mode": "numbering_844_evidence",
+      "path": "abri-moto-vccf25/Abri-Moto-VCCF25/Nouveau modèle.db2",
+      "exit": 0,
+      "stdout": "version=8.44 tables=10 series=0 guid=5f4eda13-411b-43a0-b3aa-9572a944571d model_version=8.44 model_parts=0 profiles=6006 properties=22 association=database_guid"
     }
   ]
 }

@@ -13,6 +13,9 @@ struct ModelReadOptions
     std::size_t maxDecodedBytes = 1024ULL * 1024 * 1024;
     // Total expanded numeric values and chunk visits in reinforcement arrays.
     std::size_t maxReinforcementArrayValues = 16ULL * 1024 * 1024;
+    // Project reader only: namespace GUIDs from sibling IDRM files to match
+    // against the DB1 allocation preamble while the database bytes are loaded.
+    std::vector<std::array<std::uint8_t, 16>> idRangeMapperNamespaceGuids;
 };
 bool parseModelDirectory(const std::filesystem::path& directory, Model& model, std::string& error);
 bool parseModelDirectory(const std::filesystem::path& directory, Model& model, std::string& error,

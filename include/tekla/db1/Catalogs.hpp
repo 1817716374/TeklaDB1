@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <string>
 #include <optional>
+#include <utility>
 #include <unordered_map>
 #include <vector>
 
@@ -28,6 +29,30 @@ struct ProfileCatalog
 {
     std::uint32_t version = 0;
     std::unordered_map<std::string, Profile> profiles;
+    // These names have multiple profdb.bin definition records. The legacy map
+    // keeps one record for compatibility; callers must not treat it as unique.
+    std::vector<std::string> ambiguousProfileNames;
+};
+
+// Numeric profile properties from the observed third-party PROFILE DATABASE .lis
+// dialect. Property names are preserved verbatim; unknown names are not dropped.
+struct ProfileCatalogLisEntry
+{
+    std::string name;
+    std::uint32_t type = 0;
+    std::uint32_t subType = 0;
+    double storedCoordinate = 0.0;
+    std::map<std::string, double> properties;
+    std::string rawRecord;
+};
+
+struct ProfileCatalogLis
+{
+    std::uint32_t version = 0;
+    std::vector<ProfileCatalogLisEntry> entries;
+    std::vector<std::string> ambiguousProfileNames;
+    std::filesystem::path sourcePath;
+    std::string rawText;
 };
 
 struct SketchProfileChamfer
@@ -152,6 +177,9 @@ struct BoltCatalogEntry
     float length = 0.0f;
     std::array<float, 7> trailingDimensions{};
     std::vector<std::uint8_t> rawPayload;
+    // Exact stored bolt element standard; assdb component slots refer to
+    // standards, which can each resolve to many size-specific bolt entries.
+    std::string standard;
 };
 
 struct BoltCatalog
@@ -185,6 +213,10 @@ struct ParametricProfileRule
     int minimumNumbers = 0;
     int maximumNumbers = 0;
     std::string generator;
+    // Trimble documents G3-NAME values of the form libraryId.SectionName.
+    // These are populated only when the value contains exactly one usable dot.
+    std::string generatorLibraryId;
+    std::string generatorSectionName;
     std::string namePattern;
     std::string sourceLine;
 };
@@ -203,9 +235,62 @@ struct ClbStatement
     std::size_t line = 0;
 };
 
+struct ClbNamedValue
+{
+    std::string name;
+    std::string description;
+    std::string type; // stored CLB type token; enum meanings are not normalized
+    std::string defaultValue;
+    std::string formula; // retained expression text; never evaluated
+    std::size_t line = 0;
+};
+
+struct ClbPointReference
+{
+    std::optional<std::uint32_t> stationIndex; // documented 0=start, 1=end
+    std::string yReference; // expression identifier, not a computed coordinate
+    std::string zReference;
+    std::size_t line = 0;
+};
+
+struct ClbFace
+{
+    std::optional<std::uint32_t> index;
+    std::vector<ClbPointReference> points;
+    std::size_t line = 0;
+};
+
+struct ClbGeometry
+{
+    std::string name;
+    std::vector<ClbFace> faces;
+    std::size_t line = 0;
+};
+
+struct ClbSection
+{
+    std::string name;
+    std::vector<ClbNamedValue> baseAttributes;
+    std::vector<ClbNamedValue> expressions;
+    std::vector<ClbGeometry> geometries;
+    std::size_t line = 0;
+};
+
+struct ClbInclude
+{
+    std::string target;
+    std::size_t line = 0;
+};
+
 struct ClbDocument
 {
     std::vector<ClbStatement> statements;
+    // Extracted only from a unique top-level library_id statement. The full
+    // generic syntax tree remains available in statements.
+    std::string libraryId;
+    std::vector<ClbSection> sections;
+    // Top-level Include statements, as documented for components.clb.
+    std::vector<ClbInclude> includes;
     std::vector<std::string> diagnostics;
 };
 
@@ -267,7 +352,44 @@ struct ShapeCatalog
     std::vector<std::string> diagnostics;
 };
 
+struct RebarShapeCategory
+{
+    std::string name;
+    std::vector<std::string> shapeIds;
+};
+
+// Tekla reinforcement shape catalog XML (.rscx). Root-level shapes are
+// retained separately because the format permits entries outside categories.
+struct RebarShapeCatalog
+{
+    std::vector<RebarShapeCategory> categories;
+    std::vector<std::string> uncategorizedShapeIds;
+    std::filesystem::path sourcePath;
+    std::string rawXml;
+};
+
+// Ordered entries observed in rebar_schedule_config.inp. Values remain raw
+// expressions: this API does not evaluate Tekla's formula language.
+struct RebarScheduleConfigEntry
+{
+    std::string internalBendingType;
+    std::uint32_t index = 0;
+    std::string rawValue;
+    std::size_t lineNumber = 0;
+};
+struct RebarScheduleConfig
+{
+    std::vector<RebarScheduleConfigEntry> entries;
+    std::vector<std::pair<std::size_t, std::string>> unparsedLines;
+    std::filesystem::path sourcePath;
+    std::string rawText;
+};
+
 bool parseProfileCatalog(const std::filesystem::path& path, ProfileCatalog& result, std::string& error);
+// Strictly reads the observed PROFILE DATABASE EXPORT VERSION 2 text dialect.
+// This is not the documented PROFILE CATALOG EXPORT .lis format.
+// Numeric property labels are preserved as written; no geometry is inferred.
+bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis& result, std::string& error);
 // UTF-8 TeklaStructuresModels with one direct Model; decoded size <= 16 MiB.
 // Retains raw XML. Unsupported DTD/entities and ambiguous known fields fail.
 bool parseModelMetadata(const std::filesystem::path& path, ModelMetadata& result, std::string& error);
@@ -287,4 +409,8 @@ bool parseShapeGeometry(const std::filesystem::path& path, ShapeGeometry& result
 bool parseShapeGeometry(const std::filesystem::path& path, ShapeGeometry& result, std::string& error,
                         const ShapeReadOptions& options);
 bool parseShapeCatalog(const std::filesystem::path& directory, ShapeCatalog& result, std::string& error);
+bool parseRebarShapeCatalog(const std::filesystem::path& path, RebarShapeCatalog& result, std::string& error);
+// Partial reader for BEND_TYPE_<internal type>[index]=value entries. Input is
+// limited to 64 MiB. Unknown non-empty lines are retained; expressions are never evaluated.
+bool parseRebarScheduleConfig(const std::filesystem::path& path, RebarScheduleConfig& result, std::string& error);
 }

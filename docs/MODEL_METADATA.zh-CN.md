@@ -3,6 +3,8 @@
 `tekla::db1::parseModelMetadata` 读取 `TeklaStructuresModels` 根下唯一的直接 `Model`。
 模型目录和工程入口沿用这个读取器，解析错误不会留下部分填写的结果。
 
+`readProject` 现在也把根目录中的这份 XML 列为 `FileRole::ModelMetadata`，标为 `PartialSemantic`（已解码13个字段，未命名扩展仍保留在 `ModelMetadata::rawXml`），并记录 metadata 文件到所选 DB1 的带理由关联。该关联只来自模型根目录文件被实际读取并写入所选模型，不根据 `Name` 与目录名猜测，也不覆盖 DB1 的存储版本或 GUID。
+
 现有13个字段继续可用：Name、Designer、Description、Version、ProductVersion、Language、Template、Environment、IsTemplate、XS_PROJECT、XS_FIRM、XS_SYSTEM、ConnectedId。
 字符串保留首尾空白，按XML 1.0处理换行；只解码一遍五种预定义实体和十进制/十六进制字符引用。
 注释不会提供字段值，同名嵌套节点也不会覆盖直接子节点。CDATA保持文本语义。
@@ -21,9 +23,9 @@ IsTemplate单独去除XML空白，接受大小写不敏感的TRUE/FALSE、1/0；
 
 ## 独立验收
 
-主语料的32份固定来源元数据均为一个直接Model，31份带上述DOCTYPE，3份字段带换行。
+主语料的34份固定来源元数据均为一个直接Model，31份带上述DOCTYPE，3份字段带换行。
 `tools/test_metadata_evidence.py` 先检查来源文件散列，再用Python标准库ElementTree独立读取13个字段，
-按固定顺序与C++输出对照，同时核对完整原文字节。期望值固定在 `tests/corpus.json`，不会在测试时用生产解析器重写。
+按固定顺序与C++输出对照，同时核对完整原文字节。随后对每个实际样本目录调用 `readProject`，核对元数据清单级别、原文及唯一 DB1 来源关联。当前两类检查均为34/34，字段期望固定在 `tests/corpus.json`，不会在测试时用生产解析器重写。
 可复现命令（数据目录使用仓库外路径）：
 
 ```sh

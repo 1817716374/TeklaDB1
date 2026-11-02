@@ -59,6 +59,26 @@ std::string scalar(const xml::XMLElement& element)
 }
 std::string value(const xml::XMLElement& parent,const char* name)
 { return scalar(child(parent,name)); }
+bool sameIdentifier(std::string left,std::string right)
+{
+    const auto fold=[](std::string& value) {
+        std::transform(value.begin(),value.end(),value.begin(),[](unsigned char c) {
+            return c>='A' && c<='Z' ? static_cast<char>(c-'A'+'a') : static_cast<char>(c);
+        });
+    };
+    fold(left);fold(right);return left==right;
+}
+bool isShapeGroupMetadataFile(const std::filesystem::path& path)
+{
+    auto name=detail::pathUtf8(path.filename());
+    std::transform(name.begin(),name.end(),name.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});
+    constexpr char suffix[]=".shapecatalog.groups.xml";
+    const bool userGroups=name.rfind("shapecatalog.groups.user.",0)==0 && name.size()>=4 &&
+        name.compare(name.size()-4,4,".xml")==0;
+    return name=="shapecatalog.groups.xml" || userGroups ||
+        (name.size()>sizeof(suffix)-1 &&
+         name.compare(name.size()-(sizeof(suffix)-1),sizeof(suffix)-1,suffix)==0);
+}
 double number(std::string text)
 {
     text=xu::trimXml(std::move(text));
@@ -184,6 +204,10 @@ bool detail::readShapeDirectories(const std::vector<std::filesystem::path>& dire
         auto& ambiguousDefinitions=scan.ambiguousDefinitions;auto& ambiguousGeometries=scan.ambiguousGeometries;
         for(const auto& path:paths)
         {
+            // These XML files describe catalog organization, not individual
+            // shape definitions. Project inventory handles them separately;
+            // they must not create shape diagnostics or downgrade Shapes/.
+            if(isShapeGroupMetadataFile(path))continue;
             auto ext=detail::pathUtf8(path.extension());
             std::transform(ext.begin(),ext.end(),ext.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});
             if(ext!=".xml" && ext!=".tez")continue;
@@ -199,6 +223,8 @@ bool detail::readShapeDirectories(const std::vector<std::filesystem::path>& dire
                 else if(std::strcmp(d.root->Name(),"ImportPart")==0)
                 {
                     auto item=definition(d,path);const auto key=item.guid;
+                    if(!sameIdentifier(key,detail::pathUtf8(path.stem())))
+                        throw std::runtime_error("shape definition GUID does not match its filename: "+key);
                     if(ambiguousDefinitions.count(key) || !result.definitionsByGuid.emplace(key,std::move(item)).second)
                     {ambiguousDefinitions.insert(key);result.definitionsByGuid.erase(key);throw std::runtime_error("ambiguous shape definition GUID: "+key);}
                 }
@@ -217,5 +243,46 @@ bool parseShapeCatalog(const std::filesystem::path& directory,ShapeCatalog& resu
     for(const auto& entry:result.definitionsByGuid)
         if(!result.geometriesByStorageId.count(entry.second.brepStorageId))result.diagnostics.push_back("shape "+entry.second.name+" references missing geometry "+entry.second.brepStorageId);
     return true;
+}
+bool parseRebarShapeCatalog(const std::filesystem::path& path,RebarShapeCatalog& result,std::string& error)
+{
+    result={};error.clear();
+    try
+    {
+        Document d(path,ShapeReadOptions{});
+        if(std::strcmp(d.root->Name(),"ShapeCatalog")!=0)
+            throw std::runtime_error("rebar shape catalog XML root must be ShapeCatalog");
+        xu::containerText(*d.root);
+        const auto shapeId=[](const xml::XMLElement& element) {
+            const auto id=xu::trimXml(scalar(element));
+            if(id.empty())throw std::runtime_error("empty reinforcement shape ID");
+            return id;
+        };
+        RebarShapeCatalog parsed;parsed.sourcePath=path;parsed.rawXml=std::move(d.raw);
+        for(const auto* entry=d.root->FirstChildElement();entry;entry=entry->NextSiblingElement())
+        {
+            if(std::strcmp(entry->Name(),"Shape")==0)
+            {
+                parsed.uncategorizedShapeIds.push_back(shapeId(*entry));
+                continue;
+            }
+            if(std::strcmp(entry->Name(),"Category")!=0)
+                throw std::runtime_error(std::string("unexpected reinforcement shape catalog element: ")+entry->Name());
+            const auto* name=entry->Attribute("Name");
+            if(!name || xu::trimXml(xu::decode(name)).empty())
+                throw std::runtime_error("reinforcement shape category requires a non-empty Name attribute");
+            xu::containerText(*entry);
+            RebarShapeCategory category;category.name=xu::trimXml(xu::decode(name));
+            for(const auto* child=entry->FirstChildElement();child;child=child->NextSiblingElement())
+            {
+                if(std::strcmp(child->Name(),"Shape")!=0)
+                    throw std::runtime_error(std::string("unexpected reinforcement shape category element: ")+child->Name());
+                category.shapeIds.push_back(shapeId(*child));
+            }
+            parsed.categories.push_back(std::move(category));
+        }
+        result=std::move(parsed);return true;
+    }
+    catch(const std::exception& e){result={};error=e.what();return false;}
 }
 }

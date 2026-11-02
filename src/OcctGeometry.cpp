@@ -1040,7 +1040,10 @@ bool applyBoolean(TopoDS_Shape& father, const TopoDS_Shape& tool, bool additive)
                 return true;
         }
     }
-    for (const auto fuzzy : {5e-2, 1e-3, 1e-5})
+    // Try the least permissive tolerance first. A coarse fuzzy value can
+    // merge legitimate nearby faces or erase thin residual features even when
+    // the same operation succeeds at the model's stored precision.
+    for (const auto fuzzy : {1e-5, 1e-3, 5e-2})
     {
         TopTools_ListOfShape arguments, tools;
         arguments.Append(father);

@@ -29,7 +29,8 @@ int drawingMetadataValidation(const std::filesystem::path& path,const std::strin
         return 0;
     }
     tekla::Project project;tekla::ProjectOptions options;
-    options.mainDatabase="API_Developer_Exam_01.db1";
+    options.mainDatabase=std::filesystem::exists(path/"Steel Fundamentals Modeling Assignment.db1")?
+        "Steel Fundamentals Modeling Assignment.db1":"API_Developer_Exam_01.db1";
     options.strictCompanions=mode!="drawing_metadata_project_lenient";
     options.readDrawingMetadata=mode!="drawing_metadata_project_disabled";
     options.readDrawings=mode!="drawing_metadata_project_no_drawings";
@@ -37,11 +38,14 @@ int drawingMetadataValidation(const std::filesystem::path& path,const std::strin
     std::size_t objects=0,failed=0,discovered=0;
     for(const auto& pair:project.drawingMetadataAssociations)
     {
-        const auto& metadata=project.drawingMetadata.at(pair.metadata);const auto& drawing=project.drawings.at(pair.drawing);
+        const auto& metadata=project.drawingMetadata.at(pair.metadata);
         if(pair.modelObjectId)
         {
             ++objects;
-            if(project.model.identities.at(*pair.modelObjectId).guid!=metadata.mainObjectGuid || drawing.subject->modelObjectId!=*pair.modelObjectId)
+            const auto subject=std::find_if(project.drawingSubjectAssociations.begin(),project.drawingSubjectAssociations.end(),
+                [&](const auto& value){return value.drawing==pair.drawing && value.modelObjectId==*pair.modelObjectId &&
+                    value.modelGuid==metadata.mainObjectGuid;});
+            if(project.model.identities.at(*pair.modelObjectId).guid!=metadata.mainObjectGuid || subject==project.drawingSubjectAssociations.end())
                 throw std::runtime_error("metadata association lost identity provenance");
         }
     }
@@ -49,6 +53,19 @@ int drawingMetadataValidation(const std::filesystem::path& path,const std::strin
     {
         failed+=file.level==tekla::ReadLevel::Failed;discovered+=file.level==tekla::ReadLevel::Discovered;
         if(file.level==tekla::ReadLevel::Semantic)throw std::runtime_error("metadata overstates lifecycle semantics");
+    }
+    if(mode=="drawing_metadata_project_steel")
+    {
+        for(const auto& entry:project.drawingMetadata)
+        {
+            const auto& metadata=entry.second;
+            const auto stored=metadata.storedIntegers.find("AlwaysNecessary");
+            const auto extension=std::find_if(metadata.extensions.begin(),metadata.extensions.end(),[](const auto& value){
+                return value.name=="AlwaysNecessary";});
+            if(metadata.rawXml.find("<AlwaysNecessary>") == std::string::npos ||
+                stored==metadata.storedIntegers.end() || extension!=metadata.extensions.end())
+                throw std::runtime_error("observed AlwaysNecessary integer was not exposed without guessing its meaning");
+        }
     }
     std::cout<<"metadata="<<project.drawingMetadata.size()<<" pairs="<<project.drawingMetadataAssociations.size()<<" objects="<<objects
         <<" failed="<<failed<<" discovered="<<discovered<<" drawings="<<project.drawings.size()<<'\n';

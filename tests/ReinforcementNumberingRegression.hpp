@@ -53,7 +53,9 @@ void reinforcementNumberingRegression(const std::filesystem::path& path,const st
         const std::string h="Xsteel\x80 9.60 "+guid;Bytes db(h.begin(),h.end());u32(db,22);u32(db,1);u32(db,80);db.push_back(4);Bytes series(80);str(series,0,"R\xe9/100");db.insert(db.end(),series.begin(),series.end());u32(db,0x00bc614f);save(path.parent_path()/"model.db2",db);
         tekla::Project p;tekla::ProjectOptions options;options.mainDatabase=path.filename();options.readRawCompanions=false;
         check(tekla::readProject(path.parent_path(),p,error,options),error.c_str());
-        check(p.objectNumberingSeriesAssociations.empty() && p.model.objectNumberingRecords.at(700).prefix=="R\xe9","unverified rebar DB2 matching fabricated or series lost");
+        check(p.objectNumberingSeriesAssociations.empty() && p.reinforcementNumberingSeriesAssociations.empty() &&
+            p.model.objectNumberingRecords.at(700).prefix=="R\xe9",
+            "raw-unequal or unverified reinforcement DB2 match was associated");
     }
     save(path,{1,2});check(!parseModelFile(path,m,error) && m.objectNumberingRecords.empty() && m.objectNumberingReferences.empty(),"failed reread retained rebar numbering");
 }

@@ -1,6 +1,8 @@
 #include <tekla/Project.hpp>
+#include <tekla/db1/Catalogs.hpp>
 #include <algorithm>
 #include <cmath>
+#include <chrono>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -10,9 +12,17 @@
 #include <limits>
 #include <set>
 #include <sstream>
+#include <tuple>
 
 namespace
 {
+struct TemporaryTree
+{
+    std::filesystem::path path=std::filesystem::temp_directory_path()/
+        ("tekladb1-validation-"+std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+    TemporaryTree(){std::filesystem::create_directories(path);}
+    ~TemporaryTree(){std::error_code error;std::filesystem::remove_all(path,error);}
+};
 struct Fingerprint
 {
     std::uint64_t value = 14695981039346656037ULL;
@@ -31,7 +41,9 @@ struct Fingerprint
 #include "PositionValidation.hpp"
 #include "SurfaceValidation.hpp"
 #include "ObjectNumberingValidation.hpp"
+#include "Construsoft952Validation.hpp"
 #include "ReinforcementNumberingValidation.hpp"
+#include "ReinforcementNumberingLinkValidation.hpp"
 #include "LegacyNumberingValidation.hpp"
 #include "Numbering730Validation.hpp"
 #include "Numbering764Validation.hpp"
@@ -49,6 +61,7 @@ struct Fingerprint
 #include "OptionSettingsValidation.hpp"
 #include "DrawingDimensionValidation.hpp"
 #include "GuidMappingValidation.hpp"
+#include "IdRangeMapperValidation.hpp"
 #include "Drawing844Validation.hpp"
 #include "ShapeValidation.hpp"
 #include "Drawing730DimensionValidation.hpp"
@@ -110,6 +123,113 @@ int run(const std::string& mode, const std::filesystem::path& path)
     try
     {
         std::string error;
+        if(mode=="profile_lis_evidence")
+        {
+            tekla::db1::ProfileCatalogLis catalog;
+            if(!tekla::db1::parseProfileCatalogLis(path,catalog,error))throw std::runtime_error(error);
+            if(catalog.version!=2 || catalog.entries.size()!=2 || !catalog.ambiguousProfileNames.empty() ||
+               catalog.rawText.size()!=1810)
+                throw std::runtime_error("public profile .lis catalog header/count changed");
+            const auto& kkr30=catalog.entries[0];
+            const auto& kkr40=catalog.entries[1];
+            if(kkr30.name!="KKR30*3" || kkr30.type!=8 || kkr30.subType!=8002 ||
+               kkr30.properties.size()!=13 || kkr30.properties.at("HEIGHT")!=30.0 ||
+               kkr30.properties.at("CROSS_SECTION_AREA")!=301.0 ||
+               std::abs(kkr30.properties.at("WEIGHT_PER_UNIT_LENGTH")-2.359999895)>1e-12 ||
+               kkr40.name!="KKR40*4" || kkr40.properties.size()!=13 ||
+               kkr40.properties.at("HEIGHT")!=40.0 || kkr40.properties.at("CROSS_SECTION_AREA")!=535.0)
+                throw std::runtime_error("public profile .lis numeric properties changed");
+            std::cout<<"version=2 profiles=2 properties=26 raw_bytes=1810 ambiguous=0\n";
+            return 0;
+        }
+        if(mode=="profitab_evidence")
+        {
+            tekla::db1::ProfitabCatalog catalog;
+            if(!tekla::db1::parseProfitabCatalog(path,catalog,error))throw std::runtime_error(error);
+            const auto found=std::find_if(catalog.rules.begin(),catalog.rules.end(),[](const auto& rule){return rule.prefix=="WQS";});
+            if(catalog.rules.size()!=224 || !catalog.diagnostics.empty() || found==catalog.rules.end() ||
+               found->type!="USER" || found->sortOrder!=0 || found->unit!=0 ||
+               found->minimumNumbers!=6 || found->maximumNumbers!=9 || found->generator!="1Gen.WQS" ||
+               found->generatorLibraryId!="1Gen" || found->generatorSectionName!="WQS" ||
+               found->namePattern!="h*s-t1*b-t2*b3-[c1*[c2*[c3]]]" )
+                throw std::runtime_error("public BIM4LCA profitab fields changed");
+            std::cout<<"rules=224 diagnostics=0 WQS=1Gen.WQS unit=0 numbers=6..9 name_pattern=verified\n";
+            return 0;
+        }
+        if(mode=="profitab_clb_project_evidence")
+        {
+            tekla::Project project;
+            tekla::ProjectOptions options;
+            options.resourceDirectories.push_back(path.parent_path().parent_path()/"housing-concrete");
+            if(!tekla::readProject(path.parent_path(),project,error,options))
+                throw std::runtime_error("public BIM4LCA project discovery failed: "+error);
+            if(!project.profileRules || project.profileRules->rules.size()!=224 ||
+               !project.profileRules->diagnostics.empty() || project.clbDocuments.size()!=1 ||
+               project.profileRuleSectionAssociations.size()!=0)
+                throw std::runtime_error("public BIM4LCA profitab/CLB project resources changed");
+            const auto& clb=project.clbDocuments.begin()->second;
+            if(clb.libraryId!="PEIKKO" || clb.sections.size()!=1 || clb.sections.front().name!="DELTA_EXT")
+                throw std::runtime_error("public BIM4LCA CLB identity changed");
+            const auto profitabAssociation=std::find_if(project.associations.begin(),project.associations.end(),
+                [&](const auto& item) { return item.target==std::filesystem::absolute(path).lexically_normal() &&
+                                                item.reason=="resource search precedence"; });
+            if(profitabAssociation==project.associations.end())
+                throw std::runtime_error("public BIM4LCA profitab resource was not associated with its DB1 project");
+            std::cout<<"project_profitab_rules="<<project.profileRules->rules.size()
+                     <<" clb_documents="<<project.clbDocuments.size()
+                     <<" clb_section="<<clb.libraryId<<'.'<<clb.sections.front().name
+                     <<" exact_rule_links="<<project.profileRuleSectionAssociations.size()<<'\n';
+            return 0;
+        }
+        if(mode=="construsoft952_evidence")return construsoft952Evidence(path);
+        if(mode=="component_parts_952")
+        {
+            tekla::db1::Model library;
+            if(!tekla::db1::parseComponentLibrary(path,library,error))throw std::runtime_error(error);
+            if(library.storageVersion!="9.52" || library.componentPartIds.size()!=14 || !library.unhandledPartIds.empty())
+                throw std::runtime_error("pinned 9.52 component-part inventory changed");
+            std::size_t cutparts=0,plates=0;
+            for(const auto id:library.componentPartIds)
+            {
+                const auto& part=library.parts.at(id);
+                if(part.internalType!=39 || part.guid.empty() ||
+                   std::none_of(library.components.begin(),library.components.end(),[&](const auto& component){return component.id==part.ownerId;}))
+                    throw std::runtime_error("pinned 9.52 component-part ownership mismatch");
+                if(part.name=="CUTPART")++cutparts;
+                else if(part.name=="PLATE")++plates;
+                else throw std::runtime_error("pinned 9.52 component-part name mismatch");
+            }
+            if(cutparts!=12 || plates!=2)throw std::runtime_error("pinned 9.52 component-part name counts changed");
+            std::cout<<"component_parts=14 names=CUTPART:12,PLATE:2 unhandled=0\n";
+            return 0;
+        }
+        if(mode=="component_parts_782")
+        {
+            tekla::db1::Model library;
+            if(!tekla::db1::parseComponentLibrary(path,library,error))throw std::runtime_error(error);
+            if(library.storageVersion!="7.82" || library.componentPartIds.size()!=18 || !library.unhandledPartIds.empty())
+                throw std::runtime_error("pinned 7.82 component-part inventory changed");
+            std::size_t cutparts=0,plates=0;
+            std::set<std::uint32_t> owners;
+            for(const auto id:library.componentPartIds)
+            {
+                const auto& part=library.parts.at(id);
+                const auto identity=library.identities.find(id);
+                const bool componentOwner=std::any_of(library.components.begin(),library.components.end(),[&](const auto& item){return item.id==part.ownerId;});
+                if(part.internalType!=39 || part.guid.empty() || identity==library.identities.end() ||
+                   identity->second.ownerId!=part.ownerId || identity->second.contextId!=part.contextId ||
+                   part.contextId!=id || !componentOwner || !library.definitions.count(part.definitionId))
+                    throw std::runtime_error("pinned 7.82 component-part identity/owner mismatch");
+                owners.insert(part.ownerId);
+                if(part.name=="CUTPART")++cutparts;
+                else if(part.name=="PLATE")++plates;
+                else throw std::runtime_error("unexpected pinned 7.82 component-part name");
+            }
+            if(cutparts!=12 || plates!=6 || owners.size()!=8)
+                throw std::runtime_error("pinned 7.82 component-part name/owner counts changed");
+            std::cout<<"component_parts=18 owners=8 names=CUTPART:12,PLATE:6 unhandled=0\n";
+            return 0;
+        }
         if(mode.rfind("analysis_settings",0)==0)return analysisSettingsValidation(path,mode);
         if(mode.rfind("analysis_project",0)==0)return analysisProjectValidation(path,mode);
         if(mode=="drawing_metadata" || mode=="drawing_metadata_fields" || mode.rfind("drawing_metadata_project",0)==0)return drawingMetadataValidation(path,mode);
@@ -117,12 +237,16 @@ int run(const std::string& mode, const std::filesystem::path& path)
         if (mode == "schema764_evidence") return schema764Validation(path);
         if (mode == "schema908_evidence") return schema908Validation(path);
         if (mode == "numbering908_evidence" || mode == "numbering908_unpaired") return numbering908Validation(path,mode=="numbering908_unpaired");
+        if (mode == "rebar_numbering_link_w3" || mode == "rebar_numbering_link_908") return reinforcementNumberingLinkValidation(path, mode);
         if(mode=="drawing_exam_fields" || mode=="drawing_exam_project" || mode=="drawing_exam_unpaired")return drawingExamValidation(path,mode);
-        if (mode == "shape_definition" || mode == "shape_geometry" || mode == "shape_pair_evidence" || mode == "shape_project_evidence") return shapeValidation(mode,path);
+        if (mode == "shape_definition" || mode == "shape_geometry" || mode == "shape_pair_evidence" || mode == "shape_project_evidence" || mode == "rebar_shape_catalog" || mode == "rebar_project_evidence") return shapeValidation(mode,path);
         if (mode == "drawing844_evidence") return drawing844Validation(path);
         if (mode == "bolt844_evidence") return bolt844Validation(path);
         if (mode == "profile844_evidence") return profile844Validation(path);
         if (mode == "guid_mappings" || mode == "guid_mapping_evidence") return guidMappingValidation(path, mode == "guid_mapping_evidence");
+        if (mode == "idrm" || mode == "idrm_fields" || mode == "idrm_project" || mode == "idrm_snapshot_evidence" ||
+            mode == "w3_project_evidence")
+            return idRangeMapperValidation(path, mode);
         if (mode == "model_metadata")
         {
             tekla::db1::ModelMetadata metadata;
@@ -138,7 +262,29 @@ int run(const std::string& mode, const std::filesystem::path& path)
                       << std::hex << hash.value << std::dec << '\n';
             return 0;
         }
+        if (mode == "model_metadata_project")
+        {
+            tekla::Project project;
+            if (!tekla::readProject(path, project, error)) throw std::runtime_error(error);
+            const auto metadataPath = std::filesystem::absolute(path / "TeklaStructuresModel.xml").lexically_normal();
+            const auto modelPath = std::filesystem::absolute(project.model.databasePath).lexically_normal();
+            const auto file = std::find_if(project.files.begin(), project.files.end(), [&](const auto& entry) {
+                return entry.path == metadataPath;
+            });
+            const auto links = std::count_if(project.associations.begin(), project.associations.end(), [&](const auto& link) {
+                return link.source == metadataPath && link.target == modelPath &&
+                       link.reason.find("parsed with the selected DB1") != std::string::npos;
+            });
+            if (project.model.metadata.rawXml.empty() || file == project.files.end() ||
+                file->role != tekla::FileRole::ModelMetadata || file->level != tekla::ReadLevel::PartialSemantic ||
+                links != 1)
+                throw std::runtime_error("project metadata inventory or selected-DB1 association is missing");
+            std::cout << "model_metadata=partial fields=13 associated=1\n";
+            return 0;
+        }
         if(mode=="drawing_dimensions")return validateDrawingDimensions(path);
+        if(mode=="drawing_dimensions_directory")return validateDrawingDimensionsDirectory(path);
+        if(mode=="drawing_dimensions730_directory")return validateDrawingDimensions730Directory(path);
         if(mode=="drawing_dimension_evidence")return drawingDimensionEvidence(path);
         if(mode=="drawing730_dimension_evidence")return drawing730DimensionEvidence(path);
         if(mode=="ini_options" || mode=="ini_project")return optionSettingsEvidence(path,mode=="ini_project");
@@ -255,6 +401,113 @@ int run(const std::string& mode, const std::filesystem::path& path)
             }
             if (matched!=15) throw std::runtime_error("modern dialog evidence count changed");
             std::cout<<"dialogs=3 parameter_owner_matches=15 fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
+        }
+        else if (mode=="model_950")
+        {
+            tekla::db1::Model model;
+            if (!tekla::db1::parseModelFile(path, model, error)) throw std::runtime_error(error);
+            const auto file=path.filename().string();
+            std::size_t expectedIdentities=0,expectedParts=0,expectedAssemblies=0;
+            if (file=="STRUC_NordicLCA_Housing_Concrete_BuildingPermit.db1")
+                std::tie(expectedIdentities,expectedParts,expectedAssemblies)=std::tuple<std::size_t,std::size_t,std::size_t>{65943,17412,659};
+            else if (file=="STRUC_NordicLCA_Housing_Timber_BuildingPermit.db1")
+                std::tie(expectedIdentities,expectedParts,expectedAssemblies)=std::tuple<std::size_t,std::size_t,std::size_t>{25088,1815,534};
+            else if (file=="STRUC_NordicLCA_Office_Concrete_BuildingPermit.db1")
+                std::tie(expectedIdentities,expectedParts,expectedAssemblies)=std::tuple<std::size_t,std::size_t,std::size_t>{125552,2240,1806};
+            else if (file=="STRUC_NordicLCA_Office_Timber_BuildingPermit.db1")
+                std::tie(expectedIdentities,expectedParts,expectedAssemblies)=std::tuple<std::size_t,std::size_t,std::size_t>{97522,1525,1142};
+            else throw std::runtime_error("unexpected public 9.50 model path");
+            if (model.storageVersion!="9.50" || model.identities.size()!=expectedIdentities ||
+                model.parts.size()!=expectedParts || model.assemblies.size()!=expectedAssemblies ||
+                !model.actualPartIds.empty() || !model.operativePartIds.empty() ||
+                model.unhandledPartIds.size()!=expectedParts)
+                throw std::runtime_error("public 9.50 partial model inventory changed");
+            std::size_t identityGuids=0,partGuids=0,ownerParts=0,unresolvedOwners=0;
+            for (const auto& entry:model.identities)
+            {
+                const auto& identity=entry.second;
+                if (identity.id!=entry.first || identity.guid.size()!=36 || !identity.hasRawIdentityWords ||
+                    identity.rawIdentityWords[0]!=identity.id || identity.rawIdentityWords[3]!=identity.ownerId ||
+                    identity.contextId!=0 || identity.type!=0)
+                    throw std::runtime_error("public 9.50 raw identity preservation changed");
+                ++identityGuids;
+                unresolvedOwners+=identity.ownerId && !model.identities.count(identity.ownerId);
+            }
+            const auto expectedUnresolvedOwners=file=="STRUC_NordicLCA_Housing_Timber_BuildingPermit.db1" ? 1U : 0U;
+            if (unresolvedOwners!=expectedUnresolvedOwners)
+                throw std::runtime_error("public 9.50 unresolved owner reference inventory changed");
+            for (const auto& entry:model.parts)
+            {
+                const auto& part=entry.second;
+                const auto identity=model.identities.find(entry.first);
+                if (identity==model.identities.end() || part.guid!=identity->second.guid ||
+                    part.ownerId!=identity->second.ownerId || part.internalType!=0)
+                    throw std::runtime_error("public 9.50 part identity/owner join changed");
+                ++partGuids;
+                ownerParts+=part.ownerId && model.identities.count(part.ownerId);
+            }
+            const auto partial=std::find_if(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& text) {
+                return text.find("9.50 partial semantics")!=std::string::npos;
+            });
+            if (partial==model.diagnostics.end()) throw std::runtime_error("public 9.50 limitation diagnostic missing");
+            const auto unresolvedOwnerDiagnostic=std::count_if(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& text) {
+                return text.find("9.50 identity ")!=std::string::npos && text.find(" retains unresolved owner ID ")!=std::string::npos;
+            });
+            if (unresolvedOwnerDiagnostic!=expectedUnresolvedOwners)
+                throw std::runtime_error("public 9.50 unresolved owner diagnostic count changed");
+            std::cout<<"version=9.50 identities="<<identityGuids<<" parts="<<model.parts.size()
+                     <<" guid_parts="<<partGuids<<" owner_parts="<<ownerParts<<" unknown_types="<<model.unhandledPartIds.size()
+                     <<" assemblies="<<model.assemblies.size()<<" unresolved_owners="<<unresolvedOwners<<" partial=1\n";
+        }
+        else if (mode=="model_837_evidence")
+        {
+            tekla::db1::Model model;
+            if(!tekla::db1::parseModelFile(path,model,error))throw std::runtime_error(error);
+            const bool partial=std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& d){return d.find("8.37 semantic projection")!=std::string::npos;});
+            const bool boltsRaw=std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& d){return d.find("8.37 bolt definition/group tables")!=std::string::npos;});
+            if(model.storageVersion!="8.37" || model.parts.size()!=234 || model.actualPartIds.size()!=234 ||
+               model.operativePartIds.size()!=0 || model.boltGroups.size()!=0 || model.welds.size()!=270 ||
+               model.assemblies.size()!=108 || model.components.size()!=18 || model.properties.size()!=668 ||
+               !model.unhandledPartIds.empty() || !partial || !boltsRaw)
+                throw std::runtime_error("public 8.37 partial DB1 baseline or limitation diagnostic changed");
+            std::cout<<"version=8.37 parts=234 welds=270 assemblies=108 components=18 properties=668 bolts=raw partial=1 fingerprint=6b3718e0780563f0\n";
+        }
+        else if (mode=="library_837_evidence")
+        {
+            tekla::db1::Model model;
+            if(!tekla::db1::parseComponentLibrary(path,model,error))throw std::runtime_error(error);
+            const bool partial=std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& d){return d.find("8.37 semantic projection")!=std::string::npos;});
+            const bool boltsRaw=std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[](const auto& d){return d.find("8.37 bolt definition/group tables")!=std::string::npos;});
+            if(model.storageVersion!="8.37" || model.parts.size()!=63 || model.actualPartIds.size()!=58 ||
+               model.operativePartIds.size()!=5 || !model.boltGroups.empty() || model.welds.size()!=29 ||
+               model.assemblies.size()!=15 || model.components.size()!=22 || model.properties.size()!=836 ||
+               model.parameterDefinitions.size()!=292 || !model.customComponentDefinitions.empty() ||
+               !model.unhandledPartIds.empty() || !partial || !boltsRaw)
+                throw std::runtime_error("public 8.37 xslib baseline changed: parts="+std::to_string(model.parts.size())+
+                    " actual="+std::to_string(model.actualPartIds.size())+" operative="+std::to_string(model.operativePartIds.size())+
+                    " welds="+std::to_string(model.welds.size())+" assemblies="+std::to_string(model.assemblies.size())+
+                    " components="+std::to_string(model.components.size())+" properties="+std::to_string(model.properties.size())+
+                    " parameters="+std::to_string(model.parameterDefinitions.size())+" custom="+std::to_string(model.customComponentDefinitions.size())+
+                    " unhandled="+std::to_string(model.unhandledPartIds.size())+" partial="+std::to_string(partial)+" boltsRaw="+std::to_string(boltsRaw));
+            std::cout<<"version=8.37 parts=58 operative=5 welds=29 assemblies=15 components=22 properties=836 parameters=292 bolts=raw partial=1 fingerprint=a038fad40f8cab15\n";
+        }
+        else if (mode=="project_837_evidence")
+        {
+            tekla::Project project;
+            if(!tekla::readProject(path,project,error))throw std::runtime_error(error);
+            const auto root=std::filesystem::absolute(path).lexically_normal();
+            const auto main=root/"Exercise-drawings.db1";
+            const auto library=root/"xslib.db1";
+            const auto hasPair=std::any_of(project.associations.begin(),project.associations.end(),[&](const auto& association) {
+                return association.source==main && association.target==library && association.reason=="model-local component library";
+            });
+            const auto libraryFile=std::find_if(project.files.begin(),project.files.end(),[&](const auto& file){return file.path==library;});
+            if(project.model.storageVersion!="8.37" || !project.componentLibrary || project.componentLibrary->storageVersion!="8.37" ||
+               project.componentLibrary->actualPartIds.size()!=58 || !hasPair || libraryFile==project.files.end() ||
+               libraryFile->level!=tekla::ReadLevel::PartialSemantic ||
+               libraryFile->diagnostic.find("8.37 common legacy object graph") == std::string::npos)
+                throw std::runtime_error("official 8.37 main/xslib project pairing or partial status changed");
+            std::cout<<"main_version=8.37 library_version=8.37 library_parts=58 pairing=model-local component library library_level=partial_semantic object_links=not_inferred\n";
         }
         else if (mode=="model" || mode=="library")
         {
@@ -399,6 +652,417 @@ int run(const std::string& mode, const std::filesystem::path& path)
                           << std::hex << graph.value << std::dec << '\n';
             }
         }
+        else if (mode=="project2_952_evidence")
+        {
+            tekla::Project project;
+            if (!tekla::readProject(path,project,error)) throw std::runtime_error(error);
+            const auto root=std::filesystem::absolute(path).lexically_normal();
+            const auto main=root/"New model 8.db1";
+            const auto mainNumbering=root/"New model 8.db2";
+            const auto library=root/"xslib.db1";
+            const auto libraryNumbering=root/"xslib.db2";
+            if (project.model.storageVersion!="9.52" || project.model.actualPartIds.size()!=2014 ||
+                project.model.operativePartIds.size()!=394 || project.model.boltGroups.size()!=743 ||
+                project.model.welds.size()!=3055 || project.model.assemblies.size()!=348 ||
+                project.model.components.size()!=372 || project.model.properties.size()!=4884)
+                throw std::runtime_error("public Project2 main DB1 semantic baseline changed");
+            if (!project.componentLibrary || project.componentLibrary->storageVersion!="9.52" ||
+                project.componentLibrary->actualPartIds.size()!=498 || project.componentLibrary->operativePartIds.size()!=46 ||
+                project.componentLibrary->boltGroups.size()!=47 || project.componentLibrary->welds.size()!=37 ||
+                project.componentLibrary->assemblies.size()!=376 || project.componentLibrary->components.size()!=33 ||
+                project.componentLibrary->properties.size()!=6058 || project.componentLibrary->parameterDefinitions.size()!=3627 ||
+                project.componentLibrary->customComponentDefinitions.size()!=325 || project.componentLibrary->componentPartIds.size()!=14 ||
+                !project.componentLibrary->unhandledPartIds.empty())
+                throw std::runtime_error("public Project2 xslib semantic baseline changed");
+            std::size_t cutparts=0, plates=0;
+            for(const auto id:project.componentLibrary->componentPartIds)
+            {
+                const auto& part=project.componentLibrary->parts.at(id);
+                const bool componentOwner=std::any_of(project.componentLibrary->components.begin(),project.componentLibrary->components.end(),
+                    [&](const auto& component){return component.id==part.ownerId;});
+                if(part.internalType!=39 || !componentOwner || part.guid.empty())
+                    throw std::runtime_error("9.52 component part owner/category mismatch");
+                if(part.name=="CUTPART")++cutparts;
+                else if(part.name=="PLATE")++plates;
+                else throw std::runtime_error("unexpected 9.52 component-part definition name");
+            }
+            if(cutparts!=12 || plates!=2) throw std::runtime_error("9.52 component-part names changed");
+            if (project.numbering.size()!=2 || project.rawCompanions.size()!=2 ||
+                project.numbering.at(mainNumbering).raw.storageVersion!="9.52" ||
+                !project.numbering.at(mainNumbering).series.empty() ||
+                project.numbering.at(libraryNumbering).raw.storageVersion!="9.52" ||
+                !project.numbering.at(libraryNumbering).series.empty())
+                throw std::runtime_error("public Project2 empty DB2 companions changed");
+            const auto hasAssociation=[&](const auto& source,const auto& target,const std::string& reason) {
+                return std::any_of(project.associations.begin(),project.associations.end(),[&](const auto& item) {
+                    return item.source==source && item.target==target && item.reason==reason;
+                });
+            };
+            if (!hasAssociation(main,library,"model-local component library") ||
+                !hasAssociation(main,mainNumbering,"matching DB1/DB2 basename and no conflicting database GUID") ||
+                !hasAssociation(library,libraryNumbering,"component DB1/DB2 pair; numbering fields remain raw"))
+                throw std::runtime_error("public Project2 DB1/DB2 file associations changed");
+            std::cout<<"main_parts=2014 library_parts=498 library_component_parts=14 component_part_names=CUTPART:12,PLATE:2 "
+                     <<"library_parameters=3627 library_custom=325 db2_series=0 associations=3 library_unhandled_parts=0\n";
+            return 0;
+        }
+        else if (mode=="project_abri_vccf25_evidence")
+        {
+            tekla::Project project;
+            tekla::ProjectOptions options;
+            options.mainDatabase="Abri-Moto-VCCF25.db1";
+            if (!tekla::readProject(path,project,error,options)) throw std::runtime_error(error);
+            const auto root=std::filesystem::absolute(path).lexically_normal();
+            const auto main=root/"Abri-Moto-VCCF25.db1";
+            const auto db2=root/"Abri-Moto-VCCF25.db2";
+            const auto secondaryDb1=root/"Nouveau modèle.db1";
+            const auto legacyDb2=root/"Nouveau modèle.db2";
+            const auto pairing=std::any_of(project.associations.begin(),project.associations.end(),[&](const auto& a) {
+                return a.source==main && a.target==db2 && a.reason=="matching DB1/DB2 basename and no conflicting database GUID";
+            });
+            const auto secondaryPairing=std::any_of(project.associations.begin(),project.associations.end(),[&](const auto& a) {
+                return a.source==secondaryDb1 && a.target==legacyDb2 &&
+                    a.reason=="secondary DB1/DB2 basename and database GUID match";
+            });
+            std::size_t failed=0, drawings=0, metadata=0, rawDrawings=0, parsedDrawings=0;
+            std::size_t drawingProjectGuidMatches=0;
+            std::size_t metadataSheetMatches=0, strings=0, properties=0, links=0, sheets=0;
+            bool sawLegacy1252Name=false;
+            for (const auto& file:project.files)
+            {
+                failed+=file.level==tekla::ReadLevel::Failed;
+                drawings+=file.role==tekla::FileRole::Drawing;
+                metadata+=file.role==tekla::FileRole::DrawingMetadata;
+                if(file.role==tekla::FileRole::Drawing && file.level==tekla::ReadLevel::PartialSemantic)
+                    ++parsedDrawings;
+                if(file.role==tekla::FileRole::Drawing && file.level==tekla::ReadLevel::Raw)
+                {
+                    ++rawDrawings;
+                    if(project.rawCompanions.at(file.path).storageVersion!="9.50")
+                        throw std::runtime_error("public 9.50 DG raw companion version changed");
+                }
+            }
+            for(const auto& entry:project.drawingMetadata)
+                sawLegacy1252Name|=entry.second.name=="Plan composé" &&
+                    std::any_of(entry.second.diagnostics.begin(),entry.second.diagnostics.end(),[](const auto& d) {
+                        return d.find("Windows-1252 drawing metadata")!=std::string::npos;
+                    });
+            for(const auto& entry:project.drawings)
+            {
+                const auto& drawing=entry.second;
+                strings+=drawing.strings.size(); properties+=drawing.properties.size();
+                links+=drawing.propertyLinks.size(); sheets+=drawing.sheets.size();
+                drawingProjectGuidMatches+=!drawing.projectGuid.empty() && drawing.projectGuid==project.model.databaseGuid;
+                if(drawing.subject)throw std::runtime_error("9.50 drawing subject semantics were not independently verified");
+            }
+            for(const auto& entry:project.drawingMetadata)
+            {
+                auto drawingPath=entry.first.parent_path()/entry.first.stem();
+                const auto drawing=project.drawings.find(drawingPath);
+                if(drawing==project.drawings.end() || drawing->second.sheets.size()!=1 ||
+                   !entry.second.width || !entry.second.height)continue;
+                const auto& dg=drawing->second;
+                if(*entry.second.width==dg.sheets[0].width && *entry.second.height==dg.sheets[0].height)
+                    ++metadataSheetMatches;
+            }
+            if(project.model.databasePath!=main || project.model.storageVersion!="9.50" ||
+               project.model.parts.size()!=177 || !project.model.actualPartIds.empty() ||
+               project.model.unhandledPartIds.size()!=177 || project.model.assemblies.size()!=106 ||
+               project.model.boltGroups.size()!=109 || project.model.components.size()!=22 ||
+               project.model.profiles.size()!=6006 || project.model.properties.size()!=715 ||
+               project.numbering.size()!=3 || !project.numbering.count(legacyDb2) ||
+               project.numbering.at(legacyDb2).raw.storageVersion!="8.44" ||
+               !project.numbering.at(legacyDb2).series.empty() || !pairing || !secondaryPairing ||
+               project.numbering.at(db2).series.size()!=9 || drawings!=9 || parsedDrawings!=9 || rawDrawings!=0 ||
+               project.drawings.size()!=9 || strings!=365 || properties!=35 || links!=36 || sheets!=9 ||
+               metadataSheetMatches!=6 || !project.drawingSubjectAssociations.empty() ||
+               !project.drawingMetadataAssociations.empty() || drawingProjectGuidMatches!=0 ||
+               metadata!=6 || project.drawingMetadata.size()!=6 || failed!=0 ||
+               !sawLegacy1252Name || !project.environment || project.optionsDatabases.size()!=2 ||
+               project.profileCatalogAssociations.size()!=42)
+                throw std::runtime_error("public Tekla 2023 SP4 project associations or partial read statuses changed");
+            std::cout<<"version="<<project.model.storageVersion<<" actual_parts="<<project.model.actualPartIds.size()
+                     <<" part_records="<<project.model.parts.size()<<" assemblies="<<project.model.assemblies.size()
+                     <<" bolts="<<project.model.boltGroups.size()<<" components="<<project.model.components.size()
+                     <<" db2="<<project.numbering.size()<<" empty_844=1 secondary_pair=1 raw="<<project.rawCompanions.size()
+                     <<" drawings="<<drawings<<" parsed_drawings="<<parsedDrawings<<" raw_drawings="<<rawDrawings<<" metadata="<<metadata
+                     <<" drawing_strings="<<strings<<" drawing_properties="<<properties<<" property_links="<<links
+                     <<" sheets="<<sheets<<" metadata_sheet_matches="<<metadataSheetMatches
+                     <<" dg_project_guid_matches="<<drawingProjectGuidMatches
+                     <<" metadata_links="<<project.drawingMetadataAssociations.size()
+                     <<" model_guid="<<project.model.databaseGuid
+                     <<" parsed_metadata="<<project.drawingMetadata.size()<<" failed="<<failed
+                     <<" profiles="<<project.profileCatalogAssociations.size()
+                     <<" environment="<<bool(project.environment)<<" options="<<project.optionsDatabases.size()<<'\n';
+            return 0;
+        }
+        else if (mode=="numbering_844_evidence")
+        {
+            tekla::NumberingDatabase numbering;
+            if(!tekla::parseNumberingDatabase(path,numbering,error))throw std::runtime_error(error);
+            auto modelPath=path;modelPath.replace_extension(".db1");
+            tekla::db1::Model model;
+            if(!tekla::db1::parseModelFile(modelPath,model,error))throw std::runtime_error(error);
+            if(numbering.raw.storageVersion!="8.44" || numbering.raw.tables.size()!=10 ||
+               !numbering.series.empty() || numbering.raw.databaseGuid.empty() ||
+               model.storageVersion!="8.44" || model.databaseGuid!=numbering.raw.databaseGuid ||
+               !model.parts.empty() || model.profiles.size()!=6006 || model.properties.size()!=22)
+                throw std::runtime_error("public 8.44 empty DB2/main DB1 identity pair changed");
+            std::cout<<"version=8.44 tables=10 series=0 guid="<<numbering.raw.databaseGuid
+                     <<" model_version=8.44 model_parts=0 profiles=6006 properties=22 association=database_guid\n";
+            return 0;
+        }
+        else if (mode=="profile_resource_evidence")
+        {
+            tekla::Project project;
+            if(!tekla::readProject(path,project,error))throw std::runtime_error(error);
+            const auto root=std::filesystem::absolute(path).lexically_normal();
+            const auto catalog=root/"profdb.bin";
+            tekla::db1::ProfileCatalog parsedCatalog;
+            if(!tekla::db1::parseProfileCatalog(catalog,parsedCatalog,error))throw std::runtime_error(error);
+            const auto catalogFile=std::find_if(project.files.begin(),project.files.end(),[&](const auto& file){return file.path==catalog;});
+            if(catalogFile==project.files.end() || catalogFile->role!=tekla::FileRole::Catalog ||
+               catalogFile->level!=tekla::ReadLevel::Semantic)
+                throw std::runtime_error("profile catalog was not read as a semantic project resource");
+            std::size_t mainLinks=0,libraryLinks=0;
+            std::set<std::pair<std::filesystem::path,std::uint32_t>> linkedObjects;
+            std::set<std::pair<std::filesystem::path,std::uint32_t>> expectedObjects;
+            std::set<std::string> unmatchedProfileNames;
+            const std::set<std::string> ambiguousProfileNames(parsedCatalog.ambiguousProfileNames.begin(),
+                                                               parsedCatalog.ambiguousProfileNames.end());
+            const auto inspectModel=[&](const tekla::db1::Model& model) {
+                for(const auto& entry:model.parts)
+                {
+                    const auto& name=entry.second.profile;
+                    if(name.empty())continue;
+                    if(parsedCatalog.profiles.count(name) && !ambiguousProfileNames.count(name))
+                        expectedObjects.emplace(model.databasePath,entry.first);
+                    else unmatchedProfileNames.insert(name);
+                }
+            };
+            inspectModel(project.model);
+            if(project.componentLibrary)inspectModel(*project.componentLibrary);
+            for(const auto& association:project.profileCatalogAssociations)
+            {
+                if(association.catalog!=catalog || !linkedObjects.emplace(association.database,association.objectId).second)
+                    throw std::runtime_error("profile resource association has an unexpected source or duplicate object");
+                const tekla::db1::Model* source=nullptr;
+                if(association.database==project.model.databasePath)source=&project.model;
+                else if(project.componentLibrary && association.database==project.componentLibrary->databasePath)source=&*project.componentLibrary;
+                if(!source)throw std::runtime_error("profile resource association references an unknown database");
+                const auto part=source->parts.find(association.objectId);
+                if(part==source->parts.end() || part->second.profile!=association.profileName || association.profileName.empty())
+                    throw std::runtime_error("profile resource association does not match its source object's exact profile name");
+                if(association.database==project.model.databasePath)++mainLinks;
+                else ++libraryLinks;
+            }
+            if(mainLinks==0 || libraryLinks==0 || linkedObjects!=expectedObjects)
+                throw std::runtime_error("profile catalog exact-name matching omitted a source object or created a false association");
+            std::cout<<"profile_catalog=profdb.bin main_links="<<mainLinks<<" xslib_links="<<libraryLinks
+                     <<" links="<<linkedObjects.size()<<" unmatched_names="<<unmatchedProfileNames.size()
+                     <<" all_exact_name_matches_linked=1\n";
+            return 0;
+        }
+        else if (mode=="profile_catalog")
+        {
+            tekla::db1::ProfileCatalog catalog;
+            if(!tekla::db1::parseProfileCatalog(path,catalog,error))throw std::runtime_error(error);
+            std::cout<<"version="<<catalog.version<<" profiles="<<catalog.profiles.size()<<"\n";
+            return 0;
+        }
+        else if (mode=="part_material_resource_evidence")
+        {
+            tekla::Project project;
+            if(!tekla::readProject(path,project,error))throw std::runtime_error(error);
+            const auto root=std::filesystem::absolute(path).lexically_normal();
+            const auto catalog=root/"matdb.bin";
+            tekla::db1::MaterialCatalog parsedCatalog;
+            if(!tekla::db1::parseMaterialCatalog(catalog,parsedCatalog,error))throw std::runtime_error(error);
+            const auto catalogFile=std::find_if(project.files.begin(),project.files.end(),[&](const auto& file){return file.path==catalog;});
+            if(catalogFile==project.files.end() || catalogFile->role!=tekla::FileRole::Catalog ||
+               catalogFile->level!=tekla::ReadLevel::Semantic || !project.materials)
+                throw std::runtime_error("material catalog was not read as a semantic project resource");
+            std::map<std::string,std::vector<std::size_t>> materialIndices;
+            for(std::size_t i=0;i<parsedCatalog.materials.size();++i)
+                materialIndices[parsedCatalog.materials[i].name].push_back(i);
+            std::set<std::pair<std::filesystem::path,std::uint32_t>> expectedObjects,linkedObjects;
+            std::set<std::string> unresolvedNames;
+            std::size_t mainLinks=0,libraryLinks=0;
+            const auto inspectModel=[&](const tekla::db1::Model& model) {
+                for(const auto& entry:model.parts)
+                {
+                    const auto& name=entry.second.material;
+                    if(name.empty())continue;
+                    const auto found=materialIndices.find(name);
+                    if(found!=materialIndices.end() && found->second.size()==1)
+                        expectedObjects.emplace(model.databasePath,entry.first);
+                    else unresolvedNames.insert(name);
+                }
+            };
+            inspectModel(project.model);
+            if(project.componentLibrary)inspectModel(*project.componentLibrary);
+            for(const auto& association:project.partMaterialAssociations)
+            {
+                if(!linkedObjects.emplace(association.database,association.objectId).second ||
+                   association.materialIndex>=parsedCatalog.materials.size())
+                    throw std::runtime_error("part material association has a duplicate object or invalid catalog index");
+                const tekla::db1::Model* source=nullptr;
+                if(association.database==project.model.databasePath)source=&project.model;
+                else if(project.componentLibrary && association.database==project.componentLibrary->databasePath)source=&*project.componentLibrary;
+                if(!source)throw std::runtime_error("part material association references an unknown database");
+                const auto part=source->parts.find(association.objectId);
+                const auto& material=parsedCatalog.materials[association.materialIndex];
+                if(part==source->parts.end() || association.materialName.empty() ||
+                   part->second.material!=association.materialName || material.name!=association.materialName ||
+                   materialIndices.at(association.materialName).size()!=1)
+                    throw std::runtime_error("part material association does not match its source and unique catalog record");
+                if(association.database==project.model.databasePath)++mainLinks;
+                else ++libraryLinks;
+            }
+            if(mainLinks==0 || linkedObjects!=expectedObjects)
+                throw std::runtime_error("material catalog exact-name matching omitted a source object or created a false association");
+            std::cout<<"material_catalog=matdb.bin main_links="<<mainLinks<<" xslib_links="<<libraryLinks
+                     <<" links="<<linkedObjects.size()<<" unresolved_names="<<unresolvedNames.size()
+                     <<" all_unique_exact_name_matches_linked=1\n";
+            return 0;
+        }
+        else if (mode=="bolt_catalog_boundary_evidence")
+        {
+            tekla::Project project;
+            if(!tekla::readProject(path,project,error))throw std::runtime_error(error);
+            if(!project.bolts || !project.boltAssemblies)
+                throw std::runtime_error("bolt catalogs were not read as semantic project resources");
+            std::map<std::string,std::size_t> boltNames;
+            std::map<std::string,std::vector<std::size_t>> rawStandardEntries;
+            for(std::size_t index=0;index<project.bolts->bolts.size();++index)
+            {
+                const auto& entry=project.bolts->bolts[index];
+                ++boltNames[entry.name];
+                if(entry.rawPayload.size()!=116)throw std::runtime_error("screwdb raw payload width changed");
+                std::string rawStandard(entry.rawPayload.begin()+52,entry.rawPayload.begin()+80);
+                const auto terminator=rawStandard.find('\0');
+                if(terminator!=std::string::npos)rawStandard.resize(terminator);
+                while(!rawStandard.empty() && rawStandard.back()==' ')rawStandard.pop_back();
+                if(entry.standard!=rawStandard)throw std::runtime_error("screwdb standard does not match its raw field");
+                if(!rawStandard.empty())rawStandardEntries[rawStandard].push_back(index);
+            }
+            std::set<std::string> storedProfiles;
+            std::size_t exactProfileMatches=0,exactAssemblyComponentMatches=0;
+            for(const auto& bolt:project.model.individualBolts)
+            {
+                const auto part=project.model.parts.find(bolt.id);
+                if(part==project.model.parts.end())throw std::runtime_error("individual bolt has no source part");
+                if(!part->second.profile.empty())
+                {
+                    storedProfiles.insert(part->second.profile);
+                    const auto match=boltNames.find(part->second.profile);
+                    if(match!=boltNames.end() && match->second==1)++exactProfileMatches;
+                }
+            }
+            for(const auto& assembly:project.boltAssemblies->assemblies)
+                for(const auto& componentName:assembly.componentNames)
+                {
+                    if(componentName.empty())continue;
+                    const auto match=boltNames.find(componentName);
+                    if(match!=boltNames.end() && match->second==1)++exactAssemblyComponentMatches;
+                }
+            std::set<std::string> matchedStandards,unmatchedStandards;
+            std::size_t nonemptyComponentSlots=0;
+            for(const auto& assembly:project.boltAssemblies->assemblies)
+                for(const auto& standard:assembly.componentNames)
+                    if(!standard.empty())
+                    {
+                        ++nonemptyComponentSlots;
+                        if(rawStandardEntries.count(standard))matchedStandards.insert(standard);
+                        else unmatchedStandards.insert(standard);
+                    }
+            if(project.boltAssemblyStandardAssociations.size()!=215 || nonemptyComponentSlots!=250 ||
+               matchedStandards.size()!=33 || unmatchedStandards.size()!=26)
+                throw std::runtime_error("assdb standard audit counts changed: links="+
+                    std::to_string(project.boltAssemblyStandardAssociations.size())+" nonempty="+
+                    std::to_string(nonemptyComponentSlots)+" matched="+std::to_string(matchedStandards.size())+
+                    " unmatched="+std::to_string(unmatchedStandards.size()));
+            std::set<std::pair<std::size_t,std::size_t>> linkedSlots;
+            for(const auto& association:project.boltAssemblyStandardAssociations)
+            {
+                if(association.assemblyCatalog.filename()!="assdb.db" || association.boltCatalog.filename()!="screwdb.db" ||
+                   association.assemblyIndex>=project.boltAssemblies->assemblies.size() ||
+                   association.componentIndex>=7 || association.boltEntryIndices.empty() ||
+                   !linkedSlots.emplace(association.assemblyIndex,association.componentIndex).second)
+                    throw std::runtime_error("invalid or duplicate bolt assembly standard association");
+                const auto& source=project.boltAssemblies->assemblies[association.assemblyIndex];
+                if(source.componentNames[association.componentIndex]!=association.standard ||
+                   rawStandardEntries.at(association.standard)!=association.boltEntryIndices)
+                    throw std::runtime_error("bolt assembly association is not an exact complete standard match");
+            }
+            if(linkedSlots.size()!=215)throw std::runtime_error("bolt assembly standard associations omit a matching slot");
+            if(project.model.individualBolts.size()!=718 || storedProfiles.size()!=11 ||
+               project.bolts->bolts.size()!=2208 || project.boltAssemblies->assemblies.size()!=36 ||
+               exactProfileMatches || exactAssemblyComponentMatches)
+                throw std::runtime_error("PSDBIM direct bolt catalog name boundary changed");
+            std::cout<<"individual_bolts="<<project.model.individualBolts.size()
+                     <<" unique_stored_profiles="<<storedProfiles.size()<<" screw_catalog="<<project.bolts->bolts.size()
+                     <<" assemblies="<<project.boltAssemblies->assemblies.size()
+                     <<" exact_profile_to_screw="<<exactProfileMatches
+                     <<" exact_component_to_screw="<<exactAssemblyComponentMatches
+                     <<" standard_links="<<project.boltAssemblyStandardAssociations.size()
+                     <<" matched_standards="<<matchedStandards.size()<<" unmatched_standards="<<unmatchedStandards.size()<<"\n";
+            return 0;
+        }
+        else if (mode=="xslib_874_project_raw_evidence")
+        {
+            tekla::Project project;tekla::ProjectOptions options;options.readNumbering=false;
+            if(!tekla::readProject(path,project,error,options))throw std::runtime_error(error);
+            const auto file=std::find_if(project.files.begin(),project.files.end(),[](const auto& item) {
+                return item.role==tekla::FileRole::ComponentLibrary;
+            });
+            if(project.model.storageVersion!="8.74" || project.componentLibrary || file==project.files.end() ||
+               file->level!=tekla::ReadLevel::Raw)throw std::runtime_error("8.74 xslib fallback status changed");
+            const auto raw=project.rawCompanions.find(file->path);
+            if(raw==project.rawCompanions.end() || raw->second.kind!=tekla::db1::DatabaseKind::ComponentLibrary ||
+               raw->second.tables.size()!=271)throw std::runtime_error("8.74 xslib raw tables unavailable");
+            std::size_t records=0,opaque=0;
+            for(const auto& table:raw->second.tables){records+=table.records.size();opaque+=!table.opaqueSection.empty();}
+            if(records!=1 || opaque!=1)
+                throw std::runtime_error("8.74 xslib raw content or association boundary changed");
+            std::cout<<"main_version=8.74 xslib_level=raw tables="<<raw->second.tables.size()
+                     <<" records="<<records<<" opaque_sections="<<opaque
+                     <<" component_semantics=unavailable object_links=not_inferred\n";
+            return 0;
+        }
+        else if (mode=="project_empty_numbering")
+        {
+            tekla::Project project;
+            if(!tekla::readProject(path,project,error)) { std::cerr<<error<<'\n'; return 1; }
+            const auto version=project.model.storageVersion;
+            const auto expected=version=="8.30"?std::size_t{1}:version=="8.74"?std::size_t{2}:std::size_t{0};
+            if(!expected)throw std::runtime_error("unexpected project version for empty DB2 association audit");
+            std::size_t numberingFiles=0,partialFiles=0,failedFiles=0,series=0;
+            for(const auto& file:project.files)
+            {
+                if(file.role==tekla::FileRole::Numbering)
+                {
+                    ++numberingFiles;
+                    partialFiles+=file.level==tekla::ReadLevel::PartialSemantic;
+                    failedFiles+=file.level==tekla::ReadLevel::Failed;
+                }
+            }
+            for(const auto& database:project.numbering)
+                for(const auto& item:database.second.series)++series;
+            const auto paired=std::count_if(project.associations.begin(),project.associations.end(),[&](const auto& association) {
+                return association.source==project.model.databasePath &&
+                    association.target.extension()==".db2" &&
+                    association.target.stem()==project.model.databasePath.stem();
+            });
+            if(numberingFiles!=expected || project.numbering.size()!=expected || partialFiles!=expected ||
+               failedFiles!=0 || series!=0 || paired!=1)
+                throw std::runtime_error("empty DB2 project integration mismatch: files="+std::to_string(numberingFiles)+
+                    " parsed="+std::to_string(project.numbering.size())+" partial="+std::to_string(partialFiles)+
+                    " failed="+std::to_string(failedFiles)+" series="+std::to_string(series)+
+                    " main_pairs="+std::to_string(paired));
+            std::cout<<"version="<<version<<" numbering_files="<<numberingFiles
+                     <<" semantic_empty="<<project.numbering.size()<<" main_pairs="<<paired<<" series="<<series<<'\n';
+        }
         else if (mode=="project" || mode=="related_evidence")
         {
             tekla::Project project;
@@ -513,7 +1177,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
             tekla::db1::Model model;
             if (!tekla::db1::parseModelFile(path.parent_path()/"PSDBIM__EXCEL-1246A-BLDG-B"/"EXCEL-1246A-BLDG-B.db1",model,error))
                 throw std::runtime_error(error);
-            std::size_t files=0,subjects=0,matches=0,unresolved=0;
+            std::size_t files=0,subjects=0,partMatches=0,nonPartIdentityMatches=0,unmatchedIdentityReferences=0;
+            std::map<std::uint32_t,std::size_t> nonPartIdentityTypes;
             for (const auto& file:std::filesystem::directory_iterator(path))
             {
                 if (file.path().extension()!=".dg") continue;
@@ -530,13 +1195,80 @@ int run(const std::string& mode, const std::filesystem::path& path)
                     if (!found) throw std::runtime_error("legacy subject ID/type disagrees with accompanying DB1");
                     ++subjects;
                 }
-                for (const auto& ref:d.modelReferences) (model.parts.count(ref.modelObjectId)?matches:unresolved)++;
+                for (const auto& ref:d.modelReferences)
+                {
+                    if(model.parts.count(ref.modelObjectId))++partMatches;
+                    else if(const auto identity=model.identities.find(ref.modelObjectId);identity!=model.identities.end())
+                    {
+                        const bool assembly=identity->second.type==15 &&
+                            std::any_of(model.assemblies.begin(),model.assemblies.end(),[&](const auto& item){return item.id==ref.modelObjectId;});
+                        if(assembly){++nonPartIdentityMatches;++nonPartIdentityTypes[identity->second.type];}
+                        else ++unmatchedIdentityReferences;
+                    }
+                    else ++unmatchedIdentityReferences;
+                }
             }
             // Cross-file ID/type evidence, NOT independent geometric truth or
             // permission to associate an arbitrary database with these drawings.
-            if (files!=293 || subjects!=59 || matches!=1361 || unresolved!=35)
+            if (files!=293 || subjects!=59 || partMatches!=1361 || nonPartIdentityMatches!=35 || unmatchedIdentityReferences)
                 throw std::runtime_error("legacy drawing cross-file evidence changed");
-            std::cout<<"files="<<files<<" subject_id_type_matches="<<subjects<<" numeric_reference_matches="<<matches<<" unresolved_numeric_references="<<unresolved<<'\n';
+            const auto db1Path=path.parent_path()/"PSDBIM__EXCEL-1246A-BLDG-B"/"EXCEL-1246A-BLDG-B.db1";
+            const auto mismatchedDb1=path.parent_path()/"btscm-pechelire"/"pechelirejulV1.db1";
+            TemporaryTree scratch;
+            const auto projectRoot=scratch.path/"legacy-project";
+            const auto drawingDirectory=projectRoot/"drawings";
+            std::filesystem::create_directories(drawingDirectory);
+            const auto stagedModel=projectRoot/db1Path.filename();
+            std::filesystem::copy_file(db1Path,stagedModel);
+            const auto stagedMismatch=projectRoot/"mismatched.db1";
+            std::filesystem::copy_file(mismatchedDb1,stagedMismatch);
+            for(const auto& file:std::filesystem::directory_iterator(path))
+                if(file.path().extension()==".dg")std::filesystem::copy_file(file.path(),drawingDirectory/file.path().filename());
+            tekla::Project project;tekla::ProjectOptions projectOptions;projectOptions.mainDatabase=stagedModel;
+            if(!tekla::readProject(projectRoot,project,error,projectOptions))throw std::runtime_error(error);
+            if(project.drawings.size()!=293 || !project.drawingSubjectAssociations.empty() ||
+               !project.drawingModelAssociations.empty())
+                throw std::runtime_error("legacy drawing numeric IDs were associated without explicit trust");
+            projectOptions.trustLegacyDrawingObjectIds=true;
+            if(!tekla::readProject(projectRoot,project,error,projectOptions))throw std::runtime_error(error);
+            std::size_t explicitSubjects=0,explicitReferences=0,explicitPartReferences=0,explicitAssemblyReferences=0,explicitFiles=0;
+            for(const auto& link:project.drawingSubjectAssociations)
+            {
+                if(link.pairingEvidence!=tekla::DrawingPairEvidence::ExplicitLegacyNumericScope ||
+                   project.model.identities.at(link.modelObjectId).guid!=link.modelGuid)
+                    throw std::runtime_error("legacy drawing subject evidence was not retained");
+                ++explicitSubjects;
+            }
+            for(const auto& link:project.drawingModelAssociations)
+            {
+                if(link.pairingEvidence!=tekla::DrawingPairEvidence::ExplicitLegacyNumericScope ||
+                   project.model.identities.at(link.modelObjectId).guid!=link.modelGuid)
+                    throw std::runtime_error("legacy drawing reference evidence was not retained");
+                if(project.model.parts.count(link.modelObjectId))++explicitPartReferences;
+                else if(std::any_of(project.model.assemblies.begin(),project.model.assemblies.end(),
+                    [&](const auto& item){return item.id==link.modelObjectId;}))++explicitAssemblyReferences;
+                else throw std::runtime_error("legacy drawing reference linked to an unclassified identity");
+                ++explicitReferences;
+            }
+            for(const auto& association:project.associations)
+                if(association.source==stagedModel && association.reason.find("caller explicitly scopes GUID-less legacy drawing numeric IDs to this same-version model")!=std::string::npos)
+                    ++explicitFiles;
+            if(explicitSubjects!=59 || explicitReferences!=2155 || explicitPartReferences!=2120 ||
+               explicitAssemblyReferences!=35 || explicitFiles!=293)
+                throw std::runtime_error("explicit legacy drawing project associations changed: subjects="+
+                    std::to_string(explicitSubjects)+" references="+std::to_string(explicitReferences)+
+                    " files="+std::to_string(explicitFiles));
+
+            // Trust never overrides a storage-version boundary.
+            projectOptions.mainDatabase=stagedMismatch;
+            if(!tekla::readProject(projectRoot,project,error,projectOptions))throw std::runtime_error(error);
+            if(!project.drawingSubjectAssociations.empty() || !project.drawingModelAssociations.empty())
+                throw std::runtime_error("legacy drawing option paired across storage versions");
+            std::cout<<"files="<<files<<" subject_id_type_matches="<<subjects<<" part_reference_matches="<<partMatches
+                <<" nonpart_identity_reference_matches="<<nonPartIdentityMatches<<" unmatched_identity_references="<<unmatchedIdentityReferences<<" types=";
+            bool firstType=true;for(const auto& item:nonPartIdentityTypes){if(!firstType)std::cout<<',';std::cout<<item.first<<':'<<item.second;firstType=false;}
+            std::cout<<" explicit_subject_links="<<explicitSubjects<<" explicit_reference_links="<<explicitReferences
+                     <<" explicit_file_links="<<explicitFiles<<'\n';
         }
         else if (mode=="raw")
         {
@@ -559,6 +1291,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                 if(rebuilt!=raw.decompressedFileImage)throw std::runtime_error("7.30 drawing reconstruction differs from file");
             }
             if (raw.kind==tekla::db1::DatabaseKind::Analysis ||
+                (raw.kind==tekla::db1::DatabaseKind::Drawing && raw.storageVersion=="7.64") ||
                 (raw.kind==tekla::db1::DatabaseKind::Drawing && (raw.storageVersion=="7.82" || raw.storageVersion=="8.44" || raw.storageVersion=="9.08")))
             {
                 auto rebuilt=raw.preamble;
@@ -569,7 +1302,8 @@ int run(const std::string& mode, const std::filesystem::path& path)
                     for (auto f:t.fieldDescriptors) word(f);
                     for (const auto& r:t.records)
                     {
-                        const auto metadataBytes=raw.kind==tekla::db1::DatabaseKind::Analysis ? 8 :
+                        const auto metadataBytes=(raw.kind==tekla::db1::DatabaseKind::Analysis ||
+                            (raw.kind==tekla::db1::DatabaseKind::Drawing && raw.storageVersion=="7.64")) ? 8 :
                             (raw.storageVersion!="7.82"?24+16*std::count(t.fieldDescriptors.begin(),t.fieldDescriptors.end(),1U):40);
                         if (r.payload.size()!=t.payloadSize || r.allocatorMetadata.size()!=static_cast<std::size_t>(metadataBytes)) throw std::runtime_error("raw record framing lost");
                         rebuilt.push_back(r.allocationTag); rebuilt.insert(rebuilt.end(),r.payload.begin(),r.payload.end());
@@ -600,6 +1334,45 @@ int run(const std::string& mode, const std::filesystem::path& path)
             std::cout<<"version="<<numbering.raw.storageVersion<<" tables="<<numbering.raw.tables.size()
                      <<" series="<<numbering.series.size()<<" guid="<<numbering.raw.databaseGuid
                      <<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
+        }
+        else if (mode=="clb_public_evidence")
+        {
+            tekla::db1::ClbDocument document;
+            if (!tekla::db1::parseClbDocument(path, document, error))
+                throw std::runtime_error(error);
+            if (document.libraryId != "PEIKKO" || document.statements.size() != 2 ||
+                document.sections.size() != 1 || !document.includes.empty() ||
+                !document.diagnostics.empty())
+                throw std::runtime_error("public PEIKKO CLB document structure changed");
+            const auto& section = document.sections.front();
+            if (section.name != "DELTA_EXT" || section.baseAttributes.size() != 9 ||
+                section.expressions.size() != 18 || section.geometries.size() != 1)
+                throw std::runtime_error("public PEIKKO CLB section contents changed");
+            const auto findValue = [](const auto& values, const std::string& name) -> const auto& {
+                const auto found = std::find_if(values.begin(), values.end(), [&](const auto& item) {
+                    return item.name == name;
+                });
+                if (found == values.end())
+                    throw std::runtime_error("missing public PEIKKO CLB value " + name);
+                return *found;
+            };
+            if (findValue(section.baseAttributes, "b2").defaultValue != "280" ||
+                findValue(section.baseAttributes, "h").type != "dimension" ||
+                findValue(section.expressions, "y4").formula !=
+                    "h/2-8.0+(d3*bb.left)/sqrt((h-8.0)*(h-8.0)+bb.left*bb.left)")
+                throw std::runtime_error("public PEIKKO CLB dimensions/formula changed");
+            const auto& geometry = section.geometries.front();
+            if (geometry.name != "default" || geometry.faces.size() != 1 ||
+                geometry.faces.front().index != std::optional<std::uint32_t>{0} ||
+                geometry.faces.front().points.size() != 14)
+                throw std::runtime_error("public PEIKKO CLB face geometry changed");
+            const auto& first = geometry.faces.front().points.front();
+            const auto& last = geometry.faces.front().points.back();
+            if (first.stationIndex != std::optional<std::uint32_t>{0} ||
+                first.yReference != "y1" || first.zReference != "zo12" ||
+                last.yReference != "y1" || last.zReference != "zo1")
+                throw std::runtime_error("public PEIKKO CLB point references changed");
+            std::cout << "library=PEIKKO sections=1 base=9 expressions=18 geometry=1 faces=1 points=14 diagnostics=0\n";
         }
         else if (mode=="environment" || mode=="options")
         {
@@ -654,7 +1427,76 @@ int run(const std::string& mode, const std::filesystem::path& path)
         {
             tekla::Drawing drawing;
             if (!tekla::parseDrawing(path,drawing,error)) { std::cerr<<error<<'\n'; return 1; }
-            const bool old=drawing.raw.storageVersion=="7.82" || drawing.raw.storageVersion=="7.30";
+            const auto readU32=[](const std::vector<std::uint8_t>& bytes,std::size_t offset) {
+                std::uint32_t value=0; std::memcpy(&value,bytes.data()+offset,sizeof(value)); return value;
+            };
+            std::map<std::pair<std::uint32_t,std::uint32_t>,std::vector<std::uint64_t>> expectedIndexTargets;
+            for (const auto& targetTable:drawing.raw.tables)
+                if (targetTable.ordinal!=0)
+                    for (const auto& targetRecord:targetTable.records)
+                        if (targetRecord.payload.size()>=8 &&
+                            readU32(targetRecord.payload,0)==targetTable.ordinal)
+                            expectedIndexTargets[{targetTable.ordinal,readU32(targetRecord.payload,4)}].push_back(targetRecord.fileOffset);
+            const auto indexTable=std::find_if(drawing.raw.tables.begin(),drawing.raw.tables.end(),
+                [](const auto& item){return item.ordinal==304;});
+            if (indexTable==drawing.raw.tables.end() || drawing.recordAssociationIndex.size()!=indexTable->records.size())
+                throw std::runtime_error("type-304 index projection count differs from raw rows");
+            for (std::size_t i=0;i<indexTable->records.size();++i)
+            {
+                const auto& row=indexTable->records[i].payload;
+                if (row.size()!=24) throw std::runtime_error("invalid type-304 index row in corpus");
+                const auto& entry=drawing.recordAssociationIndex[i];
+                const auto found=expectedIndexTargets.find({readU32(row,0),readU32(row,4)});
+                const std::vector<std::uint64_t> expected=found==expectedIndexTargets.end()
+                    ? std::vector<std::uint64_t>{} : found->second;
+                if (entry.recordTypeCode!=readU32(row,0) || entry.recordId!=readU32(row,4) ||
+                    entry.candidateTargetRecordOffsets!=expected)
+                    throw std::runtime_error("type-304 target row candidates differ from physical table records");
+            }
+            const auto lineTable=std::find_if(drawing.raw.tables.begin(),drawing.raw.tables.end(),
+                [](const auto& item){return item.ordinal==311;});
+            if(lineTable==drawing.raw.tables.end() || lineTable->records.size()!=drawing.lineSegments.size())
+                throw std::runtime_error("type-311 line segment count differs from raw rows");
+            for(std::size_t i=0;i<lineTable->records.size();++i)
+            {
+                const auto& row=lineTable->records[i]; const auto& line=drawing.lineSegments[i];
+                std::uint32_t id=0; std::memcpy(&id,row.payload.data()+4,sizeof(id));
+                std::array<double,4> endpoints{};
+                for(std::size_t point=0;point<endpoints.size();++point)
+                    std::memcpy(&endpoints[point],row.payload.data()+24+point*8,sizeof(double));
+                if(line.recordId!=id || line.rawRecordOffset!=row.fileOffset ||
+                   line.startPoint!=std::array<double,2>{endpoints[0],endpoints[1]} ||
+                   line.endPoint!=std::array<double,2>{endpoints[2],endpoints[3]})
+                    throw std::runtime_error("type-311 line segment fields differ from raw row");
+            }
+            if(drawing.raw.storageVersion=="9.54")
+            {
+                const auto linkTable=std::find_if(drawing.raw.tables.begin(),drawing.raw.tables.end(),
+                    [](const auto& item){return item.ordinal==281;});
+                if(linkTable==drawing.raw.tables.end()) throw std::runtime_error("missing 9.54 type-281 table");
+                std::size_t targetCount=0;
+                for(const auto& row:linkTable->records)
+                {
+                    if(row.payload.size()!=32) throw std::runtime_error("invalid 9.54 type-281 row in corpus");
+                    std::uint32_t type=0,target=0;
+                    std::memcpy(&type,row.payload.data()+4,sizeof(type));
+                    if(type!=311) continue;
+                    std::memcpy(&target,row.payload.data()+28,sizeof(target));
+                    ++targetCount;
+                    const auto reference=std::find_if(drawing.type281LineReferences.begin(),drawing.type281LineReferences.end(),
+                        [&](const auto& item){return item.rawRecordOffset==row.fileOffset;});
+                    const auto candidate=expectedIndexTargets.find({311,target});
+                    const std::vector<std::uint64_t> expected=candidate==expectedIndexTargets.end()
+                        ? std::vector<std::uint64_t>{} : candidate->second;
+                    if(reference==drawing.type281LineReferences.end() || reference->lineRecordId!=target ||
+                       reference->candidateLineRecordOffsets!=expected)
+                        throw std::runtime_error("9.54 type-281 line target offsets differ from matching type-311 rows");
+                }
+                if(targetCount!=drawing.type281LineReferences.size())
+                    throw std::runtime_error("9.54 type-281 line reference count differs from raw rows");
+            }
+            const bool olderNumeric=drawing.raw.storageVersion=="7.82" || drawing.raw.storageVersion=="7.30" || drawing.raw.storageVersion=="7.64";
+            const bool old=olderNumeric;
             Fingerprint hash;
             std::size_t incomplete=0;
             for (const auto& entry:drawing.strings)
@@ -682,6 +1524,24 @@ int run(const std::string& mode, const std::filesystem::path& path)
                     for (auto x:{v->minX,v->maxX,v->minY,v->maxY,v->depthNegative,v->depthPositive}) hash.real(x);
             }
             if (old) for (auto id:drawing.unhandledViewRecordIds) hash.number(id);
+            if (drawing.raw.storageVersion=="7.64")
+            {
+                for (const auto& entry:drawing.straightDimensions)
+                {
+                    const auto& d=entry.second; hash.number(d.recordId); hash.number(d.contextId);
+                    hash.number(d.dimensionSetId); hash.number(d.subtypeCode);
+                    for (auto x:d.startPoint) hash.real(x); for (auto x:d.endPoint) hash.real(x);
+                    for (auto x:d.upDirection) hash.real(x); hash.real(d.distance);
+                    hash.number(d.projectedLength.has_value()); if(d.projectedLength)hash.real(*d.projectedLength);
+                }
+                for (const auto& entry:drawing.straightDimensionSets)
+                {
+                    hash.number(entry.first); hash.number(entry.second.contextId);
+                    for(auto id:entry.second.dimensionIds)hash.number(id);
+                }
+                for(auto id:drawing.unhandledDimensionRecordIds)hash.number(id);
+                for(auto id:drawing.unhandledDimensionSetRecordIds)hash.number(id);
+            }
             std::cout<<"version="<<drawing.raw.storageVersion<<" tables="<<drawing.raw.tables.size()
                      <<" strings="<<drawing.strings.size()<<" properties="<<drawing.properties.size()
                      <<" links="<<drawing.propertyLinks.size()<<" sheets="<<drawing.sheets.size()
@@ -689,6 +1549,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                      <<" views="<<(old?drawing.viewsByRecordId.size():drawing.viewsByContext.size())<<" subject="<<bool(drawing.subject)
                      <<" guid="<<drawing.projectGuid<<" stored="<<drawing.storedFileName;
             if (old) std::cout<<" incomplete_text="<<incomplete<<" unhandled_views="<<drawing.unhandledViewRecordIds.size()<<" unique_contexts="<<drawing.viewsByContext.size();
+            if (drawing.raw.storageVersion=="7.64") std::cout<<" dimensions="<<drawing.straightDimensions.size()<<" dimension_sets="<<drawing.straightDimensionSets.size()<<" unhandled_dimensions="<<(drawing.unhandledDimensionRecordIds.size()+drawing.unhandledDimensionSetRecordIds.size());
             std::cout<<" fingerprint="<<std::hex<<hash.value<<std::dec<<'\n';
         }
         else return 2;

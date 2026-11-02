@@ -2,6 +2,7 @@
 #include <zlib.h>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <stdexcept>
 
 namespace
@@ -91,16 +92,97 @@ int main(int argc,char** argv)
             check(gzwrite(f,geometry.data(),unsigned(geometry.size()))==int(geometry.size()),"gzip fixture write");check(gzclose(f)==Z_OK,"gzip fixture close");
             check(tekla::db1::parseShapeGeometry(path,g,error),error);check(g.rawXml==geometry && g.storageId=="geom","gzip bytes/storage");
             tekla::db1::ShapeReadOptions opt;opt.maxDecodedBytes=geometry.size()-1;check(!tekla::db1::parseShapeGeometry(path,g,error,opt),"gzip limit ignored");
+            const auto readCompressed=[&]() {
+                std::ifstream in(path,std::ios::binary);
+                return std::string(std::istreambuf_iterator<char>(in),std::istreambuf_iterator<char>());
+            };
+            const auto reject=[&](const std::string& bytes,const char* message) {
+                save(path,bytes);g.points.push_back({9,9,9});error="stale";
+                check(!tekla::db1::parseShapeGeometry(path,g,error),message);
+                check(!error.empty() && g.points.empty() && g.rawXml.empty(),"invalid gzip retained partial shape output");
+            };
+            const auto valid=readCompressed();check(valid.size()>8,"gzip fixture unexpectedly short");
+            auto badCrc=valid;badCrc[badCrc.size()-8]^=1;reject(badCrc,"corrupt gzip CRC accepted");
+            auto truncated=valid;truncated.pop_back();reject(truncated,"truncated gzip stream accepted");
+            reject(valid+"garbage","trailing gzip garbage accepted");
+            save(path,valid);error.clear();
+            check(tekla::db1::parseShapeGeometry(path,g,error),error);check(g.rawXml==geometry,"valid gzip changed after rejected inputs");
         }
         else if(mode=="shapes_catalog")
         {
-            const auto root=folder/"valid";save(root/"Shapes/def.xml",definition);save(root/"ShapeGeometries/geom.xml",geometry);save(root/"unrelated.xml","<Other><!-- <ImportPart/> --></Other>");
+            const auto root=folder/"valid-guid-match";save(root/"Shapes/GUID.xml",definition);save(root/"ShapeGeometries/geom.xml",geometry);save(root/"unrelated.xml","<Other><!-- <ImportPart/> --></Other>");
             tekla::db1::ShapeCatalog catalog;check(tekla::db1::parseShapeCatalog(root,catalog,error),error);
-            check(catalog.definitionsByGuid.size()==1 && catalog.geometriesByStorageId.size()==1 && catalog.diagnostics.empty(),"plain XML geometry not linked");
-            const auto dup=folder/"duplicates";save(dup/"a.xml",definition);save(dup/"b.xml",definition);save(dup/"c.xml",definition);
+            check(catalog.definitionsByGuid.size()==1 && catalog.geometriesByStorageId.size()==1 && catalog.diagnostics.empty(),
+                "plain XML geometry not linked defs="+std::to_string(catalog.definitionsByGuid.size())+
+                " geos="+std::to_string(catalog.geometriesByStorageId.size())+
+                " diagnostics="+(catalog.diagnostics.empty()?std::string{}:catalog.diagnostics.front()));
+            const auto mismatch=folder/"filename-mismatch";save(mismatch/"Shapes/wrong-name.xml",definition);
+            check(tekla::db1::parseShapeCatalog(mismatch,catalog,error),error);
+            check(catalog.definitionsByGuid.empty() && catalog.diagnostics.size()==1 && catalog.diagnostics.front().find("does not match its filename")!=std::string::npos,
+                "shape definition filename identity conflict was not reported");
+            const auto dup=folder/"duplicates-guid-match";save(dup/"a/guid.xml",definition);save(dup/"b/guid.xml",definition);save(dup/"c/guid.xml",definition);
             save(dup/"one/geom.xml",geometry);save(dup/"two/geom.tez",geometry);
             check(tekla::db1::parseShapeCatalog(dup,catalog,error),error);
             check(catalog.definitionsByGuid.empty() && catalog.geometriesByStorageId.empty() && catalog.diagnostics.size()==3,"ambiguous keys selected silently");
+        }
+        else if(mode=="rebar_catalog")
+        {
+            const auto path=folder/"RebarShapeCatalog.rscx";
+            const std::string xml="<?xml version='1.0'?><!--saved--><ShapeCatalog><Category Name='Straight'><Shape>1</Shape></Category><Category Name='One &amp; two'><Shape>2_1</Shape><Shape>2_2</Shape></Category><Shape>5_1</Shape><Shape>36_3</Shape></ShapeCatalog>";
+            save(path,xml);tekla::db1::RebarShapeCatalog catalog;error="stale";
+            check(tekla::db1::parseRebarShapeCatalog(path,catalog,error),error);
+            check(error.empty() && catalog.categories.size()==2 && catalog.categories[0].name=="Straight" &&
+                  catalog.categories[0].shapeIds==std::vector<std::string>{"1"} && catalog.categories[1].name=="One & two" &&
+                  catalog.categories[1].shapeIds==std::vector<std::string>({"2_1","2_2"}) &&
+                  catalog.uncategorizedShapeIds==std::vector<std::string>({"5_1","36_3"}) && catalog.rawXml==xml &&
+                  catalog.sourcePath==path,"rebar catalog order, entities, root entries, or raw retention");
+            for(const auto& invalid:std::vector<std::string>{
+                    "<Other/>","<ShapeCatalog><Category><Shape>1</Shape></Category></ShapeCatalog>",
+                    "<ShapeCatalog><Category Name='  '/></ShapeCatalog>","<ShapeCatalog><Shape> </Shape></ShapeCatalog>",
+                    "<ShapeCatalog><Category Name='x'><Other>1</Other></Category></ShapeCatalog>",
+                    "<ShapeCatalog><Unknown/></ShapeCatalog>","<ShapeCatalog><Shape><Id>1</Id></Shape></ShapeCatalog>"})
+            {
+                save(path,invalid);catalog.categories.push_back({"stale",{"stale"}});error.clear();
+                check(!tekla::db1::parseRebarShapeCatalog(path,catalog,error) && !error.empty() && catalog.categories.empty() &&
+                      catalog.uncategorizedShapeIds.empty() && catalog.rawXml.empty(),"invalid rebar catalog accepted or retained output");
+            }
+        }
+        else if(mode=="rebar_schedule_config")
+        {
+            const auto path=folder/"rebar_schedule_config.inp";
+            // Syntax examples published in Trimble's Tekla Structures documentation.
+            const std::string source=
+                "# example mappings\r\n"
+                "BEND_TYPE_5_1[1]=\"E\"\r\n"
+                "BEND_TYPE_5_1[2]=\"DIM_A=D1\"\r\n"
+                "BEND_TYPE_6_2[3]=\"DIM_B=D2*cos(A2*PI/180)\"\r\n"
+                "BEND_TYPE_4[1]=if (D1==D3) then (\"A\") else (\"B\") endif\r\n"
+                "UNKNOWN_OPTION=preserve me\r\n";
+            save(path,source);tekla::db1::RebarScheduleConfig config;error="stale";
+            check(tekla::db1::parseRebarScheduleConfig(path,config,error),error);
+            check(error.empty()&&config.entries.size()==4&&config.entries[0].internalBendingType=="5_1"&&
+                  config.entries[0].index==1&&config.entries[0].rawValue=="\"E\""&&
+                  config.entries[2].rawValue=="\"DIM_B=D2*cos(A2*PI/180)\""&&
+                  config.entries[3].rawValue=="if (D1==D3) then (\"A\") else (\"B\") endif"&&
+                  config.entries[3].lineNumber==5&&config.unparsedLines.size()==1&&
+                  config.unparsedLines[0].second=="UNKNOWN_OPTION=preserve me\r"&&config.rawText==source&&config.sourcePath==path,
+                  "schedule mapping order, expression text, line numbers, or raw retention: entries="+
+                  std::to_string(config.entries.size())+" type="+(config.entries.empty()?"":config.entries[0].internalBendingType)+
+                  " value="+(config.entries.empty()?"":config.entries[0].rawValue)+" line="+
+                  std::to_string(config.entries.size()<4?0:config.entries[3].lineNumber)+" unknown="+
+                  std::to_string(config.unparsedLines.size()));
+            const std::string bom=std::string("\xef\xbb\xbf",3)+"BEND_TYPE_1[1]=\"A\"\n";
+            save(path,bom);check(tekla::db1::parseRebarScheduleConfig(path,config,error)&&
+                config.entries.size()==1&&config.entries[0].rawValue=="\"A\""&&config.rawText==bom,
+                "UTF-8 BOM blocked schedule entry or raw retention");
+            for(const auto* invalid:{"BEND_TYPE_5_1[0]=x\n","BEND_TYPE_5_1[x]=x\n","BEND_TYPE_5_1[1] x\n",
+                                     "BEND_TYPE_5_1[1]=x\nBEND_TYPE_5_1[1]=y\n","BEND_TYPE_5_1[4294967296]=x\n",
+                                     "BEND_TYPE_5_1[1]=\n"})
+            {
+                save(path,invalid);config.entries.push_back({"stale",1,"stale",1});error.clear();
+                check(!tekla::db1::parseRebarScheduleConfig(path,config,error)&&!error.empty()&&
+                      config.entries.empty()&&config.rawText.empty(),"malformed schedule mapping accepted or retained output");
+            }
         }
         else throw std::runtime_error("unknown shape test");
         std::cout<<"PASS "<<mode<<'\n';return 0;

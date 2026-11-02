@@ -26,16 +26,23 @@ int main(int argc,char** argv)
             accept(wrap("<DrawingGuid> ABCDEFAB-0000-0000-0000-000000000001 </DrawingGuid><MainObjectGuid/>"
                 "<Author>A</Author><Mark>[M.92]</Mark><Name> STANDARD </Name><Title1>T1</Title1><Title2>T2</Title2><Title3>T3</Title3>"
                 "<Width>297</Width><Height>210.5</Height><DrawingType>1</DrawingType><IssueDate>0</IssueDate><CreateDate>1625531731</CreateDate>"
-                "<UpToDate>1</UpToDate><Lock>0</Lock><Flag>5</Flag><PartsNo>25</PartsNo><Revision>-1</Revision>"));
+                "<UpToDate>1</UpToDate><Lock>0</Lock><Flag>5</Flag><PartsNo>25</PartsNo><Revision>-1</Revision><AlwaysNecessary>7</AlwaysNecessary>"));
             check(value.drawingGuid=="abcdefab-0000-0000-0000-000000000001" && value.mainObjectGuid.empty() && value.author=="A" &&
                 value.mark=="[M.92]" && value.name=="STANDARD" && value.title1=="T1" && value.title2=="T2" && value.title3=="T3" &&
                 value.width==297 && value.height==210.5 && value.drawingType==1 && value.storedIntegers.at("CreateDate")==1625531731 &&
-                value.storedIntegers.at("Revision")==-1 && value.storedIntegers.at("Flag")==5,"metadata fields lost");
+                value.storedIntegers.at("Revision")==-1 && value.storedIntegers.at("Flag")==5 &&
+                value.storedIntegers.at("AlwaysNecessary")==7,"metadata fields lost");
             accept(wrap("<Name/>"));check(!value.width && !value.drawingType && value.storedIntegers.empty(),"absent value became zero");
         }
         else if(mode=="drawing_metadata_scope")
         {
             accept(wrap("<!--<Name>wrong</Name>--><Extension><Name>nested</Name></Extension><Name>direct</Name>"));check(value.name=="direct","wrong field scope");
+            accept(wrap("<Extra> A &amp; B </Extra><Extra a='v'>second</Extra><Extra>one<!--c-->two<![CDATA[&x;]]></Extra><Complex><Child>text</Child></Complex>"));
+            check(value.extensions.size()==4 && value.extensions[0].name=="Extra" && value.extensions[0].scalarText==" A & B " &&
+                !value.extensions[0].hasAttributes && value.extensions[1].name=="Extra" && value.extensions[1].scalarText=="second" &&
+                value.extensions[1].hasAttributes && value.extensions[2].name=="Extra" && value.extensions[2].scalarText=="onetwo&x;" &&
+                value.extensions[3].name=="Complex" && !value.extensions[3].scalarText,
+                "unknown metadata extensions lost order or content");
             accept(wrap("<Extension><Name>nested</Name></Extension>"));check(value.name.empty(),"nested fallback");
             reject(wrap("<Name>A</Name><Name>B</Name>"));reject(wrap("<Name><Nested/></Name>"));
             reject(wrap("<Name xmlns='other'>wrong</Name>"));reject("<DrawingVersionMetadata xmlns='other'/>");
@@ -53,10 +60,12 @@ int main(int argc,char** argv)
         {
             for(const char* text:{"","NaN","inf","-1","0","1,5","1e309","1junk"})reject(wrap(std::string("<Width>")+text+"</Width>"));
             for(const char* text:{"","1.2","1x","9223372036854775808","-9223372036854775809"})reject(wrap(std::string("<Flag>")+text+"</Flag>"));
+            for(const char* text:{"1.2","1x"})reject(wrap(std::string("<AlwaysNecessary>")+text+"</AlwaysNecessary>"));
             reject(wrap("<DrawingType>-1</DrawingType>"));reject(wrap("<DrawingType>4294967296</DrawingType>"));
             accept(wrap("<Flag>-9223372036854775808</Flag><Revision>9223372036854775807</Revision><Width>2.97e2</Width>"));
             check(value.width==297 && value.storedIntegers.at("Revision")==9223372036854775807LL,"numeric limits");
             reject(wrap("<Flag>0</Flag><Flag>1</Flag>"));
+            reject(wrap("<AlwaysNecessary>0</AlwaysNecessary><AlwaysNecessary>1</AlwaysNecessary>"));
         }
         else if(mode=="drawing_metadata_guid")
         {

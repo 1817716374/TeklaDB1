@@ -19,8 +19,9 @@ struct Fixture
     std::vector<unsigned> widths;
     std::vector<std::vector<unsigned>> fields;
     std::vector<std::vector<Bytes>> rows;
-    bool environment,legacy,extended;
-    Fixture(bool env,bool old=false,bool modern=true):environment(env),legacy(old),extended(modern)
+    bool environment,legacy,extended,legacyVersion2;
+    Fixture(bool env,bool old=false,bool modern=true,bool version2=false)
+        :environment(env),legacy(old),extended(modern),legacyVersion2(version2)
     {
         if (env)
         {
@@ -58,7 +59,7 @@ struct Fixture
     Bytes encode(unsigned tag=1)
     {
         Bytes b;
-        if (legacy) for (auto v:{1U,0U,0U,0U,1U,0xdbcec0bcU}) word(b,v);
+        if (legacy) for (auto v:{legacyVersion2?2U:1U,0U,0U,0U,1U,0xdbcec0bcU}) word(b,v);
         else
         {
             b={'D','B','V','@'}; const std::string name=environment?"Environment":"EnvModelOptions";
@@ -92,9 +93,25 @@ int main(int argc,char** argv)
                 check(tekla::parseEnvironmentDatabase(path,env,error,{true}),error);
                 check(error.empty() && env.raw.decompressedFileImage==b,"raw retention/error");
                 const auto& a=env.attributes.at(3);
-                check(a.name=="OBJECT_LOCKED" && std::get<std::int32_t>(*a.storedValue)==-1 && a.choices.at(0).integerValue==1,"attribute values");
+                check(a.name=="OBJECT_LOCKED" && std::get<std::int32_t>(*a.storedValue)==-1 &&
+                      a.choices.at(0).integerValue==1 && a.choices.at(0).allocationTag==tag,"attribute values/tags");
                 check(a.objectClassIds==std::vector<std::uint32_t>{1} && env.objectClasses.at(1).attributeIds==std::vector<std::uint32_t>{3},"class join");
             }
+            for (auto tag:{1U,4U,5U,6U,12U})
+            {
+                Fixture legacyV2(true,true,true,true); const auto bytes=legacyV2.encode(tag); save(path,bytes);
+                check(tekla::parseEnvironmentDatabase(path,env,error,{true}),error);
+                check(env.raw.storageVersion=="DBV-legacy-v2" && env.raw.tables.size()==15 &&
+                      env.attributes.at(3).name=="OBJECT_LOCKED" && env.objectClasses.at(1).attributeIds==std::vector<std::uint32_t>{3} &&
+                      env.attributes.at(3).choices.at(0).allocationTag==tag,"legacy DBV v2 environment semantics/tags");
+            }
+            Fixture legacyV2(true,true,true,true); const auto bytes=legacyV2.encode();
+            save(path,bytes);
+            check(!tekla::parseOptionsDatabase(path,options,error) && options.raw.tables.empty() && !error.empty(),
+                  "legacy DBV v2 environment signature accepted as options");
+            auto invalid=bytes; put<std::uint32_t>(invalid,0,3); save(path,invalid);
+            check(!tekla::parseEnvironmentDatabase(path,env,error) && env.raw.tables.empty() && !error.empty(),
+                  "unknown legacy DBV header version accepted");
         }
         else if (mode=="options_valid" || mode=="dbv_embedded_magic")
         {

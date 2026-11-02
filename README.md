@@ -8,24 +8,32 @@
 
 | 内容 | 接口与状态 |
 |---|---|
-| 主模型 DB1 | 7.64与7.82采用显式分支，U52 IFC/快照对照见[7.64证据](docs/DB1_764.zh-CN.md)；7.82表面处理及父构件/变量关联，见 [表面处理证据](docs/SURFACE_TREATMENT.zh-CN.md)；构件、坐标、GUID、属性、装配、组件、螺栓、焊缝、切割/布尔关系；现代独立位置记录与7.82定义内嵌位置块（轴向偏移及深度/平面字段），见 [位置证据](docs/PART_POSITION.zh-CN.md) |
-| xslib.db1 | 组件、参数与定义；7.82/现代布局的距离变量与公式引用图，通用变量归属索引；公式求解尚未实现 |
-| DB1 钢筋 | 现代kind47实体、定义、父构件、名称/类别/材质/尺寸、半径和已存数组，见[钢筋证据](docs/REINFORCEMENT.zh-CN.md)；另恢复编号前缀/起始号及类型限定的对象引用，见[钢筋编号](docs/REINFORCEMENT_NUMBERING.zh-CN.md)；分配编号、完整模式、保护层/钩和最终中心线未恢复 |
-| profdb / pgdb | 型材目录、固定截面、Sketch Solver 轮廓 |
-| matdb / screwdb / assdb | 材料、螺栓与螺栓组件目录 |
-| profitab / CLB | 规则与语句读取；不等于完整执行所有参数化生成器 |
-| Shapes XML / TEZ | 结构化读取Shape定义与Polymesh点、面、内环、边，支持XML几何及gzip输入；可选实体/类型字段、原文和歧义诊断，按storage ID关联；工程入口保留来源路径和资源优先级，抑制跨目录歧义，[证据与边界](docs/SHAPES_XML.zh-CN.md) |
-| DB2 | 新增[7.64编号及范围关联](docs/NUMBERING_764.zh-CN.md)，四系列/八计数和103个历史对象核对；显式确认配对后105条系列关联；新增[9.08编号日志与跨文件关联](docs/NUMBERING_908.zh-CN.md)，4,936个历史对象及三项计数独立核对；`parseNumberingDatabase`：完整顺序表、编号系列与零件/装配序列计数；7.30内联编号、7.82及现代DB1对象编号记录可关联系列，见[对象编号证据](docs/OBJECT_NUMBERING.zh-CN.md)；**比较快照、8.44对象分配与有效状态尚未恢复** |
+| 主模型 DB1 | 7.30、7.64与7.82采用显式分支；8.30（275节）与8.74（307节）加入固定布局的有限核心投影，类别/所有权/螺栓等未验证语义保留边界，见[相关格式证据](docs/RELATED_FORMATS.zh-CN.md#新增公开旧工程-db1-830--874-与早期-dbv-边界)；8.37采用279节有限投影，螺栓定义/组留原始，见[8.37证据](docs/DB1_837.zh-CN.md)；U52 IFC/快照对照见[7.64证据](docs/DB1_764.zh-CN.md)，7.82表面处理见[表面处理证据](docs/SURFACE_TREATMENT.zh-CN.md)；其他已支持语义含构件、坐标、GUID、属性、装配、组件、螺栓、焊缝、切割/布尔关系及位置，详见各版本证据 |
+| xslib.db1 | 7.82/现代布局的组件定义、参数、距离变量与公式引用图；8.37同包样本有限布局投影（247节，螺栓表留 raw，主库/xslib只确认文件配对），见[8.37证据](docs/DB1_837.zh-CN.md)；8.74 xslib 语义布局未支持，`readProject` 在该情形保留 raw 容器且不推测对象；EXCEL 7.82 和两份 9.52 组件库中的 type-39 记录在 owner 可核验时暴露为 `componentPartIds`，不计入独立零件/操作件；公式求解尚未实现 |
+| DB1 钢筋 | 现代kind47实体、定义、父构件、名称/类别/材质/尺寸、半径和已存数组，见[钢筋证据](docs/REINFORCEMENT.zh-CN.md)；另恢复编号前缀/起始号及类型限定的对象引用，并在已验证的现代同工程DB1/DB2文件中暴露一项未解释的原始字段精确相等，见[钢筋编号](docs/REINFORCEMENT_NUMBERING.zh-CN.md)；分配编号、完整模式、保护层/钩和最终中心线未恢复 |
+| profdb / pgdb | profdb明确支持版本9/10的完整10表签名；版本10由四份真实Tekla 2023目录回归，7.82真实工程中1,558条主库与322条xslib对象通过版本9目录的唯一型材名关联，目录内重复名会公开标记并跳过链接，见[关联证据](docs/RELATED_FORMATS.zh-CN.md#profdb-与-db1xslib-的型材名关联)；pgdb轮廓点暴露已读到的倒角type/X/Y/DZ1/DZ2/flags，拒绝重复/非法索引与非有限几何值。当前固定公开语料没有pgdb.bin，字段布局和几何仍缺真实样本独立复核；倒角 API 字段旁证与其边界见[PGDB说明](docs/RELATED_FORMATS.zh-CN.md#pgdb-与-sketch-solver-倒角字段) |
+| 实验性 `.lis` 文本方言 | `parseProfileCatalogLis` 仅读取公开第三方测试夹具采用的 `PROFILE DATABASE EXPORT VERSION = 2` 方言；该夹具来源未证明为 Tekla 原生导出。Trimble 文档记载的 profile catalog `.lis` 使用 `PROFILE CATALOG EXPORT VERSION`、树结构及 profile records，本实现尚不支持。接口保留以便兼容，不能据此宣称型材目录 `.lis` 已支持；见[证据边界](docs/RELATED_FORMATS.zh-CN.md#型材目录-lis-导出) |
+| matdb / screwdb / assdb | 材料、螺栓与螺栓组件目录；7.82真实工程按精确唯一名称建立3,148条主库和640条xslib零件→matdb关联，12个未匹配名称不链接；同样本的DB1螺栓参数串与screwdb商品规格名没有精确匹配，因此螺栓目录对象关联仍未建立，见[关联证据](docs/RELATED_FORMATS.zh-CN.md#matdb-与-db1xslib-的材料名关联)及[螺栓边界](docs/RELATED_FORMATS.zh-CN.md#screwdb-assdb-与-db1-螺栓的关联边界) |
+| profitab / CLB | `G3-NAME` 的 `libraryId.SectionName` 与唯一 CLB 截面关联；`components.clb` 同目录 Include 也建立链接；保留完整语句树，不执行公式或生成几何。BIM4LCA/Tekla 2023 SP8 的真实 `profitab.inp` 固定验证224条规则及 WQS 的排序/单位/数字范围/宏字段，并有工程级目录与 PEIKKO `DELTA_EXT` 资源发现回归；样本没有精确目录-截面匹配，因此不构成二者关联证据 |
+| Shapes XML / TEZ | 结构化读取Shape定义与Polymesh点、面、内环、边，支持XML几何及gzip输入；可选实体/类型字段、原文和歧义诊断，按storage ID关联；工程入口保留来源路径和资源优先级，抑制跨目录歧义，[证据与边界](docs/SHAPES_XML.zh-CN.md)。模型根目录及显式资源根/Shapes一级子目录中的 `ShapeCatalog.Groups.xml`、用户变更、`*.ShapeCatalog.Groups.xml` 和 `*.shapecatalog` 现列入 `Project::files`，标为 `Discovered`；文件内容、层级成员、shape ID关联及导入包仍未解析 |
+| 钢筋形状目录 | 独立 API 与工程入口读取 `.rscx` 的 `ShapeCatalog` 分类、形状编号及根级未分类编号，保留原顺序与原文；真实 9.08 官方考试工程覆盖 5 个分类/14 个分类编号/2 个根级编号，[证据与边界](docs/REBAR_SHAPE_CATALOG.zh-CN.md) |
+| 钢筋弯曲形状规则 | `rebar_schedule_config.inp` 有限读取官方示例中的 `BEND_TYPE_<类型>[序号]=值` 行，保留文件顺序和公式原文；未识别行也保留，公式不执行。`readProject` 按模型目录及显式资源目录的顺序选择该配置，并标为部分语义。固定语料无原生配置文件，不能据此声称完整支持。根目录 `RebarShapeRules.xml` 现列为 `Catalog/Discovered`，XML规则、目录优先级和首个匹配语义仍未解析，见[关联格式证据](docs/RELATED_FORMATS.zh-CN.md#rebarshaperulesxml-与-rebar_schedule_configinp) |
+| `rebar_database.inp` 钢筋目录 | **尚未语义解析**。`readProject` 可将模型根目录中的同名文件标为 `Catalog/Discovered` 并明确报告语义解析未实现。这是钢筋/钢绞线材料定义目录，与 `.rscx` 的钢筋弯曲形状目录不同；应恢复 grade、nominal/actual diameter、bend/hook radius 和版本新增容差，并核验 DB1 钢筋定义/实例的 grade、size、radius 关联。当前固定公开语料没有该文件，见[关联格式缺口](docs/RELATED_FORMATS.zh-CN.md#rebar_databaseinp-钢筋目录) |
+| `mesh_database.inp` 钢筋网片目录 | **尚未语义解析**。`readProject` 可将模型根目录中的同名文件标为 `Catalog/Discovered` 并明确报告语义解析未实现。这是与 `rebar_database.inp` 分离的网片规格目录；尚无固定原生样本、字段映射或网片实例关联证据，见[关联格式缺口](docs/RELATED_FORMATS.zh-CN.md#mesh_databaseinp-钢筋网片目录) |
+| DB2 | 新增[7.64编号及范围关联](docs/NUMBERING_764.zh-CN.md)，四系列/八计数和103个历史对象核对；显式确认配对后105条系列关联；新增[9.08编号日志与跨文件关联](docs/NUMBERING_908.zh-CN.md)，4,936个历史对象及三项计数独立核对；`parseNumberingDatabase`：完整顺序表、编号系列与零件/装配序列计数；8.30/8.37/8.44/8.74仅接受已验证签名的空快照，非空记录拒绝语义投影；Abri-Moto 的8.44 DB2 空快照与次级同名 DB1 按 GUID 配对；9.50读取编号系列及计数但保留其余表为 raw；7.30内联编号、7.82及现代DB1对象编号记录可关联系列，见[对象编号证据](docs/OBJECT_NUMBERING.zh-CN.md)；**8.30/8.37/8.44/8.74非空系列、比较快照、8.44对象分配与有效状态尚未恢复** |
 | environment.db | `parseEnvironmentDatabase`：属性名称/标签/存储类型、对象类别关联、整数选项列表；**元数据标志和部分定义值尚未解释** |
 | options_*.db | `parseOptionsDatabase`：布尔/整数/浮点/字符串键与成对值槽位；**当前值/默认值的优先级尚未验证** |
 | options.ini | `parseOptionSettingsFile`：模型文本赋值、行号、原始值与重复键；`matchOptionSettings`逐项比较DBV两个槽，工程入口保留文件/记录关联；**不推断运行时展开和最终有效值**，见[文本选项证据](docs/OPTION_SETTINGS.zh-CN.md) |
-| DG 图纸 | 新增[8.95/9.08容器与数字身份](docs/DG_EXAM.zh-CN.md)，修复目录数46误吞为版本句点；五张图幅/类型有XML对照，9.08主体与DB1的GUID/编号匹配，旧工程身份不强配； 另支持[8.44容器与文字/属性/已存图幅](docs/DG_844.zh-CN.md)，其视图/尺寸/模型引用仍保留原始记录；`parseDrawing`：7.30/7.82/9.54 容器、文本/属性、图幅、主体、视图坐标基/范围；7.82/9.54另有模型引用，7.30其余引用未恢复，见[7.30证据](docs/DG_730.zh-CN.md)；7.30/7.82使用无工程范围的数字ID，8.95/9.08仍保存数字ID（仅9.08已验证按工程GUID和同存储版本自动配对），9.54使用GUID；**7.30/9.54另恢复[直线尺寸与尺寸链](docs/DRAWING_DIMENSIONS.zh-CN.md)；纸面定位、比例/缩短、尺寸样式与完整绘图图元尚未恢复** |
-| TeklaStructuresModel.xml | 13个具名字段、严格直接节点匹配、UTF-8实体读取及完整原文保留；32份独立XML对照，见[工程元数据](docs/MODEL_METADATA.zh-CN.md) |
-| *.dg.metadata | `parseDrawingVersionMetadata`：图纸/主对象GUID、标题、图幅、类型及保存的整数状态字段；工程入口校验DG文件名、图幅、主体并关联已验证DB1身份，见[图纸版本元数据](docs/DRAWING_METADATA.zh-CN.md)；**日期/标志含义、最新版本选择和当前有效状态仍未解释** |
-| history.db | 标准 SQLite，交由 SQLite 工具读取 |
+| DG 图纸 | 新增[9.50 gzip 图纸部分语义](docs/DG_950.zh-CN.md)：严格校验真实 2023 SP4 工程 9 张图纸签名，解码字符串、属性/链接和图幅；subject、视图、尺寸、图元仍未恢复，且因 DG `grProjectGuid` 与所选 DB1 GUID 不匹配而不建立对象关联。新增[8.95/9.08容器与数字身份](docs/DG_EXAM.zh-CN.md)，修复目录数46误吞为版本句点；五张图幅/类型有XML对照，9.08主体与DB1的GUID/编号匹配，旧工程身份不强配；新增[7.64 DG有限语义](docs/DG_764.zh-CN.md)：10张同工程图纸严格验证表签名并读取文字、属性、图幅、主体、视图、数字引用及137条共同布局的 subtype-1 尺寸；图元和绘图精度仍未验证，且不与不同版本DB1配对；新增[7.13文字/属性/图幅](docs/DG_713.zh-CN.md)，仅对两个官方样本的34项容器签名解码共同字段；另支持[8.44容器、文字/属性/图幅、一条视图及13条直线尺寸](docs/DG_844.zh-CN.md)；`parseDrawing`：7.30/7.82/9.54容器、文本/属性、图幅、主体、视图坐标基/范围；7.30现在读取subtype 0/1存储尺寸锚点与尺寸链，35个固定文件为313/28条，subtype-1尚无独立打印真值；7.82的62条重复尺寸物理记录按原始偏移独立读取；28条重复尺寸集行中14组完整payload相同并在map中合并，同时保留occurrence；293张图纸仍有111条锚点引用96个不存在的尺寸集ID，保持未链接；DG关联诊断列出尺寸ID和尺寸集ID，context冲突时列出两端context；9.54另保留已检查视图记录中的原始纸面位置与比例值，不据此换算；7.82/9.54另有模型引用，7.30/7.82 type-309数字零件引用已支持显式同版本DB1关联，7.30其余引用未恢复，见[7.30证据](docs/DG_730.zh-CN.md)；7.30/7.82使用无工程范围的数字ID，8.95/9.08仍保存数字ID（仅9.08已验证按工程GUID和同存储版本自动配对），9.54使用GUID；9.54 type-281→type-311 引用提供同图全部物理候选行偏移并校验唯一/重复/悬空情形，见[图元字段证据](docs/DRAWING_ENTITIES.zh-CN.md)；7.30/7.82可由调用者通过默认关闭的`trustLegacyDrawingObjectIds`显式限定同版本工程范围；直线尺寸锚点/尺寸集支持7.30、7.64 subtype 1、7.82 subtype 0/1、8.44和9.54，7.64/7.82/8.44均缺独立尺寸真值，详见[尺寸与纸面边界](docs/DRAWING_DIMENSIONS.zh-CN.md)；**比例换算/缩短、尺寸样式与完整绘图图元尚未恢复** |
+| TeklaStructuresModel.xml | 13个具名字段、严格直接节点匹配、UTF-8实体读取及完整原文保留；34份独立XML对照；工程清单将已读取元数据关联到主DB1，见[工程元数据](docs/MODEL_METADATA.zh-CN.md) |
+| *.dg.metadata | `parseDrawingVersionMetadata`：图纸/主对象GUID、标题、图幅、类型及保存的整数状态字段；未知直接子字段以有序不透明扩展暴露并保留原文；工程入口校验DG文件名、图幅、主体并关联已验证DB1身份；无效UTF-8时支持Windows-1252回退且保留原始字节，见[图纸版本元数据](docs/DRAWING_METADATA.zh-CN.md)；**日期/标志含义、最新版本选择和当前有效状态仍未解释** |
+| `history.db` | 内置 SQLite 只读读取用户、修订、对象和对象修订表；保留 `version_data` 原始字节。对象 identifier 与 DB1 identity GUID 精确匹配时建立关联；历史 type 编号不解释为 DB1 类型。详见[历史库说明](docs/HISTORY.zh-CN.md) |
 | *.admodel | `parseAnalysisModelSettings`：具名整数/浮点/字符串与按引擎限定的设计表设置；125字段和3条设置有原生对照，保留Windows-1252原文、行号和重复项；工程入口可独立读取，见[分析预设证据](docs/ANALYSIS_SETTINGS.zh-CN.md)；**枚举含义、最终有效值和DB6关联未恢复** |
 | DB6 分析数据 | `parseRawDatabase`：已验证10014头部布局的完整原始表、记录与分配器数据；工程入口发现根目录/Analysis子目录并标记Raw，见[DB6证据](docs/DB6_RAW.zh-CN.md)；**分析属性语义、DB1对象关联及其他DB6布局仍未恢复** |
+| `analysis_results.db5` | `readProject` 在根目录或 `Analysis` 子目录发现并标记 `FileRole::AnalysisResults`；官方说明该库保存各荷载组合结果：`XS_AD_MEMBER_RESULT_DIVISION_COUNT` / `DISP_DIVISION_COUNT` 控制杆件结果采样，`MIN_DISTANCE` 控制杆件结果点间距，`GRID_SIZE` 控制板/楼板/面板结果网格；**文件内容未解析**，缺少带非空结果的原生样本与结果/DB6/DB1身份对照，见[DB5证据边界](docs/RELATED_FORMATS.zh-CN.md#db5-分析结果库)
+| `*.db3` | `readProject` 在工程根目录或 `Analysis` 子目录识别为 `FileRole::PlanDatabase`；当前只发现文件，不解析内容或关联DB1/DB6。没有固定原生样本和独立字段真值，见[相关格式缺口](docs/RELATED_FORMATS.zh-CN.md#db3-规划数据库) |
 | guid.mapper | 按批次读取旧/新GUID与行号，匹配当前身份或明确提供的两份模型；811对历史身份交叉验证，见[身份映射](docs/GUID_MAPPINGS.zh-CN.md)；不自动替换DG引用 |
+| db.idrm / xslib.idrm | 读取静态 ID 范围、命名空间 GUID/起始号/数量与范围边界；工程入口在 namespace GUID 与 DB1/xslib 分配前导区精确匹配时建立文件级关联；不执行静态→运行时 ID 转换，见[IDRM说明](docs/IDRM.zh-CN.md) |
 
 文件扩展名 `.db` 并不代表统一格式，目录文件、DBV 和 SQLite 使用不同入口。`readProject` 会区分 `Semantic`、`PartialSemantic`、`Raw`、`Discovered` 和 `Failed`；DG、DB2 与 DBV 当前为部分语义，不能把发现文件或读取部分字段当成解析完成。
 
@@ -33,11 +41,15 @@
 |---|---|
 | 7.30 | 已固定公开教学主库和组件库，沿用旧构件/几何路径；恢复对象内联编号，1,467个对象与历史日志核对；另固定34组历史DB1/DB2备份，见[7.30编号证据](docs/INLINE_NUMBERING_730.zh-CN.md) |
 | 7.64 | 新增U52主库/组件库；66个IFC构件与20个螺栓放置核对，67个旧快照构件逐项比较；GUID迁移未解释，保持部分语义，见[7.64证据](docs/DB1_764.zh-CN.md) |
-| 7.82 | 两份主库、两份组件库：构件/板轮廓、独立螺栓、焊缝、布尔/装配/属性与参数；部分语义，见 [字段证据与边界](docs/DB1_782.zh-CN.md) |
+| 7.82 | 两份主库、两份组件库：构件/板轮廓、18个组件归属 type-39 子构件、独立螺栓、焊缝、布尔/装配/属性与参数；部分语义，见 [字段证据与边界](docs/DB1_782.zh-CN.md) |
+| 8.30 | 固定275节主库的有限核心投影；构件/装配/组件/焊缝/属性计数仅作解析基线，类别、所有权、编号、螺栓和表27仍未恢复，见[旧工程证据](docs/RELATED_FORMATS.zh-CN.md#新增公开旧工程-db1-830--874-与早期-dbv-边界) |
+| 8.37 | 固定279节主库与247节 xslib 的有限投影；螺栓表留 raw，缺少独立字段真值和跨文件对象归属证据，见[8.37证据](docs/DB1_837.zh-CN.md) |
 | 8.44 | 811对身份重映射；[型材IFC对照](docs/PROFILES_844.zh-CN.md)覆盖19个型材、58个名称和原点；[螺栓IFC对照](docs/BOLTS_844.zh-CN.md)覆盖79组/201位置，并修正非零首点丢失；完整签名、生成开关与实体几何仍待验证 |
 | 8.95 | 本轮公开语料回归：27 份主库、27 份组件库；身份类型引用、owner 与构件辅助引用已分开读取，见 [归属证据](docs/OWNERSHIP.zh-CN.md) |
-| 9.08 | 官方考试工程的两份历史快照，主库/xslib采用独立混合布局；7月4,237个梁候选与同提交官方代码吻合，49个型材名称与配套目录核对；螺栓参数与完整几何保持部分支持，见[9.08证据](docs/DB1_908.zh-CN.md) |
-| 9.52 | 本轮公开语料回归：1 份主库、1 份组件库；主库为空模型 |
+| 8.74 | 固定307节主库的有限核心投影；身份类别链接已做闭合检查，螺栓、钢筋、编号、型材语义和未映射表仍保留 raw；同版本 xslib 目前 raw-only，见[旧工程证据](docs/RELATED_FORMATS.zh-CN.md#新增公开旧工程-db1-830--874-与早期-dbv-边界) |
+| 9.08 | 官方考试工程的两份历史快照，主库/xslib采用独立混合布局；7月4,237个梁候选与同提交官方代码吻合，49个型材名称由配套目录核对，两份快照各建立1,714条唯一对象→型材目录关联；每份主库的104条 PLATE type-39 记录均归属26个组件实例并单列为 `componentPartIds`；螺栓参数与完整几何保持部分支持，见[9.08证据](docs/DB1_908.zh-CN.md) |
+| 9.50 | BIM4LCA 四份 Tekla 2023 SP8 DB1/IFC4 已恢复 table 353 的对象 ID、16 字节 GUID 及经 IFC 聚合边验证的 owner 字段：25,521 个 IFC GlobalId 直连匹配，5,017/5,017 条可配对聚合边的 owner 相符。Abri-Moto SP4 另核验 177 条 part、106 条 assembly、109 条 bolt group 记录，其中 158 个 part、99 个 assembly、108 个 mechanical fastener 的 IFC 身份命中相应 DB1 表。**部分语义**：part 类型仍未知，身份类别、context 和其他原始字段未解释；不代表完整支持。见 [9.50 证据与边界](docs/DB1_950.zh-CN.md) |
+| 9.52 | 本轮公开语料回归：2 份主库/xslib/DB2 工程；两份组件库各核验14个组件归属的 type-39 CUTPART/PLATE 记录，另有一份 xslib 不含该类对象 |
 | 9.60 | 本轮公开语料回归：1 份非空主库、1 份组件库 |
 | 9.65 / 9.66 | 保留历史布局；使用角色签名检查，本轮未重新取得样本 |
 | 其他版本 | 明确拒绝语义解码；可尝试 `parseRawDatabase` 保留原始内容 |
@@ -61,16 +73,20 @@ cmake --install build --prefix "$PWD/installed"
 Windows（MSVC，已通过 vcpkg 安装 zlib）：
 
 ```powershell
+$work = 'E:/CodexData/TeklaFormats'
+New-Item -ItemType Directory -Force -Path "$work/tmp" | Out-Null
+$env:TEMP = "$work/tmp"
+$env:TMP = "$work/tmp"
 vcpkg install zlib:x64-windows
-cmake -S . -B E:/CodexData/TeklaFormats/build `
+cmake -S . -B "$work/build" `
   -DCMAKE_TOOLCHAIN_FILE=E:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake `
   -DVCPKG_TARGET_TRIPLET=x64-windows
-cmake --build E:/CodexData/TeklaFormats/build --config Release
-ctest --test-dir E:/CodexData/TeklaFormats/build -C Release --output-on-failure
-cmake --install E:/CodexData/TeklaFormats/build --config Release --prefix E:/CodexData/TeklaFormats/installed
+cmake --build "$work/build" --config Release
+ctest --test-dir "$work/build" -C Release --output-on-failure
+cmake --install "$work/build" --config Release --prefix "$work/installed"
 ```
 
-将示例中的 vcpkg 路径替换为实际安装路径。如果已有独立 zlib，可改用 `-DZLIB_ROOT=...`。MinGW 的检查工具已配置 Unicode 入口链接选项；C++20 的 `char8_t` 路径转换也兼容。`TEKLADB1_BUILD_TESTS=OFF` 可关闭测试与检查工具。
+示例把构建、测试和临时文件放在 E 盘；如果使用其他盘符，请统一修改 `$work`。将 vcpkg 路径替换为实际安装路径，并让 vcpkg 本身及其安装目录也位于 E 盘。如果已有独立 zlib，可改用 `-DZLIB_ROOT=...`。MinGW 的检查工具已配置 Unicode 入口链接选项；C++20 的 `char8_t` 路径转换也兼容。`TEKLADB1_BUILD_TESTS=OFF` 可关闭测试与检查工具。
 
 默认 CTest 使用现场生成的小型数据，不下载第三方文件，不需要 Tekla。测试数据写入 CMake 构建目录下的 `test-data`。
 
@@ -133,7 +149,7 @@ tekla::parseDrawing("models/drawings/example.dg", drawing, error);
 
 DB2 语义入口当前覆盖 7.30、7.64、7.82、8.95、9.08、9.52、9.60（包括空组件编号库）。`partCounter` / `assemblyCounter` 是保存的序列计数，不是当前构件数量，也不能单独还原某个对象的编号；其余字段和快照保留在 `raw` 中。现代DB1提供objectNumberingRecords和objectNumberingReferences，工程入口可关联DB2系列；零序号和高位特殊值不猜成确定编号。7.82 DB1另有独立的部分语义映射，其对象编号已按独立布局恢复；无GUID的旧DB1/DB2默认不配对，调用者可显式设置trustLegacyNumberingBasenames，并通过关联的pairingEvidence区分依据。7.30直接把对象编号保存在94/95表，公开inlineObjectId和storedNumber，不伪造引用；仅已验证的起始号1范围提供派生编号，见[内联编号证据](docs/INLINE_NUMBERING_730.zh-CN.md)。
 
-DG 9.54 会校验完整表目录签名，恢复根字符串（包括跨记录的标记 XML）、属性、属性链接、图幅宽高及一类模型 GUID 引用。标记 XML 当前作为文本返回。`grProjectGuid` 相符后，工程入口才用引用 GUID 连接 DB1 identity；无法匹配或有歧义的引用给出诊断。不会通过图纸文件名猜测构件，也不把这些字段称为完整图纸解析。研究记录与独立编号日志验证见 [DB2 / DG 格式证据](docs/RELATED_FORMATS.zh-CN.md)。
+DG 9.54 会校验完整表目录签名，恢复根字符串（包括跨记录的标记 XML）、属性、属性链接、图幅宽高、一类模型 GUID 引用，以及已观察的 type-311 XY 线段坐标和 type-281→311 原始引用。固定 Steel Fundamentals 样本中 47/47 个此类目标 ID 闭合；接口不推断 owner/context。根节点为 `Mark` 的 XML 同时提供节点、属性与文本结构，原文保持可访问；模板表达式不会被求值或自动绑定到模型。`grProjectGuid` 相符后，工程入口才用引用 GUID 连接 DB1 identity；无法匹配或有歧义的引用给出诊断。其他 DG 版本的 type-311 也可读取两组已存坐标，但其他图元类型、风格、上下文和渲染语义仍未恢复。不会通过图纸文件名猜测构件，也不把这些字段称为完整图纸解析。边界见 [DG 图元说明](docs/DRAWING_ENTITIES.zh-CN.md)，研究记录与独立编号日志验证见 [DB2 / DG 格式证据](docs/RELATED_FORMATS.zh-CN.md)。
 
 ## 原始容器与内存预算
 
@@ -151,18 +167,24 @@ tekla::db1::parseRawDatabase("model.db2", raw, error, options);
 
 ## 可重复的公开语料回归
 
-`tests/corpus.json` 记录 793 个外部文件路径的固定来源 URL、大小、SHA-256 和 1,678 个用例。独立检查包括32份XML元数据、811对历史身份映射，以及8.44的IFC型材、螺栓参数与位置对照。第三方模型不随仓库分发。需要 Python 3.11+：
+`tests/corpus.json` 记录 844 个外部文件路径的固定来源 URL、大小、SHA-256 和 1,774 个用例，包括单段/两段 IDRM 样本、W3 的主库/xslib namespace 关联和 AUVENT 当前/备份前导区对照，以及 Trimble 官方练习包中两张 7.13 DG 图纸的文本/属性/图幅回归；RABAS 工程10张7.64 DG可逐字节重建，并解析文字、视图、数字引用和137条 subtype-1 尺寸字段（无独立出图尺寸真值；其DB1是7.30，因此不建立对象关联）；还覆盖8.30、8.37、8.74主DB1有限投影、8.37 xslib有限投影与空DB2快照解析。独立检查包括36份XML元数据、811对历史身份映射，以及8.44的IFC型材、螺栓参数与位置对照。公开 Construsoft 9.52 图纸视图练习模型和 Project2 钢结构工程分别提供独立的 DB1/xslib/DB2 项目回归；前者逐对象验证24条 DB1→DB2 编号系列关联，后者校验2,014个主库构件、组件库语义基线及三条精确文件配对。第三方模型不随仓库分发。需要 Python 3.11+：
 
 ```powershell
+$work = 'E:/CodexData/TeklaFormats'
+New-Item -ItemType Directory -Force -Path "$work/tmp" | Out-Null
+$env:TEMP = "$work/tmp"
+$env:TMP = "$work/tmp"
 python -B tools/corpus.py --download `
-  --data E:/CodexData/TeklaFormats/corpus `
-  --exe E:/CodexData/TeklaFormats/build/Release/tekladb1_validate.exe `
-  --report E:/CodexData/TeklaFormats/corpus-results.json
+  --data "$work/corpus" `
+  --exe "$work/build/Release/tekladb1_validate.exe" `
+  --report "$work/corpus-results.json"
 ```
 
-Ninja/MinGW 构建的 exe 通常直接位于构建目录，不含 `Release` 子目录；Linux 使用无 `.exe` 的路径。不带 `--download` 时只验证本地文件。下载约 70 MB，完整文件清单以 manifest 为准。
+Ninja/MinGW 构建的 exe 通常直接位于构建目录，不含 `Release` 子目录；Linux 使用无 `.exe` 的路径。不带 `--download` 时只验证本地文件。下载约 75 MB，完整文件清单以 manifest 为准。
 
-新增7.64 DB2与编号历史四份固定文件、九项回归，65个零件与38个装配保存编号吻合，见[编号证据](docs/NUMBERING_764.zh-CN.md)。新增7.64主库/组件库及历史快照、嵌套IFC共六个固定路径和11项回归；66构件与20螺栓放置独立核对，GUID变更不推导通用映射，见[7.64证据](docs/DB1_764.zh-CN.md)。新增分析预设.admodel及复用同包主库两份固定路径、五项回归；125字段与3条设计表独立核对，见[分析预设证据](docs/ANALYSIS_SETTINGS.zh-CN.md)。新增DB6原始层及同包主库两份文件、五项语料；86表/79记录可逐字节重建，28项原生输入和工程边界检查，不宣称分析语义或DB1关联，见[DB6证据](docs/DB6_RAW.zh-CN.md)。新增图纸版本元数据接口及六项语料：五份XML的22字段与ElementTree独立核对，工程入口恢复五组DG配对及一条已验证DB1主对象关联；状态整数不解释为当前有效状态，见[元数据证据](docs/DRAWING_METADATA.zh-CN.md)。新增五张8.95/9.08图纸及配套XML和复用模型共13个固定路径、16项回归，详见[图纸证据](docs/DG_EXAM.zh-CN.md)。新增9.08编号的5份固定文件及14项回归，7月4,936个历史对象和三项DB2计数独立匹配，9月两条缺失历史身份单独记录。新增9.08同一官方考试工程的两份主库/组件库历史快照及12项回归，详见[9.08证据](docs/DB1_908.zh-CN.md)。包括原有 32 份主库（图纸测试工程另复用一份相同主库副本）、32 份组件库、64 份 DB2、336 份 DG、93 份 DBV 及配套目录，另有同一7.30工程的34组历史DB1/DB2备份（不作为34个独立工程）。现有用例包含 7.82 的两份主库、两份组件库与两个工程聚合检查；7.82 仍为部分语义，独立螺栓和未命名实体的限制见支持矩阵。一项以 Tekla 自身编号历史日志独立核对 10 个 DB2 计数，同时核对 28 个 DG→DB1 GUID 引用、118 条 DB1→环境定义名称/类型匹配，并检查官方 OBJECT_LOCKED 示例中的标签次序。另核对 19 个视图、4 个图纸主体、同包 VI 设置中的 6 个范围/深度字段，以及钢板模型轴与视图 X 轴。旧 DG 另有 293 项逐字节重建与 293 项语义回归，59 个主体 ID/类型匹配、1,361 条数字引用匹配；35 条未解析引用、断链文本、退化/歧义视图均明确保留。旧 xslib 另核对 40 条构件定义、660 条归属参数和 2,726 条子对象身份；配套目录及四份对话框验证 28 条具名定义与 69 个参数引用；新增 6,838 条距离变量、10,450 条公式绑定及对象引用图，公式尚不求值，详见 [7.82 证据](docs/DB1_782.zh-CN.md)。另有 60 项主库/组件库归属回归和三份现代对话框的 15 个参数匹配；通用变量作用域保留 kind-60 对象，详见 [归属与现代变量](docs/OWNERSHIP.zh-CN.md)。新增60项位置记录回归（含4份7.82主库/组件库）和现代同工程源码对照（30根梁、36个柱/基础），位置设置不重复应用到已存几何。另有4项7.82表面处理回归和1项实体/材质证据，恢复7个表面、32个轮廓点及7条工程材质关联；颜色、完整裁剪/铺贴等仍未解释。另有56项现代对象编号回归及一项独立日志核对：187个零件、43个装配与Tekla日志一致，249条对象关联到DB2系列，20条特殊起始值保持未配对。第三种44字节记录已确认为钢筋编号系列，恢复前缀/起始号并用两份组件参数核对12项；分配槽及生命周期仍未解释，见[钢筋编号](docs/REINFORCEMENT_NUMBERING.zh-CN.md)。7.82另有4项编号回归及1项图纸证据，685条编号记录和7,410条非零引用完整保留；4个主体编号与配套图纸标记一致，显式确认文件配对后有5,192条DB2系列关联。另有56项现代钢筋回归和2项参数证据检查，1,447个实例、301份定义及父构件关联；两种版本组件库各96项已存参数一致性检查，重复模板不视为独立几何真值。新增Construsoft公开练习模型的24项回归；螺栓零位置引用保留并诊断，非零断链仍拒绝，见[空位置证据](docs/BOLT_POSITIONS.zh-CN.md)。新增7.30公开工程的10项回归及21项编号历史计数核验；空组件DB2可只有文件头，新增73项7.30内联编号/备份回归，1,467个对象编号与日志一致，2个当前零值与历史差异原样保留；显式配对后2,236条系列关联，详见[内联编号证据](docs/INLINE_NUMBERING_730.zh-CN.md)。新增35份7.30 DG的72项回归：91个视图、35个图幅、13条目录文件名交叉核对、1个独立模型主体及2个独立视图轴；图纸已存标记不当作当前模型编号。新增同工程IFC独立证据：1,215个对象身份/属性/端点和536个简单矩形构件的4,288个顶点核验；25个未导出构件及复杂几何仍保留边界，详见[IFC证据](docs/IFC_730_EVIDENCE.zh-CN.md)。新增7项9.54直线尺寸回归和1项论文图纸证据：144条尺寸、57条链及13个独立标注值；其他尺寸布局与纸面变换仍有缺口，见[尺寸证据](docs/DRAWING_DIMENSIONS.zh-CN.md)。新增35项7.30尺寸回归及1项独立DWG对照，313条已解读尺寸、187条链和28条未知子类型；五条DWG尺寸线的精确长度与端点独立核验，见[7.30尺寸证据](docs/DRAWING_DIMENSIONS_730.zh-CN.md)。默认 CTest 另有 526 项正常/异常输入测试。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
+默认 CTest 有617项正常/异常输入测试；当前完整语料回归为1,780/1,780，安装消费者回归87/87。`profdb.bin` 现仅接受已验证的版本9/10签名，四份真实Tekla 2023版10目录、目录内重复名称歧义与异常布局均有回归。DG type-304 索引现暴露按类型和ID精确命中的目标物理行偏移，重复候选全部保留；type-311 两组 XY 坐标按行保留，9.54 type-281→311 引用也按原始字段公开；其余绘图实体和语义仍待恢复，见[DG 图元说明](docs/DRAWING_ENTITIES.zh-CN.md)及[相关格式说明](docs/RELATED_FORMATS.zh-CN.md)。新增8.30与8.74主库固定布局的部分语义投影；8.74 xslib尚无语义映射，但工程入口会保留raw容器并明确标为Raw，不猜对象关系。8.74 xslib公开工程回归检查271表、1条记录和1个opaque section；这不等于组件库语义支持。七项8.30/8.74输入回归覆盖布局读取、损坏宽度/字段拒绝，以及8.74 identity-class 与关联类型冲突拒绝；独立脚本在真实8.74样本上核对5,674个类型关联端点的一致性，但不作为Tekla外部对象真值。`rebar_schedule_config.inp` 现有限读取官方示例中 `BEND_TYPE` 映射，工程入口按资源目录优先级读取并标为部分语义，公式只保留原文、不执行；固定语料无原生配置，不能据此声称完整支持。PGDB的合成坏输入回归现在拒绝重复字符串/轮廓/点块键、非有限坐标与解算值；固定公开语料仍无真实 `pgdb.bin`，所以其轮廓字段含义保持未独立核验。统计和语义指纹用于防止回归；它们不等于 Tekla/IFC 独立几何真值。数据来源具体记录在 manifest 中。
+
+图纸版本元数据现有九份 XML 独立校验：五份官方考试工程文档核对22个具名字段，另四份钢结构练习工程文档核对额外整数 `AlwaysNecessary=0`；两个工程共九组 DG 配对及五条 DB1 主体关联。`AlwaysNecessary` 仍无已证实含义，不参与状态或版本判断。详情见[元数据证据](docs/DRAWING_METADATA.zh-CN.md)。
 
 GitHub Actions 配置 Linux C++17/20、ASan/UBSan、Windows MSVC、安装后独立消费和 Linux OCCT 构建。运行状态以对应提交的 Actions 结果为准。
 

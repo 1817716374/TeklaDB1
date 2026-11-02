@@ -98,6 +98,39 @@ std::vector<Table> onePart(std::uint32_t type = 2, bool broken = false, bool con
     }
     tables[274].rows = {part}; return tables;
 }
+std::vector<Table> partialCoreSchema(const std::string& version)
+{
+    const bool old830 = version == "8.30";
+    check(old830 || version == "8.74", "unknown partial core fixture version");
+    std::vector<Table> tables(old830 ? 275 : 307);
+    const auto define = [&](std::size_t ordinal, std::uint32_t payload, std::size_t count,
+                            std::initializer_list<std::size_t> refs = {}) {
+        auto& table = tables.at(ordinal);
+        table.payload = payload;
+        table.fields.assign(count, 0);
+        for (auto field : refs) table.fields.at(field) = 1;
+    };
+    define(61,32,6,{0,1}); define(64,40,7,{0,1,2}); define(65,52,8,{0,7});
+    define(75,45,6,{0,1,2}); define(122,44,6,{0,1,5}); define(154,104,22,{0,1,4,5,6,21});
+    for (auto ordinal : {160U,161U}) define(ordinal,24,7,{0,1,2,3,4});
+    define(190,24,7,{0,1,2,3,4,5,6});
+    for (auto ordinal : {191U,192U}) define(ordinal,60,7,{0,1,3,4});
+    if (old830)
+    {
+        define(209,63,8); define(245,322,31); define(121,332,84);
+        define(116,116,6); define(272,64,12); define(268,24,7);
+        define(227,100,18); define(181,88,8);
+    }
+    else
+    {
+        define(293,55,6,{0,1,2,3,4}); define(114,32,9,{0,1,7,8});
+        define(299,332,19,{0,1,12}); define(121,332,84,{0,1});
+        define(116,116,6,{0,1,5}); define(274,64,12,{0,1,2,3,4,5,6,7});
+        define(270,24,7,{0,1,2,5,6}); define(228,104,18,{0,1,2});
+        define(300,92,9,{0,1,4,5}); define(294,20,6,{0,1,2,4,5});
+    }
+    return tables;
+}
 std::vector<Table> onePart782(bool library = false)
 {
     std::vector<Table> tables(library ? 198 : 228);
@@ -265,7 +298,40 @@ int main(int argc, char** argv)
         const auto path = root / "model.db1";
         tekla::db1::Model model; tekla::db1::RawDatabase raw; std::string error = "stale";
         const auto parse = [&] { return tekla::db1::parseModelFile(path,model,error); };
-        if (name.rfind("schema908_",0)==0) schema908Regression(path,name);
+        if (name.rfind("db1_core_830_",0)==0 || name.rfind("db1_core_874_",0)==0)
+        {
+            const std::string version = name.rfind("db1_core_830_",0)==0 ? "8.30" : "8.74";
+            auto tables = partialCoreSchema(version);
+            if (name=="db1_core_830_part_width") tables[272].payload=68;
+            if (name=="db1_core_874_part_width") tables[274].payload=68;
+            if (name=="db1_core_874_identity_class_fields") tables[114].fields[7]=0;
+            if (name=="db1_core_874_class_relation" || name=="db1_core_874_class_relation_mismatch")
+            {
+                auto identityClass=row(tables[114],1); put<std::uint32_t>(identityClass,5,11); tables[114].rows={identityClass};
+                auto identity=row(tables[293],10); put<std::uint32_t>(identity,5,1); tables[293].rows={identity};
+                auto association=row(tables[191],100);
+                put<std::uint32_t>(association,5,name=="db1_core_874_class_relation"?11U:38U);
+                put<std::uint32_t>(association,13,10); tables[191].rows={association};
+            }
+            save(path,encode(tables,version));
+            const bool valid = name=="db1_core_830_valid" || name=="db1_core_874_valid" ||
+                               name=="db1_core_874_class_relation";
+            const bool ok=parse();
+            if (valid)
+            {
+                check(ok,error.c_str());
+                check(model.storageVersion==version && model.parts.empty(),"partial core schema selected wrong layout");
+                if (name=="db1_core_874_class_relation")
+                    check(model.identities.at(10).type==11,"8.74 relation identity type inference changed");
+                check(std::any_of(model.diagnostics.begin(),model.diagnostics.end(),[&](const auto& diagnostic) {
+                    return diagnostic.find(version+" partial semantics")!=std::string::npos;
+                }),"partial core boundary diagnostic missing");
+            }
+            else check(!ok && !error.empty() && model.parts.empty() && model.identities.empty() &&
+                       (name!="db1_core_874_class_relation_mismatch" || error.find("identity-class kind conflicts")!=std::string::npos),
+                       "malformed partial core schema accepted or partial output retained");
+        }
+        else if (name.rfind("schema908_",0)==0) schema908Regression(path,name);
         else if (name.rfind("bolt844_",0)==0) bolt844Regression(path,name);
         else if (name.rfind("profile844_",0)==0) profile844Regression(path,name);
         else if (name.rfind("inline_number_730_",0)==0) inlineNumbering730Regression(path,name);
@@ -697,6 +763,28 @@ int main(int argc, char** argv)
                 check(project.rawCompanions.begin()->second.kind==tekla::db1::DatabaseKind::Numbering,"DB2 misclassified");
             }
         }
+        else if (name == "project_xslib_raw_fallback" || name == "project_xslib_raw_disabled")
+        {
+            save(root/"model.db1",encode(partialCoreSchema("8.74"),"8.74"));
+            save(root/"xslib.db1",encode(std::vector<Table>(271),"8.74"));
+            tekla::Project project;tekla::ProjectOptions options;
+            options.readRawCompanions=name!="project_xslib_raw_disabled";
+            options.strictCompanions=name=="project_xslib_raw_fallback";
+            const bool ok=tekla::readProject(root,project,error,options);
+            const auto libraryFile=std::find_if(project.files.begin(),project.files.end(),[](const auto& file) {
+                return file.path.filename()=="xslib.db1";
+            });
+            if(name=="project_xslib_raw_fallback")
+                check(ok && !project.componentLibrary && project.rawCompanions.size()==1 &&
+                    project.rawCompanions.begin()->second.kind==tekla::db1::DatabaseKind::ComponentLibrary &&
+                    project.rawCompanions.begin()->second.tables.size()==271 && libraryFile!=project.files.end() &&
+                    libraryFile->level==tekla::ReadLevel::Raw && project.associations.empty(),
+                    "unsupported xslib was not retained as raw without guessed pairing");
+            else
+                check(ok && project.rawCompanions.empty() && libraryFile!=project.files.end() &&
+                    libraryFile->level==tekla::ReadLevel::Failed,
+                    "raw companion option did not preserve xslib failure behavior");
+        }
         else if (name == "duplicate_id")
         {
             auto s=onePart(); s[355].rows.push_back(s[355].rows.front()); save(path,encode(s));
@@ -723,30 +811,31 @@ int main(int argc, char** argv)
         }
         else if (name.rfind("project_shapes_",0)==0)
         {
-            save(path,encode(onePart()));
+            const auto shapeRoot=root/"shape-fixture";
+            save(shapeRoot/"model.db1",encode(onePart()));
             const std::string definition="<ImportPart version='1.0'><Info><Name>local</Name><Guid>guid</Guid><BrepStorageId>geom</BrepStorageId><Extrema><MinPoint X='0' Y='0' Z='0'/><MaxPoint X='1' Y='1' Z='0'/></Extrema></Info></ImportPart>";
             const std::string geometry="<Polymesh><Points><Point><X>0</X><Y>0</Y><Z>0</Z></Point><Point><X>1</X><Y>0</Y><Z>0</Z></Point><Point><X>0</X><Y>1</Y><Z>0</Z></Point></Points><Faces><Face><OuterLoop><Index>0</Index><Index>1</Index><Index>2</Index></OuterLoop></Face></Faces></Polymesh>";
-            const auto xml=[&](const std::filesystem::path& file,const std::string& value){save(root/file,Bytes(value.begin(),value.end()));};
-            xml("Shapes/def.xml",definition);
+            const auto xml=[&](const std::filesystem::path& file,const std::string& value){save(shapeRoot/file,Bytes(value.begin(),value.end()));};
+            xml("Shapes/guid.xml",definition);
             const bool missing=name=="project_shapes_missing", split=name=="project_shapes_split";
             if(!missing && !split)xml("ShapeGeometries/geom.xml",geometry);
             tekla::Project project;tekla::ProjectOptions options;
             const bool sibling=name=="project_shapes_sibling", internal=name=="project_shapes_internal";
             const bool lowConflict=name=="project_shapes_lower_conflict";
-            if(sibling){xml("ShapeGeometries/second.xml",definition);xml("Shapes/geom.xml",geometry);}
-            if(internal){xml("Shapes/second.xml",definition);xml("ShapeGeometries/sub/geom.xml",geometry);}
+            if(sibling){xml("ShapeGeometries/guid.xml",definition);xml("Shapes/geom.xml",geometry);}
+            if(internal){xml("Shapes/sub/guid.xml",definition);xml("ShapeGeometries/sub/geom.xml",geometry);}
             const bool external=sibling || internal || split || lowConflict || name=="project_shapes_precedence";
             if(external)
             {
                 options.resourceDirectories={"resources"};
                 auto other=definition;other.replace(other.find("local"),5,"external");
-                xml("resources/Shapes/def.xml",other);xml("resources/ShapeGeometries/geom.xml",geometry);
-                if(lowConflict){xml("resources/Shapes/other.xml",other);xml("resources/ShapeGeometries/sub/geom.xml",geometry);}
+                xml("resources/Shapes/guid.xml",other);xml("resources/ShapeGeometries/geom.xml",geometry);
+                if(lowConflict){xml("resources/Shapes/sub/guid.xml",other);xml("resources/ShapeGeometries/sub/geom.xml",geometry);}
             }
             const bool malformed=name=="project_shapes_malformed" || name=="project_shapes_strict";
             if(malformed)xml("Shapes/bad.xml","<ImportPart>");
             options.strictCompanions=name=="project_shapes_strict";
-            const bool ok=tekla::readProject(root,project,error,options);
+            const bool ok=tekla::readProject(shapeRoot,project,error,options);
             if(options.strictCompanions)check(!ok && project.files.empty() && project.shapes.definitionsByGuid.empty(),"strict shape failure retained output");
             else
             {
@@ -760,7 +849,7 @@ int main(int argc, char** argv)
                     if(!missing)
                     {
                         const auto& a=project.associations.front();
-                        check(a.source==root/"Shapes/def.xml" && a.target==root/(split?"resources/ShapeGeometries/geom.xml":"ShapeGeometries/geom.xml"),"shape association provenance or precedence");
+                        check(a.source==shapeRoot/"Shapes/guid.xml" && a.target==shapeRoot/(split?"resources/ShapeGeometries/geom.xml":"ShapeGeometries/geom.xml"),"shape association provenance or precedence");
                     }
                 }
                 const bool partial=missing || malformed || sibling || internal || lowConflict;
@@ -771,6 +860,173 @@ int main(int argc, char** argv)
                 check(foundPartial==partial,"partial shape catalog reported as complete");
             }
         }
+        else if (name == "project_db5_discovery" || name == "project_db5_discovery_nested")
+        {
+            save(path,encode(onePart()));
+            const auto db5Path=name=="project_db5_discovery_nested" ? root/"Analysis"/"analysis_results.db5" : root/"analysis_results.db5";
+            save(db5Path,Bytes{0,1,2,3,4,5});
+            tekla::Project project;
+            check(tekla::readProject(root,project,error),error.c_str());
+            const auto db5=std::filesystem::absolute(db5Path).lexically_normal();
+            const auto file=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==db5;});
+            check(file!=project.files.end() && file->role==tekla::FileRole::AnalysisResults &&
+                  file->level==tekla::ReadLevel::Discovered && file->diagnostic.find("semantic parsing is not implemented")!=std::string::npos,
+                  "DB5 analysis results were not explicitly inventoried as unsupported");
+            check(project.rawCompanions.count(db5)==0 &&
+                  std::none_of(project.associations.begin(),project.associations.end(),[&](const auto& item){return item.source==db5 || item.target==db5;}),
+                  "DB5 was passed to the DB6 reader or given an unverified association");
+        }
+        else if (name == "project_model_metadata")
+        {
+            save(path,encode(onePart()));
+            const auto metadataPath=root/"TeklaStructuresModel.xml";
+            const std::string xml="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                "<!DOCTYPE TeklaStructuresModels>\n<TeklaStructuresModels><Model>"
+                "<Name>Fixture model</Name><Version>2024 Service Pack 3</Version>"
+                "<ProductVersion>2024.0</ProductVersion><Environment>middle_east</Environment>"
+                "<Extension>retained</Extension></Model></TeklaStructuresModels>";
+            save(metadataPath,Bytes(xml.begin(),xml.end()));
+            tekla::Project project;
+            check(tekla::readProject(root,project,error),error.c_str());
+            const auto metadata=std::filesystem::absolute(metadataPath).lexically_normal();
+            const auto database=std::filesystem::absolute(path).lexically_normal();
+            const auto file=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==metadata;});
+            check(project.model.metadata.name=="Fixture model" &&
+                  project.model.metadata.productVersion=="2024.0" &&
+                  project.model.metadata.environment=="middle_east" &&
+                  project.model.metadata.rawXml==xml,
+                  "project did not retain parsed Tekla model metadata");
+            check(file!=project.files.end() && file->role==tekla::FileRole::ModelMetadata &&
+                  file->level==tekla::ReadLevel::PartialSemantic &&
+                  file->diagnostic.find("unknown XML extensions retained raw")!=std::string::npos,
+                  "model metadata file was not inventoried with its partial semantic boundary");
+            check(std::count_if(project.associations.begin(),project.associations.end(),[&](const auto& item){
+                      return item.source==metadata && item.target==database &&
+                             item.reason.find("parsed with the selected DB1")!=std::string::npos;
+                  })==1,
+                  "parsed model metadata was not linked to the selected DB1 with provenance");
+        }
+        else if (name == "project_db3_discovery" || name == "project_db3_discovery_nested")
+        {
+            save(path,encode(onePart()));
+            const auto db3Path=name=="project_db3_discovery_nested" ? root/"Analysis"/"plans.db3" : root/"plans.db3";
+            save(db3Path,Bytes{0,1,2,3,4,5});
+            tekla::Project project;
+            check(tekla::readProject(root,project,error),error.c_str());
+            const auto db3=std::filesystem::absolute(db3Path).lexically_normal();
+            const auto file=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==db3;});
+            check(file!=project.files.end() && file->role==tekla::FileRole::PlanDatabase &&
+                  file->level==tekla::ReadLevel::Discovered && file->diagnostic.find("semantic parsing is not implemented")!=std::string::npos,
+                  "DB3 plan database was not explicitly inventoried as unsupported");
+            check(project.rawCompanions.count(db3)==0 &&
+                  std::none_of(project.associations.begin(),project.associations.end(),[&](const auto& item){return item.source==db3 || item.target==db3;}),
+                  "DB3 was passed to another companion reader or given an unverified association");
+        }
+        else if (name == "project_rebar_catalog")
+        {
+            save(path,encode(onePart()));
+            const auto catalogPath=root/"attributes"/"RebarShapeCatalog.rscx";
+            const auto rebarDatabasePath=root/"rebar_database.inp";
+            const auto meshDatabasePath=root/"mesh_database.inp";
+            const auto rulesPath=root/"RebarShapeRules.xml";
+            const auto groupsPath=root/"ShapeCatalog.Groups.xml";
+            const auto userGroupsPath=root/"ShapeCatalog.Groups.user.alice.xml";
+            const auto packagePath=root/"custom.shapecatalog";
+            const auto resourceGroupsPath=root/"resources"/"Shapes"/"steel"/"Steel.ShapeCatalog.Groups.xml";
+            const auto resourceUserGroupsPath=root/"resources"/"Shapes"/"steel"/"ShapeCatalog.Groups.user.bob.xml";
+            const std::string xml="<ShapeCatalog><Category Name='Straight'><Shape>1</Shape></Category><Shape>5_1</Shape></ShapeCatalog>";
+            save(catalogPath,Bytes(xml.begin(),xml.end()));
+            const std::string unparsedCatalog="fixture: semantic contents intentionally not interpreted";
+            save(rebarDatabasePath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            save(meshDatabasePath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            save(rulesPath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            save(groupsPath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            save(userGroupsPath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            save(packagePath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            save(resourceGroupsPath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            save(resourceUserGroupsPath,Bytes(unparsedCatalog.begin(),unparsedCatalog.end()));
+            tekla::Project project;
+            tekla::ProjectOptions options; options.resourceDirectories={"resources"};
+            check(tekla::readProject(root,project,error,options),error.c_str());
+            const auto catalog=std::filesystem::absolute(catalogPath).lexically_normal();
+            const auto file=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==catalog;});
+            check(project.rebarShapeCatalog && project.rebarShapeCatalog->categories.size()==1 &&
+                  project.rebarShapeCatalog->categories.front().shapeIds==std::vector<std::string>{"1"} &&
+                  project.rebarShapeCatalog->uncategorizedShapeIds==std::vector<std::string>{"5_1"},
+                  "project did not expose the rebar shape catalog semantics");
+            check(file!=project.files.end() && file->role==tekla::FileRole::Catalog && file->level==tekla::ReadLevel::Semantic &&
+                  std::any_of(project.associations.begin(),project.associations.end(),[&](const auto& item){return item.target==catalog;}),
+                  "rebar shape catalog was not inventoried as a semantic project resource");
+            for(const auto& [sourcePath,diagnostic]:std::array<std::pair<std::filesystem::path,std::string>,2>{{
+                    {rebarDatabasePath,"rebar catalog discovered; semantic parsing is not implemented"},
+                    {meshDatabasePath,"reinforcement mesh catalog discovered; semantic parsing is not implemented"}}})
+            {
+                const auto target=std::filesystem::absolute(sourcePath).lexically_normal();
+                const auto discovered=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==target;});
+                check(discovered!=project.files.end() && discovered->role==tekla::FileRole::Catalog &&
+                      discovered->level==tekla::ReadLevel::Discovered && discovered->diagnostic==diagnostic,
+                      "unparsed reinforcement catalog was not identified with its semantic boundary");
+                check(std::none_of(project.associations.begin(),project.associations.end(),[&](const auto& item){return item.target==target;}),
+                      "unparsed reinforcement catalog was given a semantic resource association");
+            }
+            for(const auto& [sourcePath,diagnostic]:std::array<std::pair<std::filesystem::path,std::string>,6>{{
+                    {rulesPath,"rebar shape recognition rules discovered; semantic parsing is not implemented"},
+                    {groupsPath,"shape catalog group structure discovered; semantic parsing is not implemented"},
+                    {userGroupsPath,"shape catalog group structure discovered; semantic parsing is not implemented"},
+                    {packagePath,"shape catalog exchange package discovered; semantic parsing is not implemented"},
+                    {resourceGroupsPath,"shape catalog group structure discovered; semantic parsing is not implemented"},
+                    {resourceUserGroupsPath,"shape catalog group structure discovered; semantic parsing is not implemented"}}})
+            {
+                const auto target=std::filesystem::absolute(sourcePath).lexically_normal();
+                const auto discovered=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==target;});
+                check(discovered!=project.files.end() && discovered->role==tekla::FileRole::Catalog &&
+                      discovered->level==tekla::ReadLevel::Discovered && discovered->diagnostic==diagnostic,
+                      "shape catalog companion was not inventoried with its unsupported semantic boundary");
+                check(std::none_of(project.associations.begin(),project.associations.end(),[&](const auto& item){return item.target==target;}),
+                      "unparsed shape catalog companion was given a semantic resource association");
+            }
+            const auto shapeDirectory=std::filesystem::absolute(root/"resources"/"Shapes").lexically_normal();
+            const auto shapeDirectoryStatus=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==shapeDirectory;});
+            check(shapeDirectoryStatus!=project.files.end() && shapeDirectoryStatus->level==tekla::ReadLevel::Semantic &&
+                  std::none_of(project.shapes.diagnostics.begin(),project.shapes.diagnostics.end(),[&](const auto& item){
+                      return item.find("ShapeCatalog.Groups")!=std::string::npos;
+                  }),
+                  "shape group XML contaminated shape-definition parsing");
+        }
+        else if (name == "project_rebar_schedule_config" || name == "project_rebar_schedule_precedence" ||
+                 name == "project_rebar_schedule_off")
+        {
+            save(path,encode(onePart()));
+            const auto local=root/"rebar_schedule_config.inp";
+            const auto external=root/"resources"/"rebar_schedule_config.inp";
+            const std::string localText="BEND_TYPE_5_1[1]=\"LOCAL\"\n";
+            const std::string externalText="BEND_TYPE_5_1[1]=\"EXTERNAL\"\n";
+            save(local,Bytes(localText.begin(),localText.end()));
+            if(name!="project_rebar_schedule_config")save(external,Bytes(externalText.begin(),externalText.end()));
+            tekla::Project project;tekla::ProjectOptions options;
+            if(name!="project_rebar_schedule_config")options.resourceDirectories={"resources"};
+            if(name=="project_rebar_schedule_off")options.readRebarScheduleConfig=false;
+            check(tekla::readProject(root,project,error,options),error.c_str());
+            const auto target=std::filesystem::absolute(local).lexically_normal();
+            const auto file=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==target;});
+            if(name=="project_rebar_schedule_off")
+            {
+                check(!project.rebarScheduleConfig&&file!=project.files.end()&&file->role==tekla::FileRole::Catalog&&
+                      file->level==tekla::ReadLevel::Discovered&&
+                      std::none_of(project.associations.begin(),project.associations.end(),[&](const auto& item){return item.target==target;}),
+                      "disabled schedule parsing created semantics or association");
+            }
+            else
+            {
+                constexpr const char* expected="LOCAL";
+                check(project.rebarScheduleConfig&&project.rebarScheduleConfig->entries.size()==1&&
+                      project.rebarScheduleConfig->entries.front().rawValue==std::string("\"")+expected+"\""&&
+                      file!=project.files.end()&&file->role==tekla::FileRole::Catalog&&
+                      file->level==tekla::ReadLevel::PartialSemantic&&
+                      std::any_of(project.associations.begin(),project.associations.end(),[&](const auto& item){return item.target==target;}),
+                      "project schedule config semantics, local precedence, or partial boundary changed");
+            }
+        }
         else if (name == "project_precedence")
         {
             save(path,encode(onePart())); const std::string a="LOCAL!TYPE!0!0!1!1", b="EXTERNAL!TYPE!0!0!1!1";
@@ -778,6 +1034,97 @@ int main(int argc, char** argv)
             tekla::Project project; tekla::ProjectOptions options; options.resourceDirectories={"resources"};
             check(tekla::readProject(root,project,error,options),error.c_str());
             check(project.profileRules && project.profileRules->rules.front().prefix=="LOCAL","external resource overrides local resource");
+        }
+        else if (name == "project_clb" || name == "project_clb_ambiguous" || name == "project_clb_invalid_geometry" ||
+                 name == "project_clb_invalid_profitab" || name == "project_clb_missing_field" ||
+                 name == "project_clb_include_missing" || name == "project_clb_include_escape")
+        {
+            save(path,encode(onePart()));
+            const std::string profitab=name=="project_clb_invalid_profitab"
+                ? "PNL_A ! USER ! nope ! ! 2 ! 3 !1Gen.RectChamfer !h*b-[c]"
+                : "PNL_A ! USER ! 0 ! ! 2 ! 3 !1Gen.RectChamfer !h*b-[c]";
+            std::string clb=
+                "library_id \"1Gen\"\n"
+                "Section_type\n{\n"
+                " name \"RectChamfer\"\n"
+                " base_attribute\n {\n  name \"h\"\n  type dimension\n  default 1000\n }\n"
+                " expression\n {\n  name \"y1\"\n  type y\n  default -400\n  formula -h/2\n }\n"
+                " geometry\n {\n  name \"default\"\n"
+                "  face\n  {\n   index 0\n   point 0 y1 z3\n   point 1 y2 z4\n  }\n }\n"
+                "}\n";
+            if(name=="project_clb_invalid_geometry")
+            {
+                clb.replace(clb.find("point 0 y1 z3"),13,"point 3 y1 z3");
+                clb.replace(clb.find("point 1 y2 z4"),13,"point 0 y2");
+            }
+            else if(name=="project_clb_missing_field")
+                clb.erase(clb.find("  default 1000\n"),std::string("  default 1000\n").size());
+            save(root/"profitab.inp",Bytes(profitab.begin(),profitab.end()));
+            save(root/"common"/"inp"/"one.clb",Bytes(clb.begin(),clb.end()));
+            std::string includes="Include \"one.clb\"\n";
+            if(name=="project_clb_include_missing") includes="Include \"missing.clb\"\n";
+            if(name=="project_clb_include_escape") includes="Include \"../inp/one.clb\"\n";
+            save(root/"common"/"inp"/"components.clb",Bytes(includes.begin(),includes.end()));
+            if(name=="project_clb_ambiguous")
+                save(root/"resources"/"duplicate.CLb",Bytes(clb.begin(),clb.end()));
+            tekla::Project project;
+            check(tekla::readProject(root,project,error),error.c_str());
+            const bool invalidProfitab=name=="project_clb_invalid_profitab";
+            check(project.profileRules && project.profileRules->rules.size()==(invalidProfitab?0U:1U),
+                  "profitab invalid integer row was retained or valid rule was lost");
+            if (!invalidProfitab)
+            {
+                const auto& rule=project.profileRules->rules.front();
+                check(rule.generatorLibraryId=="1Gen" && rule.generatorSectionName=="RectChamfer","G3-NAME split incorrectly");
+            }
+            check(project.clbDocuments.size()==(name=="project_clb_ambiguous"?3:2),"CLB documents not discovered");
+            const auto& document=project.clbDocuments.at(std::filesystem::absolute(root/"common"/"inp"/"one.clb").lexically_normal());
+            check(document.libraryId=="1Gen" && document.sections.size()==1,"CLB section identity missing");
+            const auto& section=document.sections.front();
+            check(section.name=="RectChamfer" && section.baseAttributes.size()==1 && section.baseAttributes.front().name=="h" &&
+                  section.baseAttributes.front().type=="dimension" &&
+                  section.baseAttributes.front().defaultValue==(name=="project_clb_missing_field"?"":"1000") &&
+                  section.expressions.size()==1 && section.expressions.front().name=="y1" &&
+                  section.expressions.front().type=="y" && section.expressions.front().formula=="-h/2" &&
+                  section.geometries.size()==1 && section.geometries.front().name=="default" &&
+                  section.geometries.front().faces.size()==1 && section.geometries.front().faces.front().index==0 &&
+                  section.geometries.front().faces.front().points.size()==2 &&
+                  section.geometries.front().faces.front().points.front().stationIndex==
+                      std::optional<std::uint32_t>{name=="project_clb_invalid_geometry"?3U:0U} &&
+                  section.geometries.front().faces.front().points.front().yReference=="y1" &&
+                  section.geometries.front().faces.front().points.front().zReference=="z3",
+                  "CLB profile declarations or geometry references missing");
+            if(name=="project_clb_invalid_geometry" || name=="project_clb_missing_field")
+            {
+                const auto file=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){
+                    return item.path==std::filesystem::absolute(root/"common"/"inp"/"one.clb").lexically_normal();
+                });
+                check(!document.diagnostics.empty() && file!=project.files.end() && file->level==tekla::ReadLevel::PartialSemantic,
+                      "invalid CLB geometry was not retained with a partial-semantic diagnostic");
+            }
+            const auto componentPath=std::filesystem::absolute(root/"common"/"inp"/"components.clb").lexically_normal();
+            if(name!="project_clb_include_missing" && name!="project_clb_include_escape")
+                check(project.clbIncludeAssociations.size()==1 && project.clbIncludeAssociations.front().components==componentPath &&
+                      project.clbIncludeAssociations.front().clb==std::filesystem::absolute(root/"common"/"inp"/"one.clb").lexically_normal() &&
+                      project.clbIncludeAssociations.front().includeIndex==0,
+                      "components.clb Include was not resolved");
+            else
+            {
+                check(project.clbIncludeAssociations.empty(),"invalid components.clb Include was resolved");
+                const auto status=std::find_if(project.files.begin(),project.files.end(),[&](const auto& item){return item.path==componentPath;});
+                check(status!=project.files.end() && status->level==tekla::ReadLevel::PartialSemantic,"invalid Include was not marked partial");
+            }
+            if(name=="project_clb")
+                check(project.profileRuleSectionAssociations.size()==1 &&
+                      project.profileRuleSectionAssociations.front().clb==std::filesystem::absolute(root/"common"/"inp"/"one.clb").lexically_normal() &&
+                      project.profileRuleSectionAssociations.front().sectionIndex==0 && project.profileRuleSectionAssociations.front().profitab==root/"profitab.inp",
+                      "profitab rule was not linked to its CLB section");
+            else if(name=="project_clb_ambiguous")
+                check(project.profileRuleSectionAssociations.empty(),"ambiguous CLB section was selected");
+            else if(invalidProfitab)
+                check(project.profileRuleSectionAssociations.empty(),"invalid profitab row was linked to a CLB section");
+            else
+                check(project.profileRuleSectionAssociations.size()==1,"valid profile section link lost because of Include diagnostic");
         }
         else if (name == "project_guid")
         {

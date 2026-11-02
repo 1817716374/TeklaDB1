@@ -1,10 +1,14 @@
 #include <tekla/db1/Parser.hpp>
 #include <tekla/db1/OcctGeometry.hpp>
 #include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepBndLib.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepGProp.hxx>
 #include <GProp_GProps.hxx>
+#include <Bnd_Box.hxx>
+#include <TopAbs_ShapeEnum.hxx>
+#include <TopExp_Explorer.hxx>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -112,10 +116,45 @@ int check(const std::filesystem::path& directory, bool camberCheck)
     }
     catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
 }
+
+int diagnoseCutComponents(const std::filesystem::path& modelFile)
+{
+    using namespace tekla::db1;
+    try
+    {
+        Model model; std::string error;
+        ifc730::require(parseModelFile(modelFile,model,error),error);
+        OcctGeometryModel geometry;
+        ifc730::require(buildOcctGeometry(model,geometry,error),error);
+        for (const auto id : {318943u,327338u,327524u,327681u,266801u,266954u})
+        {
+            for(const auto& op:model.booleans) if(op.fatherPartId==id)
+                std::cout<<"operation boolean tool="<<op.id<<" father="<<id<<" additive="<<op.additive<<'\n';
+            for(const auto& op:model.fittings) if(op.fatherPartId==id)
+                std::cout<<"operation fitting id="<<op.id<<" father="<<id<<" origin="<<op.origin[0]<<','<<op.origin[1]<<','<<op.origin[2]<<'\n';
+            for(const auto& op:model.cutPlanes) if(op.fatherPartId==id)
+                std::cout<<"operation cut-plane id="<<op.id<<" father="<<id<<" origin="<<op.origin[0]<<','<<op.origin[1]<<','<<op.origin[2]<<'\n';
+            const auto found=geometry.partShapes.find(id);
+            if(found==geometry.partShapes.end()) { std::cout<<"part="<<id<<" missing\n"; continue; }
+            std::size_t count=0;
+            for(TopExp_Explorer it(found->second,TopAbs_SOLID);it.More();it.Next())
+            {
+                GProp_GProps mass; BRepGProp::VolumeProperties(it.Current(),mass);
+                Bnd_Box box; BRepBndLib::Add(it.Current(),box);
+                double x0,y0,z0,x1,y1,z1; box.Get(x0,y0,z0,x1,y1,z1);
+                std::cout<<"part="<<id<<" solid="<<count++<<" volume="<<std::setprecision(12)<<mass.Mass()
+                         <<" bounds="<<x0<<","<<y0<<","<<z0<<":"<<x1<<","<<y1<<","<<z1<<"\n";
+            }
+            std::cout<<"part="<<id<<" solids="<<count<<"\n";
+        }
+        return 0;
+    }
+    catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
+}
 #ifdef _WIN32
 int wmain(int argc,wchar_t** argv)
-{if(argc==2 && std::wstring(argv[1])==L"ifc_volume_evidence")return volumeEvidenceRegression();if(argc==3 && std::wstring(argv[1])==L"ifc_ellipse_geometry")return checkEllipseIfc(std::filesystem::path(argv[2]));return argc==3 && (std::wstring(argv[1])==L"ifc_geometry" || std::wstring(argv[1])==L"ifc_camber_geometry")?check(std::filesystem::path(argv[2]),std::wstring(argv[1])==L"ifc_camber_geometry"):2;}
+{if(argc==2 && std::wstring(argv[1])==L"ifc_volume_evidence")return volumeEvidenceRegression();if(argc==3 && std::wstring(argv[1])==L"ifc_ellipse_geometry")return checkEllipseIfc(std::filesystem::path(argv[2]));if(argc==3 && std::wstring(argv[1])==L"ifc_cut_components")return diagnoseCutComponents(std::filesystem::path(argv[2]));return argc==3 && (std::wstring(argv[1])==L"ifc_geometry" || std::wstring(argv[1])==L"ifc_camber_geometry")?check(std::filesystem::path(argv[2]),std::wstring(argv[1])==L"ifc_camber_geometry"):2;}
 #else
 int main(int argc,char** argv)
-{if(argc==2 && std::string(argv[1])=="ifc_volume_evidence")return volumeEvidenceRegression();if(argc==3 && std::string(argv[1])=="ifc_ellipse_geometry")return checkEllipseIfc(std::filesystem::u8path(argv[2]));return argc==3 && (std::string(argv[1])=="ifc_geometry" || std::string(argv[1])=="ifc_camber_geometry")?check(std::filesystem::u8path(argv[2]),std::string(argv[1])=="ifc_camber_geometry"):2;}
+{if(argc==2 && std::string(argv[1])=="ifc_volume_evidence")return volumeEvidenceRegression();if(argc==3 && std::string(argv[1])=="ifc_ellipse_geometry")return checkEllipseIfc(std::filesystem::u8path(argv[2]));if(argc==3 && std::string(argv[1])=="ifc_cut_components")return diagnoseCutComponents(std::filesystem::u8path(argv[2]));return argc==3 && (std::string(argv[1])=="ifc_geometry" || std::string(argv[1])=="ifc_camber_geometry")?check(std::filesystem::u8path(argv[2]),std::string(argv[1])=="ifc_camber_geometry"):2;}
 #endif
