@@ -143,9 +143,11 @@ struct DrawingMetadataAssociation
 {
     std::filesystem::path metadata;
     std::filesystem::path drawing;
-    // Present only when an existing scoped DG-to-DB1 subject association agrees
-    // with MainObjectGuid. Metadata never supplies missing DG subject identity.
+    // File pairing can be proven by exact sidecar/DG filename and sheet, even
+    // when this DG version has no decoded subject. This optional object link is
+    // present only when the scoped DG subject agrees with MainObjectGuid.
     std::optional<std::uint32_t> modelObjectId;
+    enum class Evidence { FilenameAndSheet, SubjectIdentity } evidence = Evidence::SubjectIdentity;
 };
 struct BoltAssemblyStandardAssociation
 {

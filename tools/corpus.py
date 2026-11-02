@@ -119,8 +119,11 @@ def main():
     results = []
     for case in manifest["cases"]:
         path = safe_path(data, case["path"])
+        timeout_seconds = case.get("timeout_seconds", 120)
+        if not isinstance(timeout_seconds, int) or timeout_seconds < 1:
+            raise ValueError(f"invalid timeout_seconds for {case['name']}: {timeout_seconds!r}")
         result = subprocess.run([str(args.exe.resolve()), case["mode"], str(path)],
-                                capture_output=True, encoding="utf8", errors="replace", timeout=120)
+                                capture_output=True, encoding="utf8", errors="replace", timeout=timeout_seconds)
         ok = result.returncode == case["exit"]
         if "stdout" in case:
             ok = ok and result.stdout.strip() == case["stdout"]

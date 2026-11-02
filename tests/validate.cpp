@@ -776,7 +776,10 @@ int run(const std::string& mode, const std::filesystem::path& path)
                project.numbering.at(db2).series.size()!=9 || drawings!=9 || parsedDrawings!=9 || rawDrawings!=0 ||
                project.drawings.size()!=9 || strings!=365 || properties!=35 || links!=36 || sheets!=9 ||
                metadataSheetMatches!=6 || !project.drawingSubjectAssociations.empty() ||
-               !project.drawingMetadataAssociations.empty() || drawingProjectGuidMatches!=0 ||
+               project.drawingMetadataAssociations.size()!=6 ||
+               std::any_of(project.drawingMetadataAssociations.begin(),project.drawingMetadataAssociations.end(),[](const auto& a) {
+                   return a.modelObjectId.has_value() || a.evidence!=tekla::DrawingMetadataAssociation::Evidence::FilenameAndSheet;
+               }) || drawingProjectGuidMatches!=0 ||
                metadata!=6 || project.drawingMetadata.size()!=6 || failed!=0 ||
                !sawLegacy1252Name || !project.environment || project.optionsDatabases.size()!=2 ||
                project.profileCatalogAssociations.size()!=42)

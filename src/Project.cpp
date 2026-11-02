@@ -570,12 +570,25 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
             const auto& drawing=found->second;
             if(drawing.storedFileName.empty() || lower(drawing.storedFileName)!=lower(db1::detail::pathUtf8(found->first.filename())))
             {diagnostic("drawing metadata filename differs from DG stored filename");continue;}
-            if(metadata.drawingGuid.empty() || !metadata.width || !metadata.height || !metadata.drawingType ||
-                drawing.sheets.size()!=1 || !drawing.subject)
-            {diagnostic("drawing metadata pairing lacks required identity, sheet or subject fields");continue;}
-            if(*metadata.width!=drawing.sheets[0].width || *metadata.height!=drawing.sheets[0].height || *metadata.drawingType!=drawing.subject->typeCode)
-            {diagnostic("drawing metadata sheet or type conflicts with DG");continue;}
+            if(metadata.drawingGuid.empty() || !metadata.width || !metadata.height || drawing.sheets.size()!=1)
+            {diagnostic("drawing metadata pairing lacks GUID or a unique sheet");continue;}
+            if(*metadata.width!=drawing.sheets[0].width || *metadata.height!=drawing.sheets[0].height)
+            {diagnostic("drawing metadata sheet dimensions conflict with DG");continue;}
+            if(!drawing.subject)
+            {
+                DrawingMetadataAssociation association{entry.first,found->first,{}};
+                association.evidence=DrawingMetadataAssociation::Evidence::FilenameAndSheet;
+                result.drawingMetadataAssociations.push_back(std::move(association));
+                result.associations.push_back({entry.first,found->first,
+                    "DG metadata filename, saved filename and sheet dimensions match; DG subject identity is unavailable"});
+                if(!metadata.mainObjectGuid.empty())
+                    diagnostic("main object GUID retained without a decoded DG subject; no model object link inferred");
+                continue;
+            }
+            if(!metadata.drawingType || *metadata.drawingType!=drawing.subject->typeCode)
+            {diagnostic("drawing metadata type conflicts with DG subject");continue;}
             DrawingMetadataAssociation association{entry.first,found->first,{}};
+            association.evidence=DrawingMetadataAssociation::Evidence::SubjectIdentity;
             if(!metadata.mainObjectGuid.empty())
             {
                 const auto subject=std::find_if(result.drawingSubjectAssociations.begin(),result.drawingSubjectAssociations.end(),
