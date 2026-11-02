@@ -468,6 +468,9 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                     (drawing.raw.storageVersion=="7.30" || drawing.raw.storageVersion=="7.82") &&
                     drawing.raw.storageVersion==result.model.storageVersion &&
                     drawing.projectGuid.empty() && result.model.databaseGuid.empty();
+                const bool directSubjectGuidCandidate=drawing.raw.storageVersion=="9.50" && drawing.subject &&
+                    !drawing.subject->modelGuid.empty() &&
+                    (drawing.subject->kind==DrawingSubjectKind::SinglePart || drawing.subject->kind==DrawingSubjectKind::Assembly);
                 if (drawingGuidMatches || explicitLegacyNumericScope)
                 {
                     result.associations.push_back({result.model.databasePath,file.path,drawingGuidMatches?
@@ -535,6 +538,33 @@ bool readProject(const std::filesystem::path& directory, Project& result, std::s
                         else
                             result.diagnostics.push_back("legacy drawing type-309 model ID is unresolved or not an actual part: "+std::to_string(id));
                     }
+                }
+                else if (directSubjectGuidCandidate)
+                {
+                    // A stored subject GUID can identify one DB1 object even
+                    // when grProjectGuid does not scope the whole drawing.
+                    // Keep this narrow to the observed 9.50 subject layout:
+                    // exact unique GUID, matching subject kind, and matching
+                    // object-table membership. Do not pair the drawing file
+                    // itself or any other model references on this evidence.
+                    const auto& subject=*drawing.subject;
+                    const auto found=modelIdsByGuid.find(lower(subject.modelGuid));
+                    if(found!=modelIdsByGuid.end() && found->second.size()==1)
+                    {
+                        const auto id=found->second.front();
+                        const bool objectKindMatches=subject.kind==DrawingSubjectKind::SinglePart ?
+                            result.model.parts.count(id)!=0 :
+                            std::any_of(result.model.assemblies.begin(),result.model.assemblies.end(),
+                                [&](const auto& assembly){return assembly.id==id;});
+                        if(objectKindMatches)
+                            result.drawingSubjectAssociations.push_back({file.path,subject.recordId,id,subject.modelGuid,0,
+                                DrawingPairEvidence::DirectSubjectGuidIdentity});
+                        else
+                            result.diagnostics.push_back("9.50 drawing subject GUID matches a DB1 identity but not the corresponding object table: "+subject.modelGuid);
+                    }
+                    else
+                        result.diagnostics.push_back("9.50 drawing subject GUID is unresolved or ambiguous in the selected DB1: "+subject.modelGuid);
+                    result.diagnostics.push_back("drawing project GUID differs from the selected DB1; only an exact unique 9.50 subject GUID match was considered: "+db1::detail::pathUtf8(file.path));
                 }
                 else result.diagnostics.push_back("drawing project GUID is missing or differs from main model: "+db1::detail::pathUtf8(file.path));
                 for (const auto& item:drawing.diagnostics) result.diagnostics.push_back(db1::detail::pathUtf8(file.path)+": "+item);

@@ -49,6 +49,8 @@ int main(int argc,char** argv)
     projectOptions.trustLegacyDrawingObjectIds = false;
     tekla::DrawingModelAssociation drawingAssociation;
     if(drawingAssociation.pairingEvidence!=tekla::DrawingPairEvidence::ProjectGuidAndObjectIdentity)return 12;
+    drawingAssociation.pairingEvidence=tekla::DrawingPairEvidence::DirectSubjectGuidIdentity;
+    if(drawingAssociation.pairingEvidence!=tekla::DrawingPairEvidence::DirectSubjectGuidIdentity)return 25;
     tekla::db1::ClbDocument clb;
     clb.libraryId = "consumer";
     tekla::db1::ClbSection section;

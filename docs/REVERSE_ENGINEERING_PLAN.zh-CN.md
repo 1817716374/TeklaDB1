@@ -736,3 +736,9 @@ Trimble 当前 Model Sharing 文档将 `.db3` 列为 Plan database，并说明�
 重复交叉截面名、重复点号、重复字段、非有限数值以及缺少点坐标会拒绝并清空输出。倒角类型仍是未解释的原始数值；解析器不生成轮廓，不根据 TYPE=998 的 SUB_TYPE 猜测其与截面名称的关联。测试使用官方文档公开的字段示例构造片段；固定公开语料仍没有真实 Tekla `.lis` 导出，因此本项仍是部分语法支持，不代表原生全目录兼容。文档来源：[Tekla 2025 型材目录导入/导出](https://support.tekla.com/doc/tekla-structures/2025/mod_catalogs_exporting_and_importing_profiles)、[Tekla 2022 固定型材示例](https://support.tekla.com/pt-pt/doc/tekla-structures/2022/mod_catalogs_example_export_file)。
 
 验证：MinGW C++17 与 MSVC Release 全量 CTest 均为 636/636；两种工具链各自的全新安装包消费者测试均为 97/97；固定公开语料为 1,787/1,787。构建、临时文件、安装包、语料和报告均位于 E 盘。后续需取得真实 Tekla `.lis` 导出，以验证完整树/目录语法、版本变化、profile 类型及截面依赖关系。
+
+## 2026-11-02：9.50 DG 单对象主体 GUID 关联
+
+Abri-Moto-VCCF25 的 9 张 9.50 DG 中，`grProjectGuid` 与所选 DB1 的工程 GUID 均不匹配；但三张单对象图纸的主体 GUID 分别唯一命中 DB1 身份表中的两条零件记录和一条装配记录，且身份 ID 分别存在于对应对象表。工程入口现仅在这种精确、唯一、类型吻合的 9.50 subject 情形下建立 `DirectSubjectGuidIdentity` 主体关系，不建立整图/工程配对，也不启用其它数字或 GUID 引用。六张多对象主体不产生对象链接；三份 sidecar 的 `MainObjectGuid` 与主体 GUID 不同，因此仍只与 DG 做文件名和图幅关联。验证仍限于一个公开工程；9.50 其它版本的 DG 身份作用域、视图、尺寸、实体和跨工程可复现性待后续取证。
+
+本轮 MinGW C++17 与 MSVC Release 全量 CTest 均为 636/636；固定公开语料 1,787/1,787、MinGW 安装包消费者 97/97 均通过。`model_950` 工程回归和独立 Python 原始表解码共同确认三条 direct subject GUID 关系；另一个独立程序经安装的 CMake 包读取真实工程，确认9张DG、3条主体关系、0条其它模型引用和6条 metadata 文件关系。CI 已增加独立 DB1 9.50 IFC/DG 身份证据步骤。语料报告写入 `E:\CodexData\TeklaDB1-review\reports\corpus-dg950-direct-subject-guid-20261102.json`。

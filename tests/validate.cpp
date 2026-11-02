@@ -800,6 +800,24 @@ int run(const std::string& mode, const std::filesystem::path& path)
                    entry.second.mainObjectGuid!=dg.subject->modelGuid)
                     ++subjectMetadataGuidConflicts;
             }
+            if(project.drawingSubjectAssociations.size()!=3 ||
+               std::any_of(project.drawingSubjectAssociations.begin(),project.drawingSubjectAssociations.end(),[&](const auto& link) {
+                   const auto drawing=project.drawings.find(link.drawing);
+                   if(link.pairingEvidence!=tekla::DrawingPairEvidence::DirectSubjectGuidIdentity ||
+                      drawing==project.drawings.end() || !drawing->second.subject ||
+                      drawing->second.subject->modelGuid!=link.modelGuid ||
+                      project.model.identities.count(link.modelObjectId)==0 ||
+                      project.model.identities.at(link.modelObjectId).guid!=link.modelGuid)
+                       return true;
+                   const auto& subject=*drawing->second.subject;
+                   return subject.kind==tekla::DrawingSubjectKind::SinglePart ?
+                       project.model.parts.count(link.modelObjectId)==0 :
+                       subject.kind!=tekla::DrawingSubjectKind::Assembly ||
+                       std::none_of(project.model.assemblies.begin(),project.model.assemblies.end(),[&](const auto& a) {
+                           return a.id==link.modelObjectId;
+                       });
+               }))
+                throw std::runtime_error("9.50 direct subject GUID associations are not unique typed identity matches");
             if(project.model.databasePath!=main || project.model.storageVersion!="9.50" ||
                project.model.parts.size()!=177 || !project.model.actualPartIds.empty() ||
                project.model.unhandledPartIds.size()!=177 || project.model.assemblies.size()!=106 ||
@@ -811,7 +829,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                project.numbering.at(db2).series.size()!=9 || drawings!=9 || parsedDrawings!=9 || rawDrawings!=0 ||
                project.drawings.size()!=9 || strings!=365 || properties!=35 || links!=36 || sheets!=9 ||
                metadataSheetMatches!=6 || subjectMetadataGuidConflicts!=3 || subjects!=9 || subjectIdentityMatches!=3 || subjectTypes[1]!=2 ||
-               subjectTypes[2]!=1 || subjectTypes[7]!=6 || !project.drawingSubjectAssociations.empty() ||
+               subjectTypes[2]!=1 || subjectTypes[7]!=6 || project.drawingSubjectAssociations.size()!=3 ||
                !project.drawingModelAssociations.empty() ||
                project.drawingMetadataAssociations.size()!=6 ||
                std::any_of(project.drawingMetadataAssociations.begin(),project.drawingMetadataAssociations.end(),[](const auto& a) {
@@ -827,6 +845,7 @@ int run(const std::string& mode, const std::filesystem::path& path)
                      <<" db2="<<project.numbering.size()<<" empty_844=1 secondary_pair=1 raw="<<project.rawCompanions.size()
                      <<" drawings="<<drawings<<" parsed_drawings="<<parsedDrawings<<" raw_drawings="<<rawDrawings<<" metadata="<<metadata
                      <<" subjects="<<subjects<<" subject_identity_db1_matches="<<subjectIdentityMatches
+                     <<" direct_subject_links="<<project.drawingSubjectAssociations.size()
                      <<" subject_metadata_guid_conflicts="<<subjectMetadataGuidConflicts
                      <<" drawing_strings="<<strings<<" drawing_properties="<<properties<<" property_links="<<links
                      <<" sheets="<<sheets<<" metadata_sheet_matches="<<metadataSheetMatches

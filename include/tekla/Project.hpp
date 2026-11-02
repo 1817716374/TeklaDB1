@@ -59,7 +59,15 @@ struct ProjectOptions
     bool readIdRangeMappers = true;
     bool readHistory = true;
 };
-enum class DrawingPairEvidence { ProjectGuidAndObjectIdentity, ExplicitLegacyNumericScope };
+enum class DrawingPairEvidence
+{
+    ProjectGuidAndObjectIdentity,
+    ExplicitLegacyNumericScope,
+    // A DG subject's stored GUID uniquely matched one DB1 identity, but the
+    // drawing's project GUID did not match. This links only that subject; it
+    // does not scope other numeric/model references in the drawing.
+    DirectSubjectGuidIdentity
+};
 struct DrawingModelAssociation
 {
     std::filesystem::path drawing;

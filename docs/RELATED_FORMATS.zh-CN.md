@@ -230,7 +230,7 @@ Trimble官方Open API图纸练习包里的8.37主DB2有10张顺序表但均无�
 
 范围组依次为 minX/maxX/minY/maxY/depthNegative/depthPositive；保留有符号深度，不附加未经证实的正值要求。同包固定散列的 `attributes/new_FAB-PLATE_Without_Dimensions.vi` 对应图纸 D2ba7aa95 的 context 12，其 6 个值与第二存储组全部相符。第二组与第一组在旧视图上可能不同甚至平面范围为零，因此公开为 storedAttributeVolume，不当成自动尺寸调整后的有效裁剪范围。
 
-视图属性集名由 `gr_cl_view_prop` 的 property link 按 context 连接。28 条 type-322 引用的 context 均对应某个视图；Project 的 drawingModelAssociations 现保留该 context。图纸主体单独置于 drawingSubjectAssociations，只有工程 GUID 相同、主体 GUID 唯一且已知主体类型与 DB1 类型相符才建立关联。未解析的 context/主体不会凭文件名猜测。
+视图属性集名由 `gr_cl_view_prop` 的 property link 按 context 连接。28 条 type-322 引用的 context 均对应某个视图；Project 的 drawingModelAssociations 现保留该 context。图纸主体单独置于 drawingSubjectAssociations：通常要求工程 GUID 相同、主体 GUID 唯一且已知主体类型与 DB1 类型相符；DG 9.50 另对精确唯一且对象表类别相符的单对象 subject GUID 暴露 `DirectSubjectGuidIdentity`，即使工程 GUID 不匹配也只链接该主体，不据此配对整图或关联其它引用。未解析的 context/主体不会凭文件名猜测。
 
 ## DBV 环境与选项
 

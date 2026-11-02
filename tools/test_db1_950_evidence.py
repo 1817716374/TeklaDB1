@@ -316,9 +316,70 @@ def verify_abri(root: Path) -> str:
             matching_edges += identities[child_id][0][3] == parent_id
     if (matching_edges, owner_edges) != (158, 266):
         raise ValueError("Abri-Moto IFC aggregation/DB1 owner evidence changed")
+    # Independently decode the 9.50 DG subject rows. The DB1 project GUID is
+    # intentionally not used here: only the exact subject GUID/object-table
+    # pairs are evidence for the narrow DirectSubjectGuidIdentity link.
+    drawing_paths = sorted((folder / "drawings").glob("*.dg"))
+    if len(drawing_paths) != 9:
+        raise ValueError("Abri-Moto DG inventory changed")
+    subjects: list[tuple[int, int, bytes]] = []
+    for drawing_path in drawing_paths:
+        drawing_data = analyze_schema.read_payload(drawing_path)
+        drawing_db = analyze_schema.parse_database(drawing_path)
+        drawing_offsets = analyze_schema.section_offsets(drawing_data)
+        if drawing_db.storage_version != "9.50" or len(drawing_db.tables) != 48:
+            raise ValueError(f"unexpected Abri-Moto DG schema: {drawing_path}")
+        subject_table = drawing_db.tables[11]
+        subject_offset = drawing_offsets[11]
+        field_count = struct.unpack_from("<I", drawing_data, subject_offset + 8)[0]
+        descriptors = struct.unpack_from(f"<{field_count}I", drawing_data, subject_offset + 12)
+        if (subject_table.payload_size, field_count) != (6148, 804):
+            raise ValueError(f"unexpected Abri-Moto 9.50 subject table: {drawing_path}")
+        if descriptors != (1,) + (0,) * 803:
+            raise ValueError(f"unexpected Abri-Moto 9.50 subject field descriptors: {drawing_path}")
+        first = subject_offset + 12 + field_count * 4
+        next_offset = drawing_offsets[12]
+        stride = subject_table.payload_size + 1 + 24 + 16 * sum(value != 0 for value in descriptors)
+        records = []
+        cursor = first
+        while cursor < next_offset and drawing_data[cursor] in (4, 12):
+            if stride > next_offset - cursor:
+                raise ValueError(f"truncated Abri-Moto 9.50 subject row: {drawing_path}")
+            records.append(drawing_data[cursor:cursor + stride])
+            cursor += stride
+        if cursor >= next_offset or drawing_data[cursor] != 0 or len(records) != 1:
+            raise ValueError(f"unexpected Abri-Moto 9.50 subject row framing: {drawing_path}")
+        record = records[0]
+        if record[0] not in (4, 12):
+            raise ValueError(f"invalid Abri-Moto 9.50 subject row framing: {drawing_path}")
+        payload = record[1:1 + subject_table.payload_size]
+        if struct.unpack_from("<I", payload, 0)[0] != 269 or struct.unpack_from("<I", payload, 8)[0] != 0:
+            raise ValueError(f"invalid Abri-Moto 9.50 subject row header: {drawing_path}")
+        subjects.append((struct.unpack_from("<I", payload, 12)[0],
+                         struct.unpack_from("<I", payload, 4)[0], payload[16:32]))
+    linked_subjects = []
+    for type_code, subject_id, guid in subjects:
+        if type_code == 1:
+            target = guid_to_identity.get(guid)
+            if target is None or target[0] not in parts:
+                raise ValueError("9.50 single-part subject GUID did not uniquely resolve to a DB1 part row")
+            linked_subjects.append(target[0])
+        elif type_code == 2:
+            target = guid_to_identity.get(guid)
+            if target is None or target[0] not in assemblies:
+                raise ValueError("9.50 assembly subject GUID did not uniquely resolve to a DB1 assembly row")
+            linked_subjects.append(target[0])
+        elif type_code == 7:
+            if guid != bytes(16):
+                raise ValueError("9.50 multiple-object subject unexpectedly carries a single-object GUID")
+        else:
+            raise ValueError(f"unexpected Abri-Moto 9.50 drawing subject type: {type_code}")
+    if len(linked_subjects) != 3 or len(set(linked_subjects)) != 3 or Counter(t for t, _, _ in subjects) != Counter({1: 2, 2: 1, 7: 6}):
+        raise ValueError("Abri-Moto direct subject identity evidence changed")
     return ("model=Abri-Moto-VCCF25 identities=1715 part_rows=177 assembly_rows=106 bolt_rows=109 "
             "ifc_parts=158/158 ifc_assemblies=99/99 ifc_mechanical_fasteners=108/108 "
-            "ifc_fasteners_unclassified=55 owner_edges=158/266")
+        "ifc_fasteners_unclassified=55 owner_edges=158/266 drawing_subjects=9 "
+        "direct_subject_guid_matches=3 multiple_object_subjects=6")
 
 
 def main() -> int:
