@@ -21,7 +21,7 @@ def main():
     args = parser.parse_args()
     manifest = json.loads((Path(__file__).resolve().parents[1]/"tests/corpus.json").read_text(encoding="utf8"))
     specs = [f for f in manifest["files"] if f["path"].startswith("api-exam908-")]
-    if len(specs) != 14:
+    if len(specs) != 15:
         raise ValueError("missing pinned 9.08 numbering inputs")
     for spec in specs:
         source = safe_path(args.data.resolve(), spec["path"])
