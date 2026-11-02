@@ -19,7 +19,8 @@ add_test(NAME installed-dbv-environment-v2-consumer
 foreach(case profile_v9 profile_v10 profile_duplicate profile_bad_version profile_bad_width profile_bad_tag
              bolt_standard bolt_truncated bolt_schema assembly_components assembly_truncated
              profitab_valid profitab_invalid_integer profile_lis_valid profile_lis_bad_version
-             profile_lis_bad_structure profile_lis_duplicate_property)
+             profile_lis_bad_structure profile_lis_duplicate_property profile_lis_tekla_valid
+             profile_lis_tekla_bad_structure profile_lis_tekla_bad_version)
     add_test(NAME installed-catalog-${case}-consumer COMMAND catalog_consumer "${CMAKE_CURRENT_BINARY_DIR}/test-data" ${case})
 endforeach()
 add_executable(analysis_settings_consumer ../analysis_settings.cpp)

@@ -843,7 +843,10 @@ bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis
         auto header = trim(lines[cursor].text);
         constexpr char bom[] = "\xEF\xBB\xBF";
         if (header.compare(0, 3, bom) == 0) header.erase(0, 3);
-        constexpr std::string_view prefix = "PROFILE DATABASE EXPORT VERSION";
+        constexpr std::string_view databasePrefix = "PROFILE DATABASE EXPORT VERSION";
+        constexpr std::string_view catalogPrefix = "PROFILE CATALOG EXPORT VERSION";
+        const bool teklaCatalogExport = header.compare(0, catalogPrefix.size(), catalogPrefix) == 0;
+        const auto prefix = teklaCatalogExport ? catalogPrefix : databasePrefix;
         if (header.compare(0, prefix.size(), prefix) != 0)
             throw std::runtime_error("unsupported profile .lis header at line " + std::to_string(lines[cursor].number));
         const auto equal = header.find('=', prefix.size());
@@ -852,7 +855,8 @@ bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis
         const auto versionText = trim(header.substr(equal + 1));
         std::uint32_t version = 0;
         const auto versionResult = std::from_chars(versionText.data(), versionText.data() + versionText.size(), version);
-        if (versionResult.ec != std::errc{} || versionResult.ptr != versionText.data() + versionText.size() || version != 2)
+        if (versionResult.ec != std::errc{} || versionResult.ptr != versionText.data() + versionText.size() ||
+            (!teklaCatalogExport && version != 2) || (teklaCatalogExport && version == 0))
             throw std::runtime_error("unsupported profile .lis export version at line " + std::to_string(lines[cursor].number));
         result.version = version;
         ++cursor;
@@ -893,7 +897,15 @@ bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis
             const auto declaration = trim(lines[cursor].text);
             constexpr std::string_view namePrefix = "PROFILE_NAME";
             if (declaration.compare(0, namePrefix.size(), namePrefix) != 0)
-                throw std::runtime_error("expected PROFILE_NAME at line " + std::to_string(lines[cursor].number));
+            {
+                if (!teklaCatalogExport)
+                    throw std::runtime_error("expected PROFILE_NAME at line " + std::to_string(lines[cursor].number));
+                // Native catalog exports include a tree section before the fixed
+                // profile records. Preserve it in rawText while interpreting only
+                // documented PROFILE_NAME records.
+                ++cursor;
+                continue;
+            }
             const auto nameEqual = declaration.find('=', namePrefix.size());
             if (nameEqual == std::string::npos || !trim(declaration.substr(namePrefix.size(), nameEqual - namePrefix.size())).empty())
                 throw std::runtime_error("malformed PROFILE_NAME at line " + std::to_string(lines[cursor].number));
@@ -969,6 +981,8 @@ bool parseProfileCatalogLis(const std::filesystem::path& path, ProfileCatalogLis
             }
             result.entries.push_back(std::move(entry));
         }
+        if (result.entries.empty())
+            throw std::runtime_error("profile .lis contains no supported PROFILE_NAME records");
         result.ambiguousProfileNames.assign(duplicateNames.begin(), duplicateNames.end());
         std::sort(result.ambiguousProfileNames.begin(), result.ambiguousProfileNames.end());
         return true;

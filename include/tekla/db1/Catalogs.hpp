@@ -34,8 +34,10 @@ struct ProfileCatalog
     std::vector<std::string> ambiguousProfileNames;
 };
 
-// Numeric profile properties from the observed third-party PROFILE DATABASE .lis
-// dialect. Property names are preserved verbatim; unknown names are not dropped.
+// Numeric fixed-profile properties from either the observed third-party
+// PROFILE DATABASE .lis dialect or documented Tekla PROFILE CATALOG exports.
+// Tekla tree/rule sections and any unrecognized content remain in rawText.
+// Property names are preserved verbatim; unknown names are not dropped.
 struct ProfileCatalogLisEntry
 {
     std::string name;

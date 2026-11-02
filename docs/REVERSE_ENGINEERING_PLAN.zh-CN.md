@@ -18,6 +18,10 @@
 
 精确对象 GUID 命中仍不能越过工程范围：九张 DG 的 `grProjectGuid` 对所选 DB1 为0/9匹配；三份单对象 metadata 的 `MainObjectGuid` 也与 DG 主体 GUID 不同。项目入口因此仅保留经文件名、DG 保存文件名和图幅验证的六条 sidecar→DG 文件级关联，不创建 DG→DB1 或 metadata→DB1 对象链接。现有版本中，仅当已有 scoped subject association 与 `MainObjectGuid` 一致时才填入 `modelObjectId`。本轮本地 CTest 632/632、完整公开语料 1,787/1,787、安装消费者93/93及 metadata 独立对照和16种变异均通过；当前改动推送后的远端 CI 待验收。
 
+## 2026-11-02：官方 profile catalog `.lis` 固定记录读取
+
+沿用现有 `parseProfileCatalogLis` 兼容入口新增 Trimble 文档样例所示 `PROFILE CATALOG EXPORT VERSION = n` 头和固定 profile 记录读取。合成回归覆盖官方 HEA120 数值属性示例、`TYPE=998` 原始属性、前置树区块保留、错误 subtype 与零版本拒绝；既有第三方 `PROFILE DATABASE EXPORT VERSION = 2` 夹具语法保持不变。没有把已观测的文档格式称为真实工程样本：目前尚无可匿名复取的 Tekla `.lis` 文件；树结构、独立 `rules.lis`、CLB/UEL 依赖和 profile 类型/属性语义仍未恢复。E 盘全量 CTest 635/635、固定语料 1,787/1,787、安装后消费者 96/96 通过；语料报告为 `E:\CodexData\TeklaDB1-review\reports\corpus-profile-lis-20261102.json`。依据：[Trimble 型材目录导入/导出](https://support.tekla.com/doc/tekla-structures/2025/mod_catalogs_exporting_and_importing_profiles)和[官方固定型材样例](https://support.tekla.com/pt-pt/doc/tekla-structures/2022/mod_catalogs_example_export_file)。
+
 ## 2026-11-02：DG 9.50 sidecar 文件级关联与慢案例超时隔离
 
 对 Abri-Moto-VCCF25 的9张 DG 和6份 `.dg.metadata` 独立核对发现：6个 sidecar 的 basename 唯一对应到 DG；DG 内部保存的文件名也逐一与路径一致；每份 sidecar 的图幅尺寸都与唯一 DG sheet 精确相同。`readProject` 现将这6对登记为 `FilenameAndSheet` 文件级 `DrawingMetadataAssociation`。9.50 subject 的 type-269 类型和部分GUID已读取；sidecar 中非空的 `MainObjectGuid` 不等于 DG 主体GUID，仍不填入 `modelObjectId`，也不绕过0/9个 DG 项目 GUID 与 DB1 的不匹配。其他版本只有既有 scoped subject identity 与 metadata GUID 一致时才建立对象链接。

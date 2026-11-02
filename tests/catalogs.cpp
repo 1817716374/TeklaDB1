@@ -157,6 +157,24 @@ int run(const std::filesystem::path& root, const std::string& mode)
                   "PROFILE_NAME = \"KKR40*4\";\n{\n"
                   "TYPE = 8; SUB_TYPE = 8002; COORDINATE = 1.25;\n{\n"
                   "\"WIDTH\" 4.000000000E+001\n}\n}\n"
+                : mode == "profile_lis_tekla_valid"
+                    ? "PROFILE CATALOG EXPORT VERSION = 17\n"
+                      "TREE_BRANCH = \"Steel\"\nTREE_ITEM = \"HEA\"\n"
+                      "PROFILE_NAME = \"HEA120\";\n{\n"
+                      "TYPE = 1; SUB_TYPE = 1001; COORDINATE = 0.000;\n{\n"
+                      "\"FLANGE_SLOPE_RATIO\" 0.000000000E+000\n"
+                      "\"ROUNDING_RADIUS_1\" 1.200000000E+001\n"
+                      "\"FLANGE_THICKNESS\" 8.000000000E+000\n"
+                      "\"WEB_THICKNESS\" 5.000000000E+000\n"
+                      "\"WIDTH\" 1.200000000E+002\n"
+                      "\"HEIGHT\" 1.140000000E+002\n}\n}\n"
+                      "PROFILE_NAME = \"TAN_HK_TEST_2_CS\";\n{\n"
+                      "TYPE = 998; SUB_TYPE = 253; COORDINATE = 0.000;\n{\n"
+                      "\"EQUIVALENT_TYPE\" 11\n\"ECCENTRICITY_X\" 0\n}\n}\n"
+                : mode == "profile_lis_tekla_bad_structure"
+                    ? "PROFILE CATALOG EXPORT VERSION = 17\nPROFILE_NAME = \"X\";\n{\nTYPE = 1; SUB_TYPE = nope; COORDINATE = 0;\n{\n}\n}\n"
+                : mode == "profile_lis_tekla_bad_version"
+                    ? "PROFILE CATALOG EXPORT VERSION = 0\n"
                 : mode == "profile_lis_duplicate_property"
                     ? "PROFILE DATABASE EXPORT VERSION = 2\nPROFILE_NAME = \"X\";\n{\nTYPE = 1; SUB_TYPE = 2; COORDINATE = 0;\n{\n\"HEIGHT\" 1\n\"HEIGHT\" 2\n}\n}\n"
                     : mode == "profile_lis_bad_version"
@@ -167,25 +185,35 @@ int run(const std::filesystem::path& root, const std::string& mode)
             catalog.entries.push_back({});
             error = "stale diagnostic";
             const bool ok = tekla::db1::parseProfileCatalogLis(path, catalog, error);
-            check(ok == (mode == "profile_lis_valid"), "unexpected profile .lis parse result");
+            const bool shouldPass = mode == "profile_lis_valid" || mode == "profile_lis_tekla_valid";
+            check(ok == shouldPass, "unexpected profile .lis parse result");
             if (!ok)
                 check(!error.empty() && catalog.entries.empty() && catalog.rawText.empty(),
                       "invalid profile .lis leaked partial output");
             else
             {
-                check(error.empty() && catalog.version == 2 && catalog.entries.size() == 2 &&
+                const auto expectedVersion = mode == "profile_lis_tekla_valid" ? 17U : 2U;
+                check(error.empty() && catalog.version == expectedVersion && catalog.entries.size() == 2 &&
                       catalog.ambiguousProfileNames.empty() && catalog.rawText == source,
                       "profile .lis header, entry count, ambiguity, or raw source changed");
                 const auto& first = catalog.entries[0];
                 const auto& second = catalog.entries[1];
-                check(first.name == "KKR30*3" && first.type == 8 && first.subType == 8002 &&
-                      first.storedCoordinate == 0.0 && first.properties.size() == 2 &&
-                      first.properties.at("HEIGHT") == 30.0 &&
-                      first.properties.at("UNKNOWN_TEST_PROPERTY") == -0.0025 &&
-                      second.name == "KKR40*4" && second.storedCoordinate == 1.25 &&
-                      second.properties.at("WIDTH") == 40.0 &&
-                      first.rawRecord.find("UNKNOWN_TEST_PROPERTY") != std::string::npos,
-                      "profile .lis numeric fields or unknown property preservation changed");
+                if (mode == "profile_lis_tekla_valid")
+                    check(first.name == "HEA120" && first.type == 1 && first.subType == 1001 &&
+                          first.properties.size() == 6 && first.properties.at("HEIGHT") == 114.0 &&
+                          first.properties.at("WIDTH") == 120.0 && second.name == "TAN_HK_TEST_2_CS" &&
+                          second.type == 998 && second.subType == 253 && second.properties.at("EQUIVALENT_TYPE") == 11.0 &&
+                          first.rawRecord.find("FLANGE_SLOPE_RATIO") != std::string::npos,
+                          "documented Tekla profile fields or type-998 record changed");
+                else
+                    check(first.name == "KKR30*3" && first.type == 8 && first.subType == 8002 &&
+                          first.storedCoordinate == 0.0 && first.properties.size() == 2 &&
+                          first.properties.at("HEIGHT") == 30.0 &&
+                          first.properties.at("UNKNOWN_TEST_PROPERTY") == -0.0025 &&
+                          second.name == "KKR40*4" && second.storedCoordinate == 1.25 &&
+                          second.properties.at("WIDTH") == 40.0 &&
+                          first.rawRecord.find("UNKNOWN_TEST_PROPERTY") != std::string::npos,
+                          "profile .lis numeric fields or unknown property preservation changed");
             }
             return 0;
         }
